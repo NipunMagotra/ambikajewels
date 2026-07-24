@@ -11,12 +11,7 @@ export default function Header() {
 
   return (
     <header className="fixed top-0 left-0 w-full z-50 bg-background/90 backdrop-blur-md border-b border-outline-variant/20 transition-all">
-      {/* 1. Sleek Announcement Bar */}
-      <div className="bg-surface-container-lowest text-[10px] font-label-caps text-on-surface-variant/90 py-1.5 px-4 text-center tracking-[0.25em] border-b border-outline-variant/20">
-        ✨ FREE INSURED DELIVERY ACROSS INDIA &bull; 100% BIS 916 HALLMARKED GOLD
-      </div>
-
-      {/* 2. Main Minimal Header */}
+      {/* Main Minimal Header */}
       <div className="container mx-auto px-margin-mobile lg:px-margin-desktop h-16 flex items-center justify-between">
         {/* Left: Mobile Menu Toggle / Desktop Quick Links */}
         <div className="flex items-center gap-6">
