@@ -6,7 +6,7 @@ export function getProductWhatsAppUrl(
   selectedFinish?: string, 
   quantity: number = 1
 ): string {
-  const phone = siteConfig.contact.whatsapp.replace(/[^0-9]/g, '') || '919419100000';
+  const phone = siteConfig.contact.whatsapp.replace(/[^0-9]/g, '') || '919086098457';
   const finish = selectedFinish || product.metal_finishes?.[0] || '22K Yellow Gold';
   
   const mainImage = product.images?.[0] || '/hero-clean.png';
@@ -40,7 +40,7 @@ export function getCartWhatsAppUrl(
   customerName?: string, 
   customerPhone?: string
 ): string {
-  const phone = siteConfig.contact.whatsapp.replace(/[^0-9]/g, '') || '919419100000';
+  const phone = siteConfig.contact.whatsapp.replace(/[^0-9]/g, '') || '919086098457';
   
   const itemLines = items.map((item, idx) => 
     `${idx + 1}. *${item.name}* [${item.metal_finish}]\n   Qty: ${item.quantity} | Total: ₹${(item.price * item.quantity / 100).toLocaleString('en-IN')}`

@@ -3,8 +3,8 @@ export const siteConfig = {
   description: "Crafting heritage into timeless elegance since 1984.",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
   contact: {
-    whatsapp: "+91XXXXXXXXXX",
-    phone: "+91XXXXXXXXXX",
+    whatsapp: "+919086098457",
+    phone: "+919682589725",
     email: "contact@ambikajewels.com"
   },
   social: {
