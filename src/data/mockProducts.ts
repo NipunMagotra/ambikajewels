@@ -53,7 +53,8 @@ export const mockProducts: Product[] = [
     display_price: '₹2,90,000',
     category: 'Bridal Couture',
     images: [
-      'https://images.unsplash.com/photo-1611591475140-e3e78f993d01?auto=format&fit=crop&w=800&q=80'
+      '/products/heritage-ruby-haar.png',
+      '/products/royal-kundan.png'
     ],
     badges: ['22K BIS', 'BURMESE RUBY'],
     metal_finishes: ['Gold', 'Rose Gold'],
@@ -327,7 +328,7 @@ export const mockProducts: Product[] = [
     display_price: '₹45,000',
     category: 'Daily Luxury',
     images: [
-      'https://images.unsplash.com/photo-1611591475140-e3e78f993d01?auto=format&fit=crop&w=800&q=80'
+      '/products/minimalist-gold-chain.png'
     ],
     badges: ['22K BIS', 'ESSENTIAL'],
     metal_finishes: ['Gold'],
