@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import "./globals.css";
 import { siteConfig } from "@/config/siteConfig";
 
@@ -8,6 +8,13 @@ import ChatWidget from "@/components/chat/ChatWidget";
 export const metadata: Metadata = {
   title: `${siteConfig.name} | Modern Heritage`,
   description: siteConfig.description,
+};
+
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  maximumScale: 1,
+  themeColor: "#0d0707",
 };
 
 export default function RootLayout({

@@ -54,24 +54,24 @@ export default async function CollectionsPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-24 pb-section-gap">
-        <div className="container mx-auto px-margin-mobile lg:px-margin-desktop">
-          <div className="text-center mb-stack-lg">
-            <span className="font-label-caps text-label-caps text-primary tracking-[0.2em] block mb-2">COUTURE COLLECTION</span>
-            <h1 className="font-display-lg-mobile lg:font-display-lg text-display-lg-mobile lg:text-display-lg text-primary">
+      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
+        <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
+          <div className="text-center mb-6 sm:mb-stack-lg">
+            <span className="font-label-caps text-[10px] sm:text-xs text-primary tracking-[0.2em] block mb-2 font-semibold">COUTURE COLLECTION</span>
+            <h1 className="font-headline-md text-3xl sm:text-5xl lg:text-6xl text-primary">
               {category || 'Timeless Heritage'}
             </h1>
           </div>
 
           <FilterBar />
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-stack-md lg:gap-stack-lg">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-stack-md lg:gap-stack-lg">
             {displayProducts.length > 0 ? (
               displayProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))
             ) : (
-              <div className="col-span-full py-32 text-center text-on-surface-variant font-body-lg">
+              <div className="col-span-full py-20 sm:py-32 text-center text-on-surface-variant font-body-lg">
                 No pieces found in this collection currently.
               </div>
             )}

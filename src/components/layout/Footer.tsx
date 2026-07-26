@@ -4,12 +4,12 @@ import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
 
 export default function Footer() {
   return (
-    <footer className="bg-surface-container-lowest border-t border-outline-variant py-section-gap pb-32 lg:pb-section-gap">
-      <div className="container mx-auto px-margin-desktop">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-margin-desktop mb-section-gap">
+    <footer className="bg-surface-container-lowest border-t border-outline-variant/30 py-12 sm:py-section-gap pb-28 lg:pb-section-gap">
+      <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 sm:mb-section-gap">
           <div className="col-span-1">
-            <h2 className="font-headline-sm text-headline-sm text-primary mb-stack-md">{siteConfig.name}</h2>
-            <p className="font-body-md text-body-md text-on-surface-variant mb-stack-md whitespace-pre-line">
+            <h2 className="font-headline-sm text-2xl text-primary mb-3 font-semibold">{siteConfig.name}</h2>
+            <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mb-4 whitespace-pre-line leading-relaxed">
               {siteConfig.address.replace(', ', ',\n')}
             </p>
             <div className="flex gap-4">
@@ -27,8 +27,8 @@ export default function Footer() {
           </div>
           
           <div className="col-span-1">
-            <h3 className="font-label-caps text-label-caps text-on-surface mb-stack-md">COLLECTIONS</h3>
-            <ul className="flex flex-col gap-2 font-body-md text-body-md text-on-surface-variant">
+            <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">COLLECTIONS</h3>
+            <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
               <li><Link className="hover:text-primary transition-colors" href="/collections?category=Bridal Couture">Bridal Couture</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/collections?category=Daily Luxury">Daily Luxury</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/collections?category=Temple Jewelry">Temple Jewelry</Link></li>
@@ -37,8 +37,8 @@ export default function Footer() {
           </div>
           
           <div className="col-span-1">
-            <h3 className="font-label-caps text-label-caps text-on-surface mb-stack-md">QUICK LINKS</h3>
-            <ul className="flex flex-col gap-2 font-body-md text-body-md text-on-surface-variant">
+            <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">QUICK LINKS</h3>
+            <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
               <li><Link className="hover:text-primary transition-colors" href="#">Privacy Policy</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="#">Terms of Service</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="#">Shipping & Returns</Link></li>
@@ -47,16 +47,16 @@ export default function Footer() {
           </div>
           
           <div className="col-span-1">
-            <h3 className="font-label-caps text-label-caps text-on-surface mb-stack-md">CONTACT US</h3>
-            <div className="flex flex-col gap-stack-md">
+            <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">CONTACT US</h3>
+            <div className="flex flex-col gap-3">
               <WhatsAppButton />
               <CallButton />
             </div>
           </div>
         </div>
         
-        <div className="grid grid-cols-12 gap-stack-lg items-center">
-          <div className="col-span-12 lg:col-span-8 h-64 bg-surface-container border border-outline-variant overflow-hidden relative">
+        <div className="grid grid-cols-12 gap-6 items-center border-t border-outline-variant/20 pt-8">
+          <div className="col-span-12 lg:col-span-8 h-48 sm:h-64 bg-surface-container border border-outline-variant/30 overflow-hidden relative rounded-xs">
             <iframe
               src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13414.288277259163!2d74.8304221!3d32.7715891!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391e84e5a95f9227%3A0xb7cf9f3238914619!2sRoop%20Nagar%2C%20Jammu%2C%20Jammu%20and%20Kashmir%20180013!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
               width="100%"
@@ -68,9 +68,9 @@ export default function Footer() {
               title="Ambika Jewels Location Map - Roop Nagar, Jammu"
             />
           </div>
-          <div className="col-span-12 lg:col-span-4 text-center lg:text-right mt-stack-md lg:mt-0">
-            <p className="font-body-md text-body-md text-on-surface-variant opacity-60">
-              © {new Date().getFullYear()} AMBIKA JEWELS. ROOP NAGAR, JAMMU. <br/>DESIGNED FOR THE DISCERNING.
+          <div className="col-span-12 lg:col-span-4 text-center lg:text-right mt-2 lg:mt-0">
+            <p className="font-body-md text-xs text-on-surface-variant/70 leading-relaxed">
+              © {new Date().getFullYear()} AMBIKA JEWELS. ROOP NAGAR, JAMMU. <br/>HANDCRAFTED HERITAGE JEWELRY.
             </p>
           </div>
         </div>

@@ -71,33 +71,33 @@ export default function AdminDashboard() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-24 pb-section-gap bg-background">
-        <div className="container mx-auto px-margin-mobile lg:px-margin-desktop">
+      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap bg-background">
+        <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
           
-          <div className="flex justify-between items-end border-b border-outline-variant pb-4 mb-stack-lg">
+          <div className="flex flex-row justify-between items-center border-b border-outline-variant/30 pb-4 mb-6 sm:mb-stack-lg">
             <div>
-              <h1 className="font-headline-sm text-headline-sm text-primary mb-2">Owner Dashboard</h1>
-              <p className="font-label-caps text-label-caps text-on-surface-variant">MANAGE YOUR STORE</p>
+              <h1 className="font-headline-md text-xl sm:text-3xl text-primary mb-1">Owner Dashboard</h1>
+              <p className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant">MANAGE YOUR STORE</p>
             </div>
             <button 
               onClick={handleLogout}
-              className="text-error hover:text-error-container font-label-caps flex items-center gap-2 transition-colors"
+              className="text-error hover:text-error-container font-label-caps text-xs flex items-center gap-1 transition-colors"
             >
               <span className="material-symbols-outlined text-sm">logout</span> LOGOUT
             </button>
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-4 mb-stack-lg">
+          <div className="flex gap-2 sm:gap-4 mb-6 sm:mb-stack-lg">
             <button 
               onClick={() => setActiveTab('orders')}
-              className={`px-6 py-3 font-label-caps text-label-caps border ${activeTab === 'orders' ? 'bg-primary-container border-primary text-primary' : 'bg-surface-container border-outline-variant text-on-surface'}`}
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 font-label-caps text-xs border ${activeTab === 'orders' ? 'bg-primary-container border-primary text-primary font-bold' : 'bg-surface-container border-outline-variant/30 text-on-surface'}`}
             >
               ORDERS ({orders.length})
             </button>
             <button 
               onClick={() => setActiveTab('products')}
-              className={`px-6 py-3 font-label-caps text-label-caps border ${activeTab === 'products' ? 'bg-primary-container border-primary text-primary' : 'bg-surface-container border-outline-variant text-on-surface'}`}
+              className={`px-4 sm:px-6 py-2.5 sm:py-3 font-label-caps text-xs border ${activeTab === 'products' ? 'bg-primary-container border-primary text-primary font-bold' : 'bg-surface-container border-outline-variant/30 text-on-surface'}`}
             >
               PRODUCTS ({products.length})
             </button>

@@ -161,6 +161,14 @@
     border-radius: 2px;
   }
 
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
   /* Mandala overlay */
   .mandala-overlay {
     opacity: 0.04;

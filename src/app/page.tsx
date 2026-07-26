@@ -34,7 +34,7 @@ export default async function Home() {
   return (
     <>
       <Header />
-      <main className="min-h-screen bg-background text-on-background overflow-x-hidden">
+      <main className="min-h-screen bg-background text-on-background overflow-x-hidden pb-20 lg:pb-0">
         <HeroSection />
         
         <div className="container mx-auto">

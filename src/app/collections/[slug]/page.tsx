@@ -76,28 +76,28 @@ export default async function ProductPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-24 pb-section-gap">
-        <div className="container mx-auto px-margin-mobile lg:px-margin-desktop">
+      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
+        <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
           {/* Breadcrumb */}
-          <div className="flex items-center gap-2 font-label-caps text-[10px] text-on-surface-variant mb-stack-md">
+          <div className="flex flex-wrap items-center gap-1.5 font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-4 sm:mb-stack-md">
             <Link href="/" className="hover:text-primary">HOME</Link>
             <span>/</span>
             <Link href="/collections" className="hover:text-primary">COLLECTIONS</Link>
             <span>/</span>
-            <Link href={`/collections?category=${product.category}`} className="hover:text-primary">{product.category.toUpperCase()}</Link>
+            <Link href={`/collections?category=${encodeURIComponent(product.category)}`} className="hover:text-primary">{product.category.toUpperCase()}</Link>
             <span>/</span>
-            <span className="text-primary">{product.name.toUpperCase()}</span>
+            <span className="text-primary truncate max-w-[150px] sm:max-w-none">{product.name.toUpperCase()}</span>
           </div>
 
           <ProductDetailClient product={product as Product} />
 
           {/* Related Products */}
           {relatedProducts && relatedProducts.length > 0 && (
-            <div className="mt-section-gap">
-              <h3 className="font-headline-md text-headline-sm lg:text-headline-md text-primary mb-stack-lg text-center">
+            <div className="mt-12 sm:mt-section-gap">
+              <h3 className="font-headline-md text-2xl lg:text- headline-md text-primary mb-6 sm:mb-stack-lg text-center">
                 You May Also Desire
               </h3>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-stack-md lg:gap-stack-lg">
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-stack-md lg:gap-stack-lg">
                 {relatedProducts.map(p => (
                   <ProductCard key={p.id} product={p as Product} />
                 ))}
