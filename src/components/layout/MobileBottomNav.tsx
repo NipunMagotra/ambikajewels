@@ -12,7 +12,7 @@ export default function MobileBottomNav() {
     { label: 'HOME', icon: 'home', href: '/' },
     { label: 'GALLERY', icon: 'grid_view', href: '/collections' },
     { label: 'BAG', icon: 'shopping_bag', href: '/cart', badge: cartCount },
-    { label: 'PORTAL', icon: 'person', href: '/admin/login' },
+    { label: 'ABOUT US', icon: 'info', href: '/about' },
   ];
 
   return (

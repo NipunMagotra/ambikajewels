@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function HeritageSection() {
   return (
     <section className="my-12 sm:my-20 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-margin-desktop px-4 sm:px-margin-mobile lg:px-margin-desktop">
@@ -34,9 +36,9 @@ export default function HeritageSection() {
         <p className="font-body-md text-sm sm:text-base text-on-surface-variant/90 mb-6 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
           Since 1984, Ambika Jewels has handcrafted authentic 22K gold, Polki, and Kundan jewelry in Jammu. Every masterpiece is certified and hallmark stamped.
         </p>
-        <button className="border border-primary px-8 py-3.5 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 w-full sm:w-auto font-bold tracking-widest">
-          EXPLORE OUR STORY
-        </button>
+        <Link href="/about" className="inline-block border border-primary px-8 py-3.5 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 w-full sm:w-auto font-bold tracking-widest text-center">
+          OUR STORY & HERITAGE
+        </Link>
       </div>
     </section>
   );

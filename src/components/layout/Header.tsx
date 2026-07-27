@@ -58,6 +58,9 @@ export default function Header() {
             <Link href="/collections" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
               COLLECTIONS
             </Link>
+            <Link href="/about" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
+              ABOUT US
+            </Link>
           </nav>
 
           <Link href="/cart" className="flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity p-1">
@@ -100,6 +103,14 @@ export default function Header() {
                 <span className="material-symbols-outlined text-xs opacity-50">chevron_right</span>
               </Link>
             ))}
+            <Link
+              href="/about"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold"
+            >
+              <span>ABOUT US</span>
+              <span className="material-symbols-outlined text-xs">chevron_right</span>
+            </Link>
           </div>
 
           {/* Quick Contact Buttons */}

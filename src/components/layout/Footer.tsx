@@ -39,6 +39,7 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">QUICK LINKS</h3>
             <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
+              <li><Link className="hover:text-primary transition-colors text-primary font-semibold" href="/about">About Us & Legacy</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="#">Privacy Policy</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="#">Terms of Service</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="#">Shipping & Returns</Link></li>
