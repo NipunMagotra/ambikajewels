@@ -323,7 +323,7 @@ INSERT INTO faq_items (question, answer, keywords, category, sort_order) VALUES
 
 -- About
 ('Where is Ambika Jewels located?', 'Ambika Jewels is located in Muthi, Jammu, Jammu & Kashmir - 181205. We have been serving our community since 1984.', ARRAY['location', 'address', 'where', 'muthi', 'jammu', 'shop', 'store', 'find'], 'about', 1),
-('What are your shop hours?', 'We are open Monday to Saturday, 10:00 AM to 8:00 PM. We are closed on Sundays and major holidays. During festive seasons, we may have extended hours.', ARRAY['hours', 'timing', 'open', 'close', 'time', 'when', 'schedule'], 'about', 2),
+('What are your shop hours?', 'Our store timings are: Monday: 11:00 AM – 12:00 AM (Midnight); Tuesday to Saturday: 12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM; Sunday: 12:00 AM – 8:30 AM.', ARRAY['hours', 'timing', 'open', 'close', 'time', 'when', 'schedule'], 'about', 2),
 ('How long has Ambika Jewels been in business?', 'Ambika Jewels was founded in 1984 in the heart of Jammu. For over 40 years, we have been dedicated to preserving Dogra heritage jewelry through master craftsmanship.', ARRAY['history', 'founded', 'years', 'old', 'since', 'established', 'about'], 'about', 3),
 
 -- Shipping
