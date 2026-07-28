@@ -18,15 +18,15 @@ export const storeKnowledge = {
   email: "contact@ambikajewels.com",
   
   hours: {
-    monday: "11:00 AM – 12:00 AM (Midnight)",
-    tuesdayToSaturday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
-    tuesday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
-    wednesday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
-    thursday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
-    friday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
-    saturday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
-    sunday: "12:00 AM – 8:30 AM",
-    formattedSummary: "Monday: 11:00 AM – 12:00 AM; Tuesday to Saturday: 12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM; Sunday: 12:00 AM – 8:30 AM."
+    monday: "11:00 AM – 8:30 PM",
+    tuesdayToSaturday: "11:00 AM – 8:30 PM",
+    tuesday: "11:00 AM – 8:30 PM",
+    wednesday: "11:00 AM – 8:30 PM",
+    thursday: "11:00 AM – 8:30 PM",
+    friday: "11:00 AM – 8:30 PM",
+    saturday: "11:00 AM – 8:30 PM",
+    sunday: "12:00 PM – 8:30 PM",
+    formattedSummary: "Monday to Saturday: 11:00 AM – 8:30 PM; Sunday: 12:00 PM – 8:30 PM."
   },
 
   purityAndCertification: [
@@ -66,7 +66,7 @@ export const faqItems: FAQItem[] = [
   },
   {
     question: "What are your shop hours and timings?",
-    answer: "Namaste! Our store timings are:\n• Monday: 11:00 AM – 12:00 AM (Midnight)\n• Tuesday to Saturday: 12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM\n• Sunday: 12:00 AM – 8:30 AM.",
+    answer: "Namaste! Our store timings are:\n• Monday to Saturday: 11:00 AM – 8:30 PM\n• Sunday: 12:00 PM – 8:30 PM.",
     keywords: ["hours", "timing", "timings", "open", "close", "time", "when", "schedule", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
     category: "about"
   },
