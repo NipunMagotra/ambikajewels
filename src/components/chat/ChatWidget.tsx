@@ -49,11 +49,18 @@ export default function ChatWidget() {
     setInputValue('');
     setIsLoading(true);
 
+    const history = messages
+      .filter(m => m.id !== 'initial')
+      .map(m => ({
+        role: m.sender === 'user' ? 'user' : 'assistant',
+        content: m.text
+      }));
+
     try {
       const res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ message: userMsg.text })
+        body: JSON.stringify({ message: userMsg.text, history })
       });
       const data = await res.json();
       

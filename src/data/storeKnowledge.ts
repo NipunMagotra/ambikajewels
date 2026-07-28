@@ -7,7 +7,12 @@ export interface FAQItem {
 
 export const storeKnowledge = {
   name: "Ambika Jewels",
+  tagline: "Preserving Jammu's Heritage Jewelry Since 1984",
+  foundedYear: 1984,
+  experienceYears: "40+ years",
+  locationName: "Jammu, Jammu & Kashmir",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
+  landmarks: "Near E.W.S Colony, Sector 1, Lower Roop Nagar",
   phone: "+91 9682589725",
   whatsapp: "+91 9086098457",
   email: "contact@ambikajewels.com",
@@ -15,26 +20,40 @@ export const storeKnowledge = {
   hours: {
     monday: "11:00 AM – 12:00 AM (Midnight)",
     tuesdayToSaturday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
+    tuesday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
+    wednesday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
+    thursday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
+    friday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
+    saturday: "12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM",
     sunday: "12:00 AM – 8:30 AM",
     formattedSummary: "Monday: 11:00 AM – 12:00 AM; Tuesday to Saturday: 12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM; Sunday: 12:00 AM – 8:30 AM."
   },
 
   purityAndCertification: [
-    "100% pure 22K (916) and 18K (750) BIS hallmarked gold.",
-    "Certified real diamonds with GIA & IGI certificates.",
-    "Transparent pricing: Gold rate + making charges + 3% GST."
+    "100% official BIS Hallmarked Gold (22K / 916 and 18K / 750 purity with unique HUID tag).",
+    "Certified real diamonds with official GIA and IGI certificates.",
+    "Natural gemstones (Burmese Rubies, Zambian Emeralds, South Sea Pearls).",
+    "Transparent pricing formula: Daily Gold Rate + Making Charges + 3% GST."
   ],
 
   policies: [
-    "Lifetime buyback & exchange at 100% current gold value.",
-    "30 days easy exchange policy.",
-    "Free insured home delivery all over India for orders over ₹50,000."
+    "Lifetime buyback & exchange at 100% of current market gold value.",
+    "30-day easy exchange policy for catalog products.",
+    "Free 100% insured home delivery across India on all orders over ₹50,000.",
+    "Free lifetime cleaning, polishing, and stone inspection in-store."
   ],
 
   customOrders: [
-    "We specialize in custom gold and diamond designs.",
-    "Send a photo or sketch on WhatsApp (+91 9086098457) to receive a 3D design preview within 2 days.",
-    "We also redesign old family gold into modern heritage designs."
+    "Bespoke custom gold and diamond jewelry made by master karigars in Jammu.",
+    "Share any sketch, photo, or Instagram picture on WhatsApp (+91 9086098457) for a 3D CAD design preview in 2 days.",
+    "Old gold transformation: Bring old family heirloom gold to be melted and redesigned into modern heritage pieces."
+  ],
+
+  services: [
+    "In-store private bridal consultations",
+    "Live WhatsApp video shopping appointments for out-of-station and NRI customers",
+    "Jewelry repair, resizing, and restorative polishing",
+    "Gold rate lock advances for wedding purchases"
   ]
 };
 

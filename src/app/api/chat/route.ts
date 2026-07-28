@@ -64,11 +64,20 @@ function parseCategory(message: string): string | null {
   return null;
 }
 
-async function callGroqLlama3(userMessage: string, contextInfo: string): Promise<string | null> {
+async function callGroqLlama3(
+  userMessage: string, 
+  contextInfo: string,
+  history: { role: 'user' | 'assistant'; content: string }[] = []
+): Promise<string | null> {
   const apiKey = process.env.GROQ_API_KEY;
   if (!apiKey) return null;
 
   try {
+    const formattedHistory = history.slice(-6).map(h => ({
+      role: h.role === 'user' ? 'user' : 'assistant',
+      content: h.content
+    }));
+
     const response = await fetch('https://api.groq.com/openai/v1/chat/completions', {
       method: 'POST',
       headers: {
@@ -80,54 +89,62 @@ async function callGroqLlama3(userMessage: string, contextInfo: string): Promise
         messages: [
           {
             role: 'system',
-            content: `You are Aanya, a friendly and helpful assistant at Ambika Jewels in Jammu.
+            content: `You are Aanya, a warm, polite, and deeply knowledgeable AI Jewelry Assistant & Concierge at Ambika Jewels in Jammu.
 
-LANGUAGE & VOICE (CRITICAL REQUIREMENT):
-- ALWAYS USE VERY SIMPLE, PLAIN ENGLISH. 
-- Use short sentences and simple words that anyone can easily understand.
-- DO NOT use complex, fancy, or difficult English words.
-- Keep your tone warm, friendly, polite, and welcoming (start with "Namaste!").
-- Keep replies brief: 2 to 3 simple sentences max.
+YOUR PERSONALITY & TONE:
+- Start responses with a warm Indian greeting like "Namaste!".
+- Speak in simple, clear, friendly English.
+- Be extremely helpful, smart, knowledgeable, and welcoming.
+- Keep answers concise (2 to 4 sentences max), but answer the user's question DIRECTLY with accurate facts.
 
-CRITICAL RULE ON CONTACTING STORE / WHATSAPP:
-- NEVER tell the user to call or contact via WhatsApp UNLESS the user explicitly asks for contact numbers, phone number, WhatsApp, or how to contact the store.
-- Answer all questions directly yourself in the chat (including address, location, store hours, gold purity, prices).
-
-STORE CONTEXT & FACTS:
-1. STORE LOCATION & HOURS:
-   - Address: ${storeKnowledge.address}
-   - Hours:
+YOUR KNOWLEDGE ABOUT AMBIKA JEWELS:
+1. STORE LOCATION & TIMINGS:
+   - Address: ${storeKnowledge.address} (${storeKnowledge.landmarks})
+   - Timings:
      • Monday: ${storeKnowledge.hours.monday}
      • Tuesday to Saturday: ${storeKnowledge.hours.tuesdayToSaturday}
      • Sunday: ${storeKnowledge.hours.sunday}
    - Phone: ${storeKnowledge.phone} | WhatsApp: ${storeKnowledge.whatsapp} | Email: ${storeKnowledge.email}
-2. GOLD & DIAMOND PURITY:
-   ${storeKnowledge.purityAndCertification.map(p => `- ${p}`).join('\n   ')}
-3. CUSTOM ORDERS & OLD GOLD:
-   ${storeKnowledge.customOrders.map(c => `- ${c}`).join('\n   ')}
-4. EASY POLICIES:
-   ${storeKnowledge.policies.map(p => `- ${p}`).join('\n   ')}
 
-GUARDRAILS:
-1. Only talk about Ambika Jewels, jewelry products, store details, prices, address, timings, and custom orders.
-2. If asked anything unrelated (like math, weather, news, or general questions), reply simply: "Namaste! I am here to help you with Ambika Jewels products, prices, and store details. How can I help you pick your jewelry today?"
+2. BRAND HISTORY & LEGACY:
+   - Founded in 1984 in Jammu (${storeKnowledge.experienceYears} of trust and heritage).
+   - Specialized in traditional Dogra, Rajputana, Kundan, and Polki wedding jewelry.
 
-Context & Products:
+3. GOLD PURITY & CERTIFICATION:
+   - 100% BIS Hallmarked 22K (916) and 18K (750) gold with official HUID stamps.
+   - 100% Certified real diamonds (GIA & IGI certificates provided).
+   - Clear pricing: Gold Rate + Making Charges + 3% GST.
+
+4. CUSTOM ORDERS & OLD GOLD:
+   - Custom design specialty: Share photo/sketch on WhatsApp (+91 9086098457) to receive a 3D CAD design preview in 2 days.
+   - Old gold melting & redesigning into new modern heritage pieces.
+
+5. POLICIES & SERVICES:
+   - Lifetime buyback & exchange at 100% current gold value.
+   - 30 days easy exchange policy.
+   - Free insured home delivery across India on orders over ₹50,000.
+   - Live WhatsApp Video Shopping calls available for out-of-station customers.
+
+CRITICAL RULES:
+1. Directly answer what the customer asks (e.g. location, timings, purity, price, custom order).
+2. DO NOT tell the user to contact on WhatsApp or Call UNLESS they explicitly ask how to contact the shop or ask for phone numbers.
+3. If asked anything unrelated to Ambika Jewels or jewelry, politely steer back: "Namaste! I am here to help you with Ambika Jewels products, store details, prices, and custom designs. How can I assist you today?"
+
+Context & Product Data:
 ${contextInfo}`
           },
+          ...formattedHistory,
           {
             role: 'user',
             content: userMessage
           }
         ],
         temperature: 0.7,
-        max_tokens: 250
+        max_tokens: 300
       })
     });
 
-    if (!response.ok) {
-      return null;
-    }
+    if (!response.ok) return null;
 
     const data = await response.json();
     return data.choices?.[0]?.message?.content || null;
@@ -139,7 +156,7 @@ ${contextInfo}`
 
 export async function POST(request: Request) {
   try {
-    const { message } = await request.json();
+    const { message, history } = await request.json();
     
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
@@ -173,15 +190,15 @@ export async function POST(request: Request) {
       }
     }
 
-    // 2. Build local catalog context
+    // 2. Build rich local catalog context
     let catalogContext = `Categories: ${siteConfig.categories.join(', ')}. Address: ${storeKnowledge.address}. Phone: ${storeKnowledge.phone}. WhatsApp: ${storeKnowledge.whatsapp}. Hours: ${storeKnowledge.hours.formattedSummary}`;
     if (matchingProducts.length > 0) {
       catalogContext += `\nMatching Products in Store: ${matchingProducts.map(p => `${p.name} (Price: ${p.display_price}, Category: ${p.category})`).join('; ')}`;
     }
     catalogContext += `\nStore FAQs:\n` + faqItems.map(f => `Q: ${f.question} | A: ${f.answer}`).join('\n');
 
-    // 3. Call Groq AI Assistant with full local context
-    const aiResponse = await callGroqLlama3(message, catalogContext);
+    // 3. Call Groq AI Assistant with multi-turn conversation history & full context
+    const aiResponse = await callGroqLlama3(message, catalogContext, Array.isArray(history) ? history : []);
 
     if (aiResponse) {
       return NextResponse.json({
