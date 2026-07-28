@@ -40,16 +40,22 @@ export const storeKnowledge = {
 
 export const faqItems: FAQItem[] = [
   {
-    question: "What are your shop hours and timings?",
-    answer: "Our store timings are:\n• Monday: 11:00 AM – 12:00 AM (Midnight)\n• Tuesday to Saturday: 12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM\n• Sunday: 12:00 AM – 8:30 AM.",
-    keywords: ["hours", "timing", "timings", "open", "close", "time", "when", "schedule", "sunday", "monday"],
+    question: "Where is Ambika Jewels located?",
+    answer: "Namaste! Ambika Jewels is located at:\nShop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.\n\nPhone: +91 9682589725 | WhatsApp: +91 9086098457.",
+    keywords: ["location", "loacaton", "locaton", "address", "addres", "where", "jammu", "roop nagar", "shop location", "store location", "find", "reach", "situated", "place", "map"],
     category: "about"
   },
   {
-    question: "Where is Ambika Jewels located?",
-    answer: "Ambika Jewels is located at Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.",
-    keywords: ["location", "address", "where", "jammu", "roop nagar", "shop", "store", "find", "reach"],
+    question: "What are your shop hours and timings?",
+    answer: "Namaste! Our store timings are:\n• Monday: 11:00 AM – 12:00 AM (Midnight)\n• Tuesday to Saturday: 12:00 AM – 8:30 AM & 11:00 AM – 12:00 AM\n• Sunday: 12:00 AM – 8:30 AM.",
+    keywords: ["hours", "timing", "timings", "open", "close", "time", "when", "schedule", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
     category: "about"
+  },
+  {
+    question: "How can I contact Ambika Jewels?",
+    answer: "Namaste! You can call or message us directly:\n• Phone: +91 9682589725\n• WhatsApp: +91 9086098457\n• Email: contact@ambikajewels.com\n\nOr visit our showroom at Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu.",
+    keywords: ["contact", "phone", "whatsapp", "call", "mobile", "number", "reach", "email"],
+    category: "contact"
   },
   {
     question: "How long has Ambika Jewels been in business?",
