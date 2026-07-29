@@ -29,15 +29,15 @@ export default function HeritageSection() {
       </div>
       
       <div className="lg:pl-8 order-1 lg:order-2 text-center lg:text-left">
-        <span className="font-label-caps text-xs text-primary tracking-[0.25em] mb-2 block font-semibold">OUR HERITAGE</span>
+        <span className="font-label-caps text-xs text-primary tracking-[0.25em] mb-2 block font-semibold">OUR SPECIALTY</span>
         <h3 className="font-headline-md text-3xl sm:text-4xl lg:text-5xl text-on-surface mb-4">
-          40 Years of <span className="italic font-normal gold-text-gradient">Craftsmanship</span>
+          Dogra Heritage & <span className="italic font-normal gold-text-gradient">Custom Artistry</span>
         </h3>
         <p className="font-body-md text-sm sm:text-base text-on-surface-variant/90 mb-6 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
-          Since 1984, Ambika Jewels has handcrafted authentic 22K gold, Polki, and Kundan jewelry in Jammu. Every masterpiece is certified and hallmark stamped.
+          Established in 2021 by Shivani Anand and Lakesh Kumar, Ambika Jewels is Jammu's premier showroom specializing in authentic Dogra heritage jewelry (Dogri Jhumki, Naman & Long Sets), gold exchange, and custom 3D CAD jewelry redesign.
         </p>
         <Link href="/about" className="inline-block border border-primary px-8 py-3.5 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 w-full sm:w-auto font-bold tracking-widest text-center">
-          OUR STORY & HERITAGE
+          OUR STORY & LEGACY
         </Link>
       </div>
     </section>

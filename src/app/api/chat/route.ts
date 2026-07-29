@@ -57,7 +57,7 @@ function parseCategory(message: string): string | null {
   const lowerMsg = message.toLowerCase();
   for (const cat of siteConfig.categories) {
     if (lowerMsg.includes(cat.toLowerCase()) || 
-        (cat === 'Bangles & Bracelets' && (lowerMsg.includes('bangle') || lowerMsg.includes('bracelet')))) {
+        (cat.includes('Dogra') && (lowerMsg.includes('dogra') || lowerMsg.includes('dogri')))) {
       return cat;
     }
   }
@@ -89,46 +89,49 @@ async function callGroqLlama3(
         messages: [
           {
             role: 'system',
-            content: `You are Aanya, a warm, polite, and deeply knowledgeable AI Jewelry Assistant & Concierge at Ambika Jewels in Jammu.
+            content: `You are Aanya, a warm, polite, and deeply knowledgeable AI Concierge at Ambika Jewels in Jammu.
 
 YOUR PERSONALITY & TONE:
 - Start responses with a warm Indian greeting like "Namaste!".
-- Speak in simple, clear, friendly English.
-- Be extremely helpful, smart, knowledgeable, and welcoming.
-- Keep answers concise (2 to 4 sentences max), but answer the user's question DIRECTLY with accurate facts.
+- Speak in simple, elegant, helpful English.
+- Keep answers concise (2 to 4 sentences max), but answer directly with accurate business facts.
 
-YOUR KNOWLEDGE ABOUT AMBIKA JEWELS:
-1. STORE LOCATION & TIMINGS:
-   - Address: ${storeKnowledge.address} (${storeKnowledge.landmarks})
-   - Timings:
-     • Monday: ${storeKnowledge.hours.monday}
-     • Tuesday to Saturday: ${storeKnowledge.hours.tuesdayToSaturday}
-     • Sunday: ${storeKnowledge.hours.sunday}
-   - Phone: ${storeKnowledge.phone} | WhatsApp: ${storeKnowledge.whatsapp} | Email: ${storeKnowledge.email}
+OFFICIAL BUSINESS KNOWLEDGE BASE FOR AMBIKA JEWELS:
+1. STORE DETAILS & LEADERSHIP:
+   - Established: 2021 in Jammu.
+   - Owner: Shivani Anand.
+   - Business Representative: Lakesh Kumar.
+   - Showroom & Boutique: Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.
+   - Contact: Phone ${storeKnowledge.phone} | WhatsApp ${storeKnowledge.whatsapp} | Email: ${storeKnowledge.email}.
 
-2. BRAND HISTORY & LEGACY:
-   - Founded in 1984 in Jammu (${storeKnowledge.experienceYears} of trust and heritage).
-   - Specialized in traditional Dogra, Rajputana, Kundan, and Polki wedding jewelry.
+2. STORE HOURS & TIMINGS:
+   - Monday – Saturday: 10:00 AM – 8:00 PM.
+   - Sunday: Open (10:00 AM – 8:00 PM).
+   - Festive & Wedding Hours: Extended up to 9:00 PM – 10:00 PM depending on customer demand.
 
-3. GOLD PURITY & CERTIFICATION:
-   - 100% BIS Hallmarked 22K (916) and 18K (750) gold with official HUID stamps.
-   - 100% Certified real diamonds (GIA & IGI certificates provided).
-   - Clear pricing: Gold Rate + Making Charges + 3% GST.
+3. SPECIALTY & SIGNATURE DOGRA COLLECTION:
+   - Known for authentic Dogra heritage jewelry reflecting Jammu's cultural heritage.
+   - Signature Offerings: Dogri Jhumki, Dogri Naman Set, Dogri Long Set, and custom heritage designs.
 
-4. CUSTOM ORDERS & OLD GOLD:
-   - Custom design specialty: Share photo/sketch on WhatsApp (+91 9086098457) to receive a 3D CAD design preview in 2 days.
-   - Old gold melting & redesigning into new modern heritage pieces.
+4. PRODUCTS & PURITY:
+   - Gold Jewelry: 22K Gold (916), 18K Gold (750), 14K Gold (585), and 9K Gold (375).
+   - Diamond Jewelry: Available in 18K & 14K Gold (certified real diamonds).
+   - Silver Collection: 925 Hallmarked Silver & traditional silver jewelry.
+   - Complete Range: Necklaces, Chokers, Earrings, Bangles, Bracelets, Kadas, Rings, Bridal, Men's, and Everyday Wear.
 
-5. POLICIES & SERVICES:
-   - Lifetime buyback & exchange at 100% current gold value.
-   - 30 days easy exchange policy.
-   - Free insured home delivery across India on orders over ₹50,000.
-   - Live WhatsApp Video Shopping calls available for out-of-station customers.
+5. GOLD EXCHANGE & CUSTOMIZATION:
+   - Exchange old gold jewelry for new designs.
+   - Melt existing gold jewelry to create completely new customized jewelry.
+   - Upgrade older family heirlooms into modern designer pieces.
+   - 3D CAD design previews on WhatsApp (+91 9086098457).
+
+6. PAYMENT METHODS ACCEPTED:
+   - UPI, Bank Transfer, RTGS, Cash, and standard digital payment methods.
 
 CRITICAL RULES:
-1. Directly answer what the customer asks (e.g. location, timings, purity, price, custom order).
-2. DO NOT tell the user to contact on WhatsApp or Call UNLESS they explicitly ask how to contact the shop or ask for phone numbers.
-3. If asked anything unrelated to Ambika Jewels or jewelry, politely steer back: "Namaste! I am here to help you with Ambika Jewels products, store details, prices, and custom designs. How can I assist you today?"
+1. Directly answer what the customer asks based on the factual knowledge base above.
+2. DO NOT prompt users to call or WhatsApp unless they explicitly ask for contact options or phone numbers.
+3. If asked about non-jewelry topics, steer back politely: "Namaste! I am here to help you with Ambika Jewels collections, store timings, gold exchange, and custom designs. How can I assist you today?"
 
 Context & Product Data:
 ${contextInfo}`
@@ -166,12 +169,11 @@ export async function POST(request: Request) {
     const budget = parseBudget(message);
     const category = parseCategory(message);
     
-    // Explicit contact request ONLY (excludes address/location)
     const wantsContact = userTokens.some(t => ['contact', 'phone', 'whatsapp', 'call', 'number', 'mobile'].includes(t));
 
     // 1. Match products locally from mockProducts
     let matchingProducts: Product[] = [];
-    if (budget || category || userTokens.some(t => ['show', 'looking', 'want', 'buy', 'product', 'necklace', 'necklaces', 'earring', 'earrings', 'ring', 'rings', 'bangle', 'bangles', 'kundan', 'polki', 'diamond', 'gold', 'solitaire', 'bridal'].includes(t))) {
+    if (budget || category || userTokens.some(t => ['show', 'looking', 'want', 'buy', 'product', 'dogri', 'dogra', 'jhumki', 'naman', 'long set', 'gold', 'diamond', 'silver', 'bridal', 'custom', 'exchange'].includes(t))) {
       matchingProducts = mockProducts.filter(p => {
         let matches = true;
         if (category) {
@@ -197,7 +199,7 @@ export async function POST(request: Request) {
     }
     catalogContext += `\nStore FAQs:\n` + faqItems.map(f => `Q: ${f.question} | A: ${f.answer}`).join('\n');
 
-    // 3. Call Groq AI Assistant with multi-turn conversation history & full context
+    // 3. Call Groq AI Assistant
     const aiResponse = await callGroqLlama3(message, catalogContext, Array.isArray(history) ? history : []);
 
     if (aiResponse) {
@@ -208,15 +210,14 @@ export async function POST(request: Request) {
       });
     }
 
-    // 4. Smart Local Rule-Based Fallback (Zero Database Dependency + Typo Tolerance)
+    // 4. Rule-Based Fallback
     if (matchingProducts.length > 0) {
       return NextResponse.json({
-        text: `Namaste! Here are a few nice pieces from our shop${category ? ` in ${category}` : ''}${budget ? ` under ₹${(budget/100).toLocaleString('en-IN')}` : ''}:`,
+        text: `Namaste! Here are a few pieces from our store${category ? ` in ${category}` : ''}${budget ? ` under ₹${(budget/100).toLocaleString('en-IN')}` : ''}:`,
         products: matchingProducts
       });
     }
 
-    // Local FAQ Keyword Matcher with Levenshtein typo tolerance
     let bestMatch = null;
     let highestScore = 0;
     for (const faq of faqItems) {
@@ -239,11 +240,10 @@ export async function POST(request: Request) {
       });
     }
 
-    // Default Fallback
     return NextResponse.json({ 
       text: wantsContact 
-        ? "Namaste! You can reach our shop directly on WhatsApp or Call using the buttons below:" 
-        : `Namaste! Ambika Jewels is located at:\n${storeKnowledge.address}\n\nOur shop hours are:\n• Monday: ${storeKnowledge.hours.monday}\n• Tuesday to Saturday: ${storeKnowledge.hours.tuesdayToSaturday}\n• Sunday: ${storeKnowledge.hours.sunday}\n\nHow can I help you today?`,
+        ? "Namaste! You can reach Ambika Jewels directly on WhatsApp or Call using the buttons below:" 
+        : `Namaste! Ambika Jewels (Estd 2021) is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you today?`,
       showContactOptions: wantsContact ? true : undefined
     });
 

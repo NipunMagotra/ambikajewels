@@ -33,19 +33,22 @@ export default function FilterBar() {
         >
           All Collections
         </button>
-        {siteConfig.categories.map(cat => (
-          <button 
-            key={cat}
-            onClick={() => updateFilters('category', cat)}
-            className={`px-3.5 py-1.5 font-label-caps text-[10px] sm:text-xs rounded-full whitespace-nowrap transition-colors shrink-0 ${
-              currentCategory === cat 
-                ? 'bg-primary text-on-primary font-bold' 
-                : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
-            }`}
-          >
-            {cat}
-          </button>
-        ))}
+        {siteConfig.categories.map(cat => {
+          const isActive = currentCategory.toLowerCase() === cat.toLowerCase();
+          return (
+            <button 
+              key={cat}
+              onClick={() => updateFilters('category', cat)}
+              className={`px-3.5 py-1.5 font-label-caps text-[10px] sm:text-xs rounded-full whitespace-nowrap transition-colors shrink-0 ${
+                isActive 
+                  ? 'bg-primary text-on-primary font-bold shadow-sm' 
+                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
+              }`}
+            >
+              {cat}
+            </button>
+          );
+        })}
       </div>
       
       {/* Sort Dropdown */}

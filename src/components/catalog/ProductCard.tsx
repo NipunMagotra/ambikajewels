@@ -42,9 +42,12 @@ export default function ProductCard({ product }: { product: Product }) {
       {/* Image Container */}
       <div className="relative aspect-[3/4] block overflow-hidden bg-surface-container-low">
         <Link href={`/collections/${product.slug}`} className="block w-full h-full">
-          <div 
-            className="w-full h-full bg-cover bg-center transition-transform duration-500 ease-out group-hover:scale-105" 
-            style={{ backgroundImage: `url('${mainImage}')` }}
+          <img 
+            src={mainImage} 
+            alt={product.name}
+            loading="lazy"
+            decoding="async"
+            className="w-full h-full object-cover transition-transform duration-500 ease-out group-hover:scale-105"
           />
         </Link>
 

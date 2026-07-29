@@ -41,7 +41,12 @@ export default async function CollectionsPage({
   if (displayProducts.length === 0) {
     let filtered = [...mockProducts];
     if (category && category !== 'All') {
-      filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase() || p.collection.toLowerCase() === category.toLowerCase());
+      const catLower = category.toLowerCase();
+      filtered = filtered.filter(p => {
+        const pCat = p.category.toLowerCase();
+        const pColl = p.collection.toLowerCase();
+        return pCat === catLower || pColl === catLower || pCat.includes(catLower) || catLower.includes(pCat);
+      });
     }
     if (sort === 'price_asc') {
       filtered.sort((a, b) => a.price - b.price);

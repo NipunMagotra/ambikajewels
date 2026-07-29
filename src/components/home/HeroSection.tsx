@@ -17,16 +17,16 @@ export default function HeroSection() {
       <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop z-10">
         <div className="max-w-xl text-center lg:text-left mx-auto lg:mx-0">
           <span className="font-label-caps text-[9px] sm:text-[10px] text-primary tracking-[0.35em] block mb-2 sm:mb-3 font-semibold">
-            JAMMU &bull; SINCE 1984
+            JAMMU &bull; ESTD 2021
           </span>
 
           <h1 className="font-headline-md text-3xl sm:text-5xl lg:text-6xl mb-4 sm:mb-5 leading-[1.15] tracking-tight text-on-surface">
-            Authentic Gold & <br />
-            <span className="italic font-normal gold-text-gradient">Bridal Jewelry</span>
+            Authentic Dogra & <br />
+            <span className="italic font-normal gold-text-gradient">Heritage Fine Jewelry</span>
           </h1>
 
           <p className="font-body-md text-xs sm:text-sm text-on-surface-variant/90 mb-6 sm:mb-8 max-w-md mx-auto lg:mx-0 font-normal tracking-wide">
-            22K Hallmarked Gold, Polki & Kundan Sets crafted for life's legendary moments.
+            Signature Dogri Jhumki, Naman Sets, Bridal Couture, 22K-9K Gold, Certified Diamonds & Gold Exchange.
           </p>
 
           <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center lg:justify-start items-center max-w-xs sm:max-w-none mx-auto">

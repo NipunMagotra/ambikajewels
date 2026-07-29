@@ -7,9 +7,11 @@ export interface FAQItem {
 
 export const storeKnowledge = {
   name: "Ambika Jewels",
-  tagline: "Preserving Jammu's Heritage Jewelry Since 1984",
-  foundedYear: 1984,
-  experienceYears: "40+ years",
+  tagline: "Authentic Dogra Heritage & Fine Custom Jewelry",
+  foundedYear: 2021,
+  owner: "Shivani Anand",
+  businessRepresentative: "Lakesh Kumar",
+  experienceYears: "Since 2021",
   locationName: "Jammu, Jammu & Kashmir",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
   landmarks: "Near E.W.S Colony, Sector 1, Lower Roop Nagar",
@@ -18,92 +20,158 @@ export const storeKnowledge = {
   email: "contact@ambikajewels.com",
   
   hours: {
-    monday: "11:00 AM – 8:30 PM",
-    tuesdayToSaturday: "11:00 AM – 8:30 PM",
-    tuesday: "11:00 AM – 8:30 PM",
-    wednesday: "11:00 AM – 8:30 PM",
-    thursday: "11:00 AM – 8:30 PM",
-    friday: "11:00 AM – 8:30 PM",
-    saturday: "11:00 AM – 8:30 PM",
-    sunday: "12:00 PM – 8:30 PM",
-    formattedSummary: "Monday to Saturday: 11:00 AM – 8:30 PM; Sunday: 12:00 PM – 8:30 PM."
+    mondayToSaturday: "10:00 AM – 8:00 PM",
+    monday: "10:00 AM – 8:00 PM",
+    tuesdayToSaturday: "10:00 AM – 8:00 PM",
+    sunday: "Open (10:00 AM – 8:00 PM)",
+    festiveHours: "Extended up to 9:00 PM – 10:00 PM during festive seasons & wedding periods depending on customer demand.",
+    formattedSummary: "Monday to Saturday: 10:00 AM – 8:00 PM; Sunday: Open; Festival Season: Extended up to 9:00 PM – 10:00 PM."
   },
 
+  goldPurity: [
+    "22K Gold (916 Hallmarked)",
+    "18K Gold (750 Hallmarked)",
+    "14K Gold (585 Hallmarked)",
+    "9K Gold (375 Hallmarked)"
+  ],
+
+  diamondJewelry: [
+    "Available in 18K Gold",
+    "Available in 14K Gold",
+    "Certified real diamonds with official GIA and IGI certificates"
+  ],
+
+  silverCollection: [
+    "925 Hallmarked Silver",
+    "Traditional Silver Jewelry",
+    "Other Exclusive Silver Collections"
+  ],
+
+  signatureDograCollection: [
+    "Dogri Jhumki",
+    "Dogri Naman Set",
+    "Dogri Long Set",
+    "Authentic Dogra Heritage Designs"
+  ],
+
+  goldExchangeAndCustomization: [
+    "Exchange old gold jewelry for brand new designs.",
+    "Melt existing gold jewelry to create completely new customized pieces.",
+    "Upgrade older family heirlooms into modern designer collections."
+  ],
+
+  paymentMethods: [
+    "UPI",
+    "Bank Transfer",
+    "RTGS",
+    "Cash",
+    "Other standard digital payment methods"
+  ],
+
+  whyChooseUs: [
+    "Unique and exclusive jewelry designs not commonly available elsewhere.",
+    "Genuine gold, certified diamonds, and 925 silver jewelry.",
+    "Specialization in traditional Dogra heritage collections.",
+    "Full gold exchange and old gold melting customization services.",
+    "Wide range for weddings, bridal couture, and everyday wear.",
+    "Boutique & showroom managed by owner Shivani Anand and representative Lakesh Kumar."
+  ],
+
   purityAndCertification: [
-    "100% official BIS Hallmarked Gold (22K / 916 and 18K / 750 purity with unique HUID tag).",
-    "Certified real diamonds with official GIA and IGI certificates.",
-    "Natural gemstones (Burmese Rubies, Zambian Emeralds, South Sea Pearls).",
+    "100% official BIS Hallmarked Gold in 22K, 18K, 14K, and 9K purity.",
+    "Certified real diamonds in 18K & 14K gold with GIA and IGI certificates.",
+    "925 Hallmarked Silver & traditional silver collections.",
     "Transparent pricing formula: Daily Gold Rate + Making Charges + 3% GST."
   ],
 
   policies: [
-    "Lifetime buyback & exchange at 100% of current market gold value.",
-    "30-day easy exchange policy for catalog products.",
+    "100% gold exchange and custom redesign policy.",
+    "Lifetime buyback & exchange options.",
     "Free 100% insured home delivery across India on all orders over ₹50,000.",
     "Free lifetime cleaning, polishing, and stone inspection in-store."
   ],
 
-  customOrders: [
-    "Bespoke custom gold and diamond jewelry made by master karigars in Jammu.",
-    "Share any sketch, photo, or Instagram picture on WhatsApp (+91 9086098457) for a 3D CAD design preview in 2 days.",
-    "Old gold transformation: Bring old family heirloom gold to be melted and redesigned into modern heritage pieces."
-  ],
-
   services: [
-    "In-store private bridal consultations",
-    "Live WhatsApp video shopping appointments for out-of-station and NRI customers",
-    "Jewelry repair, resizing, and restorative polishing",
-    "Gold rate lock advances for wedding purchases"
+    "Gold Exchange Program (Exchange old gold for new designs)",
+    "Jewelry Customization (Melt & redesign old gold into custom pieces)",
+    "Bespoke 3D CAD design preview for custom ideas",
+    "Signature Dogra Heritage Jewelry consultations",
+    "In-store private boutique & showroom appointments",
+    "Live WhatsApp video shopping calls"
   ]
 };
 
 export const faqItems: FAQItem[] = [
   {
-    question: "Where is Ambika Jewels located?",
-    answer: "Namaste! Ambika Jewels is located at:\nShop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.\n\nPhone: +91 9682589725 | WhatsApp: +91 9086098457.",
-    keywords: ["location", "loacaton", "locaton", "address", "addres", "where", "jammu", "roop nagar", "shop location", "store location", "find", "reach", "situated", "place", "map"],
+    question: "When was the store established?",
+    answer: "Namaste! Our jewelry showroom was established in 2021 in Jammu by owner Shivani Anand and business representative Lakesh Kumar, offering premium quality jewelry and authentic Dogra heritage collections.",
+    keywords: ["established", "founded", "history", "year", "2021", "owner", "start", "old", "since", "shivani", "lakesh"],
     category: "about"
   },
   {
-    question: "What are your shop hours and timings?",
-    answer: "Namaste! Our store timings are:\n• Monday to Saturday: 11:00 AM – 8:30 PM\n• Sunday: 12:00 PM – 8:30 PM.",
-    keywords: ["hours", "timing", "timings", "open", "close", "time", "when", "schedule", "sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"],
-    category: "about"
+    question: "What types of jewelry do you sell?",
+    answer: "We offer a complete range of jewelry including Gold Necklaces, Chokers, Earrings, Bangles, Bracelets, Kadas, Rings, Bridal Jewelry, Men's Jewelry, 925 Silver Jewelry, Diamond Jewelry, Traditional Dogra Jewelry, Everyday Wear, and Custom Jewelry.",
+    keywords: ["types", "sell", "offer", "products", "collections", "items", "categories", "jewelry", "gold", "diamond", "silver", "bridal", "mens"],
+    category: "products"
   },
   {
-    question: "How can I contact Ambika Jewels?",
-    answer: "Namaste! You can call or message us directly:\n• Phone: +91 9682589725\n• WhatsApp: +91 9086098457\n• Email: contact@ambikajewels.com\n\nOr visit our showroom at Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu.",
-    keywords: ["contact", "phone", "whatsapp", "call", "mobile", "number", "reach", "email"],
-    category: "contact"
+    question: "Do you sell Dogra jewelry?",
+    answer: "Yes! We specialize in authentic traditional Dogra heritage jewelry reflecting Jammu's rich cultural heritage. Popular offerings include Dogri Jhumki, Dogri Naman Set, Dogri Long Set, and custom Dogra designs.",
+    keywords: ["dogra", "dogri", "heritage", "naman", "jhumki", "jhumka", "long set", "jammu", "traditional", "culture", "cultural"],
+    category: "specialty"
   },
   {
-    question: "How long has Ambika Jewels been in business?",
-    answer: "Ambika Jewels was founded in 1984 in Jammu. For over 40 years, we have been crafting authentic 22K hallmarked gold, Polki, and Kundan jewelry.",
-    keywords: ["history", "founded", "years", "old", "since", "established", "about", "legacy"],
-    category: "about"
+    question: "Do you sell bridal jewelry?",
+    answer: "Yes! We have an extensive bridal jewelry collection, including royal gold chokers, Kundan sets, Polki, Haathphool, and complete bridal wedding suites.",
+    keywords: ["bridal", "bride", "wedding", "marriage", "haathphool", "choker", "dulhan"],
+    category: "bridal"
   },
   {
-    question: "Is your gold hallmarked and diamonds certified?",
-    answer: "Yes! All our gold jewelry is 100% BIS Hallmarked (22K 916 and 18K 750). All diamond jewelry comes with official GIA or IGI certificates.",
-    keywords: ["hallmark", "certified", "bis", "purity", "authentic", "genuine", "real", "certificate", "22k", "18k", "diamond"],
-    category: "purity"
-  },
-  {
-    question: "Do you offer custom jewelry design?",
-    answer: "Yes! Custom jewelry is our specialty. Share your design, photo, or idea with us on WhatsApp (+91 9086098457), and our master karigars will create a 3D preview for you in 2 days.",
-    keywords: ["custom", "design", "bespoke", "personalize", "make", "order", "special", "photo", "sketch"],
+    question: "Do you customize jewelry?",
+    answer: "Yes! We specialize in custom jewelry creation. You can bring any design, sketch, or photo on WhatsApp (+91 9086098457), and our karigars will create custom jewelry for you. We also melt old gold to craft brand-new customized pieces.",
+    keywords: ["custom", "customize", "customized", "personalize", "make", "design", "redesign", "bespoke", "sketch", "photo"],
     category: "services"
   },
   {
-    question: "Do you offer delivery across India?",
-    answer: "Yes! We offer free fully-insured home delivery across India on all orders over ₹50,000. All shipments are tamper-proof and fully insured.",
-    keywords: ["delivery", "shipping", "ship", "deliver", "send", "courier", "free", "india"],
-    category: "shipping"
+    question: "Can I exchange my old gold?",
+    answer: "Yes! Under our Gold Exchange program, customers can exchange old gold jewelry for new designs, or have their old gold melted and transformed into fresh modern jewelry.",
+    keywords: ["exchange", "old gold", "melt", "trade", "upgrade", "replace", "gold exchange"],
+    category: "services"
   },
   {
-    question: "What is your buyback and return policy?",
-    answer: "We offer lifetime buyback & exchange at 100% of current gold value, plus a 30-day easy exchange policy on standard catalog items.",
-    keywords: ["return", "refund", "exchange", "buyback", "policy", "guarantee"],
-    category: "policies"
+    question: "What gold purity is available?",
+    answer: "Our gold jewelry is available in 22K Gold (916), 18K Gold (750), 14K Gold (585), and 9K Gold (375). All pieces carry official hallmarking.",
+    keywords: ["purity", "carat", "karat", "22k", "18k", "14k", "9k", "916", "750", "bis", "hallmark"],
+    category: "purity"
+  },
+  {
+    question: "What silver jewelry do you offer?",
+    answer: "We offer 925 Hallmarked Silver jewelry, traditional silver ornaments, and exclusive modern silver collections.",
+    keywords: ["silver", "925", "sterling", "silverware", "chandi"],
+    category: "silver"
+  },
+  {
+    question: "Do you sell diamond jewelry?",
+    answer: "Yes! All our certified real diamond jewelry is available in 18K Gold and 14K Gold settings with official GIA/IGI certification.",
+    keywords: ["diamond", "diamonds", "heera", "solitaire", "vvs", "gia", "igi"],
+    category: "diamond"
+  },
+  {
+    question: "What payment methods are accepted?",
+    answer: "We accept UPI, Bank Transfer, RTGS, Cash, and all standard digital payment methods.",
+    keywords: ["payment", "pay", "upi", "gpay", "phonepe", "bank transfer", "rtgs", "cash", "cards", "digital"],
+    category: "payment"
+  },
+  {
+    question: "What are your opening hours?",
+    answer: "Our showroom timings are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n• Festival Hours: Open until 9:00 PM – 10:00 PM during wedding & festive seasons.",
+    keywords: ["hours", "timing", "timings", "open", "close", "time", "schedule", "sunday", "festive", "festivals"],
+    category: "about"
+  },
+  {
+    question: "Where is the showroom located?",
+    answer: "Ambika Jewels is located at:\nShop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.\nPhone: +91 9682589725 | WhatsApp: +91 9086098457.",
+    keywords: ["location", "address", "where", "jammu", "roop nagar", "map", "reach", "find"],
+    category: "about"
   }
 ];

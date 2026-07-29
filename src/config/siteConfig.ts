@@ -1,12 +1,16 @@
 export const siteConfig = {
   name: "Ambika Jewels",
-  description: "Crafting heritage into timeless elegance since 1984.",
+  founded: 2021,
+  owner: "Shivani Anand",
+  businessRepresentative: "Lakesh Kumar",
+  description: "Authentic Dogra Heritage Jewelry, Premium Gold, Diamonds, 925 Silver & Custom Gold Exchange since 2021.",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
   contact: {
     whatsapp: "+919086098457",
     phone: "+919682589725",
     email: "contact@ambikajewels.com"
   },
+  timings: "Monday – Saturday: 10:00 AM – 8:00 PM | Sunday: Open",
   social: {
     instagram: "#",
     facebook: "#"
@@ -19,13 +23,18 @@ export const siteConfig = {
     gstRate: 0.03, // 3% GST on gold jewelry
   },
   categories: [
-    "Necklaces",
-    "Earrings",
-    "Bangles & Bracelets",
-    "Rings",
+    "Dogra Heritage Collection",
+    "Gold Jewelry",
+    "Diamond Jewelry",
+    "Silver Jewelry (925)",
     "Bridal Couture",
-    "Temple Jewelry",
-    "Daily Luxury",
+    "Gold Exchange & Custom",
+    "Necklaces & Chokers",
+    "Earrings & Jhumkas",
+    "Bangles & Kadas",
+    "Rings & Solitaires",
+    "Temple & Antique Gold",
+    "Everyday Wear",
     "Men's Accessories"
   ]
 };
