@@ -126,4 +126,31 @@ The website is powered by Next.js 16 and features **Aanya**, an AI Jewelry Assis
 
 ---
 
+## 🔐 Store Owner Production Onboarding & Credentials Checklist
+
+### 1. Razorpay API Keys (Owner Dashboard Setup)
+1. Owner logs into **Razorpay Dashboard** (`dashboard.razorpay.com`).
+2. Go to **Settings** $\rightarrow$ **API Keys**.
+3. Click **Generate Key** (*Test Mode for staging, Live Mode for production*).
+4. Save both:
+   - `NEXT_PUBLIC_RAZORPAY_KEY_ID` (starts with `rzp_test_...` or `rzp_live_...`)
+   - `RAZORPAY_KEY_SECRET` (download/copy immediately as it is shown only once).
+
+### 2. Shiprocket API Credentials (Owner Dashboard Setup)
+1. Owner logs into **Shiprocket Dashboard** (`app.shiprocket.in`).
+2. Go to **Settings** $\rightarrow$ **API** $\rightarrow$ **Configure**.
+3. Click **Create API User**.
+4. Register a dedicated API email and generate a password:
+   - `SHIPROCKET_EMAIL`
+   - `SHIPROCKET_PASSWORD`
+   - `SHIPROCKET_PICKUP_LOCATION` (Default: `Primary`)
+
+### 3. Remote Delegation Options (No Password Sharing Needed)
+- **WhatsApp Screen Share / Video Call**: 5-minute guided walkthrough during store hours.
+- **Team Access Delegation**:
+  - *Razorpay*: Settings $\rightarrow$ Team $\rightarrow$ Add User (Developer Role).
+  - *Shiprocket*: Settings $\rightarrow$ User Management $\rightarrow$ Add User.
+
+---
+
 *© Ambika Jewels (Estd 2021). Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.*
