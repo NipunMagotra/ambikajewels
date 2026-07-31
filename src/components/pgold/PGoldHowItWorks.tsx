@@ -55,14 +55,14 @@ export default function PGoldHowItWorks() {
     <div className="space-y-16 py-6">
       {/* Step by Step Section */}
       <div className="space-y-8">
-        <div className="text-center space-y-2 max-w-2xl mx-auto">
-          <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
+        <div className="text-center space-y-3 max-w-2xl mx-auto">
+          <div className="font-label-caps text-xs text-amber-400 tracking-[0.25em] font-bold">
             SIMPLE & SECURE PROCESS
           </div>
           <h2 className="font-headline-md text-2xl sm:text-4xl gold-text-gradient font-bold">
             How Ambika P-Gold Works
           </h2>
-          <p className="text-xs sm:text-sm text-amber-100/90 font-light">
+          <p className="text-sm sm:text-base text-amber-50 font-normal">
             Four easy steps to buy, accumulate, and redeem 24K pure digital gold.
           </p>
         </div>
@@ -71,22 +71,22 @@ export default function PGoldHowItWorks() {
           {steps.map((step) => (
             <div
               key={step.number}
-              className="bg-surface-container/90 p-6 rounded-xs border border-outline-variant/40 hover-gold-wire space-y-4 relative group"
+              className="bg-[#221312] p-6 sm:p-7 rounded-md border-2 border-amber-500/40 hover:border-amber-300 space-y-4 relative group"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-3xl font-bold text-primary/40 group-hover:text-primary transition-colors">
+                <span className="font-mono text-4xl font-bold text-amber-400">
                   {step.number}
                 </span>
-                <span className="material-symbols-outlined text-2xl text-primary p-2 bg-primary/10 rounded-xs border border-primary/20">
+                <span className="material-symbols-outlined text-3xl text-amber-300 p-2.5 bg-amber-500/20 rounded-md border border-amber-500/30">
                   {step.icon}
                 </span>
               </div>
 
-              <div className="space-y-1">
-                <h3 className="font-headline-md text-base font-bold text-white">
+              <div className="space-y-2">
+                <h3 className="font-headline-md text-lg font-bold text-white">
                   {step.title}
                 </h3>
-                <p className="text-xs text-amber-100/80 leading-relaxed font-light">
+                <p className="text-xs sm:text-sm text-amber-100 leading-relaxed font-normal">
                   {step.description}
                 </p>
               </div>
@@ -96,23 +96,23 @@ export default function PGoldHowItWorks() {
       </div>
 
       {/* Key Benefits Grid */}
-      <div className="relative bg-surface-container/90 p-8 sm:p-10 rounded-xs border border-primary/40 space-y-8 overflow-hidden">
-        <div className="absolute inset-0 mandala-bg-pattern pointer-events-none z-0" />
-        <div className="text-center space-y-2 max-w-xl mx-auto">
-          <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
+      <div className="relative bg-[#221312] p-8 sm:p-12 rounded-md border-2 border-amber-500/50 space-y-8 overflow-hidden">
+        <div className="absolute inset-0 mandala-bg-pattern pointer-events-none z-0 opacity-10" />
+        <div className="text-center space-y-2 max-w-xl mx-auto relative z-10">
+          <div className="font-label-caps text-xs text-amber-400 tracking-[0.25em] font-bold">
             THE AMBIKA JEWELS GUARANTEE
           </div>
-          <h3 className="font-headline-md text-2xl text-white font-bold">
+          <h3 className="font-headline-md text-2xl sm:text-3xl text-white font-bold">
             Why Accumulate P-Gold With Us?
           </h3>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
           {benefits.map((b) => (
-            <div key={b.title} className="bg-surface-container-high/90 p-5 rounded-xs border border-outline-variant/40 space-y-2">
-              <span className="material-symbols-outlined text-primary text-2xl">{b.icon}</span>
-              <h4 className="font-headline-md text-sm font-bold text-white">{b.title}</h4>
-              <p className="text-xs text-amber-100/80 leading-relaxed font-light">{b.description}</p>
+            <div key={b.title} className="bg-[#2e1917] p-6 rounded-md border border-amber-500/40 space-y-3">
+              <span className="material-symbols-outlined text-amber-400 text-3xl">{b.icon}</span>
+              <h4 className="font-headline-md text-base font-bold text-white">{b.title}</h4>
+              <p className="text-xs sm:text-sm text-amber-100 leading-relaxed font-normal">{b.description}</p>
             </div>
           ))}
         </div>

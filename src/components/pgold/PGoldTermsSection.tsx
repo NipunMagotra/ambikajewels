@@ -15,26 +15,26 @@ export default function PGoldTermsSection({ termsText }: PGoldTermsSectionProps)
 
   return (
     <div className="space-y-4 py-4">
-      <div className="bg-surface-container/90 p-6 sm:p-8 rounded-xs border border-outline-variant/40 space-y-4">
+      <div className="bg-[#221312] p-6 sm:p-8 rounded-md border-2 border-amber-500/40 space-y-4 shadow-xl">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-xl">gavel</span>
-            <h3 className="font-headline-md text-base sm:text-lg text-white font-bold">
+          <div className="flex items-center gap-3">
+            <span className="material-symbols-outlined text-amber-400 text-2xl">gavel</span>
+            <h3 className="font-headline-md text-lg sm:text-xl text-white font-bold">
               Terms & Conditions — Ambika P-Gold
             </h3>
           </div>
           <button
             onClick={() => setExpanded(!expanded)}
-            className="text-xs font-label-caps text-primary hover:underline flex items-center gap-1 font-bold"
+            className="text-xs sm:text-sm font-label-caps text-amber-400 hover:text-amber-300 flex items-center gap-1 font-bold bg-[#160b0a] px-3 py-1.5 rounded border border-amber-500/30"
           >
             <span>{expanded ? 'COLLAPSE TERMS' : 'READ FULL TERMS'}</span>
-            <span className="material-symbols-outlined text-sm">
+            <span className="material-symbols-outlined text-base">
               {expanded ? 'expand_less' : 'expand_more'}
             </span>
           </button>
         </div>
 
-        <div className={`space-y-2 text-xs sm:text-sm text-amber-100/90 font-light leading-relaxed ${
+        <div className={`space-y-3 text-sm sm:text-base text-amber-50 font-normal leading-relaxed ${
           expanded ? '' : 'line-clamp-3'
         }`}>
           {lines.map((line, idx) => (

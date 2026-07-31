@@ -18,39 +18,39 @@ export default function PGoldFAQSection({ faqs }: PGoldFAQSectionProps) {
 
   return (
     <div className="space-y-8 py-6">
-      <div className="text-center space-y-2 max-w-xl mx-auto">
-        <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
+      <div className="text-center space-y-3 max-w-xl mx-auto">
+        <div className="font-label-caps text-xs text-amber-400 tracking-[0.25em] font-bold">
           GOT QUESTIONS?
         </div>
-        <h2 className="font-headline-md text-2xl sm:text-3xl gold-text-gradient font-bold">
+        <h2 className="font-headline-md text-2xl sm:text-4xl gold-text-gradient font-bold">
           Frequently Asked Questions
         </h2>
-        <p className="text-xs sm:text-sm text-amber-100/90 font-light">
+        <p className="text-sm sm:text-base text-amber-50 font-normal">
           Everything you need to know about purchasing, safety, storage, and redeeming P-Gold.
         </p>
       </div>
 
-      <div className="max-w-3xl mx-auto space-y-3">
+      <div className="max-w-3xl mx-auto space-y-4">
         {faqs.map((faq) => {
           const isOpen = openId === faq.id;
 
           return (
             <div
               key={faq.id}
-              className="bg-surface-container/90 rounded-xs border border-outline-variant/40 overflow-hidden transition-all"
+              className="bg-[#221312] rounded-md border-2 border-amber-500/40 overflow-hidden transition-all shadow-lg"
             >
               <button
                 onClick={() => toggleAccordion(faq.id)}
-                className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-sm text-white hover:text-primary transition-colors focus:outline-none"
+                className="w-full p-6 text-left flex items-center justify-between gap-4 font-bold text-base sm:text-lg text-white hover:text-amber-300 transition-colors focus:outline-none"
               >
                 <span>{faq.question}</span>
-                <span className="material-symbols-outlined text-primary text-xl transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
+                <span className="material-symbols-outlined text-amber-400 text-2xl transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
                   expand_more
                 </span>
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-amber-100/90 leading-relaxed border-t border-outline-variant/30 animate-in fade-in duration-150 font-light">
+                <div className="px-6 pb-6 pt-2 text-sm sm:text-base text-amber-50 leading-relaxed border-t border-amber-500/30 animate-in fade-in duration-150 font-normal">
                   {faq.answer}
                 </div>
               )}

@@ -48,7 +48,6 @@ export default function PGoldBuyModal({
     setError('');
 
     try {
-      // Step 1: Create P-Gold order in DB / API
       const res = await fetch('/api/pgold/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -72,7 +71,6 @@ export default function PGoldBuyModal({
 
       const orderData = data.data;
 
-      // Check if Razorpay JS script is loaded or in future-ready mode
       if (typeof window !== 'undefined' && (window as any).Razorpay && orderData.razorpay_key_id && !orderData.is_demo) {
         const options = {
           key: orderData.razorpay_key_id,
@@ -83,7 +81,6 @@ export default function PGoldBuyModal({
           image: '/favicon.ico',
           order_id: orderData.razorpay_order_id,
           handler: async function (response: any) {
-            // Verify payment
             const verifyRes = await fetch('/api/pgold/verify', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -120,7 +117,6 @@ export default function PGoldBuyModal({
         const rzp = new (window as any).Razorpay(options);
         rzp.open();
       } else {
-        // Simulated / Future-ready mode confirmation
         const verifyRes = await fetch('/api/pgold/verify', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -148,24 +144,24 @@ export default function PGoldBuyModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
-      <div className="glass-panel max-w-lg w-full p-6 sm:p-8 rounded-xs border border-primary/40 space-y-6 animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden">
+    <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4">
+      <div className="bg-[#221312] max-w-lg w-full p-6 sm:p-8 rounded-md border-2 border-amber-500/50 space-y-6 animate-in fade-in zoom-in-95 duration-200 relative overflow-hidden shadow-2xl">
         {/* Glow */}
-        <div className="absolute -top-12 -right-12 w-40 h-40 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
+        <div className="absolute -top-12 -right-12 w-40 h-40 bg-amber-500/20 rounded-full blur-2xl pointer-events-none" />
 
         {/* Modal Header */}
-        <div className="flex items-center justify-between border-b border-outline-variant/30 pb-4">
+        <div className="flex items-center justify-between border-b border-amber-500/30 pb-4">
           <div>
-            <span className="text-[10px] font-label-caps text-primary tracking-widest font-bold">
+            <span className="text-xs font-label-caps text-amber-400 tracking-widest font-bold">
               SECURE CHECKOUT
             </span>
-            <h3 className="font-headline-md text-xl text-on-surface font-bold">
+            <h3 className="font-headline-md text-xl sm:text-2xl text-white font-bold">
               {successData ? 'Purchase Successful!' : `Buy ${purity} P-Gold`}
             </h3>
           </div>
           <button
             onClick={onClose}
-            className="text-on-surface-variant hover:text-primary text-2xl"
+            className="text-amber-200 hover:text-white text-3xl font-bold"
           >
             &times;
           </button>
@@ -174,87 +170,87 @@ export default function PGoldBuyModal({
         {/* Success View */}
         {successData ? (
           <div className="space-y-6 text-center py-4">
-            <div className="w-16 h-16 bg-secondary-container text-on-secondary-container rounded-full flex items-center justify-center mx-auto shadow-xl">
+            <div className="w-16 h-16 bg-emerald-950 text-emerald-300 border-2 border-emerald-500/50 rounded-full flex items-center justify-center mx-auto shadow-xl">
               <span className="material-symbols-outlined text-3xl">verified</span>
             </div>
 
             <div className="space-y-2">
-              <h4 className="font-headline-md text-lg text-primary font-bold">
+              <h4 className="font-headline-md text-xl text-amber-300 font-bold">
                 Gold Accumulation Confirmed!
               </h4>
-              <p className="text-xs text-on-surface-variant/90">
+              <p className="text-sm text-amber-50 font-normal">
                 Your P-Gold order has been logged successfully under digital ledger receipt:
               </p>
-              <div className="font-mono text-sm font-bold text-on-surface bg-surface-container/80 p-2 rounded-xs inline-block">
+              <div className="font-mono text-base font-bold text-white bg-[#160b0a] p-3 rounded border border-amber-500/40 inline-block">
                 {successData.transaction_number}
               </div>
             </div>
 
-            <div className="bg-surface-container/60 p-4 rounded-xs border border-outline-variant/30 text-xs text-left space-y-2">
+            <div className="bg-[#160b0a] p-5 rounded border border-amber-500/40 text-sm text-left space-y-3">
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Accumulated Weight:</span>
-                <strong className="text-primary font-mono">{successData.weight} grams ({successData.purity})</strong>
+                <span className="text-amber-200">Accumulated Weight:</span>
+                <strong className="text-amber-300 font-mono text-base">{successData.weight} grams ({successData.purity})</strong>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Amount Paid:</span>
-                <strong className="text-on-surface font-mono">₹{successData.amount.toLocaleString('en-IN')}</strong>
+                <span className="text-amber-200">Amount Paid:</span>
+                <strong className="text-white font-mono text-base">₹{successData.amount.toLocaleString('en-IN')}</strong>
               </div>
-              <div className="flex justify-between border-t border-outline-variant/20 pt-2">
-                <span className="text-on-surface-variant">Redemption Venue:</span>
-                <span className="text-on-surface font-semibold">Ambika Jewels Jammu Showroom</span>
+              <div className="flex justify-between border-t border-amber-500/30 pt-3">
+                <span className="text-amber-200">Redemption Venue:</span>
+                <span className="text-white font-semibold">Ambika Jewels Jammu Showroom</span>
               </div>
             </div>
 
             {successData.is_demo && (
-              <p className="text-[10px] text-amber-400/90 italic">
+              <p className="text-xs text-amber-300 italic">
                 * Note: System is in future-ready payment integration mode. Payment gateways (Razorpay) can be directly linked via environment keys.
               </p>
             )}
 
             <button
               onClick={onClose}
-              className="w-full gold-bg-gradient py-3 text-xs font-label-caps tracking-widest font-bold rounded-xs hover:opacity-90 transition-all"
+              className="w-full gold-bg-gradient py-3.5 text-xs font-label-caps tracking-widest font-extrabold text-black rounded hover:opacity-90 transition-all"
             >
               DONE & RETURN TO P-GOLD
             </button>
           </div>
         ) : (
           /* Form View */
-          <form onSubmit={handleSubmitOrder} className="space-y-5">
+          <form onSubmit={handleSubmitOrder} className="space-y-6">
             {/* Order Summary Card */}
-            <div className="bg-surface-container/80 p-4 rounded-xs border border-outline-variant/40 space-y-2 text-xs">
-              <div className="flex justify-between items-center text-on-surface font-semibold border-b border-outline-variant/20 pb-2">
+            <div className="bg-[#160b0a] p-5 rounded-md border border-amber-500/40 space-y-2.5 text-sm">
+              <div className="flex justify-between items-center text-white font-bold border-b border-amber-500/30 pb-2">
                 <span>P-Gold Package:</span>
-                <span className="text-primary font-bold">{purity} (999 Pure)</span>
+                <span className="text-amber-300 font-bold">{purity} (999 Pure)</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Gold Rate Locked:</span>
-                <span className="font-mono">₹{goldRate.toLocaleString('en-IN')}/g</span>
+                <span className="text-amber-200">Gold Rate Locked:</span>
+                <span className="font-mono text-white font-semibold">₹{goldRate.toLocaleString('en-IN')}/g</span>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Net Gold Weight:</span>
-                <strong className="text-primary font-mono">{weightGrams} grams</strong>
+                <span className="text-amber-200">Net Gold Weight:</span>
+                <strong className="text-amber-300 font-mono">{weightGrams} grams</strong>
               </div>
               <div className="flex justify-between">
-                <span className="text-on-surface-variant">Govt GST (3%):</span>
-                <span className="font-mono">₹{gstAmount.toLocaleString('en-IN')}</span>
+                <span className="text-amber-200">Govt GST (3%):</span>
+                <span className="font-mono text-white">₹{gstAmount.toLocaleString('en-IN')}</span>
               </div>
-              <div className="flex justify-between pt-2 border-t border-outline-variant/30 text-sm font-bold">
-                <span className="text-on-surface">Total Amount:</span>
-                <span className="text-emerald-400 font-mono">₹{amountInr.toLocaleString('en-IN')}</span>
+              <div className="flex justify-between pt-3 border-t border-amber-500/40 text-base font-bold">
+                <span className="text-white">Total Amount:</span>
+                <span className="text-emerald-400 font-mono text-lg">₹{amountInr.toLocaleString('en-IN')}</span>
               </div>
             </div>
 
             {error && (
-              <div className="p-3 bg-error-container/30 border border-error/50 rounded-xs text-error text-xs text-center">
+              <div className="p-4 bg-red-950/90 border-2 border-red-500/80 rounded text-red-200 text-sm text-center font-semibold">
                 {error}
               </div>
             )}
 
             {/* Inputs */}
-            <div className="space-y-3">
+            <div className="space-y-4">
               <div>
-                <label className="block text-[11px] font-label-caps text-on-surface-variant font-bold mb-1">
+                <label className="block text-xs font-label-caps text-amber-300 font-bold mb-1.5">
                   FULL NAME *
                 </label>
                 <input
@@ -262,13 +258,13 @@ export default function PGoldBuyModal({
                   value={name}
                   onChange={(e) => setName(e.target.value)}
                   placeholder="Enter your full name..."
-                  className="w-full bg-surface-container border border-outline-variant/50 focus:border-primary px-3 py-2 text-xs text-on-surface rounded-xs focus:outline-none"
+                  className="w-full bg-[#160b0a] border-2 border-amber-500/40 focus:border-amber-300 px-4 py-3 text-sm font-semibold text-white rounded focus:outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-label-caps text-on-surface-variant font-bold mb-1">
+                <label className="block text-xs font-label-caps text-amber-300 font-bold mb-1.5">
                   MOBILE NUMBER *
                 </label>
                 <input
@@ -276,13 +272,13 @@ export default function PGoldBuyModal({
                   value={phone}
                   onChange={(e) => setPhone(e.target.value)}
                   placeholder="10-digit phone number..."
-                  className="w-full bg-surface-container border border-outline-variant/50 focus:border-primary px-3 py-2 text-xs font-mono text-on-surface rounded-xs focus:outline-none"
+                  className="w-full bg-[#160b0a] border-2 border-amber-500/40 focus:border-amber-300 px-4 py-3 text-sm font-mono font-semibold text-white rounded focus:outline-none"
                   required
                 />
               </div>
 
               <div>
-                <label className="block text-[11px] font-label-caps text-on-surface-variant font-bold mb-1">
+                <label className="block text-xs font-label-caps text-amber-300 font-bold mb-1.5">
                   EMAIL ADDRESS (OPTIONAL FOR RECEIPT)
                 </label>
                 <input
@@ -290,7 +286,7 @@ export default function PGoldBuyModal({
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="your.email@example.com"
-                  className="w-full bg-surface-container border border-outline-variant/50 focus:border-primary px-3 py-2 text-xs text-on-surface rounded-xs focus:outline-none"
+                  className="w-full bg-[#160b0a] border-2 border-amber-500/40 focus:border-amber-300 px-4 py-3 text-sm text-white rounded focus:outline-none"
                 />
               </div>
             </div>
@@ -299,22 +295,22 @@ export default function PGoldBuyModal({
             <button
               type="submit"
               disabled={loading}
-              className="w-full gold-bg-gradient py-3.5 text-xs font-label-caps tracking-[0.2em] font-bold rounded-xs hover:opacity-95 transition-all shadow-lg flex items-center justify-center gap-2 disabled:opacity-50"
+              className="w-full gold-bg-gradient py-4 text-xs font-label-caps tracking-[0.2em] font-extrabold text-black rounded hover:opacity-95 transition-all shadow-xl flex items-center justify-center gap-2 disabled:opacity-50"
             >
               {loading ? (
                 <>
-                  <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+                  <span className="material-symbols-outlined animate-spin text-base">sync</span>
                   <span>INITIATING PAYMENT...</span>
                 </>
               ) : (
                 <>
-                  <span className="material-symbols-outlined text-sm">lock</span>
+                  <span className="material-symbols-outlined text-base">lock</span>
                   <span>PROCEED TO PAY ₹{amountInr.toLocaleString('en-IN')}</span>
                 </>
               )}
             </button>
 
-            <p className="text-[10px] text-center text-on-surface-variant/70">
+            <p className="text-xs text-center text-amber-200 font-medium">
               🔒 Safe & Encrypted • Backed by 100% Physical 24K Pure Hallmark Gold
             </p>
           </form>

@@ -82,40 +82,40 @@ export default function PGoldCalculator({
   };
 
   return (
-    <div className="bg-surface-container/90 p-6 sm:p-8 rounded-xs border border-primary/50 shadow-2xl relative overflow-hidden">
+    <div className="bg-[#221312] p-6 sm:p-10 rounded-md border-2 border-amber-500/50 shadow-2xl relative overflow-hidden">
       {/* Background Gold Accent */}
-      <div className="absolute top-0 right-0 w-64 h-64 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
+      <div className="absolute top-0 right-0 w-64 h-64 bg-amber-500/10 rounded-full blur-3xl pointer-events-none" />
 
-      <div className="space-y-6 relative z-10">
+      <div className="space-y-8 relative z-10">
         {/* Header & Purity Selector */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-outline-variant/40 pb-5">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-amber-500/30 pb-6">
           <div>
-            <div className="font-label-caps text-xs text-primary tracking-widest font-bold">
+            <div className="font-label-caps text-xs text-amber-400 tracking-widest font-bold">
               INSTANT CALCULATOR
             </div>
-            <h3 className="font-headline-md text-xl sm:text-2xl text-white font-bold">
+            <h3 className="font-headline-md text-2xl sm:text-3xl text-white font-bold">
               Calculate & Buy P-Gold Real-time
             </h3>
           </div>
 
           {/* Purity Switcher */}
-          <div className="flex items-center bg-surface-container-high p-1 rounded-xs border border-outline-variant/50 self-start sm:self-auto">
+          <div className="flex items-center bg-[#160b0a] p-1.5 rounded-md border border-amber-500/40 self-start sm:self-auto">
             <button
               onClick={() => setPurity('24K')}
-              className={`px-4 py-1.5 text-xs font-label-caps tracking-wider rounded-xs font-bold transition-all ${
+              className={`px-5 py-2 text-xs font-label-caps tracking-wider rounded font-bold transition-all ${
                 purity === '24K'
-                  ? 'gold-bg-gradient shadow-md'
-                  : 'text-amber-100/80 hover:text-white'
+                  ? 'gold-bg-gradient text-black shadow-lg font-extrabold'
+                  : 'text-amber-100 hover:text-white'
               }`}
             >
               24K (999 Pure)
             </button>
             <button
               onClick={() => setPurity('22K')}
-              className={`px-4 py-1.5 text-xs font-label-caps tracking-wider rounded-xs font-bold transition-all ${
+              className={`px-5 py-2 text-xs font-label-caps tracking-wider rounded font-bold transition-all ${
                 purity === '22K'
-                  ? 'gold-bg-gradient shadow-md'
-                  : 'text-amber-100/80 hover:text-white'
+                  ? 'gold-bg-gradient text-black shadow-lg font-extrabold'
+                  : 'text-amber-100 hover:text-white'
               }`}
             >
               22K (916 Hallmark)
@@ -126,16 +126,16 @@ export default function PGoldCalculator({
         {/* Dual Input Grid */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           {/* Amount Input */}
-          <div className="bg-surface-container-high/90 p-5 rounded-xs border border-outline-variant/40 space-y-3">
+          <div className="bg-[#2e1917] p-6 rounded-md border border-amber-500/40 space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-label-caps text-primary tracking-widest font-bold">
+              <label className="text-xs font-label-caps text-amber-300 tracking-widest font-bold">
                 ENTER AMOUNT IN RUPEES (₹)
               </label>
-              <span className="text-[10px] text-amber-200/80">Total incl. 3% GST</span>
+              <span className="text-xs text-amber-100 font-medium">Total incl. 3% GST</span>
             </div>
 
             <div className="relative">
-              <span className="absolute left-4 top-3 text-primary text-xl font-bold font-mono">₹</span>
+              <span className="absolute left-4 top-3.5 text-amber-300 text-2xl font-bold font-mono">₹</span>
               <input
                 type="number"
                 min={settings.min_purchase_amount}
@@ -146,20 +146,20 @@ export default function PGoldCalculator({
                   setAmountStr(e.target.value);
                 }}
                 placeholder="Enter amount..."
-                className="w-full bg-surface-container border border-outline-variant/60 focus:border-primary pl-10 pr-4 py-3 text-xl font-bold text-white rounded-xs focus:outline-none font-mono tracking-wide"
+                className="w-full bg-[#160b0a] border-2 border-amber-500/50 focus:border-amber-300 pl-11 pr-4 py-3.5 text-2xl font-bold text-white rounded-md focus:outline-none font-mono tracking-wide"
               />
             </div>
 
             {/* Quick Presets */}
-            <div className="flex flex-wrap gap-2 pt-1">
+            <div className="flex flex-wrap gap-2.5 pt-1">
               {presetAmounts.map((preset) => (
                 <button
                   key={preset}
                   onClick={() => handlePresetClick(preset)}
-                  className={`px-2.5 py-1 text-[11px] font-mono rounded-xs border transition-colors ${
+                  className={`px-3 py-1.5 text-xs font-mono font-bold rounded border-2 transition-colors ${
                     amountStr === preset.toString()
-                      ? 'border-primary bg-primary/25 text-primary font-bold'
-                      : 'border-outline-variant/40 text-amber-100 hover:border-primary/60'
+                      ? 'border-amber-300 bg-amber-500/30 text-amber-300'
+                      : 'border-amber-500/30 bg-[#160b0a] text-amber-100 hover:border-amber-300'
                   }`}
                 >
                   ₹{preset.toLocaleString('en-IN')}
@@ -169,12 +169,12 @@ export default function PGoldCalculator({
           </div>
 
           {/* Grams Input */}
-          <div className="bg-surface-container-high/90 p-5 rounded-xs border border-outline-variant/40 space-y-3">
+          <div className="bg-[#2e1917] p-6 rounded-md border border-amber-500/40 space-y-4">
             <div className="flex items-center justify-between">
-              <label className="text-xs font-label-caps text-primary tracking-widest font-bold">
+              <label className="text-xs font-label-caps text-amber-300 tracking-widest font-bold">
                 OR ENTER GOLD WEIGHT (GRAMS)
               </label>
-              <span className="text-[10px] text-amber-200/80">Calculated Gold</span>
+              <span className="text-xs text-amber-100 font-medium">Calculated Gold</span>
             </div>
 
             <div className="relative">
@@ -188,61 +188,61 @@ export default function PGoldCalculator({
                   setGramsStr(e.target.value);
                 }}
                 placeholder="Enter grams..."
-                className="w-full bg-surface-container border border-outline-variant/60 focus:border-primary pl-4 pr-12 py-3 text-xl font-bold text-white rounded-xs focus:outline-none font-mono tracking-wide"
+                className="w-full bg-[#160b0a] border-2 border-amber-500/50 focus:border-amber-300 pl-4 pr-12 py-3.5 text-2xl font-bold text-white rounded-md focus:outline-none font-mono tracking-wide"
               />
-              <span className="absolute right-4 top-3.5 text-xs text-primary font-bold font-mono">
+              <span className="absolute right-4 top-4 text-sm text-amber-300 font-bold font-mono">
                 g
               </span>
             </div>
 
-            <div className="text-[11px] text-amber-100/90 pt-1 flex items-center justify-between">
+            <div className="text-xs text-amber-100 pt-1 flex items-center justify-between font-medium">
               <span>Locked Gold Rate:</span>
-              <strong className="text-primary font-mono">₹{currentRate.toLocaleString('en-IN')}/g</strong>
+              <strong className="text-amber-300 font-mono text-sm">₹{currentRate.toLocaleString('en-IN')}/g</strong>
             </div>
           </div>
         </div>
 
         {/* Validation Warning */}
         {validationError && (
-          <div className="p-3 bg-error-container/40 border border-error/60 rounded-xs text-error text-xs flex items-center gap-2 font-semibold">
-            <span className="material-symbols-outlined text-base">warning</span>
+          <div className="p-4 bg-red-950/80 border-2 border-red-500/80 rounded-md text-red-200 text-xs sm:text-sm flex items-center gap-3 font-semibold">
+            <span className="material-symbols-outlined text-lg text-red-400">warning</span>
             <span>{validationError}</span>
           </div>
         )}
 
         {/* Live Calculation Summary */}
         {numAmount > 0 && numGrams > 0 && (
-          <div className="bg-surface-container-high p-4 rounded-xs border border-outline-variant/40 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs">
+          <div className="bg-[#160b0a] p-5 rounded-md border-2 border-amber-500/40 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs sm:text-sm">
             <div>
-              <div className="text-amber-200/80 text-[10px] font-label-caps">GOLD ACCUMULATED</div>
-              <div className="font-mono text-base text-primary font-bold mt-0.5">{numGrams.toFixed(4)} grams</div>
+              <div className="text-amber-300 text-xs font-label-caps font-bold">GOLD ACCUMULATED</div>
+              <div className="font-mono text-lg text-amber-300 font-bold mt-1">{numGrams.toFixed(4)} grams</div>
             </div>
 
             <div>
-              <div className="text-amber-200/80 text-[10px] font-label-caps">NET GOLD VALUE</div>
-              <div className="font-mono text-sm text-white font-semibold mt-0.5">₹{netGoldValue.toLocaleString('en-IN')}</div>
+              <div className="text-amber-200 text-xs font-label-caps font-bold">NET GOLD VALUE</div>
+              <div className="font-mono text-base text-white font-bold mt-1">₹{netGoldValue.toLocaleString('en-IN')}</div>
             </div>
 
             <div>
-              <div className="text-amber-200/80 text-[10px] font-label-caps">GST (3% APPLICABLE)</div>
-              <div className="font-mono text-sm text-white font-semibold mt-0.5">₹{gstAmount.toLocaleString('en-IN')}</div>
+              <div className="text-amber-200 text-xs font-label-caps font-bold">GST (3% APPLICABLE)</div>
+              <div className="font-mono text-base text-white font-bold mt-1">₹{gstAmount.toLocaleString('en-IN')}</div>
             </div>
 
             <div>
-              <div className="text-amber-200/80 text-[10px] font-label-caps">TOTAL PAYABLE</div>
-              <div className="font-mono text-base text-emerald-400 font-bold mt-0.5">₹{numAmount.toLocaleString('en-IN')}</div>
+              <div className="text-emerald-400 text-xs font-label-caps font-bold">TOTAL PAYABLE</div>
+              <div className="font-mono text-lg text-emerald-400 font-bold mt-1">₹{numAmount.toLocaleString('en-IN')}</div>
             </div>
           </div>
         )}
 
         {/* Action Button / Disabled Notice */}
         {!settings.is_enabled ? (
-          <div className="p-4 bg-surface-container border border-outline-variant/50 text-center rounded-xs space-y-1">
-            <div className="text-sm font-bold text-amber-400 flex items-center justify-center gap-2">
-              <span className="material-symbols-outlined text-base">info</span>
+          <div className="p-5 bg-[#2e1917] border-2 border-amber-500/50 text-center rounded-md space-y-2">
+            <div className="text-base font-bold text-amber-300 flex items-center justify-center gap-2">
+              <span className="material-symbols-outlined text-lg">info</span>
               <span>Online P-Gold Purchases Currently Paused</span>
             </div>
-            <p className="text-xs text-amber-100/90">
+            <p className="text-xs sm:text-sm text-amber-100 font-medium max-w-xl mx-auto">
               Live market rate quotes remain active. Please visit our Ambika Jewels showroom in Jammu or call concierge to complete purchases.
             </p>
           </div>
@@ -250,11 +250,11 @@ export default function PGoldCalculator({
           <button
             onClick={() => onBuyTrigger(numAmount, numGrams, purity)}
             disabled={!isValid}
-            className="w-full gold-bg-gradient py-4 text-sm font-label-caps tracking-[0.25em] font-bold rounded-xs hover:opacity-95 transition-all shadow-xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
+            className="w-full gold-bg-gradient py-4 text-base font-label-caps tracking-[0.25em] font-extrabold text-black rounded-md hover:opacity-95 transition-all shadow-2xl flex items-center justify-center gap-3 disabled:opacity-40 disabled:cursor-not-allowed"
           >
-            <span className="material-symbols-outlined text-lg">shopping_bag</span>
+            <span className="material-symbols-outlined text-xl">shopping_bag</span>
             <span>BUY {purity} P-GOLD NOW</span>
-            <span className="material-symbols-outlined text-base">arrow_forward</span>
+            <span className="material-symbols-outlined text-xl">arrow_forward</span>
           </button>
         )}
       </div>
