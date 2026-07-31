@@ -2,6 +2,8 @@ import { NextResponse } from 'next/server';
 import { pgoldStore } from '@/lib/pgoldStore';
 import { GoldDenomination } from '@/types/pgold';
 
+const GOLDAPI_KEY = process.env.GOLDAPI_KEY || 'goldapi-5589532e7a043fc495f5b911ec81a37f-io';
+
 export async function GET() {
   try {
     const settings = await pgoldStore.getSettings();
@@ -9,50 +11,55 @@ export async function GET() {
     let price22k = settings.price_per_gram_22k;
     let sourceUsed = 'manual';
 
-    // If pricing mode is API, attempt fetch
+    // If pricing mode is API, attempt live fetch from GoldAPI.io or custom URL
     if (settings.pricing_mode === 'api') {
-      const targetUrl = settings.api_provider_url || 'https://data-asg.goldprice.org/dbXRates/INR';
+      const targetUrl = settings.api_provider_url || 'https://www.goldapi.io/api/XAU/INR';
 
       try {
         const controller = new AbortController();
         const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 sec timeout
 
+        const headers: Record<string, string> = {
+          'Accept': 'application/json',
+          'User-Agent': 'AmbikaJewels/1.0'
+        };
+
+        if (targetUrl.includes('goldapi.io')) {
+          headers['x-access-token'] = GOLDAPI_KEY;
+        }
+
         const res = await fetch(targetUrl, {
           signal: controller.signal,
-          headers: {
-            'Accept': 'application/json',
-            'User-Agent': 'AmbikaJewels/1.0'
-          }
+          headers
         });
         clearTimeout(timeoutId);
 
         if (res.ok) {
           const apiData = await res.json();
-          let fetchedRatePerGram = 0;
 
-          // 1. Check goldprice.org public endpoint format: { items: [{ xauPrice: 268450 }] } in INR per oz
-          if (apiData.items && apiData.items[0]?.xauPrice) {
+          // 1. GoldAPI.io response: { price_gram_24k, price_gram_22k, price }
+          if (apiData.price_gram_24k) {
+            price24k = Math.round(Number(apiData.price_gram_24k));
+            price22k = apiData.price_gram_22k ? Math.round(Number(apiData.price_gram_22k)) : Math.round(price24k * 0.917);
+            sourceUsed = 'goldapi';
+          }
+          // 2. Public bullion endpoint format: { items: [{ xauPrice }] }
+          else if (apiData.items && apiData.items[0]?.xauPrice) {
             const pricePerOz = Number(apiData.items[0].xauPrice);
             if (pricePerOz > 0) {
-              fetchedRatePerGram = Math.round(pricePerOz / 31.1034768);
+              price24k = Math.round(pricePerOz / 31.1034768);
+              price22k = Math.round(price24k * 0.917);
+              sourceUsed = 'api';
             }
           }
-          // 2. Check GoldAPI.io format: { price_gram_24k, price }
-          else if (apiData.price_gram_24k) {
-            fetchedRatePerGram = Number(apiData.price_gram_24k);
-          }
-          // 3. Generic rate key formats (e.g. rate24k, price_24k, price_per_gram, price)
+          // 3. Generic JSON rate key formats
           else {
             const raw = Number(apiData.price_24k || apiData.rate24k || apiData.gold_24k || apiData.price_per_gram || apiData.price);
-            if (!isNaN(raw) && raw > 0) {
-              fetchedRatePerGram = raw > 50000 ? Math.round(raw / 31.1034768) : raw;
+            if (!isNaN(raw) && raw > 1000) {
+              price24k = raw > 50000 ? Math.round(raw / 31.1034768) : Math.round(raw);
+              price22k = Math.round(price24k * 0.917);
+              sourceUsed = 'api';
             }
-          }
-
-          if (fetchedRatePerGram > 1000) {
-            price24k = fetchedRatePerGram;
-            price22k = Math.round(fetchedRatePerGram * 0.917);
-            sourceUsed = 'api';
           }
         }
       } catch (apiErr) {
