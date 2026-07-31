@@ -70,10 +70,13 @@ export default function Footer() {
               title="Ambika Jewels Location Map - Roop Nagar, Jammu"
             />
           </div>
-          <div className="col-span-12 lg:col-span-4 text-center lg:text-right mt-2 lg:mt-0">
-            <p className="font-body-md text-xs text-on-surface-variant/70 leading-relaxed">
+          <div className="col-span-12 lg:col-span-4 flex flex-col items-center lg:items-end justify-between mt-2 lg:mt-0 gap-2">
+            <p className="font-body-md text-xs text-on-surface-variant/70 text-center lg:text-right leading-relaxed">
               © {new Date().getFullYear()} AMBIKA JEWELS. ROOP NAGAR, JAMMU. <br/>HANDCRAFTED HERITAGE JEWELRY.
             </p>
+            <div className="font-mono text-[10px] text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-bold self-start lg:self-auto">
+              v1.0.0
+            </div>
           </div>
         </div>
       </div>

@@ -38,9 +38,9 @@ export default function ProductCard({ product }: { product: Product }) {
   };
 
   return (
-    <div className="group relative bg-surface-container/40 border border-outline-variant/20 hover:border-primary/50 overflow-hidden transition-all duration-300 flex flex-col justify-between rounded-xs">
+    <div className="group relative bg-[#221312] border-2 border-amber-500/30 hover:border-amber-400 overflow-hidden transition-all duration-300 flex flex-col justify-between rounded-md shadow-xl">
       {/* Image Container */}
-      <div className="relative aspect-[3/4] block overflow-hidden bg-surface-container-low">
+      <div className="relative aspect-[3/4] block overflow-hidden bg-[#160b0a]">
         <Link href={`/collections/${product.slug}`} className="block w-full h-full">
           <img 
             src={mainImage} 
@@ -52,7 +52,7 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         {/* 22K Purity Tag */}
-        <span className="absolute top-2 left-2 bg-background/85 text-primary font-label-caps text-[8px] sm:text-[9px] px-2 py-0.5 font-semibold tracking-widest backdrop-blur-xs border border-primary/20">
+        <span className="absolute top-2 left-2 bg-[#160b0a]/90 text-amber-300 font-label-caps text-[9px] sm:text-[10px] px-2.5 py-1 font-extrabold tracking-widest backdrop-blur-xs border border-amber-500/40 rounded">
           22K BIS
         </span>
 
@@ -63,64 +63,65 @@ export default function ProductCard({ product }: { product: Product }) {
             e.stopPropagation();
             setIsWishlisted(!isWishlisted);
           }}
-          className="absolute top-2 right-2 w-7 h-7 sm:w-8 sm:h-8 bg-background/70 text-on-surface hover:text-primary transition-colors flex items-center justify-center backdrop-blur-xs border border-outline-variant/30 rounded-full"
+          className="absolute top-2 right-2 w-8 h-8 bg-[#160b0a]/80 text-amber-100 hover:text-amber-300 transition-colors flex items-center justify-center backdrop-blur-xs border border-amber-500/30 rounded-full"
           aria-label="Wishlist"
         >
-          <span className={`material-symbols-outlined text-sm sm:text-base ${isWishlisted ? 'text-primary fill-1' : ''}`}>
+          <span className={`material-symbols-outlined text-base ${isWishlisted ? 'text-amber-400 fill-1' : ''}`}>
             favorite
           </span>
         </button>
 
         {/* Desktop Hover Overlay */}
-        <div className="hidden lg:flex absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-background/95 via-background/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-col gap-1.5 z-10">
+        <div className="hidden lg:flex absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-black/95 via-black/80 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-col gap-2 z-10">
           <button
             onClick={handleWhatsAppBuy}
-            className="w-full gold-bg-gradient font-label-caps text-[9px] py-2 font-bold tracking-wider shadow-md hover:brightness-110 transition-colors flex items-center justify-center gap-1.5"
+            className="w-full gold-bg-gradient font-label-caps text-[10px] py-2.5 font-extrabold tracking-wider text-black shadow-md hover:brightness-110 transition-colors flex items-center justify-center gap-1.5 rounded"
           >
-            <span className="material-symbols-outlined text-xs">chat_bubble</span> BUY ON WHATSAPP
+            <span className="material-symbols-outlined text-sm">chat</span> BUY ON WHATSAPP
           </button>
           <button
             onClick={handleAddToCart}
-            className="w-full bg-surface border border-primary/40 text-primary font-label-caps text-[9px] py-1.5 font-bold tracking-wider hover:bg-primary/10 transition-colors"
+            className="w-full bg-[#160b0a] border border-amber-500/50 text-amber-300 font-label-caps text-[10px] py-2 font-bold tracking-wider hover:text-white transition-colors rounded"
           >
-            {addedAnimation ? '✓ ADDED' : '+ ADD TO BAG'}
+            {addedAnimation ? '✓ ADDED TO BAG' : '+ ADD TO BAG'}
           </button>
         </div>
       </div>
 
-      {/* Product Details & Mobile Direct Action Buttons */}
-      <div className="p-3 sm:p-4 text-center flex flex-col flex-1 justify-between gap-2">
+      {/* Product Details & Mobile Action Buttons */}
+      <div className="p-3 sm:p-4 text-center flex flex-col flex-1 justify-between gap-2.5">
         <div>
-          <Link href={`/collections/${product.slug}`} className="block group-hover:text-primary transition-colors">
-            <h5 className="font-headline-sm text-xs sm:text-sm lg:text-base text-on-surface mb-1 font-semibold line-clamp-1">
+          <Link href={`/collections/${product.slug}`} className="block group-hover:text-amber-300 transition-colors">
+            <h5 className="font-headline-sm text-xs sm:text-sm lg:text-base text-white mb-1 font-bold line-clamp-1">
               {product.name}
             </h5>
           </Link>
 
-          <p className="font-label-caps text-[11px] sm:text-xs text-primary font-bold tracking-widest">
+          <p className="font-label-caps text-xs sm:text-sm text-amber-300 font-extrabold tracking-widest font-mono">
             {product.display_price}
           </p>
         </div>
 
-        {/* Mobile Action Buttons (Visible directly on touch screens) */}
-        <div className="flex lg:hidden items-center gap-1.5 mt-1 pt-2 border-t border-outline-variant/15">
+        {/* Mobile Action Buttons (Optimized Touch Responsive Layout) */}
+        <div className="flex lg:hidden items-center gap-2 mt-1 pt-2.5 border-t border-amber-500/25">
           <button
             onClick={handleWhatsAppBuy}
-            className="flex-1 gold-bg-gradient font-label-caps text-[8.5px] py-2 font-bold tracking-wider shadow-sm flex items-center justify-center gap-1"
+            className="flex-1 gold-bg-gradient font-label-caps text-[10px] py-2.5 font-extrabold tracking-wider text-black shadow-md flex items-center justify-center gap-1 rounded active:scale-95 transition-all"
             title="Buy via WhatsApp"
           >
-            <span className="material-symbols-outlined text-[12px]">chat_bubble</span>
+            <span className="material-symbols-outlined text-[14px]">chat</span>
             <span>WHATSAPP</span>
           </button>
 
           <button
             onClick={handleAddToCart}
-            className="w-8 h-8 bg-surface-container border border-primary/40 text-primary flex items-center justify-center shrink-0 active:scale-95 transition-transform"
+            className="px-3 py-2.5 bg-[#160b0a] border-2 border-amber-500/50 text-amber-300 hover:text-white font-label-caps text-[10px] font-bold tracking-wider flex items-center justify-center gap-1 rounded shrink-0 active:scale-95 transition-all"
             title="Add to Bag"
           >
             <span className="material-symbols-outlined text-sm">
-              {addedAnimation ? 'check' : 'add_shopping_bag'}
+              {addedAnimation ? 'check' : 'shopping_bag'}
             </span>
+            <span>{addedAnimation ? 'ADDED' : 'BAG'}</span>
           </button>
         </div>
       </div>

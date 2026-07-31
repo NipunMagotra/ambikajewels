@@ -36,6 +36,10 @@ export default function RootLayout({
         <CartProvider>
           {children}
           <ChatWidget />
+          {/* Version Badge in Bottom Left */}
+          <div className="fixed bottom-2 left-2.5 z-40 font-mono text-[9px] font-bold text-amber-300/80 bg-black/80 backdrop-blur-xs px-2 py-0.5 rounded border border-amber-500/30 pointer-events-none shadow-lg">
+            v1.0.0
+          </div>
         </CartProvider>
       </body>
     </html>
