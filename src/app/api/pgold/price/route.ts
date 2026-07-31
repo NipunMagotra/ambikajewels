@@ -9,30 +9,54 @@ export async function GET() {
     let price22k = settings.price_per_gram_22k;
     let sourceUsed = 'manual';
 
-    // If pricing mode is API and provider URL is supplied, attempt live fetch
-    if (settings.pricing_mode === 'api' && settings.api_provider_url) {
+    // If pricing mode is API, attempt fetch
+    if (settings.pricing_mode === 'api') {
+      const targetUrl = settings.api_provider_url || 'https://data-asg.goldprice.org/dbXRates/INR';
+
       try {
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 3000); // 3 sec timeout
+        const timeoutId = setTimeout(() => controller.abort(), 4000); // 4 sec timeout
 
-        const res = await fetch(settings.api_provider_url, {
+        const res = await fetch(targetUrl, {
           signal: controller.signal,
-          headers: { 'Accept': 'application/json' }
+          headers: {
+            'Accept': 'application/json',
+            'User-Agent': 'AmbikaJewels/1.0'
+          }
         });
         clearTimeout(timeoutId);
 
         if (res.ok) {
           const apiData = await res.json();
-          // Flexible key parsing for external APIs (e.g. { rate24k, price_24k, price } etc.)
-          const fetchedRate = Number(apiData.price_24k || apiData.rate24k || apiData.gold_24k || apiData.price);
-          if (!isNaN(fetchedRate) && fetchedRate > 0) {
-            price24k = fetchedRate;
-            price22k = Math.round(fetchedRate * 0.917 * 100) / 100;
+          let fetchedRatePerGram = 0;
+
+          // 1. Check goldprice.org public endpoint format: { items: [{ xauPrice: 268450 }] } in INR per oz
+          if (apiData.items && apiData.items[0]?.xauPrice) {
+            const pricePerOz = Number(apiData.items[0].xauPrice);
+            if (pricePerOz > 0) {
+              fetchedRatePerGram = Math.round(pricePerOz / 31.1034768);
+            }
+          }
+          // 2. Check GoldAPI.io format: { price_gram_24k, price }
+          else if (apiData.price_gram_24k) {
+            fetchedRatePerGram = Number(apiData.price_gram_24k);
+          }
+          // 3. Generic rate key formats (e.g. rate24k, price_24k, price_per_gram, price)
+          else {
+            const raw = Number(apiData.price_24k || apiData.rate24k || apiData.gold_24k || apiData.price_per_gram || apiData.price);
+            if (!isNaN(raw) && raw > 0) {
+              fetchedRatePerGram = raw > 50000 ? Math.round(raw / 31.1034768) : raw;
+            }
+          }
+
+          if (fetchedRatePerGram > 1000) {
+            price24k = fetchedRatePerGram;
+            price22k = Math.round(fetchedRatePerGram * 0.917);
             sourceUsed = 'api';
           }
         }
       } catch (apiErr) {
-        console.warn('External Gold API fetch failed/timed out, using store price:', apiErr);
+        console.warn('Live Gold API fetch failed/timed out, using store fallback price:', apiErr);
       }
     }
 
