@@ -87,6 +87,11 @@ export default function Header() {
         {/* Right: Actions */}
         <div className="flex items-center gap-4 lg:gap-5">
           <nav className="hidden lg:flex items-center gap-6 mr-2">
+            <Link href="/pgold" className="text-[11px] font-label-caps tracking-[0.2em] text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1.5 px-2 py-1 rounded-xs bg-primary/10 border border-primary/30">
+              <span className="material-symbols-outlined text-xs">savings</span>
+              <span>P-GOLD</span>
+              <span className="bg-primary text-on-primary text-[8px] px-1 font-bold rounded-xs">24K</span>
+            </Link>
             <Link href="/services" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors font-semibold">
               SERVICES
             </Link>
@@ -139,9 +144,20 @@ export default function Header() {
               </Link>
             ))}
             <Link
+              href="/pgold"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold mt-2 bg-primary/10 px-2 rounded-xs"
+            >
+              <div className="flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-xs">savings</span>
+                <span>P-GOLD 24K ACCUMULATION</span>
+              </div>
+              <span className="material-symbols-outlined text-xs">arrow_forward</span>
+            </Link>
+            <Link
               href="/services"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold mt-2"
+              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold"
             >
               <span>SERVICES & GOLD EXCHANGE</span>
               <span className="material-symbols-outlined text-xs">chevron_right</span>

@@ -40,6 +40,7 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">OUR SERVICES</h3>
             <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
+              <li><Link className="hover:text-primary transition-colors font-bold text-primary flex items-center gap-1" href="/pgold"><span>Ambika P-Gold (Digital Gold)</span></Link></li>
               <li><Link className="hover:text-primary transition-colors font-semibold text-primary" href="/services">Gold Exchange Program</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/services">Jewelry Customization</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/services">Old Gold Melting</Link></li>
