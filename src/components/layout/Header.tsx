@@ -121,6 +121,22 @@ export default function Header() {
       {mobileMenuOpen && (
         <div className="lg:hidden fixed inset-0 top-16 bg-background/95 backdrop-blur-md z-40 flex flex-col justify-between p-6 animate-in fade-in slide-in-from-top-4 duration-200 overflow-y-auto">
           <div className="flex flex-col gap-3">
+            {/* Featured Live Rates Badge Button at Top of Drawer */}
+            <Link
+              href="/pgold"
+              onClick={() => setMobileMenuOpen(false)}
+              className="text-xs font-label-caps text-primary hover:text-primary/80 p-3 rounded-xs bg-primary/15 border-2 border-primary/50 flex justify-between items-center font-bold shadow-lg my-1"
+            >
+              <div className="flex items-center gap-2">
+                <span className="material-symbols-outlined text-base">show_chart</span>
+                <span className="tracking-[0.15em]">LIVE RATES</span>
+                <span className="bg-primary text-on-primary text-[9px] px-1.5 py-0.5 font-extrabold rounded-xs tracking-wider">
+                  GOLD & SILVER
+                </span>
+              </div>
+              <span className="material-symbols-outlined text-sm">arrow_forward</span>
+            </Link>
+
             <div className="font-label-caps text-[10px] text-primary tracking-[0.3em] font-semibold border-b border-outline-variant/20 pb-2">
               BROWSE ALL 13+ CATEGORIES
             </div>
@@ -144,20 +160,9 @@ export default function Header() {
               </Link>
             ))}
             <Link
-              href="/pgold"
-              onClick={() => setMobileMenuOpen(false)}
-              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold mt-2 bg-primary/10 px-2 rounded-xs"
-            >
-              <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-xs">show_chart</span>
-                <span>LIVE GOLD & SILVER RATES</span>
-              </div>
-              <span className="material-symbols-outlined text-xs">arrow_forward</span>
-            </Link>
-            <Link
               href="/services"
               onClick={() => setMobileMenuOpen(false)}
-              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold"
+              className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold mt-2"
             >
               <span>SERVICES & GOLD EXCHANGE</span>
               <span className="material-symbols-outlined text-xs">chevron_right</span>
