@@ -43,7 +43,8 @@ export default function AdminLoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background text-on-background pt-28 pb-16 flex items-center justify-center px-4 mandala-overlay">
+    <div className="relative min-h-screen bg-background text-on-background pt-28 pb-16 flex items-center justify-center px-4 overflow-hidden">
+      <div className="absolute inset-0 mandala-bg-pattern pointer-events-none z-0" />
       <div className="max-w-md w-full glass-panel p-8 rounded-xs border border-primary/30 shadow-2xl relative overflow-hidden">
         <div className="absolute -top-10 -right-10 w-32 h-32 bg-primary/10 rounded-full blur-2xl pointer-events-none" />
 

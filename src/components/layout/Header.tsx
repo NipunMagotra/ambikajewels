@@ -65,10 +65,10 @@ export default function Header() {
               )}
             </div>
 
-            <Link href="/collections?category=Bridal Couture" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
+            <Link href="/collections?category=Bridal Couture" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
               BRIDAL
             </Link>
-            <Link href="/collections?category=Necklaces %26 Chokers" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
+            <Link href="/collections?category=Necklaces %26 Chokers" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
               NECKLACES
             </Link>
           </nav>
@@ -87,18 +87,18 @@ export default function Header() {
         {/* Right: Actions */}
         <div className="flex items-center gap-4 lg:gap-5">
           <nav className="hidden lg:flex items-center gap-6 mr-2">
-            <Link href="/pgold" className="text-[11px] font-label-caps tracking-[0.2em] text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1.5 px-2 py-1 rounded-xs bg-primary/10 border border-primary/30">
+            <Link href="/pgold" className="text-[11px] font-label-caps tracking-[0.2em] text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-primary/10 border border-primary/40 shadow-sm">
               <span className="material-symbols-outlined text-xs">savings</span>
               <span>P-GOLD</span>
               <span className="bg-primary text-on-primary text-[8px] px-1 font-bold rounded-xs">24K</span>
             </Link>
-            <Link href="/services" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors font-semibold">
+            <Link href="/services" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
               SERVICES
             </Link>
-            <Link href="/collections?category=Dogra %26 Heritage Collection" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
+            <Link href="/collections?category=Dogra %26 Heritage Collection" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
               DOGRA
             </Link>
-            <Link href="/about" className="text-[11px] font-label-caps tracking-[0.2em] text-on-surface-variant hover:text-primary transition-colors">
+            <Link href="/about" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
               ABOUT US
             </Link>
           </nav>

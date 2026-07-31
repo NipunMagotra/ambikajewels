@@ -11,7 +11,10 @@ interface PGoldHeroProps {
 
 export default function PGoldHero({ settings, price24k, price22k, lastUpdated }: PGoldHeroProps) {
   return (
-    <div className="relative overflow-hidden py-16 sm:py-20 mandala-overlay border-b border-outline-variant/30 bg-surface-container/80">
+    <div className="relative overflow-hidden py-16 sm:py-20 border-b border-outline-variant/30 bg-surface-container">
+      {/* Background Mandala Pattern */}
+      <div className="absolute inset-0 mandala-bg-pattern pointer-events-none z-0" />
+
       {/* Glow Orbs */}
       <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-96 h-96 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
 

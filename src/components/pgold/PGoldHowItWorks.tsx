@@ -96,7 +96,8 @@ export default function PGoldHowItWorks() {
       </div>
 
       {/* Key Benefits Grid */}
-      <div className="bg-surface-container/90 p-8 sm:p-10 rounded-xs border border-primary/40 space-y-8 mandala-overlay">
+      <div className="relative bg-surface-container/90 p-8 sm:p-10 rounded-xs border border-primary/40 space-y-8 overflow-hidden">
+        <div className="absolute inset-0 mandala-bg-pattern pointer-events-none z-0" />
         <div className="text-center space-y-2 max-w-xl mx-auto">
           <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
             THE AMBIKA JEWELS GUARANTEE
