@@ -88,9 +88,9 @@ export default function Header() {
         <div className="flex items-center gap-4 lg:gap-5">
           <nav className="hidden lg:flex items-center gap-6 mr-2">
             <Link href="/pgold" className="text-[11px] font-label-caps tracking-[0.2em] text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-primary/10 border border-primary/40 shadow-sm">
-              <span className="material-symbols-outlined text-xs">savings</span>
-              <span>P-GOLD</span>
-              <span className="bg-primary text-on-primary text-[8px] px-1 font-bold rounded-xs">24K</span>
+              <span className="material-symbols-outlined text-xs">show_chart</span>
+              <span>LIVE RATES</span>
+              <span className="bg-primary text-on-primary text-[8px] px-1 font-bold rounded-xs">GOLD & SILVER</span>
             </Link>
             <Link href="/services" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
               SERVICES
@@ -149,8 +149,8 @@ export default function Header() {
               className="text-xs font-label-caps text-primary hover:text-primary/80 py-2 border-b border-outline-variant/10 flex justify-between items-center font-bold mt-2 bg-primary/10 px-2 rounded-xs"
             >
               <div className="flex items-center gap-1.5">
-                <span className="material-symbols-outlined text-xs">savings</span>
-                <span>P-GOLD 24K ACCUMULATION</span>
+                <span className="material-symbols-outlined text-xs">show_chart</span>
+                <span>LIVE GOLD & SILVER RATES</span>
               </div>
               <span className="material-symbols-outlined text-xs">arrow_forward</span>
             </Link>

@@ -6,86 +6,46 @@ import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MandalaDivider from '@/components/ui/MandalaDivider';
 import PGoldHero from '@/components/pgold/PGoldHero';
+import LivePriceChart from '@/components/pgold/LivePriceChart';
+import JewelryPriceCalculator from '@/components/pgold/JewelryPriceCalculator';
 import PGoldDenominationGrid from '@/components/pgold/PGoldDenominationGrid';
-import PGoldCalculator from '@/components/pgold/PGoldCalculator';
 import PGoldHowItWorks from '@/components/pgold/PGoldHowItWorks';
 import PGoldFAQSection from '@/components/pgold/PGoldFAQSection';
-import PGoldTermsSection from '@/components/pgold/PGoldTermsSection';
-import PGoldBuyModal from '@/components/pgold/PGoldBuyModal';
-import { PGoldSettings, PGoldFAQ, GoldDenomination } from '@/types/pgold';
-import { DEFAULT_PGOLD_SETTINGS, DEFAULT_PGOLD_FAQS } from '@/lib/pgoldStore';
 
-export default function PGoldPage() {
-  const [settings, setSettings] = useState<PGoldSettings>(DEFAULT_PGOLD_SETTINGS);
-  const [faqs, setFaqs] = useState<PGoldFAQ[]>(DEFAULT_PGOLD_FAQS);
+export default function LiveRatesPage() {
   const [price24k, setPrice24k] = useState<number>(8500);
   const [price22k, setPrice22k] = useState<number>(7800);
-  const [denominations, setDenominations] = useState<GoldDenomination[]>([]);
+  const [priceSilver999, setPriceSilver999] = useState<number>(95);
+  const [priceSilver925, setPriceSilver925] = useState<number>(88);
   const [lastUpdated, setLastUpdated] = useState<string>('');
 
-  const [loading, setLoading] = useState(true);
-  const [selectedWeight, setSelectedWeight] = useState<number | null>(null);
-
-  // Buy Modal State
-  const [isBuyModalOpen, setIsBuyModalOpen] = useState(false);
-  const [checkoutParams, setCheckoutParams] = useState<{
-    amountInr: number;
-    weightGrams: number;
-    purity: '24K' | '22K';
-  }>({
-    amountInr: 5000,
-    weightGrams: 0.5543,
-    purity: '24K'
-  });
-
   useEffect(() => {
-    fetchInitialData();
+    fetchLiveRates();
   }, []);
 
-  const fetchInitialData = async () => {
+  const fetchLiveRates = async () => {
     try {
-      const [priceRes, settingsRes, faqsRes] = await Promise.all([
+      const [goldRes, silverRes] = await Promise.all([
         fetch('/api/pgold/price'),
-        fetch('/api/pgold/settings'),
-        fetch('/api/pgold/faqs')
+        fetch('/api/silver/price')
       ]);
 
-      const priceData = await priceRes.json();
-      const settingsData = await settingsRes.json();
-      const faqsData = await faqsRes.json();
+      const goldData = await goldRes.json();
+      const silverData = await silverRes.json();
 
-      if (priceData.success) {
-        setPrice24k(priceData.data.price_per_gram_24k);
-        setPrice22k(priceData.data.price_per_gram_22k);
-        setDenominations(priceData.data.denominations || []);
-        setLastUpdated(priceData.data.timestamp);
+      if (goldData.success) {
+        setPrice24k(goldData.data.price_per_gram_24k);
+        setPrice22k(goldData.data.price_per_gram_22k);
+        setLastUpdated(goldData.data.timestamp);
       }
 
-      if (settingsData.success) {
-        setSettings(settingsData.data);
-      }
-
-      if (faqsData.success && faqsData.data?.length > 0) {
-        setFaqs(faqsData.data);
+      if (silverData.success) {
+        setPriceSilver999(silverData.data.price_per_gram_999);
+        setPriceSilver925(silverData.data.price_per_gram_925);
       }
     } catch (err) {
-      console.warn('Failed to load live P-Gold data, using defaults:', err);
-    } finally {
-      setLoading(false);
+      console.warn('Using default live rates:', err);
     }
-  };
-
-  const handleSelectDenomination = (weightGrams: number) => {
-    setSelectedWeight(weightGrams);
-    const calcElem = document.getElementById('pgold-calculator');
-    if (calcElem) {
-      calcElem.scrollIntoView({ behavior: 'smooth' });
-    }
-  };
-
-  const handleBuyTrigger = (amountInr: number, weightGrams: number, purity: '24K' | '22K') => {
-    setCheckoutParams({ amountInr, weightGrams, purity });
-    setIsBuyModalOpen(true);
   };
 
   return (
@@ -94,62 +54,54 @@ export default function PGoldPage() {
       <main className="min-h-screen pt-16 bg-background text-on-background">
         {/* 1. Hero Section */}
         <PGoldHero
-          settings={settings}
           price24k={price24k}
           price22k={price22k}
+          priceSilver999={priceSilver999}
           lastUpdated={lastUpdated}
         />
 
         <MandalaDivider />
 
         <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop py-12 space-y-16">
-          {/* 2. Interactive Calculator Section */}
-          <section id="pgold-calculator">
-            <PGoldCalculator
-              settings={settings}
-              price24k={price24k}
-              price22k={price22k}
-              selectedWeight={selectedWeight}
-              onBuyTrigger={handleBuyTrigger}
+          {/* 2. Live Interactive Gold & Silver Price Graph */}
+          <section id="price-graph">
+            <LivePriceChart
+              current24k={price24k}
+              current22k={price22k}
+              currentSilver={priceSilver999}
             />
           </section>
 
-          {/* 3. Denomination Grid */}
-          {denominations.length > 0 && (
-            <section>
-              <PGoldDenominationGrid
-                denominations={denominations}
-                price24k={price24k}
-                onSelectDenomination={handleSelectDenomination}
-              />
-            </section>
-          )}
+          {/* 3. Jewelry Price Calculator */}
+          <section id="jewelry-calculator">
+            <JewelryPriceCalculator
+              price24k={price24k}
+              price22k={price22k}
+              priceSilver999={priceSilver999}
+              priceSilver925={priceSilver925}
+            />
+          </section>
 
-          {/* 4. How P-Gold Works & Benefits */}
+          {/* 4. Complete Gold & Silver Rates Grid */}
+          <section>
+            <PGoldDenominationGrid
+              price24k={price24k}
+              price22k={price22k}
+              priceSilver999={priceSilver999}
+              priceSilver925={priceSilver925}
+            />
+          </section>
+
+          {/* 5. Gold Exchange & Showroom Services */}
           <section>
             <PGoldHowItWorks />
           </section>
 
-          {/* 5. Frequently Asked Questions */}
+          {/* 6. Showroom FAQs */}
           <section>
-            <PGoldFAQSection faqs={faqs} />
-          </section>
-
-          {/* 6. Terms & Conditions */}
-          <section>
-            <PGoldTermsSection termsText={settings.terms_and_conditions} />
+            <PGoldFAQSection />
           </section>
         </div>
-
-        {/* 7. Purchase Modal */}
-        <PGoldBuyModal
-          isOpen={isBuyModalOpen}
-          onClose={() => setIsBuyModalOpen(false)}
-          amountInr={checkoutParams.amountInr}
-          weightGrams={checkoutParams.weightGrams}
-          purity={checkoutParams.purity}
-          goldRate={checkoutParams.purity === '22K' ? price22k : price24k}
-        />
       </main>
       <Footer />
       <MobileBottomNav />

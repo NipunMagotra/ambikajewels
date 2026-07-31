@@ -1,37 +1,59 @@
 'use client';
 
 import { useState } from 'react';
-import { PGoldFAQ } from '@/types/pgold';
 
-interface PGoldFAQSectionProps {
-  faqs: PGoldFAQ[];
-}
+export default function PGoldFAQSection({ faqs }: { faqs?: any[] }) {
+  const defaultFaqs = [
+    {
+      id: 'faq-1',
+      question: 'How are live gold and silver rates updated on this website?',
+      answer: 'Our rates are synchronized in real-time with Indian bullion benchmark prices via GoldAPI.io. They represent pure 24K fine gold, 22K 916 hallmark gold, 18K gold, 14K gold, and 999/925 silver per gram.'
+    },
+    {
+      id: 'faq-2',
+      question: 'How does the 100% Gold Exchange Program work?',
+      answer: 'You can bring any old gold jewelry to our Ambika Jewels showroom in Lower Roop Nagar, Jammu. We test the purity transparently and give you 100% of the current market gold rate towards brand-new jewelry.'
+    },
+    {
+      id: 'faq-3',
+      question: 'Can I get a custom 3D CAD design before ordering?',
+      answer: 'Yes! Send any photo, Instagram link, or sketch to our WhatsApp (+91 9086098457). Our master karigars will create a 3D digital preview within 2 days for your review before crafting.'
+    },
+    {
+      id: 'faq-4',
+      question: 'What purities are available for custom jewelry?',
+      answer: 'We craft jewelry in 22K (916), 18K (750), 14K (585), and 9K (375) Hallmarked Gold, as well as Certified Diamonds (GIA & IGI) and 925 Sterling Silver.'
+    },
+    {
+      id: 'faq-5',
+      question: 'Do you offer live video shopping for out-of-station customers?',
+      answer: 'Yes! We arrange live WhatsApp video consultations so NRI and out-of-station customers can view showroom collections, try on designs virtually, and discuss custom orders with store owner Shivani Anand.'
+    }
+  ];
 
-export default function PGoldFAQSection({ faqs }: PGoldFAQSectionProps) {
-  const [openId, setOpenId] = useState<string | null>(faqs[0]?.id || null);
+  const displayFaqs = faqs && faqs.length > 0 ? faqs : defaultFaqs;
+  const [openId, setOpenId] = useState<string | null>(displayFaqs[0]?.id || null);
 
   const toggleAccordion = (id: string) => {
     setOpenId(openId === id ? null : id);
   };
 
-  if (!faqs || faqs.length === 0) return null;
-
   return (
     <div className="space-y-8 py-6">
       <div className="text-center space-y-3 max-w-xl mx-auto">
         <div className="font-label-caps text-xs text-amber-400 tracking-[0.25em] font-bold">
-          GOT QUESTIONS?
+          COMMON QUESTIONS
         </div>
         <h2 className="font-headline-md text-2xl sm:text-4xl gold-text-gradient font-bold">
-          Frequently Asked Questions
+          Showroom & Rates FAQ
         </h2>
         <p className="text-sm sm:text-base text-amber-50 font-normal">
-          Everything you need to know about purchasing, safety, storage, and redeeming P-Gold.
+          Answers regarding gold rates, purity certification, 3D CAD customization, and gold exchange.
         </p>
       </div>
 
       <div className="max-w-3xl mx-auto space-y-4">
-        {faqs.map((faq) => {
+        {displayFaqs.map((faq) => {
           const isOpen = openId === faq.id;
 
           return (
