@@ -22,10 +22,10 @@ export default function PGoldFAQSection({ faqs }: PGoldFAQSectionProps) {
         <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
           GOT QUESTIONS?
         </div>
-        <h2 className="font-headline-md text-2xl sm:text-3xl text-on-surface font-bold">
+        <h2 className="font-headline-md text-2xl sm:text-3xl gold-text-gradient font-bold">
           Frequently Asked Questions
         </h2>
-        <p className="text-xs text-on-surface-variant">
+        <p className="text-xs sm:text-sm text-amber-100/90 font-light">
           Everything you need to know about purchasing, safety, storage, and redeeming P-Gold.
         </p>
       </div>
@@ -37,11 +37,11 @@ export default function PGoldFAQSection({ faqs }: PGoldFAQSectionProps) {
           return (
             <div
               key={faq.id}
-              className="glass-panel rounded-xs border border-outline-variant/30 overflow-hidden transition-all"
+              className="bg-surface-container/90 rounded-xs border border-outline-variant/40 overflow-hidden transition-all"
             >
               <button
                 onClick={() => toggleAccordion(faq.id)}
-                className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-sm text-on-surface hover:text-primary transition-colors focus:outline-none"
+                className="w-full p-5 text-left flex items-center justify-between gap-4 font-semibold text-sm text-white hover:text-primary transition-colors focus:outline-none"
               >
                 <span>{faq.question}</span>
                 <span className="material-symbols-outlined text-primary text-xl transition-transform duration-200" style={{ transform: isOpen ? 'rotate(180deg)' : 'rotate(0deg)' }}>
@@ -50,7 +50,7 @@ export default function PGoldFAQSection({ faqs }: PGoldFAQSectionProps) {
               </button>
 
               {isOpen && (
-                <div className="px-5 pb-5 pt-1 text-xs text-on-surface-variant/90 leading-relaxed border-t border-outline-variant/20 animate-in fade-in duration-150">
+                <div className="px-5 pb-5 pt-1 text-xs sm:text-sm text-amber-100/90 leading-relaxed border-t border-outline-variant/30 animate-in fade-in duration-150 font-light">
                   {faq.answer}
                 </div>
               )}

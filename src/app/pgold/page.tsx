@@ -1,6 +1,10 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import MandalaDivider from '@/components/ui/MandalaDivider';
 import PGoldHero from '@/components/pgold/PGoldHero';
 import PGoldDenominationGrid from '@/components/pgold/PGoldDenominationGrid';
 import PGoldCalculator from '@/components/pgold/PGoldCalculator';
@@ -73,7 +77,6 @@ export default function PGoldPage() {
 
   const handleSelectDenomination = (weightGrams: number) => {
     setSelectedWeight(weightGrams);
-    // Smooth scroll to calculator section
     const calcElem = document.getElementById('pgold-calculator');
     if (calcElem) {
       calcElem.scrollIntoView({ behavior: 'smooth' });
@@ -86,63 +89,70 @@ export default function PGoldPage() {
   };
 
   return (
-    <main className="min-h-screen bg-background text-on-background">
-      {/* 1. Hero Section */}
-      <PGoldHero
-        settings={settings}
-        price24k={price24k}
-        price22k={price22k}
-        lastUpdated={lastUpdated}
-      />
+    <>
+      <Header />
+      <main className="min-h-screen pt-16 bg-background text-on-background">
+        {/* 1. Hero Section */}
+        <PGoldHero
+          settings={settings}
+          price24k={price24k}
+          price22k={price22k}
+          lastUpdated={lastUpdated}
+        />
 
-      <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop py-12 space-y-16">
-        {/* 2. Interactive Calculator Section */}
-        <section id="pgold-calculator">
-          <PGoldCalculator
-            settings={settings}
-            price24k={price24k}
-            price22k={price22k}
-            selectedWeight={selectedWeight}
-            onBuyTrigger={handleBuyTrigger}
-          />
-        </section>
+        <MandalaDivider />
 
-        {/* 3. Denomination Grid */}
-        {denominations.length > 0 && (
-          <section>
-            <PGoldDenominationGrid
-              denominations={denominations}
+        <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop py-12 space-y-16">
+          {/* 2. Interactive Calculator Section */}
+          <section id="pgold-calculator">
+            <PGoldCalculator
+              settings={settings}
               price24k={price24k}
-              onSelectDenomination={handleSelectDenomination}
+              price22k={price22k}
+              selectedWeight={selectedWeight}
+              onBuyTrigger={handleBuyTrigger}
             />
           </section>
-        )}
 
-        {/* 4. How P-Gold Works & Benefits */}
-        <section>
-          <PGoldHowItWorks />
-        </section>
+          {/* 3. Denomination Grid */}
+          {denominations.length > 0 && (
+            <section>
+              <PGoldDenominationGrid
+                denominations={denominations}
+                price24k={price24k}
+                onSelectDenomination={handleSelectDenomination}
+              />
+            </section>
+          )}
 
-        {/* 5. Frequently Asked Questions */}
-        <section>
-          <PGoldFAQSection faqs={faqs} />
-        </section>
+          {/* 4. How P-Gold Works & Benefits */}
+          <section>
+            <PGoldHowItWorks />
+          </section>
 
-        {/* 6. Terms & Conditions */}
-        <section>
-          <PGoldTermsSection termsText={settings.terms_and_conditions} />
-        </section>
-      </div>
+          {/* 5. Frequently Asked Questions */}
+          <section>
+            <PGoldFAQSection faqs={faqs} />
+          </section>
 
-      {/* 7. Purchase Modal */}
-      <PGoldBuyModal
-        isOpen={isBuyModalOpen}
-        onClose={() => setIsBuyModalOpen(false)}
-        amountInr={checkoutParams.amountInr}
-        weightGrams={checkoutParams.weightGrams}
-        purity={checkoutParams.purity}
-        goldRate={checkoutParams.purity === '22K' ? price22k : price24k}
-      />
-    </main>
+          {/* 6. Terms & Conditions */}
+          <section>
+            <PGoldTermsSection termsText={settings.terms_and_conditions} />
+          </section>
+        </div>
+
+        {/* 7. Purchase Modal */}
+        <PGoldBuyModal
+          isOpen={isBuyModalOpen}
+          onClose={() => setIsBuyModalOpen(false)}
+          amountInr={checkoutParams.amountInr}
+          weightGrams={checkoutParams.weightGrams}
+          purity={checkoutParams.purity}
+          goldRate={checkoutParams.purity === '22K' ? price22k : price24k}
+        />
+      </main>
+      <Footer />
+      <MobileBottomNav />
+    </>
   );
 }

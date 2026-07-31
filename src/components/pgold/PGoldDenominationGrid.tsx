@@ -19,10 +19,10 @@ export default function PGoldDenominationGrid({
         <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
           STANDARD WEIGHT PACKS
         </div>
-        <h2 className="font-headline-md text-2xl sm:text-3xl text-on-surface font-bold">
+        <h2 className="font-headline-md text-2xl sm:text-3xl gold-text-gradient font-bold">
           Explore Popular 24K Gold Denominations
         </h2>
-        <p className="text-xs text-on-surface-variant max-w-xl mx-auto">
+        <p className="text-xs sm:text-sm text-amber-100/90 max-w-xl mx-auto font-light">
           Instant locked pricing for standard weights. Click any card to load it into the P-Gold calculator.
         </p>
       </div>
@@ -36,27 +36,27 @@ export default function PGoldDenominationGrid({
             <button
               key={denom.label}
               onClick={() => onSelectDenomination(denom.weightGrams)}
-              className="glass-panel p-4 rounded-xs border border-outline-variant/30 hover-gold-wire text-left transition-all group flex flex-col justify-between h-full relative overflow-hidden"
+              className="bg-surface-container/90 p-4 rounded-xs border border-outline-variant/40 hover-gold-wire text-left transition-all group flex flex-col justify-between h-full relative overflow-hidden"
             >
               <div className="space-y-1">
                 <div className="flex items-center justify-between">
                   <span className="font-mono text-xl font-bold gold-text-gradient">
                     {denom.label}
                   </span>
-                  <span className="text-[9px] font-label-caps bg-primary/10 text-primary px-1.5 py-0.5 rounded-xs border border-primary/20">
+                  <span className="text-[9px] font-label-caps bg-primary/20 text-primary px-1.5 py-0.5 rounded-xs border border-primary/30 font-bold">
                     24K
                   </span>
                 </div>
-                <div className="text-[11px] text-on-surface-variant font-semibold">
+                <div className="text-[11px] text-amber-100/90 font-semibold">
                   Pure Gold Coin
                 </div>
               </div>
 
-              <div className="pt-4 mt-3 border-t border-outline-variant/20 space-y-1">
-                <div className="text-xs font-bold text-on-surface font-mono">
+              <div className="pt-4 mt-3 border-t border-outline-variant/30 space-y-1">
+                <div className="text-xs font-bold text-white font-mono">
                   ₹{priceWithGst.toLocaleString('en-IN')}
                 </div>
-                <div className="text-[10px] text-on-surface-variant/70">
+                <div className="text-[10px] text-amber-200/70">
                   Incl. 3% GST
                 </div>
 

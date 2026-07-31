@@ -126,6 +126,36 @@ The website is powered by Next.js 16 and features **Aanya**, an AI Jewelry Assis
 
 ---
 
+## 💰 Ambika P-Gold (Digital Gold Accumulation Program)
+
+The website features a complete **P-Gold Module** allowing customers to purchase, accumulate, and redeem 24K (999 Pure) Digital Gold online, backed by 100% physical gold and redemption guarantee at Ambika Jewels Jammu.
+
+### 1. Customer P-Gold Portal (`/pgold`)
+- **Live Bullion Ticker**: Real-time display of 24K (999 pure fine gold) and 22K (916 hallmark gold) market prices per gram.
+- **Bi-Directional Calculator**: Instant calculation of Rupees (₹) $\leftrightarrow$ Gold Weight (Grams) with preset chips (₹500, ₹1k, ₹5k, ₹10k, ₹25k, ₹50k) and 3% GST breakdown.
+- **Standard Gold Packs**: One-click selection for 0.1g, 0.5g, 1g, 2g, 5g, and 10g 24K pure gold coins.
+- **Redemption & Safety**: 4-step explanation of physical vault backing and instant redemption for Dogra Heritage jewelry or gold coins at our Lower Roop Nagar, Jammu showroom.
+- **Dynamic FAQs & Terms**: Database-driven FAQ accordion and full legal terms & conditions.
+- **Checkout Modal**: Customer information form and Razorpay payment checkout integration.
+
+### 2. Admin Control Panel (`/admin/pgold`)
+- **Passcode Protection**: Protected admin route (`/admin/pgold`) authenticated via passcode (`ambika2026`) with HTTP-only session cookies.
+- **Gold Rate & API Mode**: Update 24K & 22K per gram rates manually or connect to external live gold rate APIs. Rate changes are automatically logged in `pgold_price_history`.
+- **Business Rules & Limits**: Toggle online purchase availability, set min (e.g. ₹100) and max (e.g. ₹5,00,000) transaction limits.
+- **Banner & Content Manager**: Edit headline, subtitle, hero image URL (with live preview), program description, and benefits.
+- **FAQ Manager**: Add, edit, reorder, toggle active visibility, and delete FAQs.
+- **Terms Editor**: Full text editor for terms & conditions.
+
+### 3. Database Schema & Netlify Hosting Setup
+- **Database Tables**: Defined in `supabase/pgold_schema.sql` (`pgold_settings`, `pgold_faqs`, `pgold_transactions`, `pgold_price_history`).
+- **Dual Data Mode**: Automatically queries Supabase when configured, and falls back to in-memory store if database env vars are not present.
+- **Netlify Deployment Checklist**:
+  1. **SQL Migration**: Open Supabase SQL Editor and execute `supabase/pgold_schema.sql`.
+  2. **Netlify Environment Variables**: Add `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, and `ADMIN_PASSCODE` in Netlify Dashboard under *Site Configuration $\rightarrow$ Environment Variables*.
+  3. Netlify automatically hosts both the frontend and backend serverless API routes (`/api/pgold/*`, `/api/admin/*`).
+
+---
+
 ## 🔐 Store Owner Production Onboarding & Credentials Checklist
 
 ### 1. Razorpay API Keys (Owner Dashboard Setup)
@@ -154,3 +184,4 @@ The website is powered by Next.js 16 and features **Aanya**, an AI Jewelry Assis
 ---
 
 *© Ambika Jewels (Estd 2021). Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013.*
+

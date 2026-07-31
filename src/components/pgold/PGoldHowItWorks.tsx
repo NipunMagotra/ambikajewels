@@ -59,10 +59,10 @@ export default function PGoldHowItWorks() {
           <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
             SIMPLE & SECURE PROCESS
           </div>
-          <h2 className="font-headline-md text-2xl sm:text-4xl text-on-surface font-bold">
+          <h2 className="font-headline-md text-2xl sm:text-4xl gold-text-gradient font-bold">
             How Ambika P-Gold Works
           </h2>
-          <p className="text-xs text-on-surface-variant">
+          <p className="text-xs sm:text-sm text-amber-100/90 font-light">
             Four easy steps to buy, accumulate, and redeem 24K pure digital gold.
           </p>
         </div>
@@ -71,22 +71,22 @@ export default function PGoldHowItWorks() {
           {steps.map((step) => (
             <div
               key={step.number}
-              className="glass-panel p-6 rounded-xs border border-outline-variant/30 hover-gold-wire space-y-4 relative group"
+              className="bg-surface-container/90 p-6 rounded-xs border border-outline-variant/40 hover-gold-wire space-y-4 relative group"
             >
               <div className="flex items-center justify-between">
-                <span className="font-mono text-3xl font-bold text-primary/30 group-hover:text-primary transition-colors">
+                <span className="font-mono text-3xl font-bold text-primary/40 group-hover:text-primary transition-colors">
                   {step.number}
                 </span>
-                <span className="material-symbols-outlined text-2xl text-primary p-2 bg-primary/10 rounded-xs">
+                <span className="material-symbols-outlined text-2xl text-primary p-2 bg-primary/10 rounded-xs border border-primary/20">
                   {step.icon}
                 </span>
               </div>
 
               <div className="space-y-1">
-                <h3 className="font-headline-md text-base font-bold text-on-surface">
+                <h3 className="font-headline-md text-base font-bold text-white">
                   {step.title}
                 </h3>
-                <p className="text-xs text-on-surface-variant/80 leading-relaxed">
+                <p className="text-xs text-amber-100/80 leading-relaxed font-light">
                   {step.description}
                 </p>
               </div>
@@ -96,22 +96,22 @@ export default function PGoldHowItWorks() {
       </div>
 
       {/* Key Benefits Grid */}
-      <div className="glass-panel p-8 sm:p-10 rounded-xs border border-primary/30 space-y-8 mandala-overlay">
+      <div className="bg-surface-container/90 p-8 sm:p-10 rounded-xs border border-primary/40 space-y-8 mandala-overlay">
         <div className="text-center space-y-2 max-w-xl mx-auto">
           <div className="font-label-caps text-xs text-primary tracking-[0.25em] font-bold">
             THE AMBIKA JEWELS GUARANTEE
           </div>
-          <h3 className="font-headline-md text-2xl text-on-surface font-bold">
+          <h3 className="font-headline-md text-2xl text-white font-bold">
             Why Accumulate P-Gold With Us?
           </h3>
         </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {benefits.map((b) => (
-            <div key={b.title} className="bg-surface-container/60 p-5 rounded-xs border border-outline-variant/30 space-y-2">
+            <div key={b.title} className="bg-surface-container-high/90 p-5 rounded-xs border border-outline-variant/40 space-y-2">
               <span className="material-symbols-outlined text-primary text-2xl">{b.icon}</span>
-              <h4 className="font-headline-md text-sm font-bold text-on-surface">{b.title}</h4>
-              <p className="text-xs text-on-surface-variant/80 leading-relaxed">{b.description}</p>
+              <h4 className="font-headline-md text-sm font-bold text-white">{b.title}</h4>
+              <p className="text-xs text-amber-100/80 leading-relaxed font-light">{b.description}</p>
             </div>
           ))}
         </div>
