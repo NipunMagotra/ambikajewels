@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const GOLDAPI_KEY = process.env.GOLDAPI_KEY || 'goldapi-5589532e7a043fc495f5b911ec81a37f-io';
+const GOLDAPI_KEY = process.env.GOLDAPI_KEY || 'goldapi-df8bb9137fadd82060b12b273ceae434-io';
 
 export async function GET() {
   try {

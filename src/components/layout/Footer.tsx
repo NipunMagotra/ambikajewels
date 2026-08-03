@@ -6,8 +6,8 @@ export default function Footer() {
   return (
     <footer className="bg-surface-container-lowest border-t border-outline-variant/30 py-12 sm:py-section-gap pb-28 lg:pb-section-gap">
       <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8 mb-10 sm:mb-section-gap">
-          <div className="col-span-1">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10 sm:mb-section-gap">
+          <div className="col-span-1 lg:col-span-1">
             <h2 className="font-headline-sm text-2xl text-primary mb-3 font-semibold">{siteConfig.name}</h2>
             <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mb-4 whitespace-pre-line leading-relaxed">
               {siteConfig.address.replace(', ', ',\n')}
@@ -47,9 +47,20 @@ export default function Footer() {
               <li><Link className="hover:text-primary transition-colors" href="/about">About Us (Estd 2021)</Link></li>
             </ul>
           </div>
+
+          <div className="col-span-1">
+            <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider text-amber-400">LEGAL & POLICIES</h3>
+            <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
+              <li><Link className="hover:text-primary transition-colors font-semibold" href="/contact">Contact Us</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/terms">Terms & Conditions</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/shipping-policy">Shipping Policy</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/refund-policy">Cancellation & Refund Policy</Link></li>
+            </ul>
+          </div>
           
           <div className="col-span-1">
-            <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">CONTACT US</h3>
+            <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">CONCIERGE</h3>
             <div className="flex flex-col gap-3">
               <WhatsAppButton />
               <CallButton />

@@ -90,8 +90,15 @@ export default function CheckoutPage() {
     setStep(2);
   };
 
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
+
   // Trigger Razorpay Payment Integration
   const handleRazorpayPayment = async () => {
+    if (!agreedToTerms) {
+      setErrorMessage('Please accept the Terms & Conditions, Shipping Policy, and Cancellation & Refund Policy to proceed with payment.');
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessage(null);
 
@@ -467,6 +474,24 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* Razorpay Compliance Checkbox */}
+                <div className="bg-background/80 border border-outline-variant/30 p-4 mb-6 rounded-xs">
+                  <label className="flex items-start gap-3 cursor-pointer">
+                    <input 
+                      type="checkbox"
+                      checked={agreedToTerms}
+                      onChange={e => {
+                        setAgreedToTerms(e.target.checked);
+                        if (e.target.checked) setErrorMessage(null);
+                      }}
+                      className="mt-0.5 accent-primary h-4 w-4 shrink-0 rounded cursor-pointer"
+                    />
+                    <span className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+                      I have read and agree to the <Link href="/terms" target="_blank" className="text-primary underline font-semibold">Terms & Conditions</Link>, <Link href="/shipping-policy" target="_blank" className="text-primary underline font-semibold">Shipping Policy</Link>, and <Link href="/refund-policy" target="_blank" className="text-primary underline font-semibold">Cancellation & Refund Policy</Link> of Ambika Jewels.
+                    </span>
+                  </label>
+                </div>
+
                 <div className="flex flex-col sm:flex-row justify-between items-center gap-3 mt-8 pt-4 border-t border-outline-variant/30">
                   <button onClick={() => setStep(1)} className="w-full sm:w-auto font-label-caps text-xs text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-1.5 py-2">
                     <span className="material-symbols-outlined text-sm">arrow_back</span> BACK TO FORM
@@ -474,8 +499,8 @@ export default function CheckoutPage() {
                   
                   <button 
                     onClick={handleRazorpayPayment}
-                    disabled={isSubmitting || !sdkLoaded}
-                    className="w-full sm:w-auto gold-bg-gradient px-8 py-3.5 font-label-caps text-xs font-bold hover:brightness-110 transition-all disabled:opacity-50 flex items-center justify-center gap-2 shadow-md tracking-wider"
+                    disabled={isSubmitting || !sdkLoaded || !agreedToTerms}
+                    className="w-full sm:w-auto gold-bg-gradient px-8 py-3.5 font-label-caps text-xs font-bold hover:brightness-110 transition-all disabled:opacity-40 disabled:cursor-not-allowed flex items-center justify-center gap-2 shadow-md tracking-wider"
                   >
                     <span className="material-symbols-outlined text-base">lock</span>
                     {isSubmitting ? 'PROCESSING PAYMENT...' : `PAY NOW (${formatPrice(finalTotal)})`}
