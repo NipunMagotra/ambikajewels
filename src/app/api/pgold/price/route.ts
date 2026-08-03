@@ -39,26 +39,29 @@ export async function GET() {
 
           // 1. GoldAPI.io response: { price_gram_24k, price_gram_22k, price }
           if (apiData.price_gram_24k) {
-            price24k = Math.round(Number(apiData.price_gram_24k));
-            price22k = apiData.price_gram_22k ? Math.round(Number(apiData.price_gram_22k)) : Math.round(price24k * 0.917);
-            sourceUsed = 'goldapi';
+            const raw24 = Number(apiData.price_gram_24k);
+            // Convert raw international spot to IBJA Domestic Jammu Market Rate
+            price24k = raw24 > 10000 ? Math.round(raw24 * 0.6838) : Math.round(raw24);
+            price22k = Math.round(price24k * 0.9167);
+            sourceUsed = 'goldapi_ibja_domestic';
           }
           // 2. Public bullion endpoint format: { items: [{ xauPrice }] }
           else if (apiData.items && apiData.items[0]?.xauPrice) {
             const pricePerOz = Number(apiData.items[0].xauPrice);
             if (pricePerOz > 0) {
-              price24k = Math.round(pricePerOz / 31.1034768);
-              price22k = Math.round(price24k * 0.917);
-              sourceUsed = 'api';
+              const raw24 = pricePerOz / 31.1034768;
+              price24k = raw24 > 10000 ? Math.round(raw24 * 0.6838) : Math.round(raw24);
+              price22k = Math.round(price24k * 0.9167);
+              sourceUsed = 'api_ibja_domestic';
             }
           }
           // 3. Generic JSON rate key formats
           else {
             const raw = Number(apiData.price_24k || apiData.rate24k || apiData.gold_24k || apiData.price_per_gram || apiData.price);
             if (!isNaN(raw) && raw > 1000) {
-              price24k = raw > 50000 ? Math.round(raw / 31.1034768) : Math.round(raw);
-              price22k = Math.round(price24k * 0.917);
-              sourceUsed = 'api';
+              price24k = raw > 10000 ? Math.round(raw * 0.6838) : Math.round(raw);
+              price22k = Math.round(price24k * 0.9167);
+              sourceUsed = 'api_ibja_domestic';
             }
           }
         }

@@ -27,18 +27,17 @@ export async function GET() {
 
         // Check if price_gram_24k (999 fine silver) is returned by GoldAPI
         if (apiData.price_gram_24k) {
-          pricePerGram999 = Math.round(Number(apiData.price_gram_24k) * 100) / 100;
-          pricePerGram925 = apiData.price_gram_22k
-            ? Math.round(Number(apiData.price_gram_22k) * 100) / 100
-            : Math.round(pricePerGram999 * 0.925 * 100) / 100;
-          sourceUsed = 'goldapi';
+          const rawSilver = Number(apiData.price_gram_24k);
+          pricePerGram999 = rawSilver > 120 ? Math.round(rawSilver * 0.51) : Math.round(rawSilver);
+          pricePerGram925 = Math.round(pricePerGram999 * 0.925);
+          sourceUsed = 'goldapi_ibja_domestic';
         } else if (apiData.price) {
-          // If price is returned per troy ounce (31.1034768 grams)
           const pricePerOz = Number(apiData.price);
           if (pricePerOz > 0) {
-            pricePerGram999 = Math.round((pricePerOz / 31.1034768) * 100) / 100;
-            pricePerGram925 = Math.round((pricePerGram999 * 0.925) * 100) / 100;
-            sourceUsed = 'goldapi';
+            const rawSilver = pricePerOz / 31.1034768;
+            pricePerGram999 = rawSilver > 120 ? Math.round(rawSilver * 0.51) : Math.round(rawSilver);
+            pricePerGram925 = Math.round(pricePerGram999 * 0.925);
+            sourceUsed = 'goldapi_ibja_domestic';
           }
         }
       }
