@@ -86,7 +86,7 @@ export default function Footer() {
               © {new Date().getFullYear()} AMBIKA JEWELS. ROOP NAGAR, JAMMU. <br/>HANDCRAFTED HERITAGE JEWELRY.
             </p>
             <div className="font-mono text-[10px] text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-bold self-start lg:self-auto">
-              v1.0.0
+              v1.0.1
             </div>
           </div>
         </div>
