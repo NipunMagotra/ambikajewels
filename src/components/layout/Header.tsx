@@ -100,11 +100,6 @@ export default function Header() {
           {/* Right: Actions */}
           <div className="flex items-center gap-4 lg:gap-5">
             <nav className="hidden lg:flex items-center gap-6 mr-2">
-              <Link href="/pgold" className="text-[11px] font-label-caps tracking-[0.2em] text-primary hover:text-primary/80 transition-colors font-bold flex items-center gap-1.5 px-2.5 py-1 rounded-xs bg-primary/10 border border-primary/40 shadow-sm">
-                <span className="material-symbols-outlined text-xs">show_chart</span>
-                <span>LIVE RATES</span>
-                <span className="bg-primary text-on-primary text-[8px] px-1 font-bold rounded-xs">GOLD & SILVER</span>
-              </Link>
               <Link href="/services" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
                 SERVICES
               </Link>
@@ -149,21 +144,6 @@ export default function Header() {
             style={{ top: '64px', maxHeight: 'calc(100dvh - 64px)' }}
           >
             <div className="flex flex-col gap-2 p-5 pb-4">
-              {/* Featured Live Rates Badge Button */}
-              <Link
-                href="/pgold"
-                onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-label-caps text-primary p-4 rounded-md bg-primary/15 border-2 border-primary/50 flex justify-between items-center font-bold shadow-lg"
-              >
-                <div className="flex items-center gap-2.5">
-                  <span className="material-symbols-outlined text-xl">show_chart</span>
-                  <span className="tracking-[0.15em]">LIVE RATES</span>
-                  <span className="bg-primary text-on-primary text-[9px] px-2 py-0.5 font-extrabold rounded tracking-wider">
-                    GOLD & SILVER
-                  </span>
-                </div>
-                <span className="material-symbols-outlined text-lg">arrow_forward</span>
-              </Link>
 
               <div className="font-label-caps text-[10px] text-primary tracking-[0.3em] font-semibold border-b border-outline-variant/20 pb-2 mt-2">
                 BROWSE ALL 13+ CATEGORIES

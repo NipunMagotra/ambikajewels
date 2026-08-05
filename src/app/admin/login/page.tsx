@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push('/admin/pgold');
+        router.push('/admin');
         router.refresh();
       } else {
         setError(data.message || 'Invalid admin passcode.');
