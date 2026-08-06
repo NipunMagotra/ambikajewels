@@ -166,3 +166,63 @@ CREATE TRIGGER orders_updated_at
   BEFORE UPDATE ON orders
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
+
+-- ============================================
+-- DAILY RATES TABLE (Jammu Gold & Silver Tracker)
+-- ============================================
+CREATE TABLE IF NOT EXISTS daily_rates (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  gold_24k NUMERIC NOT NULL DEFAULT 7850,
+  gold_22k NUMERIC NOT NULL DEFAULT 7190,
+  gold_18k NUMERIC NOT NULL DEFAULT 5888,
+  gold_14k NUMERIC NOT NULL DEFAULT 4592,
+  silver_999 NUMERIC NOT NULL DEFAULT 92,
+  silver_925 NUMERIC NOT NULL DEFAULT 85,
+  updated_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_by TEXT DEFAULT 'Shopkeeper'
+);
+
+ALTER TABLE daily_rates ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Daily rates are viewable by everyone"
+  ON daily_rates FOR SELECT
+  USING (true);
+
+CREATE POLICY "Daily rates are editable by anyone"
+  ON daily_rates FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+-- ============================================
+-- CUSTOMER SAVINGS GOALS TABLE
+-- ============================================
+CREATE TABLE IF NOT EXISTS customer_savings_goals (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  customer_name TEXT NOT NULL,
+  customer_phone TEXT NOT NULL,
+  event_name TEXT NOT NULL,
+  target_weight_grams NUMERIC DEFAULT 0,
+  target_amount_rupees NUMERIC DEFAULT 0,
+  target_purity TEXT DEFAULT '22K',
+  target_date DATE,
+  payments JSONB DEFAULT '[]'::jsonb,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+ALTER TABLE customer_savings_goals ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Savings goals are viewable by anyone"
+  ON customer_savings_goals FOR SELECT
+  USING (true);
+
+CREATE POLICY "Savings goals are editable by anyone"
+  ON customer_savings_goals FOR ALL
+  USING (true)
+  WITH CHECK (true);
+
+CREATE TRIGGER customer_savings_goals_updated_at
+  BEFORE UPDATE ON customer_savings_goals
+  FOR EACH ROW
+  EXECUTE FUNCTION update_updated_at();
+
