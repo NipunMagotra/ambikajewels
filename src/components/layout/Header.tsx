@@ -84,6 +84,9 @@ export default function Header() {
               <Link href="/collections?category=Necklaces %26 Chokers" className="text-[11px] font-label-caps tracking-[0.2em] text-amber-100 hover:text-primary transition-colors font-semibold">
                 NECKLACES
               </Link>
+              <Link href="/tools" className="text-[11px] font-label-caps tracking-[0.15em] text-primary hover:bg-primary/20 bg-primary/10 border border-primary/30 px-2.5 py-1 rounded transition-colors font-bold flex items-center gap-1">
+                <span className="material-symbols-outlined text-xs">calculate</span> COUNTER TOOLS
+              </Link>
             </nav>
           </div>
 
@@ -171,9 +174,20 @@ export default function Header() {
               ))}
 
               <Link
+                href="/tools"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-label-caps text-primary hover:text-primary/80 py-3 border-b border-outline-variant/15 flex justify-between items-center font-bold bg-primary/10 px-3 rounded-md my-1"
+              >
+                <span className="flex items-center gap-2">
+                  <span className="material-symbols-outlined text-sm">calculate</span>
+                  GOLDSMITH COUNTER & RATES
+                </span>
+                <span className="material-symbols-outlined text-sm">chevron_right</span>
+              </Link>
+              <Link
                 href="/services"
                 onClick={() => setMobileMenuOpen(false)}
-                className="text-sm font-label-caps text-primary hover:text-primary/80 py-3 border-b border-outline-variant/15 flex justify-between items-center font-bold mt-2"
+                className="text-sm font-label-caps text-primary hover:text-primary/80 py-3 border-b border-outline-variant/15 flex justify-between items-center font-bold"
               >
                 <span>SERVICES & GOLD EXCHANGE</span>
                 <span className="material-symbols-outlined text-sm">chevron_right</span>
