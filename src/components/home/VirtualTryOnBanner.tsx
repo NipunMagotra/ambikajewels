@@ -15,7 +15,7 @@ export default function VirtualTryOnBanner() {
         </div>
 
         <a
-          href="https://wa.me/919419100000?text=Namaste!%20I%20would%20like%20to%20schedule%20a%20virtual%20consultation."
+          href="https://wa.me/919086098457?text=Namaste!%20I%20would%20like%20to%20schedule%20a%20virtual%20consultation."
           target="_blank"
           rel="noopener noreferrer"
           className="w-full sm:w-auto border border-primary px-6 py-3.5 font-label-caps text-[10px] sm:text-[11px] text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 font-bold tracking-[0.2em] shrink-0 text-center"

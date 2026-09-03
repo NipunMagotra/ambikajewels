@@ -29,7 +29,7 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">POPULAR COLLECTIONS</h3>
             <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
-              <li><Link className="hover:text-primary transition-colors font-semibold text-primary" href="/collections?category=Dogra %26 Heritage Collection">Dogra Heritage Collection</Link></li>
+              <li><Link className="hover:text-primary transition-colors font-semibold text-primary" href="/collections?category=Dogra Heritage Collection">Dogra Heritage Collection</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/collections?category=Bridal Couture">Bridal Couture</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/collections?category=Diamond Jewelry">Certified Diamond Jewelry</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/collections?category=Silver Jewelry (925)">925 Silver Collection</Link></li>
@@ -40,8 +40,6 @@ export default function Footer() {
           <div className="col-span-1">
             <h3 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider">OUR SERVICES</h3>
             <ul className="flex flex-col gap-2 font-body-md text-xs sm:text-sm text-on-surface-variant">
-
-              <li><Link className="hover:text-primary transition-colors text-primary font-semibold" href="/tools">Goldsmith Counter & Rates</Link></li>
               <li><Link className="hover:text-primary transition-colors font-semibold text-primary" href="/services">Gold Exchange Program</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/services">Jewelry Customization</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/services">Old Gold Melting</Link></li>
@@ -82,13 +80,10 @@ export default function Footer() {
               title="Ambika Jewels Location Map - Roop Nagar, Jammu"
             />
           </div>
-          <div className="col-span-12 lg:col-span-4 flex flex-col items-center lg:items-end justify-between mt-2 lg:mt-0 gap-2">
+          <div className="col-span-12 lg:col-span-4 flex flex-col items-center lg:items-end justify-center mt-2 lg:mt-0 gap-2">
             <p className="font-body-md text-xs text-on-surface-variant/70 text-center lg:text-right leading-relaxed">
               © {new Date().getFullYear()} AMBIKA JEWELS. ROOP NAGAR, JAMMU. <br/>HANDCRAFTED HERITAGE JEWELRY.
             </p>
-            <div className="font-mono text-[10px] text-amber-400/80 bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30 font-bold self-start lg:self-auto">
-              v1.0.2
-            </div>
           </div>
         </div>
       </div>

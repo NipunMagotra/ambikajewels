@@ -24,6 +24,7 @@ export type CartItem = {
   quantity: number;
   image: string;
   metal_finish: string;
+  slug?: string;
 };
 
 export type Order = {

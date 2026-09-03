@@ -13,32 +13,32 @@ export default function CategoryGrid() {
       link: '/collections?category=Bridal Couture'
     },
     {
-      name: 'Necklaces & Chokers',
-      subtitle: 'Filigree & Vintage Gold',
-      image: 'https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80',
+      name: 'Dogra Heritage Collection',
+      subtitle: 'Authentic 22K Dogri Jhumkis & Namans',
+      image: '/products/heritage-ruby-haar.png',
       span: 'lg:col-span-4 h-[200px] sm:h-[240px]',
-      link: '/collections?category=Necklaces %26 Chokers'
+      link: '/collections?category=Dogra Heritage Collection'
     },
     {
-      name: 'Earrings & Jhumkas',
-      subtitle: 'Chandbalis & Temple Studs',
-      image: '/products/kundan-chandbali.png',
+      name: 'Certified Diamond Jewelry',
+      subtitle: 'Solitaires, Tennis Bracelets & Studs',
+      image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80',
       span: 'lg:col-span-4 h-[200px] sm:h-[240px]',
-      link: '/collections?category=Earrings %26 Jhumkas'
+      link: '/collections?category=Diamond Jewelry'
     },
     {
-      name: 'Temple & Antique Gold',
-      subtitle: 'Nakshi Carvings & Divine Idols',
-      image: '/products/temple-lakshmi.png',
-      span: 'lg:col-span-6 h-[200px] sm:h-[240px]',
-      link: '/collections?category=Temple %26 Antique Gold'
-    },
-    {
-      name: 'Bangles & Kadas',
-      subtitle: 'Meenakari & Solid Gold Kadas',
+      name: '925 Sterling Silver Collection',
+      subtitle: 'Traditional Payals & Oxidized Chokers',
       image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80',
       span: 'lg:col-span-6 h-[200px] sm:h-[240px]',
-      link: '/collections?category=Bangles %26 Kadas'
+      link: '/collections?category=Silver Jewelry (925)'
+    },
+    {
+      name: 'Gold Jewelry & Heirlooms',
+      subtitle: '22K & 14K Everyday Luxury & Chains',
+      image: '/products/minimalist-gold-chain.png',
+      span: 'lg:col-span-6 h-[200px] sm:h-[240px]',
+      link: '/collections?category=Gold Jewelry'
     }
   ];
 

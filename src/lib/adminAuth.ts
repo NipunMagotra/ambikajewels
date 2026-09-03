@@ -1,6 +1,6 @@
 import { cookies } from 'next/headers';
 
-const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || 'ambika2026';
+const ADMIN_PASSCODE = process.env.ADMIN_PASSCODE || '';
 const ADMIN_COOKIE_NAME = 'ambika_admin_session';
 const ADMIN_SESSION_SECRET = 'ambika_admin_secret_token_2026';
 

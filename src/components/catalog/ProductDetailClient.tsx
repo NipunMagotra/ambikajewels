@@ -26,7 +26,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         price: product.price,
         quantity: quantity,
         image: product.images[0],
-        metal_finish: selectedFinish
+        metal_finish: selectedFinish,
+        slug: product.slug
       }
     });
     
@@ -35,19 +36,42 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     }, 1000);
   };
 
+  const getPurityBadge = () => {
+    const badges = product.badges || [];
+    const name = product.name.toUpperCase();
+    const cat = product.category.toUpperCase();
+
+    if (badges.some(b => b.includes('22K')) || name.includes('22K')) return '22K BIS HALLMARKED';
+    if (badges.some(b => b.includes('18K')) || name.includes('18K')) {
+      return (badges.includes('CERTIFIED DIAMOND') || cat.includes('DIAMOND') || name.includes('DIAMOND'))
+        ? '18K CERTIFIED DIAMOND'
+        : '18K HALLMARKED GOLD';
+    }
+    if (badges.some(b => b.includes('14K')) || name.includes('14K')) return '14K HALLMARKED GOLD';
+    if (badges.some(b => b.includes('925')) || name.includes('925') || cat.includes('SILVER') || name.includes('SILVER')) return '925 STERLING SILVER';
+    if (badges.some(b => b.includes('9K')) || name.includes('9K')) return '9K SOLID GOLD';
+    if (badges.some(b => b.includes('BESPOKE'))) return 'BESPOKE CRAFTSMANSHIP';
+    return null;
+  };
+
+  const purityBadge = getPurityBadge();
+  const isSilver = product.category.toLowerCase().includes('silver') || product.name.toLowerCase().includes('silver');
+  const isDiamond = product.category.toLowerCase().includes('diamond') || product.name.toLowerCase().includes('diamond');
+  const bottomBadgeText = isSilver ? '925 HALLMARKED' : isDiamond ? 'CERTIFIED NATURAL DIAMOND' : '100% BIS HALLMARKED';
+
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-stack-lg lg:gap-margin-desktop">
-      {/* Image Gallery */}
-      <div className="flex flex-col-reverse lg:flex-row gap-3 sm:gap-4">
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
+      {/* Product Image Gallery */}
+      <div className="flex flex-col-reverse sm:flex-row gap-4">
         {/* Thumbnails */}
-        <div className="flex lg:flex-col gap-3 overflow-x-auto lg:overflow-x-hidden no-scrollbar pb-1 lg:pb-0">
-          {product.images.map((img, idx) => (
-            <button 
-              key={idx}
+        <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[500px] scrollbar-thin">
+          {product.images.map((img, i) => (
+            <button
+              key={i}
               onClick={() => setActiveImage(img)}
-              className={`w-16 h-20 sm:w-20 sm:h-24 lg:w-24 lg:h-28 shrink-0 bg-surface-container border ${
-                activeImage === img ? 'border-primary' : 'border-outline-variant/30'
-              } overflow-hidden transition-all rounded-xs`}
+              className={`w-16 h-16 sm:w-20 sm:h-20 bg-surface-container border transition-all shrink-0 rounded-xs overflow-hidden ${
+                activeImage === img ? 'border-primary ring-1 ring-primary' : 'border-outline-variant/40 hover:border-primary/50'
+              }`}
             >
               <div 
                 className="w-full h-full bg-cover bg-center" 
@@ -63,9 +87,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             className="w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105" 
             style={{ backgroundImage: `url('${activeImage || '/hero-clean.png'}')` }}
           />
-          <span className="absolute top-3 left-3 bg-background/85 text-primary font-label-caps text-[9px] px-2.5 py-1 font-semibold tracking-widest backdrop-blur-xs border border-primary/20">
-            22K BIS HALLMARKED
-          </span>
+          {purityBadge && (
+            <span className="absolute top-3 left-3 bg-background/85 text-primary font-label-caps text-[9px] px-2.5 py-1 font-semibold tracking-widest backdrop-blur-xs border border-primary/20">
+              {purityBadge}
+            </span>
+          )}
         </div>
       </div>
 
@@ -87,7 +113,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         
         <p className="font-headline-sm text-xl sm:text-2xl text-on-surface-variant mb-6 pb-4 border-b border-outline-variant/30 flex items-baseline gap-2">
           <span className="gold-text-gradient font-bold">{product.display_price}</span>
-          <span className="text-xs font-body-md text-on-surface-variant/60 font-normal">(Inclusive of all taxes)</span>
+          <span className="text-xs font-body-md text-on-surface-variant/70 font-normal">(Excl. 3% GST & shipping, calculated at checkout)</span>
         </p>
 
         <div className="mb-6">
@@ -167,7 +193,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         <div className="mt-6 flex items-center justify-around border border-outline-variant/30 p-3 bg-surface-container/30">
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-lg">verified</span>
-            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">100% HALLMARKED</span>
+            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">{bottomBadgeText}</span>
           </div>
           <div className="w-[1px] h-6 bg-outline-variant/40"></div>
           <div className="flex items-center gap-2">

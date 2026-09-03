@@ -1,7 +1,5 @@
-'use client';
-
-import AdminCounterDashboardPage from '@/app/admin/counter/page';
+import { redirect } from 'next/navigation';
 
 export default function ToolsAliasPage() {
-  return <AdminCounterDashboardPage />;
+  redirect('/admin/counter');
 }

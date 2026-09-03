@@ -31,7 +31,7 @@ export default function PrivacyPolicyPage() {
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">1. Information We Collect</h2>
                 <p className="mb-3">
-                  At <strong>Ambika Jewels</strong>, we respect your privacy and are committed to protecting the personal data you share with us. We collect information when you place an order, register for P-Gold, interact with our AI Jewelry Assistant (Aanya), or request a 3D CAD design preview:
+                  At <strong>Ambika Jewels</strong>, we respect your privacy and are committed to protecting the personal data you share with us. We collect information when you place an order, contact our concierge, interact with our AI Jewelry Concierge (Aanya), or request a 3D CAD design preview:
                 </p>
                 <ul className="list-disc pl-5 space-y-1.5">
                   <li><strong>Personal Identifiers</strong>: Name, Email Address, Phone Number, Shipping Address, Pincode.</li>
@@ -66,7 +66,7 @@ export default function PrivacyPolicyPage() {
                 <ul className="list-disc pl-5 space-y-1.5">
                   <li><strong>Shiprocket & Courier Partners</strong>: Name, phone number, and delivery address to facilitate insured shipping dispatches across India.</li>
                   <li><strong>Razorpay Gateway</strong>: Order details and total payable amount for payment verification.</li>
-                  <li><strong>Supabase Database</strong>: Encrypted database hosting for order persistence and P-Gold ledger accounts.</li>
+                  <li><strong>Supabase Database</strong>: Encrypted cloud database hosting for customer order persistence and order transaction histories.</li>
                 </ul>
               </section>
 

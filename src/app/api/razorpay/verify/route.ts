@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+
 interface GuestCustomerInfo {
   first_name: string;
   last_name: string;
@@ -48,8 +50,8 @@ export async function POST(request: Request) {
     // 1. Signature Verification
     let isSignatureValid = false;
 
-    if (is_mock) {
-      console.warn('Mock payment verification accepted for testing.');
+    if (is_mock && process.env.NODE_ENV !== 'production' && !key_secret) {
+      console.warn('Mock payment verification accepted for local testing in development.');
       isSignatureValid = true;
     } else if (key_secret && razorpay_order_id && razorpay_payment_id && razorpay_signature) {
       const generatedSignature = crypto
@@ -170,6 +172,27 @@ export async function POST(request: Request) {
     // 3. Graceful Fallback Handling (Simulate Admin Alert if Shiprocket creation failed)
     if (shiprocketStatus !== 'created' && shiprocketStatus !== 'skipped_no_credentials') {
       console.warn(`[ADMIN ALERT SIMULATION] Payment ${razorpay_payment_id} succeeded, but Shiprocket shipping order creation failed (${shiprocketStatus}): ${shiprocketError}. Customer: ${customer_info.first_name} ${customer_info.last_name} (${customer_info.phone}).`);
+    }
+
+    // 3. Persist Order in Supabase Database if configured
+    if (isSupabaseConfigured) {
+      try {
+        await supabase.from('orders').insert({
+          id: orderNumber,
+          customer_name: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
+          email: customer_info.email,
+          phone: customer_info.phone,
+          shipping_address: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
+          total: total_amount,
+          items: items,
+          payment_id: razorpay_payment_id,
+          status: 'paid',
+          shiprocket_status: shiprocketStatus,
+          shiprocket_order_id: shiprocketOrderId
+        });
+      } catch (dbErr) {
+        console.error('Error persisting verified order to Supabase:', dbErr);
+      }
     }
 
     return NextResponse.json({

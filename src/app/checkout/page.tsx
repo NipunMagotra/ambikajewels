@@ -464,9 +464,13 @@ export default function CheckoutPage() {
                       <span>{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   ))}
-                  <div className="flex justify-between font-body-md text-xs sm:text-sm text-on-surface-variant mb-3 pt-2 pb-3 border-t border-b border-outline-variant/20">
-                    <span>GST (3%) & Insured Delivery</span>
-                    <span>{formatPrice(tax + shipping)}</span>
+                  <div className="flex justify-between font-body-md text-xs sm:text-sm text-on-surface-variant mb-1.5 pt-2 border-t border-outline-variant/20">
+                    <span>GST (3% Statutory Precious Metal Tax)</span>
+                    <span>{formatPrice(tax)}</span>
+                  </div>
+                  <div className="flex justify-between font-body-md text-xs sm:text-sm text-on-surface-variant mb-3 pb-3 border-b border-outline-variant/20">
+                    <span>Insured Express Transit {isFreeShipping ? '(Free above ₹50,000)' : ''}</span>
+                    <span className={isFreeShipping ? 'text-primary font-semibold' : ''}>{isFreeShipping ? 'FREE' : formatPrice(shipping)}</span>
                   </div>
                   <div className="flex justify-between font-headline-sm text-base sm:text-lg text-primary font-bold">
                     <span>Total Payable Amount</span>

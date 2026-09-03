@@ -59,7 +59,7 @@ export default function RefundPolicyPage() {
                 <ul className="list-disc pl-5 space-y-1.5">
                   <li><strong>Bespoke 3D CAD Custom Orders</strong>: Custom jewelry crafted specifically from user sketches or personalized photo submissions.</li>
                   <li><strong>Engraved & Resized Items</strong>: Rings or bangles that have undergone personalized size modification or custom text engraving.</li>
-                  <li><strong>Digital Gold (Ambika P-Gold)</strong>: P-Gold purchases are backed by 24K vault gold and can be redeemed for physical gold jewelry at 100% valuation at our showroom, but cannot be cancelled for cash once bullion is allocated.</li>
+                  <li><strong>Gold Bullion & Coins</strong>: Precious bullion, gold coins, and custom raw metal allocations cannot be returned or cancelled for cash once allocated for fabrication.</li>
                 </ul>
               </section>
 

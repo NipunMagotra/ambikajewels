@@ -58,7 +58,7 @@ export default function AdminLoginPage() {
             ADMINISTRATOR PORTAL
           </div>
           <p className="text-xs text-on-surface-variant/80 mt-2">
-            Enter the admin passcode to access P-Gold management & store settings.
+            Enter the authorized admin passcode to access store operations & counter tools.
           </p>
         </div>
 
@@ -87,9 +87,6 @@ export default function AdminLoginPage() {
                 lock
               </span>
             </div>
-            <p className="text-[10px] text-on-surface-variant/50 mt-1">
-              Default passcode: <code className="text-primary font-mono font-semibold">ambika2026</code>
-            </p>
           </div>
 
           <button

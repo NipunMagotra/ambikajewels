@@ -8,6 +8,7 @@ import MandalaDivider from '@/components/ui/MandalaDivider';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
 import { getCartWhatsAppUrl } from '@/utils/whatsapp';
+import { mockProducts } from '@/data/mockProducts';
 
 export default function CartPage() {
   const { state, dispatch, cartTotal } = useCart();
@@ -64,7 +65,7 @@ export default function CartPage() {
                       <div className="flex justify-between items-start gap-2">
                         <div>
                           <h3 className="font-headline-sm text-sm sm:text-base lg:text-headline-sm text-on-surface hover:text-primary transition-colors line-clamp-2">
-                            <Link href={`/collections/${item.product_id}`}>{item.name}</Link>
+                            <Link href={`/collections/${item.slug || mockProducts.find(p => p.id === item.product_id)?.slug || item.product_id}`}>{item.name}</Link>
                           </h3>
                           <p className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mt-1">FINISH: {item.metal_finish.toUpperCase()}</p>
                         </div>

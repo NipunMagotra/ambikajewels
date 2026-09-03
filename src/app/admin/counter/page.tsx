@@ -7,16 +7,38 @@ import { RateTickerHeader } from '@/components/counter/RateTickerHeader';
 import { DailyRateTracker } from '@/components/counter/DailyRateTracker';
 import { BillingCalculator } from '@/components/counter/BillingCalculator';
 import { SavingsGoalTracker } from '@/components/counter/SavingsGoalTracker';
+import { useRouter } from 'next/navigation';
 import { Flame, Calculator, PiggyBank, Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function AdminCounterDashboardPage() {
+  const router = useRouter();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
   const [rates, setRates] = useState<DailyRates>(DEFAULT_RATES);
   const [activeTab, setActiveTab] = useState<'rates' | 'calculator' | 'goals'>('calculator');
   const [isLoadingRates, setIsLoadingRates] = useState(true);
 
   useEffect(() => {
-    loadLatestRates();
-  }, []);
+    let isMounted = true;
+    fetch('/api/admin/check-auth')
+      .then((res) => res.json())
+      .then((data) => {
+        if (!isMounted) return;
+        if (!data.authenticated) {
+          router.replace('/admin/login');
+        } else {
+          setIsAuthenticated(true);
+          loadLatestRates();
+        }
+      })
+      .catch(() => {
+        if (isMounted) {
+          router.replace('/admin/login');
+        }
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, [router]);
 
   const loadLatestRates = async () => {
     setIsLoadingRates(true);
@@ -33,6 +55,15 @@ export default function AdminCounterDashboardPage() {
   const handleRatesUpdated = (newRates: DailyRates) => {
     setRates(newRates);
   };
+
+  if (isAuthenticated === null) {
+    return (
+      <div className="min-h-screen bg-background flex flex-col items-center justify-center gap-3">
+        <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+        <p className="font-label-caps text-xs text-on-surface-variant tracking-widest">VERIFYING ADMIN ACCESS...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background text-on-background pb-16 pt-20">

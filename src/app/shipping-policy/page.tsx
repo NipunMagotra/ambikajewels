@@ -53,8 +53,8 @@ export default function ShippingPolicyPage() {
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">2. Shipping Charges & Free Delivery Threshold</h2>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li><strong>Free Insured Shipping</strong>: Offered on all orders exceeding <strong>₹5,000</strong>.</li>
-                  <li><strong>Standard Shipping Fee</strong>: A nominal flat rate of <strong>₹150</strong> is applied for orders below ₹5,000.</li>
+                  <li><strong>Free Insured Shipping</strong>: Complimentary 100% transit-insured express delivery is offered on all orders of <strong>₹50,000</strong> and above across India.</li>
+                  <li><strong>Standard Insured Shipping Fee</strong>: A flat rate of <strong>₹500</strong> is applied for orders below ₹50,000 to cover specialized precious-cargo security packaging and transit insurance.</li>
                 </ul>
               </section>
 

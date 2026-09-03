@@ -22,8 +22,12 @@ export async function generateMetadata({
   if (isSupabaseConfigured) {
     const { data } = await supabase.from('products').select('name, description').eq('slug', slug).single();
     if (data) prod = data;
+    if (!prod) {
+      const { data: dataById } = await supabase.from('products').select('name, description').eq('id', slug).single();
+      if (dataById) prod = dataById;
+    }
   }
-  if (!prod) prod = mockProducts.find(p => p.slug === slug);
+  if (!prod) prod = mockProducts.find(p => p.slug === slug || p.id === slug);
   
   if (!prod) return { title: 'Product Not Found' };
   
@@ -48,10 +52,18 @@ export default async function ProductPage({
       .eq('slug', slug)
       .single();
     if (dbProduct) product = dbProduct as Product;
+    if (!product) {
+      const { data: dbById } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', slug)
+        .single();
+      if (dbById) product = dbById as Product;
+    }
   }
 
   if (!product) {
-    product = mockProducts.find(p => p.slug === slug);
+    product = mockProducts.find(p => p.slug === slug || p.id === slug);
   }
 
   if (!product) {

@@ -51,7 +51,7 @@ export default function TermsPage() {
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">3. Pricing & Currency</h2>
                 <p>
-                  All prices listed on our website are in <strong>Indian Rupees (INR - ₹)</strong> and are inclusive of applicable Goods and Services Tax (GST - 3% on fine gold/silver jewelry) unless specified otherwise. Daily gold and silver rate fluctuations may cause online price updates. Orders once placed and confirmed with payment lock the rate at the time of purchase.
+                  All prices listed on our website are in <strong>Indian Rupees (INR - ₹)</strong>. Applicable statutory Goods and Services Tax (GST - 3% on fine precious jewelry) and express transit insurance fees are calculated and itemized during checkout prior to payment. Daily precious metal rate fluctuations may cause catalog price updates. Orders once placed and confirmed with payment lock the rate at the time of purchase.
                 </p>
               </section>
 
@@ -70,9 +70,9 @@ export default function TermsPage() {
               </section>
 
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">6. Ambika P-Gold Accumulation Program</h2>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">6. Ambika In-Store Gold Services</h2>
                 <p>
-                  Digital gold accumulated through our P-Gold portal represents 24K (999 Pure) physical gold held in secured custody. P-Gold can be redeemed at 100% valuation for physical jewelry or coins at our Jammu showroom.
+                  Ambika Jewels provides in-showroom gold exchange, old gold melting, and custom bridal trousseau booking at our Lower Roop Nagar, Jammu boutique. Advance bookings and custom gold crafting are fulfilled strictly with physical hallmarked gold in compliance with applicable Indian statutory regulations.
                 </p>
               </section>
 

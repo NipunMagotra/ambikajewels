@@ -45,7 +45,38 @@ export default async function CollectionsPage({
       filtered = filtered.filter(p => {
         const pCat = p.category.toLowerCase();
         const pColl = p.collection.toLowerCase();
-        return pCat === catLower || pColl === catLower || pCat.includes(catLower) || catLower.includes(pCat);
+        const pName = p.name.toLowerCase();
+        const pDesc = p.description.toLowerCase();
+        const pBadges = (p.badges || []).join(' ').toLowerCase();
+
+        // 1. Direct category or collection match
+        if (pCat === catLower || pColl === catLower || pCat.includes(catLower) || catLower.includes(pCat)) {
+          return true;
+        }
+
+        // 2. Intelligent category keyword fallback
+        if (catLower.includes('necklace') || catLower.includes('choker')) {
+          return pName.includes('necklace') || pName.includes('choker') || pName.includes('haar') || pName.includes('naman') || pName.includes('chain');
+        }
+        if (catLower.includes('earring') || catLower.includes('jhumka')) {
+          return pName.includes('jhumki') || pName.includes('stud') || pName.includes('earring') || pName.includes('chandbali');
+        }
+        if (catLower.includes('bangle') || catLower.includes('kada') || catLower.includes('bracelet')) {
+          return pName.includes('kada') || pName.includes('bracelet') || pName.includes('bangle') || pName.includes('haathphool');
+        }
+        if (catLower.includes('ring') || catLower.includes('solitaire')) {
+          return pName.includes('ring') || pName.includes('solitaire');
+        }
+        if (catLower.includes('temple') || catLower.includes('antique')) {
+          return pName.includes('temple') || pName.includes('naman') || pName.includes('antique') || pDesc.includes('traditional');
+        }
+        if (catLower.includes('everyday') || catLower.includes('daily') || catLower.includes('lightweight')) {
+          return pDesc.includes('daily') || pDesc.includes('everyday') || pDesc.includes('lightweight') || pName.includes('daily');
+        }
+        if (catLower.includes('custom') || catLower.includes('bespoke')) {
+          return pBadges.includes('bespoke') || pName.includes('bespoke') || pName.includes('custom');
+        }
+        return false;
       });
     }
     if (sort === 'price_asc') {
@@ -76,8 +107,23 @@ export default async function CollectionsPage({
                 <ProductCard key={product.id} product={product} />
               ))
             ) : (
-              <div className="col-span-full py-20 sm:py-32 text-center text-on-surface-variant font-body-lg">
-                No pieces found in this collection currently.
+              <div className="col-span-full py-16 sm:py-24 text-center px-4 max-w-md mx-auto">
+                <span className="material-symbols-outlined text-4xl text-primary mb-3 block">diamond</span>
+                <h3 className="font-headline-sm text-lg sm:text-xl text-on-surface mb-2 font-semibold">
+                  Bespoke Jewelry On Order
+                </h3>
+                <p className="text-xs sm:text-sm text-on-surface-variant mb-6 leading-relaxed">
+                  Looking for a custom design in this collection? Our master Dogra karigars craft bespoke pieces in 22K/18K/14K gold and 925 silver at our Jammu showroom.
+                </p>
+                <a
+                  href="https://wa.me/919086098457?text=Namaste!%20I%20am%20interested%20in%20a%20custom%20piece%20from%20Ambika%20Jewels."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-2 border border-primary px-6 py-3 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all font-bold tracking-widest"
+                >
+                  <span className="material-symbols-outlined text-sm">chat_bubble</span>
+                  INQUIRE ON WHATSAPP
+                </a>
               </div>
             )}
           </div>
