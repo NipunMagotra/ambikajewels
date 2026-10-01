@@ -1,92 +1,51 @@
 import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
-import { mockProducts } from '@/data/mockProducts';
-import { siteConfig } from '@/config/siteConfig';
-
-// In-memory rate limiting against order creation bot abuse: max 10 requests per 5 minutes per IP
-interface OrderCreateLimitRecord {
-  count: number;
-  resetTime: number;
-}
-const orderRateLimits = new Map<string, OrderCreateLimitRecord>();
-
-function checkOrderRateLimit(ip: string): boolean {
-  const now = Date.now();
-  const record = orderRateLimits.get(ip);
-
-  if (!record || now > record.resetTime) {
-    orderRateLimits.set(ip, { count: 1, resetTime: now + 5 * 60 * 1000 });
-    return true;
-  }
-
-  if (record.count >= 10) {
-    return false;
-  }
-
-  record.count += 1;
-  return true;
-}
+import { checkRateLimit } from '@/lib/rateLimit';
+import { calculateOrderPricingServer } from '@/lib/serverPricing';
 
 export async function POST(request: Request) {
   try {
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
 
-    // 1. Bot & Abuse Rate Limiting
-    if (!checkOrderRateLimit(ip)) {
+    // 1. Shared Upstash Redis Rate Limiting (10 requests per 5 minutes)
+    const rateCheck = await checkRateLimit('createOrder', ip);
+    if (!rateCheck.success) {
       return NextResponse.json(
         { success: false, error: 'Too many order requests. Please wait a few minutes before trying again.' },
         { status: 429 }
       );
     }
 
-    const body = await request.json();
-    const { amount, items, notes } = body;
+    const body = await request.json().catch(() => ({}));
+    const { items, notes } = body;
 
-    if (!amount || typeof amount !== 'number' || amount <= 0) {
+    if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(
-        { success: false, error: 'Invalid order amount' },
+        { success: false, error: 'Order must contain at least one item.' },
         { status: 400 }
       );
     }
 
-    // 2. Server-Side Price Verification (Prevent Client-Side Price Tampering Exploits)
-    let validatedAmount = Math.round(amount);
-
-    if (Array.isArray(items) && items.length > 0) {
-      let calculatedSubtotal = 0;
-
-      for (const item of items) {
-        const productId = item.product_id || item.id;
-        const catalogItem = mockProducts.find(p => p.id === productId);
-
-        const unitPrice = catalogItem ? catalogItem.price : item.price;
-        const qty = typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : 1;
-        calculatedSubtotal += unitPrice * qty;
-      }
-
-      const calculatedTax = Math.round(calculatedSubtotal * siteConfig.tax.gstRate);
-      const calculatedShipping = calculatedSubtotal >= siteConfig.shipping.freeThreshold ? 0 : siteConfig.shipping.flatRate;
-      const calculatedTotal = calculatedSubtotal + calculatedTax + calculatedShipping;
-
-      // Check for price tampering (allowing minor INR 1 rounding variance)
-      if (Math.abs(calculatedTotal - amount) > 100) {
-        console.warn(`[SECURITY ALERT] Price tampering attempt detected from IP ${ip}! Client submitted: ${amount}, Calculated catalog total: ${calculatedTotal}`);
-        return NextResponse.json(
-          {
-            success: false,
-            error: 'Price mismatch detected. Order amount does not match verified catalog prices.'
-          },
-          { status: 400 }
-        );
-      }
-
-      validatedAmount = calculatedTotal;
+    // 2. Authoritative Server-Side Price Verification (Rejects Unknown Products, Enforces Integer Qty >= 1)
+    let validatedPricing;
+    try {
+      validatedPricing = await calculateOrderPricingServer(items);
+    } catch (pricingErr: unknown) {
+      const errMsg = pricingErr instanceof Error ? pricingErr.message : 'Price calculation failed.';
+      console.warn(`[SECURITY ALERT] Invalid order rejected from IP ${ip}: ${errMsg}`);
+      return NextResponse.json(
+        { success: false, error: errMsg },
+        { status: 400 }
+      );
     }
+
+    const validatedAmount = validatedPricing.total_paise;
 
     // 3. Sanitize notes: Never store raw customer PAN or sensitive auth data in payment gateway notes
     const sanitizedNotes: Record<string, string> = {
       store: 'Ambika Jewels Checkout',
+      item_count: String(validatedPricing.items.length),
       ...(notes || {})
     };
     delete sanitizedNotes.pan_number;
@@ -137,10 +96,11 @@ export async function POST(request: Request) {
       currency: order.currency,
       key: key_id
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : 'Failed to create Razorpay order';
     console.error('Razorpay Create Order Error:', error);
     return NextResponse.json(
-      { success: false, error: error?.message || 'Failed to create Razorpay order' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }

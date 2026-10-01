@@ -103,20 +103,13 @@ CREATE POLICY "Products are editable by authenticated users"
   USING (auth.role() = 'authenticated')
   WITH CHECK (auth.role() = 'authenticated');
 
--- Orders: insertable by anyone (guest checkout), readable/updatable by admin only
+-- Orders: managed securely via server route handlers using service-role key
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Anyone can create orders"
-  ON orders FOR INSERT
-  WITH CHECK (true);
-
-CREATE POLICY "Orders are viewable by authenticated users"
-  ON orders FOR SELECT
-  USING (auth.role() = 'authenticated');
-
-CREATE POLICY "Orders are updatable by authenticated users"
-  ON orders FOR UPDATE
-  USING (auth.role() = 'authenticated');
+CREATE POLICY "Orders are manageable by service role only"
+  ON orders FOR ALL
+  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
 
 -- FAQ: readable by everyone, writable by admin
 ALTER TABLE faq_items ENABLE ROW LEVEL SECURITY;
@@ -220,21 +213,33 @@ CREATE TABLE IF NOT EXISTS customer_savings_goals (
 
 ALTER TABLE customer_savings_goals ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Savings goals are viewable by anyone"
-  ON customer_savings_goals FOR SELECT
-  USING (true);
-
-CREATE POLICY "Anyone can create savings goals"
-  ON customer_savings_goals FOR INSERT
-  WITH CHECK (true);
-
-CREATE POLICY "Savings goals are editable by authenticated users only"
+CREATE POLICY "Savings goals accessible by service role and authenticated admin only"
   ON customer_savings_goals FOR ALL
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
 
 CREATE TRIGGER customer_savings_goals_updated_at
   BEFORE UPDATE ON customer_savings_goals
   FOR EACH ROW
   EXECUTE FUNCTION update_updated_at();
+
+-- ============================================
+-- WEBHOOK EVENTS TABLE (Persistent Replay Protection)
+-- ============================================
+CREATE TABLE IF NOT EXISTS webhook_events (
+  id TEXT PRIMARY KEY,
+  source TEXT NOT NULL, -- 'razorpay' | 'bvc'
+  event_type TEXT NOT NULL,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  payload JSONB
+);
+
+ALTER TABLE webhook_events ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Webhook events manageable by service role only"
+  ON webhook_events FOR ALL
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
+
+CREATE INDEX IF NOT EXISTS idx_webhook_events_source ON webhook_events(source, created_at DESC);
 

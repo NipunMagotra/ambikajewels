@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com;
-  connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://*.upstash.io https://api.resend.com https://*.supabase.co https://apiv2.shiprocket.in https://api.goldapi.io;
+  connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://*.upstash.io https://api.resend.com https://*.supabase.co https://api.bvclogistics.com https://*.bvclogistics.com https://apiv2.shiprocket.in https://api.goldapi.io;
   frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com;
   img-src 'self' data: blob: https://*.razorpay.com https://images.unsplash.com https://plus.unsplash.com https://lh3.googleusercontent.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;

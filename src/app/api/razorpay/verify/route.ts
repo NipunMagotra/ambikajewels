@@ -4,7 +4,8 @@ import crypto from 'crypto';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { encryptSensitiveData, generateOrderAccessToken } from '@/lib/encryption';
-import { sendOrderConfirmationEmail, sendAdminShiprocketFailureAlert } from '@/lib/email';
+import { sendOrderConfirmationEmail, sendAdminBvcFailureAlert } from '@/lib/email';
+import { createBvcShipment } from '@/lib/bvcLogistics';
 
 interface GuestCustomerInfo {
   first_name: string;
@@ -36,7 +37,7 @@ interface CartItem {
 
 // In-memory idempotency cache to protect against rapid concurrent verify / webhook hits
 interface CachedPaymentVerification {
-  response: any;
+  response: Record<string, unknown>;
   timestamp: number;
 }
 const processedPayments = new Map<string, CachedPaymentVerification>();
@@ -150,130 +151,55 @@ export async function POST(request: Request) {
     }
 
     const orderNumber = `AMB-${Math.floor(100000 + Math.random() * 900000)}`;
-    let shiprocketStatus = 'pending';
-    let shiprocketOrderId = null;
-    let shiprocketError = null;
 
     // 3. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
     const encryptedPan = customer_info?.pan_number
       ? encryptSensitiveData(customer_info.pan_number)
       : null;
 
-    // 4. Authenticate & Create Shipment in Shiprocket
-    const shiprocketEmail = process.env.SHIPROCKET_EMAIL;
-    const shiprocketPassword = process.env.SHIPROCKET_PASSWORD;
+    // 4. Authenticate & Create Secured Shipment in BVC Logistics eSHIP API (Precious Cargo, HSN 7113)
+    let bvcStatus = 'pending';
+    let bvcDocketNumber: string | null = null;
+    let bvcShipmentId: string | null = null;
+    let bvcSecurityBag: string | null = null;
+    let bvcError: string | null = null;
 
-    if (shiprocketEmail && shiprocketPassword) {
-      try {
-        const authRes = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            email: shiprocketEmail,
-            password: shiprocketPassword,
-          }),
-        });
+    try {
+      const bvcResult = await createBvcShipment({
+        orderNumber,
+        customer: customer_info,
+        items: (items || []).map((it) => ({
+          name: it.name,
+          product_id: it.product_id,
+          sku: it.product_id || it.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase(),
+          quantity: it.quantity,
+          price: it.price,
+          weight_grams: it.weight_grams,
+          dimensions: it.dimensions
+        })),
+        totalAmountPaise: total_amount,
+        razorpayPaymentId: razorpay_payment_id,
+        razorpayOrderId: razorpay_order_id
+      });
 
-        const authData = await authRes.json();
+      bvcStatus = bvcResult.status;
+      bvcDocketNumber = bvcResult.docketNumber;
+      bvcShipmentId = bvcResult.shipmentId;
+      bvcSecurityBag = bvcResult.securityBagNumber;
+      bvcError = bvcResult.errorMessage || null;
 
-        if (authRes.ok && authData.token) {
-          const token = authData.token;
-
-          // Calculate real parcel weight and dimensions from verified items
-          let totalNetWeightGrams = 0;
-          let maxL = 12;
-          let maxB = 12;
-          let maxH = 6;
-
-          for (const item of (items || [])) {
-            const w = item.weight_grams || 25;
-            totalNetWeightGrams += w * (item.quantity || 1);
-            if (item.dimensions) {
-              if (item.dimensions.length_cm > maxL) maxL = Math.ceil(item.dimensions.length_cm + 2);
-              if (item.dimensions.breadth_cm > maxB) maxB = Math.ceil(item.dimensions.breadth_cm + 2);
-              if (item.dimensions.height_cm > maxH) maxH = Math.ceil(item.dimensions.height_cm + 2);
-            }
-          }
-
-          // Add tamper-evident luxury jewelry security packaging weight (approx 200g)
-          const finalPackageWeightKg = Math.max(0.3, Math.round(((totalNetWeightGrams + 200) / 1000) * 100) / 100);
-
-          const currentDateStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
-          const shiprocketPayload = {
-            order_id: orderNumber,
-            order_date: currentDateStr,
-            pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
-            // Safe comment with zero raw PAN disclosure
-            comment: customer_info.notes || 'Ambika Jewels Fine Jewelry Order',
-            billing_customer_name: customer_info.first_name,
-            billing_last_name: customer_info.last_name || customer_info.first_name,
-            billing_address: customer_info.address,
-            billing_address_2: '',
-            billing_city: customer_info.city,
-            billing_pincode: customer_info.pincode,
-            billing_state: customer_info.state,
-            billing_country: 'India',
-            billing_email: customer_info.email,
-            billing_phone: customer_info.phone,
-            shipping_is_billing: true,
-            order_items: (items || []).map((item) => ({
-              name: item.name,
-              sku: item.product_id || item.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase(),
-              units: item.quantity,
-              selling_price: Math.round(item.price / 100),
-              discount: 0,
-              tax: 0,
-              hsn: 7113
-            })),
-            payment_method: 'Prepaid',
-            shipping_charges: 0,
-            giftwrap_charges: 0,
-            transaction_charges: 0,
-            total_discount: 0,
-            sub_total: Math.round(total_amount / 100),
-            length: maxL,
-            breadth: maxB,
-            height: maxH,
-            weight: finalPackageWeightKg
-          };
-
-          const orderRes = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-              'Authorization': `Bearer ${token}`
-            },
-            body: JSON.stringify(shiprocketPayload),
-          });
-
-          const orderData = await orderRes.json();
-
-          if (orderRes.ok && orderData.order_id) {
-            shiprocketStatus = 'created';
-            shiprocketOrderId = orderData.order_id;
-          } else {
-            console.error('Shiprocket Order Creation Error:', orderData);
-            shiprocketStatus = 'failed';
-            shiprocketError = orderData.message || JSON.stringify(orderData);
-          }
-        } else {
-          console.error('Shiprocket Auth Error:', authData);
-          shiprocketStatus = 'auth_failed';
-          shiprocketError = authData.message || 'Authentication failed';
-        }
-      } catch (srErr: any) {
-        console.error('Shiprocket Exception:', srErr);
-        shiprocketStatus = 'exception';
-        shiprocketError = srErr?.message || 'Network exception';
+      if (!bvcResult.success && bvcStatus === 'failed') {
+        console.error('[BVC SHIPMENT FAILED]', { orderNumber, error: bvcError });
       }
-    } else {
-      console.warn('Shiprocket credentials not provided in environment variables. Simulating order processing.');
-      shiprocketStatus = 'skipped_no_credentials';
+    } catch (bvcErr: unknown) {
+      console.error('[BVC LOGISTICS UNCAUGHT EXCEPTION]', bvcErr);
+      bvcStatus = 'exception';
+      bvcError = bvcErr instanceof Error ? bvcErr.message : 'Unexpected exception during BVC shipment dispatch';
     }
 
-    // Trigger Admin Email Alert if Shiprocket Order Creation Failed (Item 6)
-    if (shiprocketStatus !== 'created') {
-      sendAdminShiprocketFailureAlert({
+    // Trigger Admin Email Alert if BVC Consignment Creation Failed
+    if (bvcStatus === 'failed' || bvcStatus === 'exception') {
+      sendAdminBvcFailureAlert({
         orderNumber,
         razorpayPaymentId: razorpay_payment_id,
         razorpayOrderId: razorpay_order_id,
@@ -286,9 +212,10 @@ export async function POST(request: Request) {
           quantity: it.quantity,
           price: it.price
         })),
-        errorMessage: shiprocketError || `Shiprocket shipment creation was not completed (status: ${shiprocketStatus})`
+        errorMessage: bvcError || `BVC shipment booking was not completed (status: ${bvcStatus})`,
+        securityBagNumber: bvcSecurityBag || undefined
       }).catch((alertErr) => {
-        console.error('Failed to dispatch Shiprocket failure alert to admin:', alertErr);
+        console.error('Failed to dispatch BVC failure alert to admin:', alertErr);
       });
     }
 
@@ -314,8 +241,13 @@ export async function POST(request: Request) {
           payment_id: razorpay_payment_id,
           razorpay_payment_id: razorpay_payment_id,
           razorpay_order_id: razorpay_order_id,
-          shiprocket_status: shiprocketStatus,
-          shiprocket_order_id: shiprocketOrderId ? String(shiprocketOrderId) : null,
+          bvc_status: bvcStatus,
+          bvc_docket_number: bvcDocketNumber,
+          bvc_shipment_id: bvcShipmentId,
+          bvc_security_bag_number: bvcSecurityBag,
+          shiprocket_status: bvcStatus,
+          shiprocket_order_id: bvcDocketNumber ? String(bvcDocketNumber) : null,
+          shiprocket_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
           notes: customer_info.notes || ''
         }, {
           onConflict: 'razorpay_payment_id',
@@ -349,20 +281,27 @@ export async function POST(request: Request) {
       total: total_amount,
       shippingAddress: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
       paymentId: razorpay_payment_id,
-      shiprocketAwb: shiprocketOrderId ? `SR-${shiprocketOrderId}` : undefined
+      bvcDocketNumber: bvcDocketNumber || undefined,
+      securityBagNumber: bvcSecurityBag || undefined,
+      shiprocketAwb: bvcDocketNumber || undefined
     }).catch((emailErr) => {
       console.error('Background order confirmation email dispatch error:', emailErr);
     });
 
     const successResponse = {
       success: true,
-      message: 'Payment verified successfully',
+      message: 'Payment verified and secured BVC shipment registered successfully',
       order_number: orderNumber,
       token: orderAccessToken,
       payment_id: razorpay_payment_id,
-      shiprocket_status: shiprocketStatus,
-      shiprocket_order_id: shiprocketOrderId,
-      shiprocket_error: shiprocketError
+      bvc_status: bvcStatus,
+      bvc_docket_number: bvcDocketNumber,
+      bvc_shipment_id: bvcShipmentId,
+      bvc_security_bag_number: bvcSecurityBag,
+      bvc_error: bvcError,
+      shiprocket_status: bvcStatus,
+      shiprocket_order_id: bvcDocketNumber,
+      shiprocket_error: bvcError
     };
 
     // Store in idempotency cache
@@ -372,10 +311,11 @@ export async function POST(request: Request) {
     });
 
     return NextResponse.json(successResponse);
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Payment Verification Route Exception:', error);
+    const errorMsg = error instanceof Error ? error.message : 'Internal server error during payment verification';
     return NextResponse.json(
-      { success: false, error: error?.message || 'Internal server error during payment verification' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }

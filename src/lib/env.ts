@@ -32,7 +32,13 @@ export function validateEnvironment(): EnvConfigReport {
   const adminPasscode = process.env.ADMIN_PASSCODE;
   const adminSecret = process.env.ADMIN_SESSION_SECRET;
 
-  if (adminSecret && KNOWN_INSECURE_FALLBACKS.some((f) => adminSecret.toLowerCase().includes(f))) {
+  if (!adminSecret) {
+    const msg = 'ADMIN_SESSION_SECRET is required (minimum 16 characters). No fallback permitted.';
+    if (isProd) errors.push(msg);
+    else warnings.push(msg);
+  } else if (adminSecret.length < 16) {
+    errors.push('ADMIN_SESSION_SECRET is too short (minimum 16 characters required).');
+  } else if (KNOWN_INSECURE_FALLBACKS.some((f) => adminSecret.toLowerCase().includes(f))) {
     errors.push('ADMIN_SESSION_SECRET appears to contain an insecure placeholder.');
   }
 
@@ -75,6 +81,20 @@ export function validateEnvironment(): EnvConfigReport {
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
   if (serviceRoleKey && typeof window !== 'undefined') {
     errors.push('CRITICAL: SUPABASE_SERVICE_ROLE_KEY leaked into browser context!');
+  }
+
+  // 5. BVC Logistics eSHIP API Credentials Check
+  const bvcKey = process.env.BVC_API_KEY;
+  const bvcSecret = process.env.BVC_API_SECRET;
+  if (!bvcKey || !bvcSecret) {
+    warnings.push('BVC Logistics API credentials not configured; simulated armored fulfillment mode active.');
+  } else {
+    if (KNOWN_INSECURE_FALLBACKS.some((f) => bvcKey.toLowerCase().includes(f))) {
+      errors.push('BVC_API_KEY appears to contain an insecure placeholder.');
+    }
+    if (KNOWN_INSECURE_FALLBACKS.some((f) => bvcSecret.toLowerCase().includes(f))) {
+      errors.push('BVC_API_SECRET appears to contain an insecure placeholder.');
+    }
   }
 
   const isValid = errors.length === 0;

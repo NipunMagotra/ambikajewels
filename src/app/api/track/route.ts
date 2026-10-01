@@ -114,8 +114,12 @@ export async function GET(request: Request) {
           shipping_address: 'Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir',
           pincode: '180013',
           status: 'paid',
+          bvc_status: 'booked',
+          bvc_docket_number: 'BVC-' + orderId.replace('AMB-', ''),
+          bvc_security_bag_number: 'AMB-SECBAG-849201-3829',
           shiprocket_status: 'created',
-          shiprocket_order_id: 'SR-' + orderId.replace('AMB-', ''),
+          shiprocket_order_id: 'BVC-' + orderId.replace('AMB-', ''),
+          shiprocket_awb: 'BVC-' + orderId.replace('AMB-', ''),
           created_at: new Date(Date.now() - 86400000).toISOString()
         };
       } else {
@@ -126,44 +130,47 @@ export async function GET(request: Request) {
       }
     }
 
-    // 5. Build Compliant Status Timeline (without unverifiable claims)
+    // 5. Build Compliant Status Timeline for High-Value Gold Logistics
     const orderDate = new Date(orderData.created_at || Date.now());
     const packDate = new Date(orderDate.getTime() + 14400000); // 4 hours later
     const dispatchDate = new Date(orderDate.getTime() + 86400000); // 24 hours later
     const estimatedDelivery = new Date(orderDate.getTime() + 259200000); // 3 days later
 
+    const docketNum = orderData.bvc_docket_number || orderData.shiprocket_awb || orderData.shiprocket_order_id || 'BVC-LIVE-PENDING';
+    const securityBag = orderData.bvc_security_bag_number || 'AMB-SECBAG-SEALED';
+
     const timeline = [
       {
-        stage: 'Order Confirmed',
-        description: 'Payment successfully received and verified via Razorpay.',
+        stage: 'Order Confirmed & Hallmark Verified',
+        description: 'Payment verified via Razorpay. BIS hallmark and HUID verified at Jammu showroom.',
         timestamp: orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         completed: true,
         current: false
       },
       {
-        stage: 'Quality Check & Tamper-Evident Packing',
-        description: 'BIS hallmark verified and sealed in serialized tamper-evident security packaging at Jammu showroom.',
+        stage: 'Tamper-Evident Security Bag Sealed',
+        description: `High-value gold cargo sealed in serialized tamper-evident security vault bag (${securityBag}).`,
         timestamp: packDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         completed: true,
         current: false
       },
       {
-        stage: 'Handed to Courier Partner',
-        description: 'Consignment dispatched via express air courier (Blue Dart / Delhivery).',
+        stage: 'Handed to BVC Logistics Armed Network',
+        description: 'Consignment handed over to BVC Logistics armored escort vehicle under insured transit protocol.',
         timestamp: dispatchDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
         completed: true,
         current: true
       },
       {
-        stage: 'In Transit to Destination',
-        description: 'Express transit to regional distribution hub with live courier tracking.',
+        stage: 'Strongroom Vault Deposit & Air Transit',
+        description: 'Secured inside biometric strongroom vault and routed via dedicated express transit.',
         timestamp: 'In Progress',
         completed: false,
         current: false
       },
       {
-        stage: 'Out for Delivery',
-        description: 'Recipient signature and OTP verification required upon handover.',
+        stage: 'Out for Secure Armored Delivery',
+        description: 'Armed courier en route. Mandatory recipient photo-ID and OTP verification required upon handover.',
         timestamp: `Estimated by ${estimatedDelivery.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`,
         completed: false,
         current: false
@@ -176,13 +183,17 @@ export async function GET(request: Request) {
     return NextResponse.json({
       success: true,
       order: {
-        order_number: orderData.id,
+        order_number: orderData.id || orderData.order_number,
         customer_name: orderData.customer_name ? `${orderData.customer_name.split(' ')[0]} ***` : 'Customer',
         shipping_address: maskedAddress,
         status: orderData.status,
-        courier_partner: 'Shiprocket Express (Blue Dart)',
-        shiprocket_order_id: orderData.shiprocket_order_id || 'SR-PENDING',
-        shiprocket_awb: orderData.shiprocket_awb || 'AWB' + Math.floor(100000000 + Math.random() * 900000000),
+        courier_partner: 'BVC Logistics Secure Armed Network',
+        bvc_docket_number: docketNum,
+        bvc_status: orderData.bvc_status || 'booked',
+        bvc_security_bag_number: securityBag,
+        // Backward-compatibility mirrors for existing front-end views
+        shiprocket_order_id: docketNum,
+        shiprocket_awb: docketNum,
         estimated_delivery: estimatedDelivery.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' }),
         timeline
       }

@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
-import { siteConfig } from '@/config/siteConfig';
 import { checkRateLimit } from '@/lib/rateLimit';
+import { calculateOrderPricingServer } from '@/lib/serverPricing';
 
 export async function POST(request: Request) {
   try {
@@ -18,7 +18,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { customer_name, customer_phone, customer_email, shipping_address, items, notes } = body;
 
     if (!customer_name || typeof customer_name !== 'string' || !customer_phone || typeof customer_phone !== 'string') {
@@ -29,19 +29,17 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Cart must contain between 1 and 50 items' }, { status: 400 });
     }
 
-    const subtotal = items.reduce((acc: number, item: any) => {
-      const price = typeof item.price === 'number' && item.price > 0 ? item.price : 0;
-      const qty = typeof item.quantity === 'number' && item.quantity > 0 ? item.quantity : 1;
-      return acc + price * qty;
-    }, 0);
-
-    const tax = Math.round(subtotal * siteConfig.tax.gstRate);
-    const isFreeShipping = subtotal >= siteConfig.shipping.freeThreshold;
-    const shipping = isFreeShipping ? 0 : siteConfig.shipping.flatRate;
-    const total = subtotal + tax + shipping;
+    // 2. Authoritative Server-Side Price Verification (Rejects Unknown Products, Enforces Integer Qty >= 1)
+    let validatedPricing;
+    try {
+      validatedPricing = await calculateOrderPricingServer(items);
+    } catch (pricingErr: unknown) {
+      const errMsg = pricingErr instanceof Error ? pricingErr.message : 'Invalid order items.';
+      console.warn(`[SECURITY ALERT] Invalid order rejected in /api/orders from IP ${ip}: ${errMsg}`);
+      return NextResponse.json({ error: errMsg }, { status: 400 });
+    }
 
     const orderNumber = `AMB-${Math.floor(100000 + Math.random() * 900000)}`;
-
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
 
     let order = null;
@@ -56,11 +54,11 @@ export async function POST(request: Request) {
           customer_phone: customer_phone.trim().slice(0, 20),
           customer_email: customer_email ? customer_email.trim().slice(0, 100) : '',
           shipping_address: shipping_address ? String(shipping_address).slice(0, 300) : '',
-          items,
-          subtotal,
-          tax,
-          shipping,
-          total,
+          items: validatedPricing.items,
+          subtotal: validatedPricing.subtotal_paise,
+          tax: validatedPricing.tax_paise,
+          shipping: validatedPricing.shipping_paise,
+          total: validatedPricing.total_paise,
           status: 'pending_confirmation',
           payment_method: 'whatsapp_pending',
           notes: notes ? String(notes).slice(0, 300) : ''
@@ -80,15 +78,16 @@ export async function POST(request: Request) {
           customer_phone,
           customer_email,
           shipping_address,
-          total,
+          total: validatedPricing.total_paise,
           status: 'pending_confirmation'
         } 
       });
     }
 
     return NextResponse.json({ order });
-  } catch (err) {
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : 'Internal server error';
     console.error('API Orders error:', err);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json({ error: errorMsg }, { status: 500 });
   }
 }

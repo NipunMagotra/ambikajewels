@@ -17,6 +17,8 @@ export interface OrderEmailData {
   shippingAddress: string;
   paymentId: string;
   shiprocketAwb?: string;
+  bvcDocketNumber?: string;
+  securityBagNumber?: string;
 }
 
 /**
@@ -84,7 +86,9 @@ export function generateOrderConfirmationEmailHtml(data: OrderEmailData): string
                   <td style="font-size: 13px; color: #555;">
                     <strong>Order Reference:</strong> ${data.orderNumber}<br />
                     <strong>Razorpay Payment ID:</strong> ${data.paymentId}<br />
-                    <strong>Shipping Partner:</strong> Shiprocket Express Logistics
+                    <strong>Shipping Partner:</strong> BVC Logistics Secure Armed Network<br />
+                    ${data.bvcDocketNumber || data.shiprocketAwb ? `<strong>Security Docket:</strong> ${data.bvcDocketNumber || data.shiprocketAwb}<br />` : ''}
+                    ${data.securityBagNumber ? `<strong>Tamper Seal Bag:</strong> ${data.securityBagNumber}` : ''}
                   </td>
                   <td style="font-size: 13px; color: #555; text-align: right;">
                     <strong>GSTIN:</strong> ${siteConfig.gstin}<br />
@@ -228,7 +232,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
   }
 }
 
-export interface ShiprocketFailureAlertData {
+export interface BvcFailureAlertData {
   orderNumber: string;
   razorpayPaymentId: string;
   razorpayOrderId?: string;
@@ -238,14 +242,17 @@ export interface ShiprocketFailureAlertData {
   amount: number; // in paise
   items: Array<{ name: string; quantity: number; price: number }>;
   errorMessage: string;
+  securityBagNumber?: string;
 }
+
+export type ShiprocketFailureAlertData = BvcFailureAlertData;
 
 /**
  * Sends an urgent administrator alert email when a customer has paid via Razorpay
- * but the automated Shiprocket order / shipment creation fails.
+ * but the automated BVC Logistics eSHIP consignment creation fails.
  */
-export async function sendAdminShiprocketFailureAlert(
-  data: ShiprocketFailureAlertData
+export async function sendAdminBvcFailureAlert(
+  data: BvcFailureAlertData
 ): Promise<{ success: boolean; id?: string; error?: string }> {
   const apiKey = process.env.RESEND_API_KEY;
   const adminEmail = process.env.ADMIN_ALERT_EMAIL || siteConfig.contact.email;
@@ -267,16 +274,16 @@ export async function sendAdminShiprocketFailureAlert(
 <html>
 <head>
   <meta charset="utf-8" />
-  <title>CRITICAL: Shiprocket Order Creation Failed</title>
+  <title>CRITICAL: BVC Logistics Consignment Booking Failed</title>
 </head>
 <body style="font-family: Arial, sans-serif; background-color: #fff4f4; margin: 0; padding: 20px;">
   <div style="max-width: 600px; margin: 0 auto; background-color: #ffffff; border: 2px solid #d32f2f; border-radius: 6px; padding: 24px;">
     <h2 style="color: #d32f2f; margin-top: 0; font-size: 20px;">
-      🚨 CRITICAL ALERT: Payment Succeeded but Shiprocket Order Creation Failed
+      🚨 CRITICAL ALERT: Payment Succeeded but BVC Logistics Booking Failed
     </h2>
     <p style="font-size: 14px; color: #333; line-height: 1.6;">
-      A customer has successfully completed payment on <strong>Ambika Jewels</strong>, but the automatic consignment creation in Shiprocket failed.
-      <strong>Please manually create this shipment in your Shiprocket dashboard immediately to prevent delivery delays.</strong>
+      A customer has successfully completed payment for high-value gold jewelry on <strong>Ambika Jewels</strong>, but the automatic armored consignment booking in BVC eSHIP failed.
+      <strong>Please manually create this secured shipment in your BVC Universe dashboard immediately to assign armored pickup and tamper-evident sealing.</strong>
     </p>
 
     <div style="background-color: #fce8e6; border: 1px solid #f5c2c7; border-radius: 4px; padding: 12px; margin: 16px 0; font-size: 13px; color: #721c24;">
@@ -288,10 +295,12 @@ export async function sendAdminShiprocketFailureAlert(
       <tr><td style="font-weight: bold; width: 160px;">Order Reference:</td><td>${data.orderNumber}</td></tr>
       <tr><td style="font-weight: bold;">Razorpay Payment ID:</td><td>${data.razorpayPaymentId}</td></tr>
       ${data.razorpayOrderId ? `<tr><td style="font-weight: bold;">Razorpay Order ID:</td><td>${data.razorpayOrderId}</td></tr>` : ''}
-      <tr><td style="font-weight: bold;">Amount Paid:</td><td style="font-weight: bold; color: #2e7d32;">${formatInr(data.amount)}</td></tr>
+      <tr><td style="font-weight: bold;">Declared Gold Value:</td><td style="font-weight: bold; color: #2e7d32;">${formatInr(data.amount)}</td></tr>
       <tr><td style="font-weight: bold;">Customer Name:</td><td>${data.customerName}</td></tr>
       <tr><td style="font-weight: bold;">Customer Phone:</td><td><a href="tel:${data.customerPhone}">${data.customerPhone}</a></td></tr>
       <tr><td style="font-weight: bold;">Customer Email:</td><td><a href="mailto:${data.customerEmail}">${data.customerEmail}</a></td></tr>
+      ${data.securityBagNumber ? `<tr><td style="font-weight: bold;">Tamper Seal Bag:</td><td><code>${data.securityBagNumber}</code></td></tr>` : ''}
+      <tr><td style="font-weight: bold;">Product HSN Code:</td><td>7113 (Gold Ornaments)</td></tr>
     </table>
 
     <h3 style="font-size: 15px; color: #111; margin-bottom: 8px;">Purchased Items:</h3>
@@ -300,8 +309,8 @@ export async function sendAdminShiprocketFailureAlert(
     </div>
 
     <div style="text-align: center; margin: 24px 0;">
-      <a href="https://app.shiprocket.in" style="background-color: #d32f2f; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; font-size: 14px; border-radius: 4px; display: inline-block;">
-        Open Shiprocket Dashboard
+      <a href="https://universe.bvclogistics.com" style="background-color: #d32f2f; color: #ffffff; padding: 12px 24px; text-decoration: none; font-weight: bold; font-size: 14px; border-radius: 4px; display: inline-block;">
+        Open BVC Universe Dashboard
       </a>
     </div>
 
@@ -314,7 +323,7 @@ export async function sendAdminShiprocketFailureAlert(
   `;
 
   if (!apiKey) {
-    console.error('[ADMIN EMAIL ALERT - SHIPROCKET FAILED]', {
+    console.error('[ADMIN EMAIL ALERT - BVC BOOKING FAILED]', {
       recipient: adminEmail,
       order: data.orderNumber,
       paymentId: data.razorpayPaymentId,
@@ -335,23 +344,26 @@ export async function sendAdminShiprocketFailureAlert(
       body: JSON.stringify({
         from: fromAddress,
         to: [adminEmail],
-        subject: `🚨 [URGENT] Shiprocket Order Creation Failed for Order #${data.orderNumber}`,
+        subject: `🚨 [URGENT] BVC Logistics Consignment Failed for Order #${data.orderNumber}`,
         html,
       }),
     });
 
     const result = await response.json();
     if (response.ok && result.id) {
-      console.log(`[SHIPROCKET FAILURE ALERT SENT] Alert email dispatched to admin (${adminEmail}) (ID: ${result.id})`);
+      console.log(`[BVC FAILURE ALERT SENT] Alert email dispatched to admin (${adminEmail}) (ID: ${result.id})`);
       return { success: true, id: result.id };
     } else {
-      console.error('[SHIPROCKET FAILURE ALERT FAILED]', result);
+      console.error('[BVC FAILURE ALERT FAILED]', result);
       return { success: false, error: result.message || 'Resend error' };
     }
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Network exception during admin alert email';
-    console.error('[SHIPROCKET FAILURE ALERT EXCEPTION]', err);
+    console.error('[BVC FAILURE ALERT EXCEPTION]', err);
     return { success: false, error: errorMsg };
   }
 }
+
+// Backward-compatibility alias
+export const sendAdminShiprocketFailureAlert = sendAdminBvcFailureAlert;
 

@@ -107,20 +107,20 @@ export async function saveDailyRates(rates: DailyRates): Promise<DailyRates> {
     localStorage.setItem(LOCAL_RATES_KEY, JSON.stringify(updatedRates));
   }
 
-  if (isSupabaseConfigured) {
+  // Persist to server via authenticated endpoint (bypasses client-side RLS)
+  if (typeof window !== 'undefined') {
     try {
-      await supabase.from('daily_rates').insert({
-        gold_24k: updatedRates.gold_24k,
-        gold_22k: updatedRates.gold_22k,
-        gold_18k: updatedRates.gold_18k,
-        gold_14k: updatedRates.gold_14k,
-        silver_999: updatedRates.silver_999,
-        silver_925: updatedRates.silver_925,
-        updated_at: updatedRates.updated_at,
-        updated_by: updatedRates.updated_by || 'Morning Rate Controller',
+      const res = await fetch('/api/admin/rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedRates)
       });
+      const data = await res.json();
+      if (!res.ok || !data.success) {
+        console.warn('Server rate sync warning (using localStorage):', data?.error);
+      }
     } catch (err) {
-      console.warn('Could not save rates to Supabase (using localStorage fallback):', err);
+      console.warn('Network error saving rates to server:', err);
     }
   }
 

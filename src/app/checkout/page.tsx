@@ -39,6 +39,9 @@ export default function CheckoutPage() {
     paymentId: string;
     shiprocketStatus: string;
     shiprocketOrderId?: string;
+    bvcStatus?: string;
+    bvcDocketNumber?: string;
+    bvcSecurityBag?: string;
     token?: string;
   } | null>(null);
 
@@ -94,7 +97,7 @@ export default function CheckoutPage() {
     // 1. Indian Phone Number Validation (10 digits starting with 6-9)
     const cleanPhone = formData.phone.trim().replace(/[\s-]/g, '').replace(/^\+91/, '');
     if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
-      setErrorMessage('Please enter a valid 10-digit Indian mobile number (e.g. 9682589725) to receive Shiprocket dispatch updates.');
+      setErrorMessage('Please enter a valid 10-digit Indian mobile number (e.g. 9682589725) to receive BVC Logistics armored dispatch updates.');
       return;
     }
 
@@ -191,8 +194,11 @@ export default function CheckoutPage() {
           setOrderSummary({
             orderNumber: verifyData.order_number,
             paymentId: verifyData.payment_id,
-            shiprocketStatus: verifyData.shiprocket_status,
-            shiprocketOrderId: verifyData.shiprocket_order_id,
+            shiprocketStatus: verifyData.bvc_status || verifyData.shiprocket_status,
+            shiprocketOrderId: verifyData.bvc_docket_number || verifyData.shiprocket_order_id,
+            bvcStatus: verifyData.bvc_status,
+            bvcDocketNumber: verifyData.bvc_docket_number,
+            bvcSecurityBag: verifyData.bvc_security_bag_number,
             token: verifyData.token
           });
           dispatch({ type: 'CLEAR_CART' });
@@ -258,8 +264,11 @@ export default function CheckoutPage() {
               setOrderSummary({
                 orderNumber: verifyData.order_number,
                 paymentId: verifyData.payment_id,
-                shiprocketStatus: verifyData.shiprocket_status,
-                shiprocketOrderId: verifyData.shiprocket_order_id,
+                shiprocketStatus: verifyData.bvc_status || verifyData.shiprocket_status,
+                shiprocketOrderId: verifyData.bvc_docket_number || verifyData.shiprocket_order_id,
+                bvcStatus: verifyData.bvc_status,
+                bvcDocketNumber: verifyData.bvc_docket_number,
+                bvcSecurityBag: verifyData.bvc_security_bag_number,
                 token: verifyData.token
               });
               dispatch({ type: 'CLEAR_CART' });
@@ -510,7 +519,7 @@ export default function CheckoutPage() {
                 {/* Guest Details Overview */}
                 <div className="bg-background border border-outline-variant/30 p-4 sm:p-5 mb-6 rounded-xs flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                   <div>
-                    <span className="font-label-caps text-[9px] text-primary tracking-widest block font-semibold">SHIPROCKET DELIVERY DESTINATION</span>
+                    <span className="font-label-caps text-[9px] text-primary tracking-widest block font-semibold">BVC LOGISTICS SECURED DESTINATION</span>
                     <p className="font-body-md text-sm text-on-surface font-semibold">{formData.firstName} {formData.lastName} ({formData.phone})</p>
                     <p className="font-body-md text-xs text-on-surface-variant">{formData.address}, {formData.city}, {formData.state} - {formData.pincode}</p>
                     <p className="font-body-md text-xs text-on-surface-variant">{formData.email}</p>
@@ -602,14 +611,21 @@ export default function CheckoutPage() {
                   </div>
 
                   <div>
-                    <span className="font-label-caps text-[9px] text-on-surface-variant tracking-widest block mb-1">SHIPROCKET DISPATCH STATUS</span>
-                    {orderSummary.shiprocketStatus === 'created' ? (
-                      <span className="inline-flex items-center gap-1 font-label-caps text-xs text-green-400 font-bold bg-green-950/40 px-2.5 py-1 rounded-xs border border-green-800/40">
-                        <span className="material-symbols-outlined text-sm">local_shipping</span> SHIPMENT CREATED #{orderSummary.shiprocketOrderId}
-                      </span>
+                    <span className="font-label-caps text-[9px] text-on-surface-variant tracking-widest block mb-1">BVC LOGISTICS SECURED DISPATCH</span>
+                    {orderSummary.bvcStatus === 'booked' || orderSummary.bvcStatus === 'simulated' || orderSummary.shiprocketStatus === 'created' ? (
+                      <div>
+                        <span className="inline-flex items-center gap-1 font-label-caps text-xs text-green-400 font-bold bg-green-950/40 px-2.5 py-1 rounded-xs border border-green-800/40">
+                          <span className="material-symbols-outlined text-sm">shield</span> DOCKET #{orderSummary.bvcDocketNumber || orderSummary.shiprocketOrderId}
+                        </span>
+                        {orderSummary.bvcSecurityBag && (
+                          <span className="block mt-1 font-mono text-[10px] text-on-surface-variant">
+                            Security Bag Seal: <strong className="text-primary">{orderSummary.bvcSecurityBag}</strong>
+                          </span>
+                        )}
+                      </div>
                     ) : (
                       <span className="inline-flex items-center gap-1 font-label-caps text-xs text-amber-400 font-bold bg-amber-950/40 px-2.5 py-1 rounded-xs border border-amber-800/40">
-                        <span className="material-symbols-outlined text-sm">schedule</span> PROCESSING SHIPMENT (ADMIN NOTIFIED)
+                        <span className="material-symbols-outlined text-sm">schedule</span> PROCESSING SECURE DISPATCH (ADMIN NOTIFIED)
                       </span>
                     )}
                   </div>

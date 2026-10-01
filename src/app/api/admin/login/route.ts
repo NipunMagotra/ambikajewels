@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { getAdminPasscode, getAdminCookieName, createAdminSessionToken, isPasscodeConfigured } from '@/lib/adminAuth';
+import { getAdminPasscode, getAdminCookieName, createAdminSessionToken, isPasscodeConfigured, ADMIN_SESSION_MAX_AGE_SECONDS } from '@/lib/adminAuth';
 import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
@@ -47,8 +47,8 @@ export async function POST(request: Request) {
       );
     }
 
-    // 3. Generate Cryptographically Signed Session Token
-    const sessionToken = createAdminSessionToken(7 * 24 * 60 * 60);
+    // 3. Generate Cryptographically Signed Session Token (12 Hours Max Lifetime)
+    const sessionToken = createAdminSessionToken(ADMIN_SESSION_MAX_AGE_SECONDS);
 
     const response = NextResponse.json({
       success: true,
@@ -62,7 +62,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: 60 * 60 * 24 * 7 // 7 days
+      maxAge: ADMIN_SESSION_MAX_AGE_SECONDS // 12 hours
     });
 
     return response;

@@ -3,19 +3,8 @@ import crypto from 'crypto';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 
-// In-memory set for fast webhook event deduplication
-const processedWebhookEventIds = new Set<string>();
-
-function cleanupWebhookEvents() {
-  if (processedWebhookEventIds.size > 2000) {
-    processedWebhookEventIds.clear();
-  }
-}
-
 export async function POST(request: Request) {
   try {
-    cleanupWebhookEvents();
-
     // 1. Capture Raw Body and Signature for Cryptographic Verification
     const rawBody = await request.text();
     const signature = request.headers.get('x-razorpay-signature');
@@ -55,86 +44,123 @@ export async function POST(request: Request) {
     }
 
     const event = JSON.parse(rawBody);
-    const eventId = event.id;
-    const eventType = event.event;
-    const payload = event.payload;
+    const eventId = String(event.id || '');
+    const eventType = String(event.event || '');
+    const payload = event.payload || {};
 
-    // 3. Idempotency Check on Event ID
-    if (eventId && processedWebhookEventIds.has(eventId)) {
-      console.log(`[WEBHOOK IDEMPOTENT] Event ${eventId} already processed.`);
-      return NextResponse.json({ success: true, idempotent: true, message: 'Event already processed' });
-    }
-    if (eventId) {
-      processedWebhookEventIds.add(eventId);
+    const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
+
+    // 3. Persistent Database Deduplication (Replay Protection Across Serverless Lambdas)
+    if (dbClient && eventId) {
+      try {
+        const { error: dedupeErr } = await dbClient.from('webhook_events').insert({
+          id: eventId,
+          source: 'razorpay',
+          event_type: eventType,
+          payload: { event: eventType, account_id: event.account_id }
+        });
+
+        // Postgres 23505 = unique_violation
+        if (dedupeErr && dedupeErr.code === '23505') {
+          console.log(`[WEBHOOK IDEMPOTENT] Event ${eventId} was already recorded in database.`);
+          return NextResponse.json({ success: true, idempotent: true, message: 'Event already processed' });
+        }
+      } catch (dbDedupeErr) {
+        console.warn('[WEBHOOK PERSISTENT DEDUPE EXCEPTION]', dbDedupeErr);
+      }
     }
 
     console.log(`[RAZORPAY WEBHOOK VERIFIED] Event: ${eventType} ID: ${eventId}`);
 
-    const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
+    // 4. Handle Payment Capture & Order Paid Events
+    if (eventType === 'payment.captured') {
+      const payment = payload.payment?.entity;
+      const paymentId = payment?.id;
+      const razorpayOrderId = payment?.order_id;
+      const paidAmountPaise = payment?.amount; // in paise
 
-    // 4. Handle specific Razorpay events idempotently
-    switch (eventType) {
-      case 'payment.captured': {
-        const payment = payload.payment?.entity;
-        const paymentId = payment?.id;
-        const razorpayOrderId = payment?.order_id;
+      console.log(`[WEBHOOK] Payment Captured: ${paymentId} for Order: ${razorpayOrderId} Amount: ${paidAmountPaise}`);
 
-        console.log(`[WEBHOOK] Payment Captured: ${paymentId} for Order: ${razorpayOrderId}`);
+      if (dbClient && (razorpayOrderId || paymentId)) {
+        // Look up by razorpay_order_id first (primary relation), or razorpay_payment_id
+        let query = dbClient
+          .from('orders')
+          .select('id, order_number, total, status, razorpay_order_id, razorpay_payment_id');
 
-        if (dbClient && paymentId) {
-          try {
-            // Check if order already recorded as paid
-            const { data: existing } = await dbClient
-              .from('orders')
-              .select('id, status, shiprocket_status, razorpay_payment_id')
-              .or(`payment_id.eq.${paymentId},razorpay_payment_id.eq.${paymentId}`)
-              .maybeSingle();
+        if (razorpayOrderId) {
+          query = query.eq('razorpay_order_id', razorpayOrderId);
+        } else if (paymentId) {
+          query = query.eq('razorpay_payment_id', paymentId);
+        }
 
-            if (existing && existing.status === 'paid') {
-              console.log(`[WEBHOOK IDEMPOTENT] Order ${existing.id} already marked as paid.`);
-              return NextResponse.json({ success: true, idempotent: true });
-            }
+        const { data: existing, error: queryErr } = await query.maybeSingle();
 
-            if (existing) {
+        if (queryErr) {
+          console.error('[WEBHOOK DB QUERY ERROR]', queryErr);
+          // Return 500 so Razorpay retries
+          return NextResponse.json({ success: false, error: 'Database lookup failed' }, { status: 500 });
+        }
+
+        if (existing) {
+          // Idempotent: already marked as paid
+          if (existing.status === 'paid') {
+            console.log(`[WEBHOOK IDEMPOTENT] Order ${existing.id} already marked as paid.`);
+            return NextResponse.json({ success: true, idempotent: true });
+          }
+
+          // Strict Amount Verification Against Stored Order Total
+          if (typeof paidAmountPaise === 'number' && existing.total) {
+            if (paidAmountPaise !== existing.total) {
+              console.error(
+                `[SECURITY ALERT] Payment amount mismatch on order ${existing.id}! Razorpay paid: ${paidAmountPaise}, Stored total: ${existing.total}`
+              );
               await dbClient
                 .from('orders')
                 .update({
-                  status: 'paid',
-                  payment_id: paymentId,
-                  razorpay_payment_id: paymentId,
+                  notes: `SECURITY ALERT: Payment amount mismatch! Received: ${paidAmountPaise} paise, Expected: ${existing.total} paise. Investigate before dispatch.`,
                   updated_at: new Date().toISOString()
                 })
                 .eq('id', existing.id);
+
+              return NextResponse.json(
+                { success: false, error: 'Payment amount does not match stored order total' },
+                { status: 400 }
+              );
             }
-          } catch (dbErr) {
-            console.error('Error updating order on payment.captured:', dbErr);
           }
+
+          const { error: updateErr } = await dbClient
+            .from('orders')
+            .update({
+              status: 'paid',
+              payment_id: paymentId,
+              razorpay_payment_id: paymentId,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', existing.id);
+
+          if (updateErr) {
+            console.error('[WEBHOOK DB UPDATE ERROR]', updateErr);
+            // Return 500 so Razorpay retries
+            return NextResponse.json({ success: false, error: 'Failed to update order status' }, { status: 500 });
+          }
+
+          console.log(`[WEBHOOK SUCCESS] Order ${existing.order_number || existing.id} marked as paid.`);
+        } else {
+          console.warn(`[WEBHOOK WARN] No database order located for Razorpay order ID ${razorpayOrderId}`);
         }
-        break;
       }
-
-      case 'order.paid': {
-        const order = payload.order?.entity;
-        console.log(`[WEBHOOK] Order Paid: ${order?.id}`);
-        break;
-      }
-
-      case 'payment.failed': {
-        const payment = payload.payment?.entity;
-        console.warn(`[WEBHOOK] Payment Failed: ${payment?.id} Reason: ${payment?.error_description}`);
-        break;
-      }
-
-      default:
-        console.log(`[WEBHOOK] Unhandled event type: ${eventType}`);
-        break;
+    } else if (eventType === 'payment.failed') {
+      const payment = payload.payment?.entity;
+      console.warn(`[WEBHOOK] Payment Failed: ${payment?.id} Reason: ${payment?.error_description}`);
     }
 
     return NextResponse.json({ success: true, received: true });
-  } catch (error: any) {
+  } catch (error: unknown) {
+    const errorMsg = error instanceof Error ? error.message : 'Webhook processing failed';
     console.error('Razorpay Webhook Handler Error:', error);
     return NextResponse.json(
-      { success: false, error: error?.message || 'Webhook processing failed' },
+      { success: false, error: errorMsg },
       { status: 500 }
     );
   }

@@ -54,11 +54,14 @@ export const siteConfig = {
   returnWindowDays: 7, // 7-day inspection and return window
   
   shipping: {
-    courierPartner: "Shiprocket Delivery Network",
+    courierPartner: "BVC Logistics Secure Armed Network",
     freeThreshold: 5000000, // in paise (₹50,000)
     flatRate: 50000, // in paise (₹500)
-    deliveryTimelineRegional: "2 to 3 Business Days (Jammu & Kashmir / Northern Region)",
-    deliveryTimelineNational: "3 to 5 Business Days (Pan-India Express Transit)",
+    baseFreightPaise: 35000, // ₹350 base freight for armored transit
+    adValoremRate: 0.002, // 0.20% ad valorem transit insurance for gold cargo
+    gstRate: 0.18, // 18% GST on shipping services
+    deliveryTimelineRegional: "1 to 2 Business Days (Jammu & Kashmir / Northern Region)",
+    deliveryTimelineNational: "2 to 4 Business Days (Pan-India Armored Transit)",
     dispatchTimeline: "24 to 48 Hours for In-Stock Items (3 to 5 Days for Custom Sizing)"
   },
   tax: {

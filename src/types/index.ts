@@ -65,6 +65,10 @@ export type Order = {
   payment_method: string;
   payment_id?: string;
   payment_status: 'unpaid' | 'paid' | 'refunded';
+  bvc_docket_number?: string;
+  bvc_shipment_id?: string;
+  bvc_status?: string;
+  bvc_security_bag_number?: string;
   shiprocket_order_id?: string;
   shiprocket_status?: string;
   shiprocket_awb?: string;
