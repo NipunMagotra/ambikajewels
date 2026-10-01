@@ -1,6 +1,5 @@
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
-import { mockProducts } from '@/data/mockProducts';
 import { siteConfig } from '@/config/siteConfig';
 
 export interface VerifiedOrderItem {
@@ -21,12 +20,18 @@ export interface PricingBreakdownResult {
   is_free_shipping: boolean;
 }
 
+export type ProductResolver = (
+  productId: string
+) => Promise<{ price: number; name: string; image?: string } | null>;
+
 /**
- * Authoritatively verifies item catalog existence, checks unit prices against DB / mock fallback,
+ * Authoritatively verifies item catalog existence strictly from the Supabase database products table,
  * rejects unknown products, enforces positive integer quantities, and computes all taxes and totals server-side.
+ * NOTE: mockProducts fallback is completely removed. Unknown products are rejected.
  */
 export async function calculateOrderPricingServer(
-  rawItems: Array<{ id?: string; product_id?: string; quantity?: unknown }>
+  rawItems: Array<{ id?: string; product_id?: string; quantity?: unknown }>,
+  customResolver?: ProductResolver
 ): Promise<PricingBreakdownResult> {
   if (!Array.isArray(rawItems) || rawItems.length === 0) {
     throw new Error('Order must contain at least one item.');
@@ -55,8 +60,16 @@ export async function calculateOrderPricingServer(
     let foundName: string = '';
     let foundImage: string = '';
 
-    // 1. Check Supabase DB products table
-    if (dbClient) {
+    // 1. If custom resolver provided (e.g. for unit tests), check it
+    if (customResolver) {
+      const resolved = await customResolver(productId);
+      if (resolved && typeof resolved.price === 'number' && resolved.price > 0) {
+        foundPrice = resolved.price;
+        foundName = resolved.name;
+        foundImage = resolved.image || '';
+      }
+    } else if (dbClient) {
+      // 2. Authoritative Database lookup from Supabase products table
       try {
         const { data: dbProduct } = await dbClient
           .from('products')
@@ -74,19 +87,9 @@ export async function calculateOrderPricingServer(
       }
     }
 
-    // 2. Authoritative static catalog fallback (if DB not populated or item in mock catalog)
+    // 3. REJECT UNKNOWN PRODUCTS (NO MOCK PRODUCTS FALLBACK PER COMPLIANCE RULES)
     if (foundPrice === null) {
-      const catalogItem = mockProducts.find(p => p.id === productId || p.slug === productId);
-      if (catalogItem && typeof catalogItem.price === 'number' && catalogItem.price > 0) {
-        foundPrice = catalogItem.price;
-        foundName = catalogItem.name;
-        foundImage = catalogItem.images && catalogItem.images[0] ? catalogItem.images[0] : '';
-      }
-    }
-
-    // 3. REJECT UNKNOWN PRODUCTS (NO CLIENT FALLBACK)
-    if (foundPrice === null) {
-      throw new Error(`Product "${productId}" is not recognized in store catalog. Price verification failed.`);
+      throw new Error(`Product "${productId}" is not recognized in store catalog database. Price verification failed.`);
     }
 
     const itemSubtotal = foundPrice * qty;

@@ -55,10 +55,15 @@ describe('Phase 1 Security & Calculation Tests', () => {
     });
 
     it('accurately computes subtotal, 3% GST, and shipping thresholds from authoritative catalog', async () => {
-      // Product dg1 in mockProducts: Authentic 22K Dogri Jhumki, price: 9500000 paise (₹95,000)
-      const result = await calculateOrderPricingServer([
-        { id: 'dg1', quantity: 1 }
-      ]);
+      const testResolver = async (id: string) => {
+        if (id === 'dg1') return { price: 9500000, name: 'Authentic 22K Dogri Jhumki' };
+        return null;
+      };
+
+      const result = await calculateOrderPricingServer(
+        [{ id: 'dg1', quantity: 1 }],
+        testResolver
+      );
 
       assert.equal(result.items.length, 1);
       assert.equal(result.subtotal_paise, 9500000); // ₹95,000

@@ -128,7 +128,7 @@ export async function saveDailyRates(rates: DailyRates): Promise<DailyRates> {
 }
 
 /**
- * Fetch all customer savings goals.
+ * Fetch all customer savings goals via authenticated admin endpoint.
  */
 export async function getSavingsGoals(): Promise<SavingsGoal[]> {
   let localGoals: SavingsGoal[] = [];
@@ -141,17 +141,12 @@ export async function getSavingsGoals(): Promise<SavingsGoal[]> {
         console.error('Error parsing local savings goals:', e);
       }
     }
-  }
 
-  if (isSupabaseConfigured) {
     try {
-      const { data, error } = await supabase
-        .from('customer_savings_goals')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (data && !error) {
-        const fetchedGoals: SavingsGoal[] = data.map((item) => ({
+      const res = await fetch('/api/admin/savings-goals');
+      const data = await res.json();
+      if (res.ok && data.success && Array.isArray(data.goals)) {
+        const fetchedGoals: SavingsGoal[] = data.goals.map((item: any) => ({
           id: item.id,
           customerName: item.customer_name,
           customerPhone: item.customer_phone,
@@ -165,13 +160,11 @@ export async function getSavingsGoals(): Promise<SavingsGoal[]> {
           updatedAt: item.updated_at || new Date().toISOString(),
         }));
 
-        if (typeof window !== 'undefined') {
-          localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(fetchedGoals));
-        }
+        localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(fetchedGoals));
         return fetchedGoals;
       }
     } catch (err) {
-      console.warn('Supabase savings goals fetch error, using local:', err);
+      console.warn('Savings goals server fetch error, using local:', err);
     }
   }
 
@@ -179,7 +172,7 @@ export async function getSavingsGoals(): Promise<SavingsGoal[]> {
 }
 
 /**
- * Save or update a customer savings goal.
+ * Save or update a customer savings goal via authenticated admin endpoint.
  */
 export async function saveSavingsGoal(goal: SavingsGoal): Promise<SavingsGoal[]> {
   const currentGoals = await getSavingsGoals();
@@ -195,24 +188,15 @@ export async function saveSavingsGoal(goal: SavingsGoal): Promise<SavingsGoal[]>
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(updatedGoals));
-  }
 
-  if (isSupabaseConfigured) {
     try {
-      await supabase.from('customer_savings_goals').upsert({
-        id: goal.id,
-        customer_name: goal.customerName,
-        customer_phone: goal.customerPhone,
-        event_name: goal.eventName,
-        target_weight_grams: goal.targetWeightGrams,
-        target_amount_rupees: goal.targetAmountRupees,
-        target_purity: goal.targetPurity,
-        target_date: goal.targetDate || null,
-        payments: goal.payments,
-        updated_at: new Date().toISOString(),
+      await fetch('/api/admin/savings-goals', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ goal })
       });
     } catch (err) {
-      console.warn('Error saving goal to Supabase:', err);
+      console.warn('Error saving goal to server endpoint:', err);
     }
   }
 
@@ -220,7 +204,7 @@ export async function saveSavingsGoal(goal: SavingsGoal): Promise<SavingsGoal[]>
 }
 
 /**
- * Delete a customer savings goal.
+ * Delete a customer savings goal via authenticated admin endpoint.
  */
 export async function deleteSavingsGoal(id: string): Promise<SavingsGoal[]> {
   const currentGoals = await getSavingsGoals();
@@ -228,13 +212,13 @@ export async function deleteSavingsGoal(id: string): Promise<SavingsGoal[]> {
 
   if (typeof window !== 'undefined') {
     localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(updatedGoals));
-  }
 
-  if (isSupabaseConfigured) {
     try {
-      await supabase.from('customer_savings_goals').delete().eq('id', id);
+      await fetch(`/api/admin/savings-goals?id=${encodeURIComponent(id)}`, {
+        method: 'DELETE'
+      });
     } catch (err) {
-      console.warn('Error deleting goal from Supabase:', err);
+      console.warn('Error deleting goal on server endpoint:', err);
     }
   }
 

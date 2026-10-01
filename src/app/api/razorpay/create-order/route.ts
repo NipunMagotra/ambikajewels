@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import Razorpay from 'razorpay';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { calculateOrderPricingServer } from '@/lib/serverPricing';
+import { verifyBullionRateFreshness } from '@/app/api/admin/rates/route';
+import { isSupabaseConfigured } from '@/lib/supabase';
+import { siteConfig } from '@/config/siteConfig';
 
 export async function POST(request: Request) {
   try {
@@ -17,6 +20,20 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2. Stale Bullion Rate Guard (Blocks checkout if daily rates are outdated)
+    if (isSupabaseConfigured) {
+      const rateFreshness = await verifyBullionRateFreshness();
+      if (!rateFreshness.isFresh) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: `Store gold rates are outdated (${rateFreshness.ageHours} hours old; maximum allowed: ${siteConfig.rates.maxRateAgeHours}h). Please contact the showroom at +91 9682589725 to confirm today's live rate before checkout.`
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     const body = await request.json().catch(() => ({}));
     const { items, notes } = body;
 
@@ -27,7 +44,7 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Authoritative Server-Side Price Verification (Rejects Unknown Products, Enforces Integer Qty >= 1)
+    // 3. Authoritative Server-Side Price Verification (Rejects Unknown Products, Enforces Integer Qty >= 1)
     let validatedPricing;
     try {
       validatedPricing = await calculateOrderPricingServer(items);

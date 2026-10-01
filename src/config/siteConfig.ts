@@ -53,6 +53,18 @@ export const siteConfig = {
   
   returnWindowDays: 7, // 7-day inspection and return window
   
+  // Feature Flags
+  features: {
+    // HIGH LEGAL RISK: Must remain false until corporate structure and advance-booking terms are approved by CA/lawyer
+    savingsGoalsEnabled: process.env.NEXT_PUBLIC_ENABLE_SAVINGS_GOALS === 'true',
+  },
+  
+  // Bullion Rates & Stale Rate Guards
+  rates: {
+    maxDeviationPercent: 10, // Max 10% change without confirm_large_change flag
+    maxRateAgeHours: 24, // Stale if older than 24 hours
+  },
+  
   shipping: {
     courierPartner: "BVC Logistics Secure Armed Network",
     freeThreshold: 5000000, // in paise (₹50,000)

@@ -22,11 +22,14 @@ import {
   Coins,
 } from 'lucide-react';
 
+import { siteConfig } from '@/config/siteConfig';
+
 interface SavingsGoalTrackerProps {
   rates: DailyRates;
 }
 
 export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates }) => {
+  const isFeatureEnabled = siteConfig.features.savingsGoalsEnabled;
   const [goals, setGoals] = useState<SavingsGoal[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
@@ -202,13 +205,38 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
         </div>
 
         <button
-          onClick={() => setShowAddModal(true)}
-          className="gold-bg-gradient font-bold text-on-primary-fixed py-3 px-5 rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2 text-sm shrink-0 cursor-pointer min-h-[48px]"
+          onClick={() => {
+            if (isFeatureEnabled) setShowAddModal(true);
+          }}
+          disabled={!isFeatureEnabled}
+          title={!isFeatureEnabled ? 'Feature pending CA/lawyer regulatory review' : undefined}
+          className={`font-bold py-3 px-5 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 text-sm shrink-0 min-h-[48px] ${
+            isFeatureEnabled
+              ? 'gold-bg-gradient text-on-primary-fixed hover:shadow-primary/20 cursor-pointer'
+              : 'bg-surface-container-high border border-outline-variant/40 text-on-surface-variant opacity-60 cursor-not-allowed'
+          }`}
         >
           <Plus className="w-4 h-4" />
           <span>New Customer Savings Goal</span>
         </button>
       </div>
+
+      {!isFeatureEnabled && (
+        <div className="p-4 sm:p-5 bg-amber-950/25 border border-amber-500/40 rounded-xl space-y-2 text-left">
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-amber-400 text-base">gavel</span>
+            <h4 className="text-xs sm:text-sm font-bold text-amber-300">
+              Savings & Gold Accumulation Feature Status: PAUSED (Pending Legal Review)
+            </h4>
+          </div>
+          <p className="text-xs text-on-surface-variant leading-relaxed">
+            Customer gold savings, chit accumulation, and installment booking features are subject to strict regulatory requirements under Indian corporate and deposit rules. This feature is set to <strong>INACTIVE (OFF)</strong> until the business structure, terms of advance booking, and maturity conditions are formally reviewed and approved by your Chartered Accountant and legal counsel.
+          </p>
+          <p className="text-[11px] text-amber-400/80 font-mono">
+            Feature Flag: NEXT_PUBLIC_ENABLE_SAVINGS_GOALS = false
+          </p>
+        </div>
+      )}
 
       {/* Loading state */}
       {isLoading ? (

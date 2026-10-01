@@ -3,6 +3,19 @@ import crypto from 'crypto';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 
+/**
+ * Razorpay Webhook Receiver
+ *
+ * Exact Order of Operations:
+ * 1. Cryptographic HMAC-SHA256 signature verification on untampered RAW body buffer.
+ * 2. Idempotency check: Query `webhook_events` for existing 'completed' event.
+ * 3. Locate order in database via `razorpay_order_id` (or fallback `razorpay_payment_id`).
+ * 4. Amount Verification:
+ *    - If mismatch detected: return HTTP 200, record 'amount_mismatch' in `webhook_events`, flag order for review, log alert.
+ * 5. Order Transition: Update database order to 'paid'.
+ * 6. DB Failure Guard: If order update fails, DO NOT mark event as completed; return HTTP 500 so Razorpay retries.
+ * 7. Mark Event Completed: Only after order update succeeds, record event as 'completed' in `webhook_events` (zero PII stored).
+ */
 export async function POST(request: Request) {
   try {
     // 1. Capture Raw Body and Signature for Cryptographic Verification
@@ -50,23 +63,21 @@ export async function POST(request: Request) {
 
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
 
-    // 3. Persistent Database Deduplication (Replay Protection Across Serverless Lambdas)
+    // 3. Persistent Database Deduplication Check (Only skip if event was already COMPLETED)
     if (dbClient && eventId) {
       try {
-        const { error: dedupeErr } = await dbClient.from('webhook_events').insert({
-          id: eventId,
-          source: 'razorpay',
-          event_type: eventType,
-          payload: { event: eventType, account_id: event.account_id }
-        });
+        const { data: existingEvent } = await dbClient
+          .from('webhook_events')
+          .select('id, status')
+          .eq('id', eventId)
+          .maybeSingle();
 
-        // Postgres 23505 = unique_violation
-        if (dedupeErr && dedupeErr.code === '23505') {
-          console.log(`[WEBHOOK IDEMPOTENT] Event ${eventId} was already recorded in database.`);
+        if (existingEvent && existingEvent.status === 'completed') {
+          console.log(`[WEBHOOK IDEMPOTENT] Event ${eventId} was previously successfully completed.`);
           return NextResponse.json({ success: true, idempotent: true, message: 'Event already processed' });
         }
       } catch (dbDedupeErr) {
-        console.warn('[WEBHOOK PERSISTENT DEDUPE EXCEPTION]', dbDedupeErr);
+        console.warn('[WEBHOOK PERSISTENT DEDUPE QUERY EXCEPTION]', dbDedupeErr);
       }
     }
 
@@ -102,9 +113,18 @@ export async function POST(request: Request) {
         }
 
         if (existing) {
-          // Idempotent: already marked as paid
+          // Idempotent: order already marked as paid
           if (existing.status === 'paid') {
             console.log(`[WEBHOOK IDEMPOTENT] Order ${existing.id} already marked as paid.`);
+            if (eventId) {
+              await dbClient.from('webhook_events').upsert({
+                id: eventId,
+                source: 'razorpay',
+                event_type: eventType,
+                status: 'completed',
+                processed_at: new Date().toISOString()
+              });
+            }
             return NextResponse.json({ success: true, idempotent: true });
           }
 
@@ -112,23 +132,39 @@ export async function POST(request: Request) {
           if (typeof paidAmountPaise === 'number' && existing.total) {
             if (paidAmountPaise !== existing.total) {
               console.error(
-                `[SECURITY ALERT] Payment amount mismatch on order ${existing.id}! Razorpay paid: ${paidAmountPaise}, Stored total: ${existing.total}`
+                `[SECURITY ALERT - MANUAL REVIEW REQUIRED] Webhook payment amount mismatch on order ${existing.id}! Razorpay paid: ${paidAmountPaise} paise (₹${paidAmountPaise / 100}), Stored total: ${existing.total} paise (₹${existing.total / 100})`
               );
+
+              // Flag order in database for manual review
               await dbClient
                 .from('orders')
                 .update({
-                  notes: `SECURITY ALERT: Payment amount mismatch! Received: ${paidAmountPaise} paise, Expected: ${existing.total} paise. Investigate before dispatch.`,
+                  status: 'flagged_mismatch',
+                  notes: `[SECURITY AUDIT REQUIRED] Payment amount mismatch: Received ₹${paidAmountPaise / 100} (${paidAmountPaise} paise), Expected ₹${existing.total / 100} (${existing.total} paise). DO NOT DISPATCH. Confirm with customer and CA before proceeding.`,
                   updated_at: new Date().toISOString()
                 })
                 .eq('id', existing.id);
 
+              // Store flagged record in webhook_events (minimal non-PII record)
+              if (eventId) {
+                await dbClient.from('webhook_events').upsert({
+                  id: eventId,
+                  source: 'razorpay',
+                  event_type: eventType,
+                  status: 'amount_mismatch',
+                  processed_at: new Date().toISOString()
+                });
+              }
+
+              // Return HTTP 200 so Razorpay does not retry endlessly, but alert is stored and order is blocked from dispatch
               return NextResponse.json(
-                { success: false, error: 'Payment amount does not match stored order total' },
-                { status: 400 }
+                { success: true, warning: 'Payment amount mismatch flagged for manual review' },
+                { status: 200 }
               );
             }
           }
 
+          // 5. Update Order to 'paid' in Database
           const { error: updateErr } = await dbClient
             .from('orders')
             .update({
@@ -139,10 +175,25 @@ export async function POST(request: Request) {
             })
             .eq('id', existing.id);
 
+          // 6. DB Failure Guard: If update fails, DO NOT mark event completed; return HTTP 500
           if (updateErr) {
-            console.error('[WEBHOOK DB UPDATE ERROR]', updateErr);
-            // Return 500 so Razorpay retries
-            return NextResponse.json({ success: false, error: 'Failed to update order status' }, { status: 500 });
+            console.error('[WEBHOOK DB UPDATE ERROR] Order update failed:', updateErr);
+            return NextResponse.json(
+              { success: false, error: 'Database update failed. Requesting retry.' },
+              { status: 500 }
+            );
+          }
+
+          // 7. Mark Event Completed: Only after order update succeeds
+          // Minimal fields only: NO customer email, phone, address, or payment card details!
+          if (eventId) {
+            await dbClient.from('webhook_events').upsert({
+              id: eventId,
+              source: 'razorpay',
+              event_type: eventType,
+              status: 'completed',
+              processed_at: new Date().toISOString()
+            });
           }
 
           console.log(`[WEBHOOK SUCCESS] Order ${existing.order_number || existing.id} marked as paid.`);
