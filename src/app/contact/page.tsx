@@ -17,6 +17,7 @@ export default function ContactPage() {
     subject: 'General Inquiry',
     message: '',
   });
+  const [marketingConsent, setMarketingConsent] = useState(false); // DPDP Act 2023: Unticked by default
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -133,6 +134,12 @@ export default function ContactPage() {
                   </div>
                 ) : (
                   <form onSubmit={handleSubmit} className="space-y-4">
+                    {/* DPDP Statutory Notice */}
+                    <div className="p-3 bg-surface-container-high/60 border border-outline-variant/30 rounded-xs text-[11px] text-on-surface-variant flex items-start gap-2 mb-2 leading-relaxed">
+                      <span className="material-symbols-outlined text-primary text-base shrink-0 mt-0.5">shield</span>
+                      <span><strong>DPDP Privacy Notice:</strong> Your name, email, and phone are collected strictly to respond to your consultation. We do not sell your personal data to marketing agencies.</span>
+                    </div>
+
                     <div>
                       <label className="font-label-caps text-[10px] text-on-surface-variant block mb-1 font-semibold">YOUR FULL NAME *</label>
                       <input 
@@ -197,9 +204,22 @@ export default function ContactPage() {
                       ></textarea>
                     </div>
 
+                    {/* DPDP Act 2023: Unticked Optional Marketing Consent */}
+                    <label className="flex items-start gap-2.5 cursor-pointer text-xs text-on-surface-variant pt-2">
+                      <input 
+                        type="checkbox"
+                        checked={marketingConsent}
+                        onChange={e => setMarketingConsent(e.target.checked)}
+                        className="accent-primary w-3.5 h-3.5 mt-0.5 cursor-pointer rounded shrink-0"
+                      />
+                      <span className="text-[11px] leading-relaxed">
+                        (Optional) Send me WhatsApp & SMS updates on custom Dogra heritage releases and showroom exhibitions.
+                      </span>
+                    </label>
+
                     <button 
                       type="submit" 
-                      className="w-full bg-primary-container px-8 py-3.5 font-label-caps text-xs text-primary border-[1.5px] border-primary hover:bg-primary hover:text-on-primary transition-colors font-bold tracking-wider"
+                      className="w-full bg-primary-container px-8 py-3.5 font-label-caps text-xs text-primary border-[1.5px] border-primary hover:bg-primary hover:text-on-primary transition-colors font-bold tracking-wider mt-2"
                     >
                       SEND INQUIRY TO CONCIERGE
                     </button>

@@ -68,6 +68,7 @@ export default function CheckoutPage() {
   const [secondsRemaining, setSecondsRemaining] = useState(rateLockDuration);
   const [rateLockExpired, setRateLockExpired] = useState(false);
   const [rateLockToken, setRateLockToken] = useState<string | null>(null);
+  const [marketingConsent, setMarketingConsent] = useState(false); // DPDP Act 2023: Unticked by default
 
   const fetchServerRateLock = async () => {
     try {
@@ -465,6 +466,12 @@ export default function CheckoutPage() {
                   <h2 className="font-headline-md text-xl sm:text-2xl text-primary">Guest Shipping Information</h2>
                   <span className="font-label-caps text-[10px] bg-primary/10 text-primary px-2.5 py-1 font-semibold tracking-wider">NO LOGIN REQUIRED</span>
                 </div>
+
+                {/* DPDP Statutory Collection Notice */}
+                <div className="p-3 mb-6 bg-surface-container-high/60 border border-outline-variant/30 rounded-xs text-[11px] text-on-surface-variant flex items-start gap-2.5 leading-relaxed">
+                  <span className="material-symbols-outlined text-primary text-base shrink-0 mt-0.5">shield</span>
+                  <span><strong>DPDP Collection Notice:</strong> Your identity and shipping details are collected strictly to fulfill your jewelry purchase, generate statutory GST tax invoices, and coordinate insured armored delivery via BVC Logistics. Data is encrypted and never sold to third parties.</span>
+                </div>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
                   <div>
@@ -670,6 +677,19 @@ export default function CheckoutPage() {
                     />
                     <span className="font-body-md text-xs text-on-surface-variant leading-relaxed">
                       I have read and agree to the <Link href="/terms" target="_blank" className="text-primary underline font-semibold">Terms & Conditions</Link>, <Link href="/shipping-policy" target="_blank" className="text-primary underline font-semibold">Shipping Policy</Link>, and <Link href="/refund-policy" target="_blank" className="text-primary underline font-semibold">Cancellation & Refund Policy</Link> of Ambika Jewels.
+                    </span>
+                  </label>
+
+                  {/* DPDP Act 2023: Unticked Optional Marketing Consent */}
+                  <label className="flex items-start gap-3 cursor-pointer mt-3 pt-3 border-t border-outline-variant/20">
+                    <input 
+                      type="checkbox"
+                      checked={marketingConsent}
+                      onChange={e => setMarketingConsent(e.target.checked)}
+                      className="mt-0.5 accent-primary h-4 w-4 shrink-0 rounded cursor-pointer"
+                    />
+                    <span className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+                      (Optional) Send me WhatsApp & SMS updates regarding new Dogra heritage collections, bridal launches, and showroom events.
                     </span>
                   </label>
                 </div>
