@@ -233,3 +233,21 @@ export function numberToIndianWords(amount: number): string {
   return words + ' Only';
 }
 
+/**
+ * Computes Indian Financial Year (April 1 to March 31).
+ * Example:
+ * - October 2026 -> '26-27'
+ * - February 2027 -> '26-27'
+ * - April 2027 -> '27-28'
+ */
+export function getIndianFinancialYear(date: Date = new Date()): string {
+  const month = date.getMonth(); // 0-indexed: 0 = Jan, 3 = Apr
+  const year = date.getFullYear();
+  const startYear = month >= 3 ? year : year - 1;
+  const endYear = startYear + 1;
+  const sy = String(startYear).slice(-2);
+  const ey = String(endYear).slice(-2);
+  return `${sy}-${ey}`;
+}
+
+

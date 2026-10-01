@@ -3,6 +3,7 @@ import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { checkRateLimit } from '@/lib/rateLimit';
 import { calculateOrderPricingServer } from '@/lib/serverPricing';
+import { generateSecureOrderNumber } from '@/lib/orderUtils';
 
 export async function POST(request: Request) {
   try {
@@ -39,7 +40,8 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: errMsg }, { status: 400 });
     }
 
-    const orderNumber = `AMB-${Math.floor(100000 + Math.random() * 900000)}`;
+    // F6: Non-guessable order identifiers
+    const orderNumber = generateSecureOrderNumber();
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
 
     let order = null;

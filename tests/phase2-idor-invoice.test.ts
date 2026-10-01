@@ -43,7 +43,7 @@ test('3. Proof of Ownership: Valid phone number grants authenticated invoice acc
   assert.match(inv.invoice_number, /^AJ\/26-27\/108249/);
   assert.equal(inv.hsn_code, '7113');
   assert.ok(Array.isArray(inv.items) && inv.items.length > 0);
-  assert.equal(inv.ca_confirmation_notice, 'Confirm GST treatment with CA');
+  assert.equal(inv._internal_ca_checklist, 'TODO: Confirm GST treatment with CA on margin scheme vs outward supply');
   assert.equal(typeof inv.amount_in_words, 'string');
   assert.match(inv.amount_in_words, /^Rupees .* Only$/);
 

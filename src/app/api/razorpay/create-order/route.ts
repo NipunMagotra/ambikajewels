@@ -5,6 +5,7 @@ import { calculateOrderPricingServer } from '@/lib/serverPricing';
 import { verifyBullionRateFreshness } from '@/app/api/admin/rates/route';
 import { isSupabaseConfigured } from '@/lib/supabase';
 import { siteConfig } from '@/config/siteConfig';
+import { verifyRateLockToken } from '@/lib/rateLock';
 
 export async function POST(request: Request) {
   try {
@@ -20,22 +21,38 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Stale Bullion Rate Guard (Blocks checkout if daily rates are outdated)
-    if (isSupabaseConfigured) {
-      const rateFreshness = await verifyBullionRateFreshness();
-      if (!rateFreshness.isFresh) {
+    const body = await request.json().catch(() => ({}));
+    const { items, notes, rate_lock_token } = body;
+
+    // 2. Server-Side Rate-Lock Verification (F3: Guarantees price against stale rates via signed token)
+    if (rate_lock_token) {
+      const lockVerification = verifyRateLockToken(rate_lock_token);
+      if (!lockVerification.valid) {
         return NextResponse.json(
           {
             success: false,
-            error: `Store gold rates are outdated (${rateFreshness.ageHours} hours old; maximum allowed: ${siteConfig.rates.maxRateAgeHours}h). Please contact the showroom at +91 9682589725 to confirm today's live rate before checkout.`
+            error: lockVerification.expired
+              ? 'Your 15-minute price rate-lock window has expired. Please refresh rates before submitting payment.'
+              : (lockVerification.error || 'Invalid or forged rate-lock token. Please refresh checkout.')
           },
           { status: 400 }
         );
       }
     }
 
-    const body = await request.json().catch(() => ({}));
-    const { items, notes } = body;
+    // 3. Stale Bullion Rate Guard (F8: Configurable, friendly customer message)
+    if (isSupabaseConfigured) {
+      const rateFreshness = await verifyBullionRateFreshness();
+      if (!rateFreshness.isFresh) {
+        return NextResponse.json(
+          {
+            success: false,
+            error: siteConfig.rates.staleRateCustomerMessage || `Daily bullion rates are being refreshed by our Jammu showroom. Please contact us at +91 9682589725 to confirm today's live rate before checkout.`
+          },
+          { status: 400 }
+        );
+      }
+    }
 
     if (!Array.isArray(items) || items.length === 0) {
       return NextResponse.json(

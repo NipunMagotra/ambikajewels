@@ -124,6 +124,11 @@ export default function ChatWidget() {
           </button>
         </div>
 
+        {/* AI Assistant Disclaimer Banner */}
+        <div className="bg-surface-container-lowest px-3 py-1 border-b border-outline-variant/30 text-[9px] text-on-surface-variant font-label-caps tracking-wider text-center">
+          AI Assistant • Please confirm live rates & stock with showroom
+        </div>
+
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-3.5 custom-scrollbar bg-surface flex flex-col gap-3">
           {messages.map(msg => (
@@ -136,7 +141,7 @@ export default function ChatWidget() {
                 {msg.text}
               </div>
               
-              {/* Product Recommendations */}
+              {/* Product Recommendations (Links to product page without quoting fluctuating rates) */}
               {msg.products && msg.products.length > 0 && (
                 <div className="mt-2.5 flex gap-2 overflow-x-auto max-w-full custom-scrollbar pb-1.5">
                   {msg.products.map(p => (
@@ -145,7 +150,7 @@ export default function ChatWidget() {
                         <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${p.images[0]}')` }} />
                       </div>
                       <p className="font-label-caps text-[9px] text-on-surface truncate">{p.name}</p>
-                      <p className="font-label-caps text-[9px] text-primary font-bold">{p.display_price}</p>
+                      <p className="font-label-caps text-[8px] text-primary font-semibold tracking-wider uppercase mt-0.5">View Details →</p>
                     </Link>
                   ))}
                 </div>

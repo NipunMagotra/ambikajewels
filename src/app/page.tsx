@@ -10,6 +10,7 @@ import HeritageSection from '@/components/home/HeritageSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Product } from '@/types';
+import { siteConfig } from '@/config/siteConfig';
 import { mockProducts } from '@/data/mockProducts';
 
 export const revalidate = 3600; // Revalidate every hour
@@ -27,7 +28,8 @@ export default async function Home() {
     }
   }
 
-  if (displayProducts.length === 0) {
+  // F5: Fallback to mockProducts only if explicitly enabled in siteConfig
+  if (displayProducts.length === 0 && siteConfig.features.useMockProductsFallback) {
     displayProducts = mockProducts.filter(p => p.is_featured).slice(0, 8);
   }
 

@@ -5,6 +5,7 @@ import ProductCard from '@/components/catalog/ProductCard';
 import FilterBar from '@/components/catalog/FilterBar';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Product } from '@/types';
+import { siteConfig } from '@/config/siteConfig';
 import { mockProducts } from '@/data/mockProducts';
 
 export const revalidate = 60; // Revalidate every minute
@@ -38,7 +39,8 @@ export default async function CollectionsPage({
     }
   }
 
-  if (displayProducts.length === 0) {
+  // F5: Fallback to mockProducts only if explicitly enabled in siteConfig
+  if (displayProducts.length === 0 && siteConfig.features.useMockProductsFallback) {
     let filtered = [...mockProducts];
     if (category && category !== 'All') {
       const catLower = category.toLowerCase();

@@ -6,6 +6,7 @@ import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { encryptSensitiveData, generateOrderAccessToken } from '@/lib/encryption';
 import { sendOrderConfirmationEmail, sendAdminBvcFailureAlert } from '@/lib/email';
 import { createBvcShipment } from '@/lib/bvcLogistics';
+import { generateSecureOrderNumber } from '@/lib/orderUtils';
 
 interface GuestCustomerInfo {
   first_name: string;
@@ -150,7 +151,8 @@ export async function POST(request: Request) {
       }
     }
 
-    const orderNumber = `AMB-${Math.floor(100000 + Math.random() * 900000)}`;
+    // F6: Non-guessable order identifiers
+    const orderNumber = generateSecureOrderNumber();
 
     // 3. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
     const encryptedPan = customer_info?.pan_number

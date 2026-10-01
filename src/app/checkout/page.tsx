@@ -67,6 +67,28 @@ export default function CheckoutPage() {
   const rateLockDuration = (siteConfig.rates.rateLockMinutes || 15) * 60;
   const [secondsRemaining, setSecondsRemaining] = useState(rateLockDuration);
   const [rateLockExpired, setRateLockExpired] = useState(false);
+  const [rateLockToken, setRateLockToken] = useState<string | null>(null);
+
+  const fetchServerRateLock = async () => {
+    try {
+      const res = await fetch('/api/rates/lock');
+      const data = await res.json();
+      if (res.ok && data.token) {
+        setRateLockToken(data.token);
+        const remSecs = Math.max(0, Math.floor((data.expires_at - Date.now()) / 1000));
+        setSecondsRemaining(remSecs);
+        setRateLockExpired(remSecs <= 0);
+      } else {
+        setSecondsRemaining(rateLockDuration);
+      }
+    } catch {
+      setSecondsRemaining(rateLockDuration);
+    }
+  };
+
+  useEffect(() => {
+    fetchServerRateLock();
+  }, []);
 
   useEffect(() => {
     if (secondsRemaining <= 0) {
@@ -87,10 +109,9 @@ export default function CheckoutPage() {
     return () => clearInterval(interval);
   }, [secondsRemaining]);
 
-  const handleRefreshRateLock = () => {
-    setSecondsRemaining(rateLockDuration);
-    setRateLockExpired(false);
+  const handleRefreshRateLock = async () => {
     setErrorMessage(null);
+    await fetchServerRateLock();
   };
 
   const formatLockTime = (secs: number) => {
@@ -187,6 +208,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           amount: finalTotal,
           items: state.items,
+          rate_lock_token: rateLockToken,
           notes: {
             customer_name: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,

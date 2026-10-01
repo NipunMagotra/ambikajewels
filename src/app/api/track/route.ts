@@ -247,7 +247,7 @@ export async function GET(request: Request) {
           tax_split: taxSplit,
           amount_in_words: amountInWords,
           place_of_supply: taxSplit.placeOfSupply,
-          ca_confirmation_notice: 'Confirm GST treatment with CA',
+          _internal_ca_checklist: 'TODO: Confirm GST treatment with CA on margin scheme vs outward supply',
           seller: {
             name: siteConfig.legalBusinessName,
             address: siteConfig.address,

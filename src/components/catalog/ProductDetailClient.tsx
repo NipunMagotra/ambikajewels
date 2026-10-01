@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import type { Product } from '@/types';
 import { getProductWhatsAppUrl } from '@/utils/whatsapp';
+import { siteConfig } from '@/config/siteConfig';
 
 export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
@@ -135,48 +136,52 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             Net retail price inclusive of 3% GST & BIS Hallmarking • Fully insured delivery by BVC Logistics
           </p>
 
-          {/* Interactive Transparent Price Breakup Accordion */}
-          <button
-            type="button"
-            onClick={() => setShowPriceBreakup(!showPriceBreakup)}
-            className="mt-3 text-xs text-primary hover:text-primary-container font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
-          >
-            <span className="material-symbols-outlined text-sm">
-              {showPriceBreakup ? 'expand_less' : 'price_change'}
-            </span>
-            <span>{showPriceBreakup ? 'Hide Price Breakup' : 'View Transparent Price Breakup (Metal + Making + GST)'}</span>
-          </button>
+          {/* F4: Hide PDP Price Breakup behind feature flag until dynamic product pricing exists */}
+          {Boolean(siteConfig.features.showPdpPriceBreakup && (estimatedMetalValue + estimatedMakingCharge + hallmarkFee + gstRupees === totalRupees)) && (
+            <>
+              <button
+                type="button"
+                onClick={() => setShowPriceBreakup(!showPriceBreakup)}
+                className="mt-3 text-xs text-primary hover:text-primary-container font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+              >
+                <span className="material-symbols-outlined text-sm">
+                  {showPriceBreakup ? 'expand_less' : 'price_change'}
+                </span>
+                <span>{showPriceBreakup ? 'Hide Price Breakup' : 'View Transparent Price Breakup (Metal + Making + GST)'}</span>
+              </button>
 
-          {showPriceBreakup && (
-            <div className="mt-3 p-3.5 bg-surface-container border border-outline-variant/30 rounded-xs text-xs font-body-md space-y-2">
-              <div className="flex justify-between items-center text-on-surface-variant">
-                <span>Precious Metal ({netWeight.toFixed(2)}g {product.purity || '22K'})</span>
-                <span className="font-mono font-semibold text-on-surface">₹{estimatedMetalValue.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between items-center text-on-surface-variant">
-                <span>Artisanal Making Charges</span>
-                <span className="font-mono font-semibold text-on-surface">+₹{estimatedMakingCharge.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between items-center text-on-surface-variant">
-                <span>BIS Hallmarking Fee</span>
-                <span className="font-mono font-semibold text-on-surface">+₹{hallmarkFee.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between items-center text-on-surface-variant pt-1 border-t border-outline-variant/20">
-                <span>Taxable Value (Pre-tax)</span>
-                <span className="font-mono text-on-surface">₹{preTaxSubtotal.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between items-center text-on-surface-variant">
-                <span>GST (3% on HSN 7113)</span>
-                <span className="font-mono font-semibold text-primary">+₹{gstRupees.toLocaleString('en-IN')}</span>
-              </div>
-              <div className="flex justify-between items-center pt-1.5 border-t border-outline-variant/30 font-bold text-sm text-primary">
-                <span>Final Payable Amount</span>
-                <span className="font-mono">{product.display_price}</span>
-              </div>
-              <p className="text-[10px] text-on-surface-variant/70 italic pt-1">
-                * Transparent pricing guarantee: No hidden surcharges. Subject to daily live Jammu bullion rates.
-              </p>
-            </div>
+              {showPriceBreakup && (
+                <div className="mt-3 p-3.5 bg-surface-container border border-outline-variant/30 rounded-xs text-xs font-body-md space-y-2">
+                  <div className="flex justify-between items-center text-on-surface-variant">
+                    <span>Precious Metal ({netWeight.toFixed(2)}g {product.purity || '22K'})</span>
+                    <span className="font-mono font-semibold text-on-surface">₹{estimatedMetalValue.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-on-surface-variant">
+                    <span>Artisanal Making Charges</span>
+                    <span className="font-mono font-semibold text-on-surface">+₹{estimatedMakingCharge.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-on-surface-variant">
+                    <span>BIS Hallmarking Fee</span>
+                    <span className="font-mono font-semibold text-on-surface">+₹{hallmarkFee.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-on-surface-variant pt-1 border-t border-outline-variant/20">
+                    <span>Taxable Value (Pre-tax)</span>
+                    <span className="font-mono text-on-surface">₹{preTaxSubtotal.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center text-on-surface-variant">
+                    <span>GST (3% on HSN 7113)</span>
+                    <span className="font-mono font-semibold text-primary">+₹{gstRupees.toLocaleString('en-IN')}</span>
+                  </div>
+                  <div className="flex justify-between items-center pt-1.5 border-t border-outline-variant/30 font-bold text-sm text-primary">
+                    <span>Final Payable Amount</span>
+                    <span className="font-mono">{product.display_price}</span>
+                  </div>
+                  <p className="text-[10px] text-on-surface-variant/70 italic pt-1">
+                    * Transparent pricing guarantee: No hidden surcharges. Subject to daily live Jammu bullion rates.
+                  </p>
+                </div>
+              )}
+            </>
           )}
         </div>
 

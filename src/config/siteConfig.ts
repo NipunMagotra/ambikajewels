@@ -57,6 +57,10 @@ export const siteConfig = {
   features: {
     // HIGH LEGAL RISK: Must remain false until corporate structure and advance-booking terms are approved by CA/lawyer
     savingsGoalsEnabled: process.env.NEXT_PUBLIC_ENABLE_SAVINGS_GOALS === 'true',
+    // F4: Hide PDP price breakup until dynamic product pricing schema is applied to database
+    showPdpPriceBreakup: false,
+    // F5: Mock products fallback (default false; Supabase DB is single source of truth)
+    useMockProductsFallback: false,
   },
   
   // Bullion Rates & Stale Rate Guards
@@ -64,6 +68,7 @@ export const siteConfig = {
     maxDeviationPercent: 10, // Max 10% change without confirm_large_change flag
     maxRateAgeHours: 24, // Stale if older than 24 hours
     rateLockMinutes: 15, // Checkout price rate-lock window in minutes
+    staleRateCustomerMessage: "Our daily bullion rates are currently being refreshed by our showroom team to match the latest market opening. Please check back shortly or call us directly at +91 9682589725 to confirm today's live rate and place your order.",
   },
   
   shipping: {

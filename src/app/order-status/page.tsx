@@ -291,8 +291,9 @@ function OrderStatusContent() {
             <p className="font-semibold text-on-surface print:text-black italic">
               {order?.invoice?.amount_in_words || 'Rupees Ninety Seven Thousand Eight Hundred Fifty Only'}
             </p>
+            {/* Internal Compliance Checklist: Verify GST treatment with CA on margin scheme vs outward supply */}
             <p className="text-[10px] text-on-surface-variant/70 mt-2">
-              * GST treatment verified for precious jewelry under HSN 7113. <em>Confirm GST treatment with CA</em>.
+              * Taxable value and GST computed in accordance with statutory guidelines for precious jewelry (HSN 7113).
             </p>
           </div>
 

@@ -1,9 +1,44 @@
 import { NextResponse } from 'next/server';
 import { siteConfig } from '@/config/siteConfig';
-import { mockProducts } from '@/data/mockProducts';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { storeKnowledge, faqItems } from '@/data/storeKnowledge';
 import { checkRateLimit } from '@/lib/rateLimit';
-import type { Product } from '@/types';
+
+// PII Redaction utility (DPDP compliance / Phase 3 Item 4)
+export function redactPiiForChat(text: string): string {
+  if (!text) return '';
+  return text
+    // Redact 10-digit Indian mobile numbers (with optional +91, 0, or spaces/dashes)
+    .replace(/(?:\+91[\s-]?)?[6-9]\d{4}[\s-]?\d{5}\b/g, '[PHONE REDACTED]')
+    // Redact email addresses
+    .replace(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g, '[EMAIL REDACTED]')
+    // Redact PAN (5 letters, 4 digits, 1 letter)
+    .replace(/\b[A-Z]{5}[0-9]{4}[A-Z]{1}\b/gi, '[PAN REDACTED]')
+    // Redact Aadhaar (12 digits, optional spaces)
+    .replace(/\b\d{4}\s?\d{4}\s?\d{4}\b/g, '[ID REDACTED]')
+    // Redact 6-digit Indian PIN codes
+    .replace(/\b[1-9][0-9]{5}\b/g, '[PINCODE REDACTED]');
+}
+
+// Prompt Injection Defense (Phase 3 Item 4)
+export function detectPromptInjection(text: string): boolean {
+  if (!text) return false;
+  const injectionPatterns = [
+    /ignore\s+(all\s+)?(previous|prior|above)\s+(instructions|directives|prompts|rules)/i,
+    /disregard\s+(all\s+)?(previous|prior|above)/i,
+    /system\s+prompt/i,
+    /reveal\s+(your|the)\s+(instructions|system\s+message|prompt)/i,
+    /you\s+are\s+now\s+(an\s+unrestricted|DAN|a\s+hacker|in\s+developer\s+mode)/i,
+    /jailbreak/i,
+    /bypass\s+(safety|content|system)\s+filter/i,
+    /<\|im_start\|>/i,
+    /<\|im_end\|>/i,
+    /\[INST\]/i,
+    /\[\/INST\]/i
+  ];
+  return injectionPatterns.some(pattern => pattern.test(text));
+}
 
 function extractKeywords(message: string): string[] {
   return message
@@ -44,25 +79,63 @@ function matchesKeyword(token: string, keyword: string): boolean {
   return false;
 }
 
-function parseBudget(message: string): number | null {
-  const match = message.match(/(?:under|<|below|max)\s*(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*)/i) || 
-                message.match(/(?:₹|rs\.?|inr)?\s*(\d+(?:,\d+)*)\s*(?:or less)/i);
-  
-  if (match && match[1]) {
-    return parseInt(match[1].replace(/,/g, ''), 10) * 100;
-  }
-  return null;
-}
-
 function parseCategory(message: string): string | null {
   const lowerMsg = message.toLowerCase();
   for (const cat of siteConfig.categories) {
-    if (lowerMsg.includes(cat.toLowerCase()) || 
-        (cat.includes('Dogra') && (lowerMsg.includes('dogra') || lowerMsg.includes('dogri')))) {
+    if (
+      lowerMsg.includes(cat.toLowerCase()) || 
+      (cat.includes('Dogra') && (lowerMsg.includes('dogra') || lowerMsg.includes('dogri')))
+    ) {
       return cat;
     }
   }
   return null;
+}
+
+interface ChatProductSummary {
+  id: string;
+  name: string;
+  slug: string;
+  category: string;
+  images: string[];
+}
+
+// F5: Fetch product catalog strictly from database (NO mockProducts, NO prices, NO stock)
+async function fetchProductsFromDb(category?: string | null, searchTerms: string[] = []): Promise<ChatProductSummary[]> {
+  const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
+  if (!dbClient) return [];
+
+  try {
+    let query = dbClient
+      .from('products')
+      .select('id, name, slug, category, images')
+      .limit(6);
+
+    if (category) {
+      query = query.ilike('category', `%${category}%`);
+    }
+
+    const { data, error } = await query;
+    if (error || !data) return [];
+
+    let filtered = data;
+    if (searchTerms.length > 0 && !category) {
+      filtered = data.filter((item: any) =>
+        searchTerms.some(term => item.name?.toLowerCase().includes(term) || item.category?.toLowerCase().includes(term))
+      );
+    }
+
+    return filtered.slice(0, 3).map((item: any) => ({
+      id: String(item.id),
+      name: item.name,
+      slug: item.slug || item.id,
+      category: item.category || 'Jewelry',
+      images: Array.isArray(item.images) && item.images.length > 0 ? item.images : ['/hero-clean.png']
+    }));
+  } catch (err) {
+    console.error('Database catalog query failed in chat:', err);
+    return [];
+  }
 }
 
 async function callGroqLlama3(
@@ -84,16 +157,23 @@ async function callGroqLlama3(
         role: 'system',
         content: `You are Aanya, the official AI Jewelry Concierge for Ambika Jewels located in Lower Roop Nagar, Jammu. 
 
-Your primary function is to assist customers with showroom collections, the Gold Exchange Program, 3D CAD customization, and custom bridal jewelry consultations.
+Your role is to assist customers with showroom collections, Dogra heritage jewelry, gold exchange inquiries, and showroom visit scheduling.
 
-### 🛑 STRICT SYSTEM GUARDRAILS (MUST OBEY) 🛑
+### 🛑 CRITICAL COMPLIANCE & SAFETY GUARDRAILS (ZERO TOLERANCE) 🛑
 
-1. **CONTEXTUAL ISOLATION:** You must answer the user's query **ONLY** using the information provided in the <KNOWLEDGE_BASE> section below. 
-2. **ZERO-FABRICATION RULE:** If the <KNOWLEDGE_BASE> does not contain the exact information needed to fully answer the prompt, you MUST output the following exact phrase and nothing else:
-   "I apologize, but I don't have the exact details for that right now. Please connect with our WhatsApp concierge at +91 9086098457 or visit our showroom, and Shivani or Lakesh will be happy to assist you directly."
-3. **NO PRICE SPECULATION:** Never guess, estimate, or hardcode gold prices, digital gold rates, or custom jewelry costs. You may only quote prices if they are explicitly passed to you in the live <KNOWLEDGE_BASE>.
-4. **NO PROMISES:** You cannot approve loans, guarantee exact delivery times, or confirm inventory. You only provide information.
-5. **TONE:** Professional, culturally respectful (honoring Dogra heritage), warm, and concise.
+1. **NO PRICE OR STOCK QUOTING (MANDATORY RULE):**
+   - You MUST NEVER quote specific prices, making charges, bullion rates, or stock availability. Gold and silver prices change daily with the market.
+   - For every product mentioned, direct the customer to its product page link: "/collections/[slug]".
+   - If asked for price or stock, respond: "Precious metal rates and live stock update daily. Please click the product link or connect with our Jammu showroom concierge on WhatsApp at +91 9086098457 for today's exact rate."
+
+2. **CONTEXTUAL ISOLATION:** 
+   - Base factual answers about the store ONLY on the provided <KNOWLEDGE_BASE>.
+   - If information is not in the knowledge base, state: "I don't have that specific detail right now. Please message our showroom team on WhatsApp at +91 9086098457 and Shivani or Lakesh will be happy to assist you directly."
+
+3. **DISCLAIMER REQUIREMENT:**
+   - Always remember you are an AI assistant. Remind users that all orders, rates, and custom jewelry details must be confirmed directly with the showroom team.
+
+4. **TONE:** Culturally respectful, honoring Dogra heritage, warm, and concise.
 
 ---
 ### 📥 <KNOWLEDGE_BASE>
@@ -117,7 +197,7 @@ ${contextInfo}
       body: JSON.stringify({
         model: 'llama-3.3-70b-versatile',
         messages: messages,
-        temperature: 0.0,
+        temperature: 0.1,
         max_tokens: 300
       })
     });
@@ -146,14 +226,14 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
+    const body = await request.json().catch(() => ({}));
     const { message, history } = body;
     
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    // 2. Input Length Guardrail (Prevents prompt bloat, memory exhaustion & large payload attacks)
+    // 2. Input Length Guardrail (Prevents prompt bloat & memory exhaustion)
     const trimmedMessage = message.trim();
     if (trimmedMessage.length > 500) {
       return NextResponse.json(
@@ -162,56 +242,66 @@ export async function POST(request: Request) {
       );
     }
 
+    // 3. Prompt Injection Defense (Phase 3 Item 4)
+    if (detectPromptInjection(trimmedMessage)) {
+      return NextResponse.json({
+        text: 'Namaste! I am Aanya, the jewelry concierge for Ambika Jewels in Jammu. I am here to assist you with our handcrafted Dogra jewelry, bridal collections, and showroom policies. How may I help you with our jewelry today?',
+        disclaimer: 'AI assistant — please confirm all details with the store.'
+      });
+    }
+
+    // 4. DPDP PII Redaction before sending to external AI (Phase 3 Item 4)
+    const sanitizedUserMessage = redactPiiForChat(trimmedMessage);
+
     const userTokens = extractKeywords(trimmedMessage);
-    const budget = parseBudget(trimmedMessage);
     const category = parseCategory(trimmedMessage);
-    
-    const wantsContact = userTokens.some(t => ['contact', 'phone', 'whatsapp', 'call', 'number', 'mobile'].includes(t));
+    const wantsContact = userTokens.some(t => ['contact', 'phone', 'whatsapp', 'call', 'number', 'mobile', 'owner'].includes(t));
+    const asksAboutPrice = userTokens.some(t => ['price', 'rate', 'cost', 'how much', 'discount', 'gold rate', 'making charge'].includes(t));
+    const asksAboutStock = userTokens.some(t => ['stock', 'available', 'availability', 'in stock', 'ready'].includes(t));
 
-    // 1. Match products locally from mockProducts
-    let matchingProducts: Product[] = [];
-    if (budget || category || userTokens.some(t => ['show', 'looking', 'want', 'buy', 'product', 'dogri', 'dogra', 'jhumki', 'naman', 'long set', 'gold', 'diamond', 'silver', 'bridal', 'custom', 'exchange'].includes(t))) {
-      matchingProducts = mockProducts.filter(p => {
-        let matches = true;
-        if (category) {
-          const matchCat = p.category.toLowerCase().includes(category.toLowerCase());
-          const matchCol = Boolean(p.collection && p.collection.toLowerCase().includes(category.toLowerCase()));
-          matches = matches && (matchCat || matchCol);
-        }
-        if (budget) matches = matches && p.price <= budget;
-        return matches;
-      }).slice(0, 3);
-
-      if (matchingProducts.length === 0) {
-        matchingProducts = mockProducts.filter(p => 
-          userTokens.some(token => matchesKeyword(token, p.name.toLowerCase()) || p.description.toLowerCase().includes(token))
-        ).slice(0, 3);
-      }
+    // 5. Fetch Matching Products from Database (NO mockProducts, NO prices, NO stock)
+    let matchingProducts: ChatProductSummary[] = [];
+    if (category || userTokens.some(t => ['show', 'looking', 'want', 'buy', 'product', 'dogri', 'dogra', 'jhumki', 'naman', 'necklace', 'gold', 'diamond', 'silver', 'bridal', 'custom', 'ring', 'bangle'].includes(t))) {
+      matchingProducts = await fetchProductsFromDb(category, userTokens);
     }
 
-    // 2. Build rich local catalog context
-    let catalogContext = `Categories: ${siteConfig.categories.join(', ')}. Address: ${storeKnowledge.address}. Phone: ${storeKnowledge.phone}. WhatsApp: ${storeKnowledge.whatsapp}. Hours: ${storeKnowledge.hours.formattedSummary}`;
+    // 6. Build Context (Strictly omits metal rates, prices, and inventory counts)
+    let catalogContext = `Store: Ambika Jewels. Location: ${storeKnowledge.address}. Contact: WhatsApp ${storeKnowledge.whatsapp}, Phone ${storeKnowledge.phone}. Showroom Hours: ${storeKnowledge.hours.formattedSummary}.`;
     if (matchingProducts.length > 0) {
-      catalogContext += `\nMatching Products in Store: ${matchingProducts.map(p => `${p.name} (Price: ${p.display_price}, Category: ${p.category})`).join('; ')}`;
+      catalogContext += `\nFeatured Catalog Items: ${matchingProducts.map(p => `${p.name} (Category: ${p.category}, Page: /collections/${p.slug})`).join('; ')}`;
     }
-    catalogContext += `\nStore FAQs:\n` + faqItems.map(f => `Q: ${f.question} | A: ${f.answer}`).join('\n');
+    catalogContext += `\nStore Policies & FAQs:\n` + faqItems.map(f => `Q: ${f.question} | A: ${f.answer}`).join('\n');
 
-    // 3. Call Groq AI Assistant
-    const aiResponse = await callGroqLlama3(message, catalogContext, Array.isArray(history) ? history : []);
+    // 7. Call Groq AI with sanitized message
+    const aiResponse = await callGroqLlama3(sanitizedUserMessage, catalogContext, Array.isArray(history) ? history : []);
+
+    const disclaimer = 'AI assistant — please confirm all details, rates, and stock with the showroom.';
 
     if (aiResponse) {
       return NextResponse.json({
         text: aiResponse,
         products: matchingProducts.length > 0 ? matchingProducts : undefined,
-        showContactOptions: wantsContact ? true : undefined
+        showContactOptions: wantsContact || asksAboutPrice || asksAboutStock ? true : undefined,
+        disclaimer
       });
     }
 
-    // 4. Rule-Based Fallback
+    // 8. Fallback for price/stock inquiries (F5: Never quote prices or stock)
+    if (asksAboutPrice || asksAboutStock) {
+      return NextResponse.json({
+        text: `Namaste! Because daily bullion rates (22K/18K/14K gold and 925 silver) fluctuate with the market, our live prices and showroom availability are updated in real time. Please visit any item's product page to view today's active rate, or chat directly with our showroom team on WhatsApp:`,
+        products: matchingProducts.length > 0 ? matchingProducts : undefined,
+        showContactOptions: true,
+        disclaimer
+      });
+    }
+
+    // 9. Rule-Based Fallback for Catalog & General Queries
     if (matchingProducts.length > 0) {
       return NextResponse.json({
-        text: `Namaste! Here are a few pieces from our store${category ? ` in ${category}` : ''}${budget ? ` under ₹${(budget/100).toLocaleString('en-IN')}` : ''}:`,
-        products: matchingProducts
+        text: `Namaste! Here are pieces from our showroom collection${category ? ` in ${category}` : ''}. Please visit the product pages to view current designs and details:`,
+        products: matchingProducts,
+        disclaimer
       });
     }
 
@@ -233,15 +323,17 @@ export async function POST(request: Request) {
     if (highestScore >= 1 && bestMatch) {
       return NextResponse.json({ 
         text: bestMatch.answer,
-        showContactOptions: wantsContact ? true : undefined
+        showContactOptions: wantsContact ? true : undefined,
+        disclaimer
       });
     }
 
     return NextResponse.json({ 
       text: wantsContact 
         ? "Namaste! You can reach Ambika Jewels directly on WhatsApp or Call using the buttons below:" 
-        : `Namaste! Ambika Jewels is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you today?`,
-      showContactOptions: wantsContact ? true : undefined
+        : `Namaste! Ambika Jewels is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you with our handcrafted jewelry today?`,
+      showContactOptions: wantsContact ? true : undefined,
+      disclaimer
     });
 
   } catch (err) {
