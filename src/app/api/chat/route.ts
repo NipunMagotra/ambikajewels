@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { siteConfig } from '@/config/siteConfig';
 import { mockProducts } from '@/data/mockProducts';
 import { storeKnowledge, faqItems } from '@/data/storeKnowledge';
+import { checkRateLimit } from '@/lib/rateLimit';
 import type { Product } from '@/types';
 
 function extractKeywords(message: string): string[] {
@@ -81,7 +82,7 @@ async function callGroqLlama3(
     const messages: any[] = [
       {
         role: 'system',
-        content: `You are Aanya, the official AI Jewelry Concierge for Ambika Jewels (Estd. 2021) located in Lower Roop Nagar, Jammu. 
+        content: `You are Aanya, the official AI Jewelry Concierge for Ambika Jewels located in Lower Roop Nagar, Jammu. 
 
 Your primary function is to assist customers with showroom collections, the Gold Exchange Program, 3D CAD customization, and custom bridal jewelry consultations.
 
@@ -133,15 +134,37 @@ ${contextInfo}
 
 export async function POST(request: Request) {
   try {
-    const { message, history } = await request.json();
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+
+    // 1. Shared Upstash Redis Rate Limiting (20 messages / min)
+    const rateCheck = await checkRateLimit('chat', ip);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { error: 'You are sending messages too quickly. Please wait a moment.' },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json();
+    const { message, history } = body;
     
     if (!message || typeof message !== 'string') {
       return NextResponse.json({ error: 'Message is required' }, { status: 400 });
     }
 
-    const userTokens = extractKeywords(message);
-    const budget = parseBudget(message);
-    const category = parseCategory(message);
+    // 2. Input Length Guardrail (Prevents prompt bloat, memory exhaustion & large payload attacks)
+    const trimmedMessage = message.trim();
+    if (trimmedMessage.length > 500) {
+      return NextResponse.json(
+        { error: 'Message is too long. Please keep your question under 500 characters.' },
+        { status: 400 }
+      );
+    }
+
+    const userTokens = extractKeywords(trimmedMessage);
+    const budget = parseBudget(trimmedMessage);
+    const category = parseCategory(trimmedMessage);
     
     const wantsContact = userTokens.some(t => ['contact', 'phone', 'whatsapp', 'call', 'number', 'mobile'].includes(t));
 
@@ -217,7 +240,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       text: wantsContact 
         ? "Namaste! You can reach Ambika Jewels directly on WhatsApp or Call using the buttons below:" 
-        : `Namaste! Ambika Jewels (Estd 2021) is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you today?`,
+        : `Namaste! Ambika Jewels is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you today?`,
       showContactOptions: wantsContact ? true : undefined
     });
 

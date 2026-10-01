@@ -51,6 +51,12 @@ CREATE TABLE orders (
   ),
   payment_method TEXT DEFAULT 'pending', -- 'pending' | 'razorpay' | 'cod' (future)
   payment_id TEXT, -- Razorpay transaction ID (future)
+  razorpay_order_id TEXT,
+  razorpay_payment_id TEXT,
+  shiprocket_order_id TEXT,
+  shiprocket_status TEXT DEFAULT 'pending',
+  shiprocket_awb TEXT,
+  pan_number TEXT,
   payment_status TEXT DEFAULT 'unpaid' CHECK (
     payment_status IN ('unpaid', 'paid', 'refunded')
   ),
@@ -61,6 +67,8 @@ CREATE TABLE orders (
 
 CREATE INDEX idx_orders_status ON orders(status);
 CREATE INDEX idx_orders_created ON orders(created_at DESC);
+CREATE UNIQUE INDEX idx_orders_razorpay_payment_id ON orders(razorpay_payment_id) WHERE razorpay_payment_id IS NOT NULL;
+CREATE UNIQUE INDEX idx_orders_razorpay_order_id ON orders(razorpay_order_id) WHERE razorpay_order_id IS NOT NULL;
 
 -- ============================================
 -- FAQ ITEMS TABLE (for chatbot)
@@ -188,10 +196,10 @@ CREATE POLICY "Daily rates are viewable by everyone"
   ON daily_rates FOR SELECT
   USING (true);
 
-CREATE POLICY "Daily rates are editable by anyone"
+CREATE POLICY "Daily rates are editable by authenticated users only"
   ON daily_rates FOR ALL
-  USING (true)
-  WITH CHECK (true);
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
 -- ============================================
 -- CUSTOMER SAVINGS GOALS TABLE
@@ -216,10 +224,14 @@ CREATE POLICY "Savings goals are viewable by anyone"
   ON customer_savings_goals FOR SELECT
   USING (true);
 
-CREATE POLICY "Savings goals are editable by anyone"
-  ON customer_savings_goals FOR ALL
-  USING (true)
+CREATE POLICY "Anyone can create savings goals"
+  ON customer_savings_goals FOR INSERT
   WITH CHECK (true);
+
+CREATE POLICY "Savings goals are editable by authenticated users only"
+  ON customer_savings_goals FOR ALL
+  USING (auth.role() = 'authenticated')
+  WITH CHECK (auth.role() = 'authenticated');
 
 CREATE TRIGGER customer_savings_goals_updated_at
   BEFORE UPDATE ON customer_savings_goals

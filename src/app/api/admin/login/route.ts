@@ -1,25 +1,54 @@
 import { NextResponse } from 'next/server';
-import { getAdminPasscode, getAdminCookieName, getAdminSecretToken } from '@/lib/adminAuth';
+import crypto from 'crypto';
+import { getAdminPasscode, getAdminCookieName, createAdminSessionToken, isPasscodeConfigured } from '@/lib/adminAuth';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
   try {
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+
+    // 1. Shared Upstash Redis Rate Limiting (5 attempts per 15 minutes)
+    const rateCheck = await checkRateLimit('adminLogin', ip);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          message: 'Too many login attempts. This IP address has been temporarily rate-limited for 15 minutes.'
+        },
+        { status: 429 }
+      );
+    }
+
     const body = await request.json();
     const { passcode } = body;
 
-    if (!passcode || typeof passcode !== 'string') {
+    if (!passcode || typeof passcode !== 'string' || !isPasscodeConfigured()) {
       return NextResponse.json(
-        { success: false, message: 'Passcode is required' },
-        { status: 400 }
+        { success: false, message: 'Invalid admin credentials or server configuration' },
+        { status: 401 }
       );
     }
 
     const validPasscode = getAdminPasscode();
-    if (passcode.trim() !== validPasscode) {
+    const inputBuf = Buffer.from(passcode.trim());
+    const validBuf = Buffer.from(validPasscode.trim());
+
+    // 2. Constant-time comparison to prevent timing attacks
+    let isMatch = false;
+    if (inputBuf.length === validBuf.length) {
+      isMatch = crypto.timingSafeEqual(inputBuf, validBuf);
+    }
+
+    if (!isMatch) {
       return NextResponse.json(
         { success: false, message: 'Invalid admin passcode' },
         { status: 401 }
       );
     }
+
+    // 3. Generate Cryptographically Signed Session Token
+    const sessionToken = createAdminSessionToken(7 * 24 * 60 * 60);
 
     const response = NextResponse.json({
       success: true,
@@ -28,7 +57,7 @@ export async function POST(request: Request) {
 
     response.cookies.set({
       name: getAdminCookieName(),
-      value: getAdminSecretToken(),
+      value: sessionToken,
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',

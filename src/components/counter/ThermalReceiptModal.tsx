@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { BillInput, BillBreakdown } from '@/types/counter';
-import { Printer, Share2, X, Check, ShieldCheck } from 'lucide-react';
+import { Printer, X } from 'lucide-react';
 
 interface ThermalReceiptModalProps {
   bill: BillInput;

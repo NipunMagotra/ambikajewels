@@ -17,7 +17,7 @@ export default function HeroSection() {
       <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop z-10">
         <div className="max-w-xl text-center lg:text-left mx-auto lg:mx-0">
           <span className="font-label-caps text-[9px] sm:text-[10px] text-primary tracking-[0.35em] block mb-2 sm:mb-3 font-semibold">
-            JAMMU &bull; ESTD 2021
+            JAMMU &bull; FINE JEWELRY
           </span>
 
           <h1 className="font-headline-md text-3xl sm:text-5xl lg:text-6xl mb-4 sm:mb-5 leading-[1.15] tracking-tight text-on-surface">

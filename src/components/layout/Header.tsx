@@ -96,7 +96,7 @@ export default function Header() {
               AMBIKA JEWELS
             </span>
             <span className="font-label-caps text-[7px] sm:text-[7.5px] tracking-[0.3em] sm:tracking-[0.45em] text-on-surface-variant/70 group-hover:text-primary transition-colors block">
-              JAMMU &bull; ESTD 2021
+              JAMMU &bull; FINE JEWELRY
             </span>
           </Link>
 

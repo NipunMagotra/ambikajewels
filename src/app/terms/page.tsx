@@ -2,10 +2,11 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import Link from 'next/link';
+import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Terms & Conditions | Ambika Jewels Jammu',
-  description: 'Terms and conditions governing the purchase of fine gold, diamond, and 925 sterling silver jewelry at Ambika Jewels online showroom.',
+  description: 'Terms and conditions governing online jewelry orders, BIS hallmarking standards, daily gold rate pricing policy, payments, and legal jurisdiction in Jammu, J&K.',
 };
 
 export default function TermsPage() {
@@ -22,77 +23,171 @@ export default function TermsPage() {
           </div>
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
-            <h1 className="font-headline-md text-2xl sm:text-4xl text-primary mb-3">Terms & Conditions</h1>
-            <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mb-8 pb-4 border-b border-outline-variant/20">
-              Last Updated: August 2026 | Ambika Jewels (Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013)
-            </p>
+            <div className="border-b border-outline-variant/20 pb-4 mb-8">
+              <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
+                TERMS OF SERVICE & SALE CONTRACT
+              </span>
+              <h1 className="font-headline-md text-2xl sm:text-4xl text-primary mb-2">
+                Terms & Conditions
+              </h1>
+              <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                Last Updated: September 2026 | Operating under the Laws of India & Courts of Jammu, J&K
+              </p>
+            </div>
 
             <div className="space-y-8 font-body-md text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              
+              {/* Introduction */}
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">1. Introduction & Acceptance</h2>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  1. Agreement to Terms
+                </h2>
+                <p className="mb-3">
+                  Welcome to <strong>{siteConfig.legalBusinessName}</strong> (&ldquo;we&rdquo;, &ldquo;us&rdquo;, or &ldquo;our&rdquo;), registered and operating from our physical showroom located at {siteConfig.fullAddress}.
+                </p>
                 <p>
-                  Welcome to <strong>Ambika Jewels</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;). By accessing or making a purchase on our website or at our flagship boutique located at Lower Roop Nagar, Jammu, J&K 180013, you agree to be bound by these Terms and Conditions. Please read them carefully before placing an order or using our services.
+                  By accessing our website (<Link href="/" className="text-primary underline">{siteConfig.domain}</Link>), placing an order, or utilizing our boutique services, you enter into a binding legal contract and agree to be governed by these Terms and Conditions, our <Link href="/privacy-policy" className="text-primary underline">Privacy Policy</Link>, <Link href="/shipping-policy" className="text-primary underline">Shipping Policy</Link>, and <Link href="/refund-policy" className="text-primary underline">Cancellation & Refund Policy</Link>.
                 </p>
               </section>
 
+              {/* Product Standards & BIS Hallmarking */}
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">2. Product Standards & Hallmark Certification</h2>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  2. Product Authenticity & BIS Hallmarking Standards
+                </h2>
                 <p className="mb-3">
-                  Ambika Jewels guarantees authenticity across all our collections:
+                  All jewelry offered by {siteConfig.legalBusinessName} complies with the mandatory hallmarking regulations established by the <strong>Bureau of Indian Standards (BIS)</strong> under the BIS Act, 2016:
                 </p>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li><strong>Gold Jewelry</strong>: Available in 22K (916), 18K (750), 14K (585), and 9K (375) solid gold, accompanied by official Bureau of Indian Standards (BIS) Hallmarking.</li>
-                  <li><strong>Diamond Jewelry</strong>: Crafted in 18K and 14K gold settings with natural certified diamonds accompanied by official GIA / IGI certificates.</li>
-                  <li><strong>925 Silver Collection</strong>: Guaranteed 925 sterling silver with authentic traditional hallmark stampings.</li>
-                  <li><strong>Dogra Heritage Line</strong>: Handcrafted traditional designs representing Jammu cultural heritage crafted by master karigars.</li>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <strong>22K Gold (916 Purity):</strong> Solid gold crafted at 91.6% fineness, stamped with the official triangular BIS logo, purity fineness mark (22K916), and a laser-inscribed unique 6-digit alphanumeric <strong>Hallmark Unique Identification (HUID)</strong>.
+                  </li>
+                  <li>
+                    <strong>18K Gold (750 Purity) & 14K Gold (585 Purity):</strong> Hallmarked with official BIS stamps (18K750 / 14K585) and laser HUID.
+                  </li>
+                  <li>
+                    <strong>Natural Certified Diamonds:</strong> Diamond jewelry is accompanied by third-party gemological certificates from internationally recognized laboratories (GIA / IGI) declaring color, clarity, cut, and carat weight.
+                  </li>
+                  <li>
+                    <strong>925 Sterling Silver:</strong> Traditional Dogra and contemporary silver jewelry stamped with the official 925 fineness hallmark stamp.
+                  </li>
+                  <li>
+                    <strong>Dogra Heritage Craftsmanship:</strong> Authentic Dogri Jhumkis, Dogri Naman, and Long Haars handcrafted by master karigars of the Jammu region.
+                  </li>
                 </ul>
               </section>
 
+              {/* Pricing, Currency & Bullion Rate Fluctuation */}
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">3. Pricing & Currency</h2>
-                <p>
-                  All prices listed on our website are in <strong>Indian Rupees (INR - ₹)</strong>. Applicable statutory Goods and Services Tax (GST - 3% on fine precious jewelry) and express transit insurance fees are calculated and itemized during checkout prior to payment. Daily precious metal rate fluctuations may cause catalog price updates. Orders once placed and confirmed with payment lock the rate at the time of purchase.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">4. Payments & Razorpay Integration</h2>
-                <p>
-                  We accept online payments via <strong>Razorpay</strong> payment gateway (UPI, Credit/Debit Cards, Net Banking, EMI, and Wallets), as well as direct showroom payments (Cash, UPI, NEFT/RTGS). Online transactions are encrypted using SSL technology. We do not store raw card numbers or banking passwords on our servers.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">5. 3D CAD Customization & Bespoke Orders</h2>
-                <p>
-                  Custom jewelry designs ordered via sketch or WhatsApp picture submission (+91 9086098457) receive a 3D CAD digital rendering within 2 business days. Bespoke custom-crafted orders require an advance deposit and are non-refundable once casting begins.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">6. Ambika In-Store Gold Services</h2>
-                <p>
-                  Ambika Jewels provides in-showroom gold exchange, old gold melting, and custom bridal trousseau booking at our Lower Roop Nagar, Jammu boutique. Advance bookings and custom gold crafting are fulfilled strictly with physical hallmarked gold in compliance with applicable Indian statutory regulations.
-                </p>
-              </section>
-
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">7. Governing Law & Jurisdiction</h2>
-                <p>
-                  These terms are governed by the laws of India. Any disputes arising in connection with website orders or boutique services shall be subject to the exclusive jurisdiction of the competent courts in <strong>Jammu, Jammu & Kashmir</strong>.
-                </p>
-              </section>
-
-              <section className="pt-4 border-t border-outline-variant/20">
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-2 font-semibold">8. Contact Information</h2>
-                <p>For questions regarding these Terms & Conditions, please contact us at:</p>
-                <div className="mt-2 p-4 bg-background border border-outline-variant/30 rounded-xs">
-                  <p className="font-semibold text-on-surface">Ambika Jewels</p>
-                  <p>Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013</p>
-                  <p>Email: <a href="mailto:contact@ambikajewels.com" className="text-primary underline">contact@ambikajewels.com</a></p>
-                  <p>Phone: +91 9682589725 | WhatsApp: +91 9086098457</p>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  3. Pricing, Currency & Bullion Rate Disclaimers
+                </h2>
+                <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs space-y-2">
+                  <p>
+                    All prices displayed on the website are denominated in <strong>Indian Rupees (INR - ₹)</strong>.
+                  </p>
+                  <p>
+                    <strong>Bullion Rate Fluctuations:</strong> Due to continuous international and domestic market fluctuations in precious metal rates (gold and silver), catalog prices are subject to periodic recalculation. Once an order is paid and confirmed via Razorpay, the transaction price is locked and will not be adjusted for subsequent market increases or decreases.
+                  </p>
+                  <p>
+                    <strong>Statutory Goods and Services Tax (GST):</strong> In accordance with Indian tax laws, fine precious metal jewelry (HSN Code 7113) attracts a mandatory statutory GST of <strong>3%</strong>, which is transparently itemized on your checkout review screen and tax invoice.
+                  </p>
                 </div>
               </section>
+
+              {/* Payment Processing */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  4. Payment Processing via Razorpay
+                </h2>
+                <p className="mb-3">
+                  Online payments are processed through <strong>Razorpay</strong>, supporting:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>Unified Payments Interface (UPI): Google Pay, PhonePe, Paytm, BHIM, and bank UPI apps.</li>
+                  <li>Credit & Debit Cards: Visa, MasterCard, RuPay, and American Express issued by Indian and international banks.</li>
+                  <li>Net Banking across 50+ major Indian banking institutions.</li>
+                </ul>
+                <p className="mt-3">
+                  We reserve the right to cancel any order if the payment verification fails, or if payment gateway fraud prevention filters flag unauthorized or suspicious activity.
+                </p>
+              </section>
+
+              {/* PAN Card Mandatory Disclosure */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  5. Mandatory PAN Card Requirement (&gt; ₹2,00,000)
+                </h2>
+                <p>
+                  Pursuant to <strong>Section 139A and Rule 114B of the Indian Income Tax Rules, 1962</strong>, every customer purchasing jewelry worth more than <strong>₹2,00,000 (Two Lakh Rupees)</strong> in a single transaction must provide their valid Permanent Account Number (PAN). Checkout will not proceed without this mandatory statutory disclosure.
+                </p>
+              </section>
+
+              {/* Bespoke 3D CAD Orders */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  6. Bespoke 3D CAD Design & Customization
+                </h2>
+                <p className="mb-2">
+                  When requesting custom jewelry through WhatsApp (+91 9086098457) or sketch submission:
+                </p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>A 3D CAD digital rendering is provided for customer review within 48 hours.</li>
+                  <li>Physical casting and stone setting begin only after formal customer approval of the CAD preview and receipt of an agreed advance deposit.</li>
+                  <li>Custom-crafted bespoke pieces are non-refundable once metal casting has commenced.</li>
+                </ul>
+              </section>
+
+              {/* Intellectual Property */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  7. Intellectual Property Rights
+                </h2>
+                <p>
+                  All proprietary designs, photographs, traditional Dogra jewelry motifs, brand logos, website content, and text appearing on this site are the exclusive intellectual property of <strong>{siteConfig.legalBusinessName}</strong> and are protected under Indian Copyright and Trademark laws. Unauthorized reproduction or commercial use is strictly prohibited.
+                </p>
+              </section>
+
+              {/* Limitation of Liability */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  8. Limitation of Liability & Force Majeure
+                </h2>
+                <p>
+                  {siteConfig.legalBusinessName} shall not be liable for delayed shipments caused by acts of God, extreme weather events, civil disturbances, strikes, courier network disruptions, or regulatory border checks beyond our reasonable control. In all cases, our maximum aggregate liability shall be strictly limited to the actual purchase price paid by the customer for the specific product in dispute.
+                </p>
+              </section>
+
+              {/* Governing Law & Dispute Resolution */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  9. Governing Law & Legal Jurisdiction
+                </h2>
+                <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs">
+                  <p className="leading-relaxed">
+                    These Terms and Conditions and all contracts of sale entered into through this website shall be governed by, interpreted, and construed in accordance with the <strong>laws of the Republic of India</strong>.
+                  </p>
+                  <p className="text-amber-400 font-semibold mt-2">
+                    Any legal claims, suits, or proceedings arising out of or related to these terms shall be subject to the exclusive jurisdiction of the competent courts located in <strong>Jammu, Jammu & Kashmir, India</strong>.
+                  </p>
+                </div>
+              </section>
+
+              {/* Contact & Legal Notices */}
+              <section className="pt-4 border-t border-outline-variant/20">
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-2 font-semibold">
+                  10. Contact for Legal Notices
+                </h2>
+                <p className="mb-2">For formal notices or inquiries regarding these Terms & Conditions:</p>
+                <div className="p-4 bg-background border border-outline-variant/30 rounded-xs space-y-1">
+                  <p className="font-semibold text-on-surface">{siteConfig.legalBusinessName} — Legal & Compliance Desk</p>
+                  <p className="text-xs">Address: {siteConfig.fullAddress}</p>
+                  <p className="text-xs">GSTIN: {siteConfig.gstin} | PAN: {siteConfig.pan}</p>
+                  <p className="text-xs">Email: <a href={`mailto:${siteConfig.contact.email}`} className="text-primary underline">{siteConfig.contact.email}</a></p>
+                  <p className="text-xs">Phone: {siteConfig.contact.phone}</p>
+                </div>
+              </section>
+
             </div>
           </div>
         </div>

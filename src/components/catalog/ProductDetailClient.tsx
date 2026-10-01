@@ -27,7 +27,9 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         quantity: quantity,
         image: product.images[0],
         metal_finish: selectedFinish,
-        slug: product.slug
+        slug: product.slug,
+        weight_grams: product.weight_grams,
+        dimensions: product.dimensions
       }
     });
     
@@ -57,7 +59,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const purityBadge = getPurityBadge();
   const isSilver = product.category.toLowerCase().includes('silver') || product.name.toLowerCase().includes('silver');
   const isDiamond = product.category.toLowerCase().includes('diamond') || product.name.toLowerCase().includes('diamond');
-  const bottomBadgeText = isSilver ? '925 HALLMARKED' : isDiamond ? 'CERTIFIED NATURAL DIAMOND' : '100% BIS HALLMARKED';
+  const bottomBadgeText = isSilver ? '925 STERLING HALLMARKED' : isDiamond ? 'CERTIFIED NATURAL DIAMOND' : 'BIS HALLMARKED (GOVT OF INDIA)';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">
@@ -113,7 +115,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         
         <p className="font-headline-sm text-xl sm:text-2xl text-on-surface-variant mb-6 pb-4 border-b border-outline-variant/30 flex items-baseline gap-2">
           <span className="gold-text-gradient font-bold">{product.display_price}</span>
-          <span className="text-xs font-body-md text-on-surface-variant/70 font-normal">(Excl. 3% GST & shipping, calculated at checkout)</span>
+          <span className="text-xs font-body-md text-on-surface-variant/70 font-normal">(Excl. 3% GST & shipping, itemized at checkout)</span>
         </p>
 
         <div className="mb-6">
@@ -153,8 +155,70 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           </div>
         </div>
 
+        {/* Specifications & Compliance Table */}
+        <div className="mb-6 border border-outline-variant/30 bg-surface-container/60 p-4 rounded-xs">
+          <div className="flex items-center justify-between border-b border-outline-variant/30 pb-2 mb-3">
+            <h3 className="font-label-caps text-[11px] text-primary tracking-widest font-bold flex items-center gap-1.5">
+              <span className="material-symbols-outlined text-sm">verified</span>
+              PRODUCT SPECIFICATIONS & LEGAL METROLOGY
+            </h3>
+            <span className="text-[9px] font-label-caps text-green-400 bg-green-950/40 px-2 py-0.5 rounded-xs border border-green-800/40 font-semibold">
+              {product.stock_status === 'in_stock' ? 'READY TO DISPATCH' : 'MADE TO ORDER'}
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-body-md">
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Material & Composition</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.material || 'Solid Gold'}</span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Purity / Karatage</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.purity || '22K (916)'}</span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Hallmarking / HUID</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.bis_hallmark || 'Govt of India BIS Hallmarked'}</span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Net Precious Weight</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.weight_grams} grams</span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Gross Weight</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.gross_weight_grams || product.weight_grams} grams</span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Dimensions (L × B × H)</span>
+              <span className="font-semibold text-on-surface text-[11px]">
+                {product.dimensions.length_cm} × {product.dimensions.breadth_cm} × {product.dimensions.height_cm} cm
+              </span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">HSN Code</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.hsn_code} (Precious Jewelry)</span>
+            </div>
+
+            <div>
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Country of Origin</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.country_of_origin}</span>
+            </div>
+
+            <div className="col-span-2 pt-1 border-t border-outline-variant/20">
+              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Seller & Manufacturing Details</span>
+              <span className="font-medium text-on-surface text-[11px]">{product.seller_details}</span>
+            </div>
+          </div>
+        </div>
+
         {/* Quantity & Actions */}
-        <div className="mt-auto pt-6 border-t border-outline-variant/30 flex flex-col gap-3">
+        <div className="mt-auto pt-4 border-t border-outline-variant/30 flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
             <div className="flex items-center border border-outline px-4 py-3 min-w-[120px] justify-between bg-surface-container">
               <span className="font-label-caps text-[10px] text-on-surface-variant mr-2">QTY:</span>
@@ -198,7 +262,12 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <div className="w-[1px] h-6 bg-outline-variant/40"></div>
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-primary text-lg">local_shipping</span>
-            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">INSURED SHIPPING</span>
+            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">SHIPROCKET DELIVERY</span>
+          </div>
+          <div className="w-[1px] h-6 bg-outline-variant/40"></div>
+          <div className="flex items-center gap-2">
+            <span className="material-symbols-outlined text-primary text-lg">assignment_return</span>
+            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">7-DAY RETURNS</span>
           </div>
         </div>
 

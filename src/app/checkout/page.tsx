@@ -24,6 +24,7 @@ interface FormState {
   city: string;
   state: string;
   pincode: string;
+  panNumber: string;
   notes: string;
 }
 
@@ -38,6 +39,7 @@ export default function CheckoutPage() {
     paymentId: string;
     shiprocketStatus: string;
     shiprocketOrderId?: string;
+    token?: string;
   } | null>(null);
 
   const [formData, setFormData] = useState<FormState>({
@@ -49,6 +51,7 @@ export default function CheckoutPage() {
     city: '',
     state: '',
     pincode: '',
+    panNumber: '',
     notes: ''
   });
 
@@ -87,6 +90,36 @@ export default function CheckoutPage() {
   const handleInfoSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    // 1. Indian Phone Number Validation (10 digits starting with 6-9)
+    const cleanPhone = formData.phone.trim().replace(/[\s-]/g, '').replace(/^\+91/, '');
+    if (!/^[6-9]\d{9}$/.test(cleanPhone)) {
+      setErrorMessage('Please enter a valid 10-digit Indian mobile number (e.g. 9682589725) to receive Shiprocket dispatch updates.');
+      return;
+    }
+
+    // 2. Indian Pincode Validation (6 digits)
+    const cleanPin = formData.pincode.trim();
+    if (!/^[1-9][0-9]{5}$/.test(cleanPin)) {
+      setErrorMessage('Please enter a valid 6-digit Indian delivery PIN code (e.g. 180013).');
+      return;
+    }
+
+    // 3. Email Validation
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email.trim())) {
+      setErrorMessage('Please enter a valid email address for official tax invoice and order receipts.');
+      return;
+    }
+
+    // 4. PAN Card Validation (> ₹2,00,000 as mandated by Indian CBDT Rule 114B)
+    if (finalTotal > 20000000) {
+      const cleanPan = formData.panNumber.trim().toUpperCase();
+      if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)) {
+        setErrorMessage('Under Indian Income Tax Rule 114B, customer PAN card is mandatory for jewelry transactions exceeding ₹2 Lakh. Please enter a valid 10-character PAN (e.g. ABCDE1234F).');
+        return;
+      }
+    }
+
     setStep(2);
   };
 
@@ -109,6 +142,7 @@ export default function CheckoutPage() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           amount: finalTotal,
+          items: state.items,
           notes: {
             customer_name: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,
@@ -144,6 +178,7 @@ export default function CheckoutPage() {
               city: formData.city,
               state: formData.state,
               pincode: formData.pincode,
+              pan_number: formData.panNumber ? formData.panNumber.toUpperCase() : undefined,
               notes: formData.notes
             },
             items: state.items,
@@ -157,7 +192,8 @@ export default function CheckoutPage() {
             orderNumber: verifyData.order_number,
             paymentId: verifyData.payment_id,
             shiprocketStatus: verifyData.shiprocket_status,
-            shiprocketOrderId: verifyData.shiprocket_order_id
+            shiprocketOrderId: verifyData.shiprocket_order_id,
+            token: verifyData.token
           });
           dispatch({ type: 'CLEAR_CART' });
           setStep(3);
@@ -208,6 +244,7 @@ export default function CheckoutPage() {
                   city: formData.city,
                   state: formData.state,
                   pincode: formData.pincode,
+                  pan_number: formData.panNumber ? formData.panNumber.toUpperCase() : undefined,
                   notes: formData.notes
                 },
                 items: state.items,
@@ -222,7 +259,8 @@ export default function CheckoutPage() {
                 orderNumber: verifyData.order_number,
                 paymentId: verifyData.payment_id,
                 shiprocketStatus: verifyData.shiprocket_status,
-                shiprocketOrderId: verifyData.shiprocket_order_id
+                shiprocketOrderId: verifyData.shiprocket_order_id,
+                token: verifyData.token
               });
               dispatch({ type: 'CLEAR_CART' });
               setStep(3);
@@ -417,6 +455,33 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
+                {/* Mandatory Indian Income Tax PAN Card field for transactions > ₹2,00,000 */}
+                {finalTotal > 20000000 && (
+                  <div className="mb-6 p-4 bg-amber-950/20 border border-amber-500/40 rounded-xs">
+                    <div className="flex items-center gap-2 mb-1.5">
+                      <span className="material-symbols-outlined text-amber-400 text-sm">gavel</span>
+                      <span className="font-label-caps text-xs text-amber-300 font-bold tracking-wider">
+                        STATUTORY TAX REQUIREMENT (CBDT RULE 114B)
+                      </span>
+                    </div>
+                    <p className="text-xs text-on-surface-variant mb-3 leading-relaxed">
+                      Under Section 139A and Rule 114B of the Indian Income Tax Rules, customer Permanent Account Number (PAN) is legally mandatory for jewelry purchases exceeding ₹2,00,000.
+                    </p>
+                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">
+                      CUSTOMER PAN NUMBER (10 CHARACTERS) *
+                    </label>
+                    <input 
+                      required
+                      type="text" 
+                      maxLength={10}
+                      value={formData.panNumber}
+                      onChange={e => setFormData({...formData, panNumber: e.target.value.toUpperCase()})}
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-mono text-base uppercase py-2 outline-none transition-colors"
+                      placeholder="e.g. ABCDE1234F"
+                    />
+                  </div>
+                )}
+
                 <div className="mb-6">
                   <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">SPECIAL DELIVERY NOTES (OPTIONAL)</label>
                   <input 
@@ -469,7 +534,7 @@ export default function CheckoutPage() {
                     <span>{formatPrice(tax)}</span>
                   </div>
                   <div className="flex justify-between font-body-md text-xs sm:text-sm text-on-surface-variant mb-3 pb-3 border-b border-outline-variant/20">
-                    <span>Insured Express Transit {isFreeShipping ? '(Free above ₹50,000)' : ''}</span>
+                    <span>Express Courier Transit {isFreeShipping ? '(Free above ₹50,000)' : ''}</span>
                     <span className={isFreeShipping ? 'text-primary font-semibold' : ''}>{isFreeShipping ? 'FREE' : formatPrice(shipping)}</span>
                   </div>
                   <div className="flex justify-between font-headline-sm text-base sm:text-lg text-primary font-bold">
@@ -550,9 +615,19 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                <Link href="/collections" className="gold-bg-gradient px-8 py-3.5 font-label-caps text-xs font-bold inline-block shadow-md tracking-wider">
-                  CONTINUE SHOPPING
-                </Link>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <Link href={`/track?orderId=${orderSummary.orderNumber}${orderSummary.token ? `&token=${encodeURIComponent(orderSummary.token)}` : ''}`} className="gold-bg-gradient px-6 py-3.5 font-label-caps text-xs font-bold shadow-md tracking-wider flex items-center justify-center gap-1.5">
+                    <span className="material-symbols-outlined text-base">local_shipping</span>
+                    TRACK SHIPMENT
+                  </Link>
+                  <Link href={`/order-status?orderId=${orderSummary.orderNumber}${orderSummary.token ? `&token=${encodeURIComponent(orderSummary.token)}` : ''}`} className="border border-primary px-6 py-3.5 font-label-caps text-xs text-primary font-bold hover:bg-primary/10 transition-colors flex items-center justify-center gap-1.5">
+                    <span className="material-symbols-outlined text-base">receipt_long</span>
+                    VIEW TAX INVOICE
+                  </Link>
+                  <Link href="/collections" className="bg-surface-container border border-outline-variant px-6 py-3.5 font-label-caps text-xs text-on-surface hover:text-primary transition-colors flex items-center justify-center">
+                    CONTINUE SHOPPING
+                  </Link>
+                </div>
               </div>
             )}
 

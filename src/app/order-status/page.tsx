@@ -1,0 +1,329 @@
+'use client';
+
+import { useState, useEffect, Suspense } from 'react';
+import { useSearchParams } from 'next/navigation';
+import Header from '@/components/layout/Header';
+import Footer from '@/components/layout/Footer';
+import MobileBottomNav from '@/components/layout/MobileBottomNav';
+import Link from 'next/link';
+import { siteConfig } from '@/config/siteConfig';
+
+function OrderStatusContent() {
+  const searchParams = useSearchParams();
+  const orderId = searchParams.get('orderId') || 'AMB-108249';
+  const token = searchParams.get('token') || '';
+
+  const [order, setOrder] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [authNeeded, setAuthNeeded] = useState(false);
+  const [verificationInput, setVerificationInput] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+
+  const loadOrder = async (ordId: string, tok?: string, contact?: string) => {
+    setLoading(true);
+    setAuthError(null);
+
+    try {
+      const params = new URLSearchParams();
+      params.append('orderId', ordId.trim().toUpperCase());
+
+      if (tok) {
+        params.append('token', tok.trim());
+      } else if (contact?.includes('@')) {
+        params.append('email', contact.trim().toLowerCase());
+      } else if (contact?.trim()) {
+        params.append('phone', contact.trim());
+      }
+
+      const res = await fetch(`/api/track?${params.toString()}`);
+      const data = await res.json();
+
+      if (res.status === 401 && data.authRequired) {
+        setAuthNeeded(true);
+        setOrder(null);
+      } else if (res.ok && data.success && data.order) {
+        setOrder(data.order);
+        setAuthNeeded(false);
+      } else {
+        setAuthError(data.error || 'Unable to authenticate order credentials.');
+        if (!token) setAuthNeeded(true);
+      }
+    } catch {
+      setAuthError('Error fetching order receipt. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (token) {
+      loadOrder(orderId, token);
+    } else {
+      setAuthNeeded(true);
+      setLoading(false);
+    }
+  }, [orderId, token]);
+
+  const handleVerifySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!verificationInput.trim()) return;
+    loadOrder(orderId, undefined, verificationInput);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  if (authNeeded && !order) {
+    return (
+      <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-lg py-12">
+        <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-8 rounded-xs text-center shadow-xl">
+          <div className="w-12 h-12 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
+            <span className="material-symbols-outlined text-2xl">lock</span>
+          </div>
+          <h2 className="font-headline-sm text-xl text-primary font-bold mb-2">
+            Order Security Verification
+          </h2>
+          <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mb-6">
+            To protect your customer privacy, please enter the phone number or email address associated with Order <strong className="text-primary font-mono">{orderId}</strong>.
+          </p>
+
+          <form onSubmit={handleVerifySubmit} className="space-y-4">
+            <div>
+              <input
+                type="text"
+                required
+                value={verificationInput}
+                onChange={e => setVerificationInput(e.target.value)}
+                placeholder="Phone (e.g. 9876543210) or Email"
+                className="w-full bg-background border border-outline px-4 py-3 text-on-surface font-body-md text-sm outline-none focus:border-primary rounded-xs transition-colors"
+              />
+            </div>
+
+            {authError && (
+              <p className="text-xs text-red-400 bg-red-950/40 p-2.5 rounded-xs border border-red-800/40">
+                {authError}
+              </p>
+            )}
+
+            <button
+              type="submit"
+              disabled={loading || !verificationInput.trim()}
+              className="gold-bg-gradient w-full py-3 font-label-caps text-xs font-bold shadow-md hover:brightness-110 transition-all disabled:opacity-50 tracking-wider"
+            >
+              {loading ? 'VERIFYING...' : 'UNLOCK TAX INVOICE'}
+            </button>
+          </form>
+
+          <div className="mt-6 pt-4 border-t border-outline-variant/20">
+            <Link href="/" className="font-label-caps text-xs text-on-surface-variant hover:text-primary transition-colors">
+              Return to Homepage
+            </Link>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-4xl">
+      {/* Breadcrumb */}
+      <div className="flex items-center gap-2 font-label-caps text-[10px] text-on-surface-variant mb-6 print:hidden">
+        <Link href="/" className="hover:text-primary">HOME</Link>
+        <span>/</span>
+        <span className="text-primary font-bold">ORDER STATUS & TAX INVOICE</span>
+      </div>
+
+      {/* Action Buttons Top */}
+      <div className="flex justify-between items-center mb-6 print:hidden">
+        <div>
+          <span className="font-label-caps text-[10px] text-primary font-bold tracking-widest block">
+            OFFICIAL GST TAX INVOICE (HSN 7113)
+          </span>
+          <h1 className="font-headline-sm text-2xl text-on-surface font-semibold">
+            Order Receipt & Invoice
+          </h1>
+        </div>
+        <div className="flex gap-2.5">
+          <button
+            onClick={handlePrint}
+            className="gold-bg-gradient px-4 py-2.5 font-label-caps text-xs font-bold shadow-md hover:brightness-110 transition-all flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-sm">print</span>
+            PRINT INVOICE
+          </button>
+          <Link
+            href={`/track?orderId=${orderId}${token ? `&token=${encodeURIComponent(token)}` : ''}`}
+            className="border border-primary px-4 py-2.5 font-label-caps text-xs text-primary font-bold hover:bg-primary/10 transition-colors flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-sm">local_shipping</span>
+            TRACK SHIPMENT
+          </Link>
+        </div>
+      </div>
+
+      {/* Printable Invoice Container */}
+      <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 rounded-xs shadow-xl print:border-none print:shadow-none print:p-0 print:bg-white print:text-black">
+        
+        {/* Invoice Header */}
+        <div className="flex flex-col sm:flex-row justify-between items-start pb-6 border-b border-outline-variant/30 gap-4">
+          <div>
+            <span className="font-headline-md text-2xl sm:text-3xl gold-text-gradient font-bold tracking-wider block print:text-black">
+              {siteConfig.legalBusinessName}
+            </span>
+            <p className="font-body-md text-xs text-on-surface-variant print:text-gray-700 whitespace-pre-line mt-1">
+              {siteConfig.address}
+            </p>
+            <p className="text-xs text-on-surface-variant print:text-gray-700 mt-1">
+              GSTIN: <strong>{siteConfig.gstin}</strong> | PAN: <strong>{siteConfig.pan}</strong>
+            </p>
+            <p className="text-xs text-on-surface-variant print:text-gray-700">
+              BIS Hallmark Reg: <strong>{siteConfig.bisHallmarkLicense}</strong> | Email: {siteConfig.contact.email}
+            </p>
+          </div>
+
+          <div className="text-left sm:text-right bg-background/50 p-4 border border-outline-variant/20 rounded-xs print:bg-transparent print:border-none">
+            <span className="font-label-caps text-[9px] text-primary uppercase font-bold tracking-wider block mb-1">
+              TAX INVOICE / CASH MEMO
+            </span>
+            <p className="font-headline-sm text-lg font-bold text-on-surface print:text-black">
+              #{orderId}
+            </p>
+            <p className="text-xs text-on-surface-variant print:text-gray-600 mt-1">
+              Date: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+            </p>
+            <p className="text-xs font-semibold text-green-400 print:text-green-700 mt-1">
+              Payment Status: PAID (Razorpay Verified)
+            </p>
+          </div>
+        </div>
+
+        {/* Bill To & Dispatch Address */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 my-6 py-4 border-b border-outline-variant/20 text-xs font-body-md">
+          <div>
+            <span className="font-label-caps text-[9px] text-primary uppercase font-bold tracking-wider block mb-1.5">
+              BILLED & SHIPPED TO:
+            </span>
+            <p className="font-bold text-sm text-on-surface print:text-black">
+              {order?.customer_name || 'Verified Customer'}
+            </p>
+            <p className="text-on-surface-variant print:text-gray-700 mt-1">
+              {order?.shipping_address || 'Verified Destination, Jammu & Kashmir'}
+            </p>
+            <p className="text-on-surface-variant print:text-gray-700 mt-1">
+              Place of Supply: Jammu & Kashmir (State Code: 01)
+            </p>
+          </div>
+
+          <div>
+            <span className="font-label-caps text-[9px] text-primary uppercase font-bold tracking-wider block mb-1.5">
+              LOGISTICS & DISPATCH SPECIFICATIONS:
+            </span>
+            <p className="text-on-surface-variant print:text-gray-700">
+              Logistics Provider: <strong>{order?.courier_partner || 'Shiprocket Express (Blue Dart)'}</strong>
+            </p>
+            <p className="text-on-surface-variant print:text-gray-700 mt-1">
+              Tracking AWB: <strong className="font-mono text-primary print:text-black">{order?.shiprocket_awb || 'AWB-LIVE-PENDING'}</strong>
+            </p>
+            <p className="text-on-surface-variant print:text-gray-700 mt-1">
+              Packaging: <strong>Tamper-Evident Security Consignment</strong>
+            </p>
+          </div>
+        </div>
+
+        {/* Itemized Table */}
+        <div className="overflow-x-auto mb-6">
+          <table className="w-full text-left text-xs font-body-md">
+            <thead>
+              <tr className="border-b border-outline-variant/30 text-primary print:text-black font-label-caps text-[10px]">
+                <th className="py-2.5 font-bold">ITEM & DESCRIPTION</th>
+                <th className="py-2.5 font-bold">HSN</th>
+                <th className="py-2.5 font-bold">PURITY / HALLMARK</th>
+                <th className="py-2.5 font-bold text-center">QTY</th>
+                <th className="py-2.5 font-bold text-right">TOTAL (INR)</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-outline-variant/15 text-on-surface-variant print:text-gray-800">
+              <tr>
+                <td className="py-3 font-semibold text-on-surface print:text-black">
+                  Authentic 22K Dogri Jhumki
+                  <span className="block text-[10px] font-normal text-on-surface-variant print:text-gray-600">Net Weight: 14.50g | Gross: 15.20g</span>
+                </td>
+                <td className="py-3">7113</td>
+                <td className="py-3">22K (916) BIS Hallmarked with HUID</td>
+                <td className="py-3 text-center">1</td>
+                <td className="py-3 text-right font-mono font-semibold">₹95,000.00</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        {/* Financial Calculation Breakdown */}
+        <div className="flex justify-end pt-4 border-t border-outline-variant/30">
+          <div className="w-full sm:w-72 space-y-2 text-xs font-body-md text-on-surface-variant print:text-gray-800">
+            <div className="flex justify-between">
+              <span>Item Taxable Subtotal</span>
+              <span className="font-mono">₹95,000.00</span>
+            </div>
+            <div className="flex justify-between">
+              <span>CGST (1.5% Precious Jewelry)</span>
+              <span className="font-mono">₹1,425.00</span>
+            </div>
+            <div className="flex justify-between">
+              <span>SGST / UTGST (1.5% Precious Jewelry)</span>
+              <span className="font-mono">₹1,425.00</span>
+            </div>
+            <div className="flex justify-between">
+              <span>Express Courier Shipping</span>
+              <span className="text-primary font-bold print:text-black">COMPLIMENTARY</span>
+            </div>
+            <div className="flex justify-between pt-2 border-t border-outline-variant/30 font-headline-sm text-base text-primary print:text-black font-bold">
+              <span>Total Invoice Amount</span>
+              <span className="font-mono">₹97,850.00</span>
+            </div>
+          </div>
+        </div>
+
+        {/* Statutory Hallmarking Declaration */}
+        <div className="mt-8 pt-6 border-t border-outline-variant/20 text-[11px] text-on-surface-variant print:text-gray-600 leading-relaxed space-y-1">
+          <p>
+            <strong>BIS Hallmark Certification Guarantee:</strong> We certify that the precious jewelry described in this tax invoice complies with Indian Standards Specification for Gold / Silver Hallmarking. Each piece bears the triangular Bureau of Indian Standards mark, purity fineness, and a unique 6-digit laser HUID.
+          </p>
+          <p>
+            <strong>Return & Inspection Policy:</strong> 7-Day return policy applies from confirmed delivery date, provided security tags and invoice copy remain untampered.
+          </p>
+          <p className="text-[10px] text-on-surface-variant/70 mt-2">
+            This is a computer-generated tax invoice issued in Jammu, J&K. No physical signature is required.
+          </p>
+        </div>
+
+      </div>
+
+      {/* Return to Shop Bottom */}
+      <div className="mt-8 text-center print:hidden">
+        <Link href="/collections" className="gold-bg-gradient px-8 py-3.5 font-label-caps text-xs font-bold inline-block shadow-md tracking-wider">
+          RETURN TO CATALOG
+        </Link>
+      </div>
+    </div>
+  );
+}
+
+export default function OrderStatusPage() {
+  return (
+    <>
+      <Header />
+      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
+        <Suspense fallback={
+          <div className="container mx-auto px-4 py-20 text-center text-primary font-label-caps text-xs">
+            GENERATING TAX INVOICE...
+          </div>
+        }>
+          <OrderStatusContent />
+        </Suspense>
+      </main>
+      <Footer />
+      <MobileBottomNav />
+    </>
+  );
+}

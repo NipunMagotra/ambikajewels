@@ -17,11 +17,11 @@ export default function ServicesPage() {
       title: 'Gold Exchange Program',
       subtitle: 'Exchange Old Gold for Brand New Designs',
       icon: 'currency_exchange',
-      description: 'Upgrade your jewelry wardrobe easily. Bring in any old gold jewelry and exchange it at 100% of current gold value for our new designer collections.',
+      description: 'Upgrade your jewelry wardrobe easily. Bring in any old gold jewelry and exchange it at prevailing daily market gold rates for our new designer collections.',
       highlights: [
-        '100% value valuation based on daily gold rate',
-        'Transparent testing and weight verification',
-        'Zero deduction on pure gold weight'
+        'Transparent valuation based on daily market bullion rate',
+        'Digital purity testing and weight verification',
+        'Full credit applied directly to your new design'
       ]
     },
     {
@@ -57,7 +57,7 @@ export default function ServicesPage() {
       highlights: [
         'Private bridal trousseau consultations',
         'Live WhatsApp video shopping appointments',
-        'Free lifetime cleaning & polishing'
+        'Complimentary showroom cleaning & inspection'
       ]
     }
   ];

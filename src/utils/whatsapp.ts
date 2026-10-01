@@ -12,7 +12,7 @@ export function getProductWhatsAppUrl(
   const mainImage = product.images?.[0] || '/hero-clean.png';
   const imageUrl = mainImage.startsWith('http') 
     ? mainImage 
-    : `https://ambikajewels.com${mainImage}`;
+    : `${siteConfig.websiteUrl}${mainImage}`;
 
   const message = 
 `Namaste Ambika Jewels! 🙏

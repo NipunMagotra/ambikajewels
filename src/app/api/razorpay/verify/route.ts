@@ -2,6 +2,9 @@ import { NextResponse } from 'next/server';
 import crypto from 'crypto';
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
+import { encryptSensitiveData, generateOrderAccessToken } from '@/lib/encryption';
+import { sendOrderConfirmationEmail, sendAdminShiprocketFailureAlert } from '@/lib/email';
 
 interface GuestCustomerInfo {
   first_name: string;
@@ -12,6 +15,7 @@ interface GuestCustomerInfo {
   city: string;
   state: string;
   pincode: string;
+  pan_number?: string;
   notes?: string;
 }
 
@@ -22,10 +26,34 @@ interface CartItem {
   quantity: number;
   image?: string;
   metal_finish?: string;
+  weight_grams?: number;
+  dimensions?: {
+    length_cm: number;
+    breadth_cm: number;
+    height_cm: number;
+  };
+}
+
+// In-memory idempotency cache to protect against rapid concurrent verify / webhook hits
+interface CachedPaymentVerification {
+  response: any;
+  timestamp: number;
+}
+const processedPayments = new Map<string, CachedPaymentVerification>();
+
+function cleanupOldIdempotencyRecords() {
+  const thirtyMinutesAgo = Date.now() - 30 * 60 * 1000;
+  for (const [key, val] of processedPayments.entries()) {
+    if (val.timestamp < thirtyMinutesAgo) {
+      processedPayments.delete(key);
+    }
+  }
 }
 
 export async function POST(request: Request) {
   try {
+    cleanupOldIdempotencyRecords();
+
     const body = await request.json();
     const {
       razorpay_order_id,
@@ -46,6 +74,14 @@ export async function POST(request: Request) {
     } = body;
 
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
+
+    if (!key_secret && process.env.NODE_ENV === 'production') {
+      console.error('[SECURITY FATAL] RAZORPAY_KEY_SECRET is not configured in production.');
+      return NextResponse.json(
+        { success: false, error: 'Server misconfiguration: Payment verification key missing.' },
+        { status: 500 }
+      );
+    }
 
     // 1. Signature Verification
     let isSignatureValid = false;
@@ -69,18 +105,66 @@ export async function POST(request: Request) {
       );
     }
 
+    // 2. Dual-Layer Idempotency Check
+    // A. Check in-memory deduplication cache
+    if (processedPayments.has(razorpay_payment_id)) {
+      const cached = processedPayments.get(razorpay_payment_id)!;
+      console.log(`[IDEMPOTENT HIT] Returning cached verification for payment: ${razorpay_payment_id}`);
+      return NextResponse.json({ ...cached.response, idempotent: true });
+    }
+
+    // B. Check persistent Supabase database (uses server-only supabaseAdmin if configured)
+    const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
+    if (dbClient) {
+      try {
+        const { data: existingOrder } = await dbClient
+          .from('orders')
+          .select('*')
+          .or(`payment_id.eq.${razorpay_payment_id},razorpay_payment_id.eq.${razorpay_payment_id},razorpay_order_id.eq.${razorpay_order_id}`)
+          .maybeSingle();
+
+        if (existingOrder) {
+          const accessToken = generateOrderAccessToken(
+            existingOrder.order_number || existingOrder.id,
+            existingOrder.email || existingOrder.customer_email || existingOrder.phone || existingOrder.customer_phone
+          );
+          const idempotentResponse = {
+            success: true,
+            message: 'Payment already verified (Idempotent)',
+            order_number: existingOrder.order_number || existingOrder.id,
+            token: accessToken,
+            payment_id: razorpay_payment_id,
+            shiprocket_status: existingOrder.shiprocket_status,
+            shiprocket_order_id: existingOrder.shiprocket_order_id,
+            idempotent: true
+          };
+          processedPayments.set(razorpay_payment_id, {
+            response: idempotentResponse,
+            timestamp: Date.now()
+          });
+          return NextResponse.json(idempotentResponse);
+        }
+      } catch (checkErr) {
+        console.error('Error during database idempotency check:', checkErr);
+      }
+    }
+
     const orderNumber = `AMB-${Math.floor(100000 + Math.random() * 900000)}`;
     let shiprocketStatus = 'pending';
     let shiprocketOrderId = null;
     let shiprocketError = null;
 
-    // 2. Authenticate & Create Order in Shiprocket
+    // 3. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
+    const encryptedPan = customer_info?.pan_number
+      ? encryptSensitiveData(customer_info.pan_number)
+      : null;
+
+    // 4. Authenticate & Create Shipment in Shiprocket
     const shiprocketEmail = process.env.SHIPROCKET_EMAIL;
     const shiprocketPassword = process.env.SHIPROCKET_PASSWORD;
 
     if (shiprocketEmail && shiprocketPassword) {
       try {
-        // Authenticate with Shiprocket API
         const authRes = await fetch('https://apiv2.shiprocket.in/v1/external/auth/login', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -95,13 +179,32 @@ export async function POST(request: Request) {
         if (authRes.ok && authData.token) {
           const token = authData.token;
 
-          // Format Shiprocket Order Payload
+          // Calculate real parcel weight and dimensions from verified items
+          let totalNetWeightGrams = 0;
+          let maxL = 12;
+          let maxB = 12;
+          let maxH = 6;
+
+          for (const item of (items || [])) {
+            const w = item.weight_grams || 25;
+            totalNetWeightGrams += w * (item.quantity || 1);
+            if (item.dimensions) {
+              if (item.dimensions.length_cm > maxL) maxL = Math.ceil(item.dimensions.length_cm + 2);
+              if (item.dimensions.breadth_cm > maxB) maxB = Math.ceil(item.dimensions.breadth_cm + 2);
+              if (item.dimensions.height_cm > maxH) maxH = Math.ceil(item.dimensions.height_cm + 2);
+            }
+          }
+
+          // Add tamper-evident luxury jewelry security packaging weight (approx 200g)
+          const finalPackageWeightKg = Math.max(0.3, Math.round(((totalNetWeightGrams + 200) / 1000) * 100) / 100);
+
           const currentDateStr = new Date().toISOString().replace('T', ' ').substring(0, 16);
           const shiprocketPayload = {
             order_id: orderNumber,
             order_date: currentDateStr,
             pickup_location: process.env.SHIPROCKET_PICKUP_LOCATION || 'Primary',
-            comment: customer_info.notes || 'Ambika Jewels Guest Order',
+            // Safe comment with zero raw PAN disclosure
+            comment: customer_info.notes || 'Ambika Jewels Fine Jewelry Order',
             billing_customer_name: customer_info.first_name,
             billing_last_name: customer_info.last_name || customer_info.first_name,
             billing_address: customer_info.address,
@@ -128,13 +231,12 @@ export async function POST(request: Request) {
             transaction_charges: 0,
             total_discount: 0,
             sub_total: Math.round(total_amount / 100),
-            length: 10,
-            breadth: 10,
-            height: 5,
-            weight: 0.5
+            length: maxL,
+            breadth: maxB,
+            height: maxH,
+            weight: finalPackageWeightKg
           };
 
-          // Create Adhoc Order in Shiprocket
           const orderRes = await fetch('https://apiv2.shiprocket.in/v1/external/orders/create/adhoc', {
             method: 'POST',
             headers: {
@@ -169,41 +271,107 @@ export async function POST(request: Request) {
       shiprocketStatus = 'skipped_no_credentials';
     }
 
-    // 3. Graceful Fallback Handling (Simulate Admin Alert if Shiprocket creation failed)
-    if (shiprocketStatus !== 'created' && shiprocketStatus !== 'skipped_no_credentials') {
-      console.warn(`[ADMIN ALERT SIMULATION] Payment ${razorpay_payment_id} succeeded, but Shiprocket shipping order creation failed (${shiprocketStatus}): ${shiprocketError}. Customer: ${customer_info.first_name} ${customer_info.last_name} (${customer_info.phone}).`);
+    // Trigger Admin Email Alert if Shiprocket Order Creation Failed (Item 6)
+    if (shiprocketStatus !== 'created') {
+      sendAdminShiprocketFailureAlert({
+        orderNumber,
+        razorpayPaymentId: razorpay_payment_id,
+        razorpayOrderId: razorpay_order_id,
+        customerName: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
+        customerEmail: customer_info.email,
+        customerPhone: customer_info.phone,
+        amount: total_amount,
+        items: (items || []).map((it) => ({
+          name: it.name,
+          quantity: it.quantity,
+          price: it.price
+        })),
+        errorMessage: shiprocketError || `Shiprocket shipment creation was not completed (status: ${shiprocketStatus})`
+      }).catch((alertErr) => {
+        console.error('Failed to dispatch Shiprocket failure alert to admin:', alertErr);
+      });
     }
 
-    // 3. Persist Order in Supabase Database if configured
-    if (isSupabaseConfigured) {
+    // 5. Persist Order in Supabase Database (Idempotent Upsert on razorpay_payment_id)
+    if (dbClient) {
       try {
-        await supabase.from('orders').insert({
-          id: orderNumber,
+        await dbClient.from('orders').upsert({
+          order_number: orderNumber,
           customer_name: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
-          email: customer_info.email,
-          phone: customer_info.phone,
+          customer_phone: customer_info.phone,
+          customer_email: customer_info.email,
           shipping_address: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
+          pincode: customer_info.pincode,
+          pan_number: encryptedPan, // Stored encrypted (CBDT Rule 114B compliant)
           total: total_amount,
+          subtotal: Math.round(total_amount * 100 / 103),
+          tax: total_amount - Math.round(total_amount * 100 / 103),
+          shipping: 0,
           items: items,
+          status: 'confirmed',
+          payment_status: 'paid',
+          payment_method: 'razorpay',
           payment_id: razorpay_payment_id,
-          status: 'paid',
+          razorpay_payment_id: razorpay_payment_id,
+          razorpay_order_id: razorpay_order_id,
           shiprocket_status: shiprocketStatus,
-          shiprocket_order_id: shiprocketOrderId
+          shiprocket_order_id: shiprocketOrderId ? String(shiprocketOrderId) : null,
+          notes: customer_info.notes || ''
+        }, {
+          onConflict: 'razorpay_payment_id',
+          ignoreDuplicates: true
         });
       } catch (dbErr) {
         console.error('Error persisting verified order to Supabase:', dbErr);
       }
     }
 
-    return NextResponse.json({
+    // 6. Generate unguessable verification token for seamless client access
+    const orderAccessToken = generateOrderAccessToken(
+      orderNumber,
+      customer_info.email || customer_info.phone
+    );
+
+    // 7. Send Real Transactional Confirmation Email via Resend
+    sendOrderConfirmationEmail({
+      orderNumber,
+      customerName: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
+      customerEmail: customer_info.email,
+      items: (items || []).map((it) => ({
+        name: it.name,
+        quantity: it.quantity,
+        price: it.price,
+        metal_finish: it.metal_finish
+      })),
+      subtotal: Math.round(total_amount * 100 / 103),
+      tax: total_amount - Math.round(total_amount * 100 / 103),
+      shipping: 0,
+      total: total_amount,
+      shippingAddress: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
+      paymentId: razorpay_payment_id,
+      shiprocketAwb: shiprocketOrderId ? `SR-${shiprocketOrderId}` : undefined
+    }).catch((emailErr) => {
+      console.error('Background order confirmation email dispatch error:', emailErr);
+    });
+
+    const successResponse = {
       success: true,
       message: 'Payment verified successfully',
       order_number: orderNumber,
+      token: orderAccessToken,
       payment_id: razorpay_payment_id,
       shiprocket_status: shiprocketStatus,
       shiprocket_order_id: shiprocketOrderId,
       shiprocket_error: shiprocketError
+    };
+
+    // Store in idempotency cache
+    processedPayments.set(razorpay_payment_id, {
+      response: successResponse,
+      timestamp: Date.now()
     });
+
+    return NextResponse.json(successResponse);
   } catch (error: any) {
     console.error('Payment Verification Route Exception:', error);
     return NextResponse.json(

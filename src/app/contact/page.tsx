@@ -6,6 +6,7 @@ import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import Link from 'next/link';
 import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
+import { siteConfig } from '@/config/siteConfig';
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
@@ -66,8 +67,8 @@ export default function ContactPage() {
 
                 <div>
                   <span className="font-label-caps text-[10px] text-primary block font-bold mb-1">OFFICIAL EMAIL ADDRESS</span>
-                  <a href="mailto:contact@ambikajewels.com" className="font-body-md text-sm text-on-surface font-semibold hover:text-primary block">
-                    contact@ambikajewels.com
+                  <a href={`mailto:${siteConfig.contact.email}`} className="font-body-md text-sm text-on-surface font-semibold hover:text-primary block">
+                    {siteConfig.contact.email}
                   </a>
                 </div>
 
@@ -83,6 +84,22 @@ export default function ContactPage() {
                     Monday – Sunday: 10:00 AM – 8:00 PM <br/>
                     <span className="text-[11px] text-amber-400 font-semibold">(Extended during Festive & Wedding Seasons)</span>
                   </p>
+                </div>
+
+                <div className="pt-2 border-t border-outline-variant/20">
+                  <span className="font-label-caps text-[10px] text-primary block font-bold mb-1">STATUTORY BUSINESS REGISTRATIONS</span>
+                  <p className="font-body-md text-xs text-on-surface">Legal Entity: Ambika Jewels</p>
+                  <p className="font-body-md text-xs text-on-surface-variant">GSTIN: {siteConfig.gstin}</p>
+                  <p className="font-body-md text-xs text-on-surface-variant">PAN: {siteConfig.pan}</p>
+                  <p className="font-body-md text-xs text-on-surface-variant">BIS Hallmark: {siteConfig.bisHallmarkLicense}</p>
+                </div>
+
+                <div className="pt-2 border-t border-outline-variant/20">
+                  <span className="font-label-caps text-[10px] text-primary block font-bold mb-1">GRIEVANCE REDRESSAL OFFICER</span>
+                  <p className="font-body-md text-xs text-on-surface font-semibold">{siteConfig.grievanceOfficer.name}</p>
+                  <p className="font-body-md text-xs text-on-surface-variant">{siteConfig.grievanceOfficer.designation}</p>
+                  <p className="font-body-md text-xs text-on-surface-variant">Email: <a href={`mailto:${siteConfig.grievanceOfficer.email}`} className="text-primary underline">{siteConfig.grievanceOfficer.email}</a></p>
+                  <p className="font-body-md text-xs text-on-surface-variant">Phone: {siteConfig.grievanceOfficer.phone}</p>
                 </div>
 
                 <div className="pt-2 flex flex-col gap-2">
@@ -105,7 +122,7 @@ export default function ContactPage() {
                     </div>
                     <h3 className="font-headline-sm text-xl text-primary font-bold">Thank You!</h3>
                     <p className="font-body-md text-sm text-on-surface-variant max-w-md mx-auto">
-                      Your inquiry has been sent successfully to <strong>contact@ambikajewels.com</strong>. Our Jammu concierge team will contact you shortly.
+                      Your inquiry has been sent successfully to <strong>{siteConfig.contact.email}</strong>. Our Jammu concierge team will contact you shortly.
                     </p>
                     <button 
                       onClick={() => setFormSubmitted(false)}

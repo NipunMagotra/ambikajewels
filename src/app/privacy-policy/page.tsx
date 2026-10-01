@@ -2,10 +2,11 @@ import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import Link from 'next/link';
+import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Privacy Policy | Ambika Jewels Jammu',
-  description: 'Privacy Policy detailing how personal data, payment information, and shipping address are collected, secured, and processed at Ambika Jewels.',
+  description: 'Privacy Policy detailing data collection, DPDP Act 2023 compliance, Razorpay payment security, Shiprocket logistics data sharing, and Grievance Officer details.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -22,71 +23,159 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
-            <h1 className="font-headline-md text-2xl sm:text-4xl text-primary mb-3">Privacy Policy</h1>
-            <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mb-8 pb-4 border-b border-outline-variant/20">
-              Last Updated: August 2026 | Ambika Jewels (Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013)
-            </p>
+            <div className="border-b border-outline-variant/20 pb-4 mb-8">
+              <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
+                DATA PROTECTION & STATUTORY PRIVACY COMPLIANCE
+              </span>
+              <h1 className="font-headline-md text-2xl sm:text-4xl text-primary mb-2">
+                Privacy Policy
+              </h1>
+              <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
+                Last Updated: September 2026 | Compliant with IT Act 2000 & DPDP Act 2023 | {siteConfig.legalBusinessName}
+              </p>
+            </div>
 
             <div className="space-y-8 font-body-md text-xs sm:text-sm text-on-surface-variant leading-relaxed">
+              
+              {/* Introduction */}
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">1. Information We Collect</h2>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  1. Introduction & Scope
+                </h2>
                 <p className="mb-3">
-                  At <strong>Ambika Jewels</strong>, we respect your privacy and are committed to protecting the personal data you share with us. We collect information when you place an order, contact our concierge, interact with our AI Jewelry Concierge (Aanya), or request a 3D CAD design preview:
+                  <strong>{siteConfig.legalBusinessName}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) is committed to honoring and protecting the privacy of our customers and visitors. We operate our flagship fine jewelry showroom and online store from {siteConfig.fullAddress}.
                 </p>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li><strong>Personal Identifiers</strong>: Name, Email Address, Phone Number, Shipping Address, Pincode.</li>
-                  <li><strong>Transaction Records</strong>: Order items, payment confirmation IDs, invoice references, and shipping dispatches.</li>
-                  <li><strong>Technical & AI Logs</strong>: Chat assistant prompts, IP addresses, browser types, and website usage statistics.</li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">2. How We Use Your Information</h2>
-                <p className="mb-3">Your data is processed strictly for legitimate business and fulfillment purposes:</p>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li>To process and fulfill jewelry orders and dispatch shipments via <strong>Shiprocket</strong> logistics partners.</li>
-                  <li>To process secure payments via <strong>Razorpay</strong> payment gateway.</li>
-                  <li>To provide live order updates, WhatsApp video shopping consultations, and 3D CAD previews.</li>
-                  <li>To comply with statutory tax laws, GST invoices, and Prevention of Money Laundering Act (PMLA) guidelines for precious metal transactions.</li>
-                </ul>
-              </section>
-
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">3. Payment Security & Data Non-Storage</h2>
                 <p>
-                  All online payments are securely processed directly by PCI-DSS compliant payment gateways (Razorpay). <strong>Ambika Jewels never captures, receives, or stores raw credit card details, debit card CVVs, net banking credentials, or UPI PINs</strong> on our servers.
+                  This Privacy Policy describes our practices regarding the collection, storage, processing, and disclosure of personal data collected through our website (<Link href="/" className="text-primary underline font-medium">{siteConfig.domain}</Link>) in compliance with the <strong>Information Technology Act, 2000</strong>, the <strong>Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011</strong>, and the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>.
                 </p>
               </section>
 
+              {/* Information Collected */}
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">4. Data Sharing & Third-Party Services</h2>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  2. Personal Information We Collect
+                </h2>
                 <p className="mb-3">
-                  We do not sell, rent, or trade your personal information to third parties. Data is shared exclusively with verified operational partners:
+                  We collect information necessary to fulfill luxury fine jewelry purchases, provide concierge support, and comply with Indian statutory requirements:
                 </p>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li><strong>Shiprocket & Courier Partners</strong>: Name, phone number, and delivery address to facilitate insured shipping dispatches across India.</li>
-                  <li><strong>Razorpay Gateway</strong>: Order details and total payable amount for payment verification.</li>
-                  <li><strong>Supabase Database</strong>: Encrypted cloud database hosting for customer order persistence and order transaction histories.</li>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <strong>Customer Contact & Identification:</strong> Full Name, Email Address, 10-digit Indian Mobile Number (for OTP and dispatch tracking).
+                  </li>
+                  <li>
+                    <strong>Shipping & Billing Coordinates:</strong> Physical Street Address, House/Flat Number, City, State, and 6-digit PIN Code.
+                  </li>
+                  <li>
+                    <strong>Statutory Tax Identifiers (PAN Card):</strong> In strict compliance with <strong>Section 139A and Rule 114B of the Indian Income Tax Rules, 1962</strong>, customer Permanent Account Number (PAN) is collected for precious jewelry transactions exceeding <strong>₹2,00,000 (Rupees Two Lakh)</strong>. Any collected PAN is stored with AES-256-GCM encryption, is never logged in server telemetry, and is never displayed on unauthenticated tracking screens.
+                  </li>
+                  <li>
+                    <strong>Order & Transaction Records:</strong> Purchased jewelry items, caratage/purity, invoice number, Razorpay payment reference ID, Shiprocket consignment AWB, and delivery confirmation timestamps.
+                  </li>
+                  <li>
+                    <strong>Technical & Browsing Data:</strong> IP address, device type, browser metadata, and functional session cookies.
+                  </li>
                 </ul>
               </section>
 
+              {/* Purpose of Data Use */}
               <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">5. Cookies & Tracking Technologies</h2>
-                <p>
-                  Our website uses functional cookies and HTTP-only session tokens to manage your shopping cart state, maintain administrator login sessions, and optimize website loading speeds. You can configure your browser to reject cookies, though certain cart features may be affected.
-                </p>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  3. Purpose of Processing Your Data
+                </h2>
+                <p className="mb-3">Your personal data is processed strictly for lawful, necessary business functions:</p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>To process jewelry orders and manage delivery via our logistics partner <strong>Shiprocket</strong>.</li>
+                  <li>To verify payments and issue official GST Tax Invoices under HSN Code 7113.</li>
+                  <li>To send live order tracking updates, dispatch notices, and delivery OTP confirmations via SMS and Email.</li>
+                  <li>To deliver personalized 3D CAD design previews, custom gold exchange consultations, and concierge assistance.</li>
+                  <li>To comply with statutory legal obligations under the Prevention of Money Laundering Act (PMLA) and Indian Goods & Services Tax (GST) laws.</li>
+                </ul>
               </section>
 
-              <section className="pt-4 border-t border-outline-variant/20">
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-2 font-semibold">6. Data Protection Officer & Privacy Inquiries</h2>
-                <p>If you have any questions or wish to request data deletion, please contact our Privacy Team:</p>
-                <div className="mt-2 p-4 bg-background border border-outline-variant/30 rounded-xs">
-                  <p className="font-semibold text-on-surface">Ambika Jewels — Customer Privacy Cell</p>
-                  <p>Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013</p>
-                  <p>Official Email: <a href="mailto:contact@ambikajewels.com" className="text-primary underline">contact@ambikajewels.com</a></p>
-                  <p>Phone: +91 9682589725 | WhatsApp: +91 9086098457</p>
+              {/* Payment Security */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  4. Payment Security & Zero Card Storage
+                </h2>
+                <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs space-y-2">
+                  <p>
+                    All online payments made on our website are processed securely by <strong>Razorpay (Razorpay Software Private Limited)</strong>.
+                  </p>
+                  <p className="font-semibold text-primary">
+                    Ambika Jewels NEVER captures, receives, processes, or stores raw credit card numbers, debit card PINs, CVV codes, net banking passwords, or UPI security credentials on our servers.
+                  </p>
+                  <p className="text-xs text-on-surface-variant">
+                    All payment transmissions are encrypted via industry-standard 256-Bit Transport Layer Security (TLS/SSL) encryption.
+                  </p>
                 </div>
               </section>
+
+              {/* Data Sharing with Third Parties */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  5. Third-Party Data Disclosures
+                </h2>
+                <p className="mb-3">
+                  We do not sell, rent, lease, or monetize your personal information to any marketing agencies or third parties. Personal data is shared exclusively with verified operational infrastructure providers:
+                </p>
+                <ul className="list-disc pl-5 space-y-2">
+                  <li>
+                    <strong>Shiprocket (BigFoot Retail Solutions Pvt. Ltd.):</strong> Customer name, shipping address, PIN code, and phone number are shared to generate courier waybills and coordinate secure express transit via Blue Dart, Delhivery, or Expressbees.
+                  </li>
+                  <li>
+                    <strong>Razorpay:</strong> Order identification, billing details, and total payable amount are transmitted securely to authenticate payment transactions.
+                  </li>
+                  <li>
+                    <strong>Statutory Authorities:</strong> Disclosed only if mandated by a formal, written request from Indian tax authorities, law enforcement agencies, or court orders under Indian jurisdiction.
+                  </li>
+                </ul>
+              </section>
+
+              {/* Cookies & Storage */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  6. Cookies & Local Storage
+                </h2>
+                <p>
+                  Our website uses functional browser storage and essential cookies strictly to maintain shopping bag contents, track anonymous user session states, and improve website loading speed. No third-party behavioral advertising trackers or cross-site tracking pixels are deployed.
+                </p>
+              </section>
+
+              {/* User Rights */}
+              <section>
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
+                  7. Customer Rights Under DPDP Act 2023
+                </h2>
+                <p className="mb-2">Under Indian data protection laws, you possess the right to:</p>
+                <ul className="list-disc pl-5 space-y-1.5">
+                  <li>Request a summary of personal data held about you.</li>
+                  <li>Request correction of inaccurate or incomplete contact or billing data.</li>
+                  <li>Request erasure of your personal data, subject to statutory tax retention periods (GST and PMLA regulations require preserving invoices for 6 to 8 financial years).</li>
+                  <li>Withdraw consent for marketing communications.</li>
+                </ul>
+              </section>
+
+              {/* Grievance Redressal Officer */}
+              <section className="pt-4 border-t border-outline-variant/20">
+                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-2 font-semibold">
+                  8. Grievance Redressal Officer (IT Rules & E-Commerce Regulations)
+                </h2>
+                <p className="mb-3">
+                  In compliance with Rule 5(6) of the Consumer Protection (E-Commerce) Rules, 2020 and Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, our designated Grievance Officer details are published below:
+                </p>
+                <div className="p-4 bg-background border border-outline-variant/30 rounded-xs space-y-1">
+                  <p className="font-semibold text-on-surface">Grievance Redressal & Compliance Officer: {siteConfig.grievanceOfficer.name}</p>
+                  <p className="text-xs">Designation: {siteConfig.grievanceOfficer.designation}</p>
+                  <p className="text-xs">Organization: {siteConfig.legalBusinessName}</p>
+                  <p className="text-xs">Physical Address: {siteConfig.grievanceOfficer.address}</p>
+                  <p className="text-xs">Direct Email: <a href={`mailto:${siteConfig.grievanceOfficer.email}`} className="text-primary underline">{siteConfig.grievanceOfficer.email}</a></p>
+                  <p className="text-xs">Phone: {siteConfig.grievanceOfficer.phone}</p>
+                  <p className="text-xs text-amber-400 font-semibold mt-2">
+                    Grievance Acknowledgment: Within 48 hours | Resolution Window: Within 30 calendar days
+                  </p>
+                </div>
+              </section>
+
             </div>
           </div>
         </div>

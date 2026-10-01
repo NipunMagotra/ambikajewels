@@ -14,7 +14,7 @@ export default function HeritageSection() {
         {/* Desktop Absolute Badge */}
         <div className="absolute -bottom-8 -right-8 w-60 h-56 bg-surface-container border border-outline-variant p-5 hidden lg:block shadow-xl">
           <p className="font-body-md text-sm italic text-on-surface-variant leading-relaxed">
-            "Every piece of jewelry is a story carved in gold, a memory meant to last generations."
+            &ldquo;Every piece of jewelry is a story carved in gold, a memory meant to last generations.&rdquo;
           </p>
           <p className="font-label-caps text-xs text-primary mt-3 font-semibold">— MASTER KARIGAR</p>
         </div>
@@ -22,7 +22,7 @@ export default function HeritageSection() {
         {/* Mobile Inline Quote */}
         <div className="mt-4 lg:hidden bg-surface-container border border-outline-variant/30 p-4 text-center">
           <p className="font-body-md text-xs italic text-on-surface-variant">
-            "Every piece of jewelry is a story carved in gold, a memory meant to last generations."
+            &ldquo;Every piece of jewelry is a story carved in gold, a memory meant to last generations.&rdquo;
           </p>
           <p className="font-label-caps text-[10px] text-primary mt-2 font-semibold">— MASTER KARIGAR</p>
         </div>
@@ -34,7 +34,7 @@ export default function HeritageSection() {
           Dogra Heritage & <span className="italic font-normal gold-text-gradient">Custom Artistry</span>
         </h3>
         <p className="font-body-md text-sm sm:text-base text-on-surface-variant/90 mb-6 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
-          Established in 2021 by Shivani Anand and Lakesh Kumar, Ambika Jewels is Jammu's premier showroom specializing in authentic Dogra heritage jewelry (Dogri Jhumki, Naman & Long Sets), gold exchange, and custom 3D CAD jewelry redesign.
+          Founded by Shivani Anand and Lakesh Kumar, Ambika Jewels is Jammu&apos;s premier showroom specializing in authentic Dogra heritage jewelry (Dogri Jhumki, Naman & Long Sets), gold exchange, and custom 3D CAD jewelry redesign.
         </p>
         <Link href="/about" className="inline-block border border-primary px-8 py-3.5 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 w-full sm:w-auto font-bold tracking-widest text-center">
           OUR STORY & LEGACY

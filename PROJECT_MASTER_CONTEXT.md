@@ -23,7 +23,8 @@
 - **Official Contact Details:**
   - Phone: `+91 9682589725`
   - WhatsApp Concierge: `+91 9086098457`
-  - Email: `contact@ambikajewels.com`
+  - Email: `contact@ambikajewelsshop.com`
+  - Domain: `ambikajewelsshop.com`
 - **Showroom Operating Hours:**  
   Monday to Saturday: 10:00 AM – 8:00 PM | Sunday: Open | Extended hours during wedding/festive seasons.
 

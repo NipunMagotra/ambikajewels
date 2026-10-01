@@ -13,14 +13,14 @@ export default function TestimonialsSection() {
       icon: 'diamond'
     },
     {
-      title: '100% Insured Delivery',
+      title: 'Secure Express Delivery',
       subtitle: 'PAN-INDIA DOORSTEP SHIPMENT',
-      description: 'Dispatched through Shiprocket in specialized tamper-evident security packaging with complete transit insurance until handed to you.',
+      description: 'Dispatched through Shiprocket in specialized tamper-evident security packaging with verified courier tracking until handed to you.',
       icon: 'local_shipping'
     },
     {
       title: 'Jammu Flagship Showroom',
-      subtitle: 'ESTABLISHED 2021',
+      subtitle: 'AUTHENTIC DOGRA JEWELRY',
       description: 'Visit our physical boutique in Lower Roop Nagar, Jammu for private bridal viewings, custom 3D CAD design, and authentic Dogra heirloom craftsmanship.',
       icon: 'storefront'
     }
@@ -37,7 +37,7 @@ export default function TestimonialsSection() {
             Standards of Heritage Craftsmanship
           </h3>
           <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-2">
-            Every piece crafted at our Jammu showroom reflects four decades of goldsmith tradition and uncompromising modern quality standards.
+            Every piece crafted at our Jammu showroom reflects dedicated goldsmith artistry and uncompromising modern quality standards.
           </p>
         </div>
 

@@ -18,7 +18,7 @@
 | **Showroom & Boutique** | Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013 |
 | **Contact Phone** | +91 9682589725 |
 | **WhatsApp Concierge** | +91 9086098457 |
-| **Contact Email** | contact@ambikajewels.com |
+| **Contact Email** | contact@ambikajewelsshop.com |
 | **Website** | Ambika Jewels Online Showroom |
 
 ---

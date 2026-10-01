@@ -142,7 +142,7 @@ export default function CartPage() {
 
                   <div className="flex items-center justify-center gap-2 mb-1.5">
                     <span className="material-symbols-outlined text-primary text-xs sm:text-sm">local_shipping</span>
-                    <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant">FULLY INSURED DELIVERY</span>
+                    <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant">EXPRESS COURIER DELIVERY</span>
                   </div>
                   <div className="flex items-center justify-center gap-2">
                     <span className="material-symbols-outlined text-primary text-xs sm:text-sm">lock</span>

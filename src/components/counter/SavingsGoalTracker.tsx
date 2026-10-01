@@ -19,11 +19,7 @@ import {
   Scale,
   Sparkles,
   TrendingUp,
-  CheckCircle2,
   Coins,
-  ChevronRight,
-  X,
-  HeartHandshake,
 } from 'lucide-react';
 
 interface SavingsGoalTrackerProps {
@@ -55,11 +51,6 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
     date: new Date().toISOString().slice(0, 10),
   });
 
-  // Load goals on mount
-  useEffect(() => {
-    loadGoals();
-  }, []);
-
   const loadGoals = async () => {
     setIsLoading(true);
     try {
@@ -71,6 +62,11 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
       setIsLoading(false);
     }
   };
+
+  // Load goals on mount
+  useEffect(() => {
+    loadGoals();
+  }, []);
 
   const handleCreateGoal = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -354,7 +350,7 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
                       ₹{currentValuation.toLocaleString('en-IN')}
                     </div>
                     <div className="text-[11px] text-on-surface-variant">
-                      Based on today's {goal.targetPurity} rate (₹{activeRate}/g)
+                      Based on today&apos;s {goal.targetPurity} rate (₹{activeRate}/g)
                     </div>
                   </div>
 
@@ -481,7 +477,7 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
                   <label className="text-xs text-on-surface font-semibold block mb-1">Target Purity</label>
                   <select
                     value={newGoalForm.targetPurity}
-                    onChange={(e) => setNewGoalForm({ ...newGoalForm, targetPurity: e.target.value as any })}
+                    onChange={(e) => setNewGoalForm({ ...newGoalForm, targetPurity: e.target.value as '22K' | '18K' | '14K' | '925Silver' })}
                     className="w-full bg-surface border border-outline-variant/50 focus:border-primary text-on-surface px-3 py-2.5 rounded-lg text-sm font-bold min-h-[44px]"
                   >
                     <option value="22K">22K Gold (916)</option>

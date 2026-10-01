@@ -8,16 +8,15 @@ export interface FAQItem {
 export const storeKnowledge = {
   name: "Ambika Jewels",
   tagline: "Authentic Dogra Heritage & Fine Custom Jewelry",
-  foundedYear: 2021,
   owner: "Shivani Anand",
   businessRepresentative: "Lakesh Kumar",
-  experienceYears: "Since 2021",
+  experienceYears: "Trusted Jammu Jeweler",
   locationName: "Jammu, Jammu & Kashmir",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
   landmarks: "Near E.W.S Colony, Sector 1, Lower Roop Nagar",
   phone: "+91 9682589725",
   whatsapp: "+91 9086098457",
-  email: "contact@ambikajewels.com",
+  email: "contact@ambikajewelsshop.com",
   
   hours: {
     mondayToSaturday: "10:00 AM – 8:00 PM",
@@ -87,7 +86,7 @@ export const storeKnowledge = {
   policies: [
     "100% gold exchange and custom redesign policy.",
     "Lifetime buyback & exchange options.",
-    "Free 100% insured home delivery across India on all orders over ₹50,000.",
+    "Free express home delivery across India on all orders over ₹50,000.",
     "Free lifetime cleaning, polishing, and stone inspection in-store."
   ],
 
@@ -104,8 +103,8 @@ export const storeKnowledge = {
 export const faqItems: FAQItem[] = [
   {
     question: "When was the store established?",
-    answer: "Namaste! Our jewelry showroom was established in 2021 in Jammu by owner Shivani Anand and business representative Lakesh Kumar, offering premium quality jewelry and authentic Dogra heritage collections.",
-    keywords: ["established", "founded", "history", "year", "2021", "owner", "start", "old", "since", "shivani", "lakesh"],
+    answer: "Namaste! Our jewelry showroom is located in Jammu, founded by owner Shivani Anand and business representative Lakesh Kumar, offering premium quality jewelry and authentic Dogra heritage collections.",
+    keywords: ["established", "founded", "history", "year", "owner", "start", "old", "shivani", "lakesh"],
     category: "about"
   },
   {

@@ -10,7 +10,8 @@ export const isSupabaseConfigured = Boolean(
   supabaseUrl.startsWith('https://')
 );
 
-export const supabase = createClient(
-  isSupabaseConfigured ? supabaseUrl : 'https://xyzcompany.supabase.co', 
-  isSupabaseConfigured ? supabaseAnonKey : 'dummy-key'
-);
+// Anonymous client for browser & public queries.
+// If credentials are not configured, client operations will be skipped via isSupabaseConfigured checks.
+export const supabase = isSupabaseConfigured
+  ? createClient(supabaseUrl, supabaseAnonKey)
+  : (createClient('https://unconfigured.supabase.co', 'unconfigured-public-anon-key'));

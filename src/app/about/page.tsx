@@ -6,8 +6,8 @@ import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
 import Link from 'next/link';
 
 export const metadata = {
-  title: 'About Us | Ambika Jewels Jammu (Estd 2021)',
-  description: 'Learn about Ambika Jewels in Jammu, founded in 2021 by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewelry, Gold Exchange, 22K-9K gold, 925 silver, and custom jewelry.',
+  title: 'About Us | Ambika Jewels Jammu',
+  description: 'Learn about Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewelry, Gold Exchange, 22K-9K gold, 925 silver, and custom jewelry.',
 };
 
 export default function AboutPage() {
@@ -35,10 +35,10 @@ export default function AboutPage() {
   ];
 
   const milestones = [
-    { year: '2021', title: 'Establishment in Jammu', detail: 'Founded our jewelry showroom and boutique in Lower Roop Nagar, Jammu by Shivani Anand.' },
-    { year: '2022', title: 'Signature Dogra Collection', detail: 'Introduced authentic Dogri Jhumki, Dogri Naman, and Long Sets crafted by master Jammu karigars.' },
-    { year: '2023', title: 'Gold Exchange & 3D CAD', detail: 'Pioneered full gold exchange and 3D CAD custom design services for custom jewelry orders.' },
-    { year: 'Present', title: 'Expanded Multi-Purity Collections', detail: 'Offering 22K, 18K, 14K, 9K gold, 18K/14K diamond, 925 silver, and nationwide insured delivery.' }
+    { year: '01', title: 'Establishment in Jammu', detail: 'Founded our jewelry showroom and boutique in Lower Roop Nagar, Jammu by Shivani Anand.' },
+    { year: '02', title: 'Signature Dogra Collection', detail: 'Introduced authentic Dogri Jhumki, Dogri Naman, and Long Sets crafted by master Jammu karigars.' },
+    { year: '03', title: 'Gold Exchange & 3D CAD', detail: 'Pioneered full gold exchange and 3D CAD custom design services for custom jewelry orders.' },
+    { year: '04', title: 'Expanded Multi-Purity Collections', detail: 'Offering 22K, 18K, 14K, 9K gold, 18K/14K diamond, 925 silver, and nationwide express delivery.' }
   ];
 
   return (
@@ -51,13 +51,13 @@ export default function AboutPage() {
           <div className="absolute inset-0 mandala-overlay opacity-5"></div>
           <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop text-center relative z-10 max-w-3xl">
             <span className="font-label-caps text-[10px] sm:text-xs text-primary tracking-[0.35em] block mb-3 font-semibold">
-              JAMMU &bull; ESTD 2021
+              JAMMU &bull; FINE JEWELRY
             </span>
             <h1 className="font-headline-md text-3xl sm:text-5xl lg:text-6xl text-primary mb-6 leading-tight">
               Authentic Dogra Heritage & <span className="italic font-normal gold-text-gradient">Modern Fine Jewelry</span>
             </h1>
             <p className="font-body-md text-sm sm:text-lg text-on-surface-variant/90 leading-relaxed font-light">
-              Established in 2021 in Jammu, Ambika Jewels is owned by Shivani Anand and managed alongside business representative Lakesh Kumar, offering premium quality jewelry, traditional Dogra collections, and customized gold services.
+              Based in Jammu, Ambika Jewels is owned by Shivani Anand and managed alongside business representative Lakesh Kumar, offering premium quality jewelry, traditional Dogra collections, and customized gold services.
             </p>
           </div>
         </section>
@@ -75,7 +75,7 @@ export default function AboutPage() {
                 />
               </div>
               <div className="absolute -bottom-6 -right-6 bg-surface-container border border-primary/40 p-4 sm:p-6 hidden sm:block max-w-xs shadow-xl">
-                <p className="font-headline-sm text-2xl gold-text-gradient font-bold mb-1">ESTD 2021</p>
+                <p className="font-headline-sm text-xl gold-text-gradient font-bold mb-1">JAMMU SHOWROOM</p>
                 <p className="font-label-caps text-[10px] text-on-surface-variant tracking-wider">PREMIUM QUALITY & TRUSTED CRAFTSMANSHIP</p>
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function AboutPage() {
                 Preserving Heritage, <span className="italic font-normal gold-text-gradient">Crafting Perfection</span>
               </h2>
               <p className="font-body-md text-xs sm:text-sm text-on-surface-variant/90 mb-4 leading-relaxed font-light">
-                Founded in 2021, Ambika Jewels was established with a clear mission: to offer unique, exclusive jewelry designs with uncompromised quality and personal customer service. Alongside our flagship showroom in Jammu, we operate a personalized boutique managed directly by owner Shivani Anand.
+                Ambika Jewels was established with a clear mission: to offer unique, exclusive jewelry designs with uncompromised quality and personal customer service. Alongside our flagship showroom in Jammu, we operate a personalized boutique managed directly by owner Shivani Anand.
               </p>
               <p className="font-body-md text-xs sm:text-sm text-on-surface-variant/90 mb-6 leading-relaxed font-light">
                 We take immense pride in preserving Jammu's cultural legacy through our Signature Dogra Collection — including authentic Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets. In addition, our Gold Exchange program allows customers to melt old gold and transform it into brand-new modern heritage pieces.
@@ -145,7 +145,7 @@ export default function AboutPage() {
               OUR JOURNEY
             </span>
             <h2 className="font-headline-md text-2xl sm:text-4xl text-on-surface">
-              Milestones Since 2021
+              Milestones & Growth
             </h2>
           </div>
 
