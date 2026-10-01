@@ -3,6 +3,7 @@
 import React, { useState, useMemo } from 'react';
 import { DailyRates, BillInput, BillBreakdown } from '@/types/counter';
 import { ThermalReceiptModal } from './ThermalReceiptModal';
+import { Form60Modal } from './Form60Modal';
 import { calculateJewelryPrice } from '@/lib/pricingEngine';
 import { siteConfig } from '@/config/siteConfig';
 import {
@@ -22,6 +23,8 @@ import {
   ArrowRight,
   FileText,
   AlertTriangle,
+  CreditCard,
+  Ban,
 } from 'lucide-react';
 
 interface BillingCalculatorProps {
@@ -32,6 +35,11 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
   const [bill, setBill] = useState<BillInput>({
     customerName: '',
     customerPhone: '',
+    customerPan: '',
+    hasForm60: false,
+    form60Details: null,
+    paymentMode: 'cash',
+    cashAmountReceived: 0,
     metalPurity: '22K',
     grossWeight: 10.0,
     stoneWeight: 0.0,
@@ -49,6 +57,7 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
 
   const [customRateOverride, setCustomRateOverride] = useState<number | null>(null);
   const [showThermalModal, setShowThermalModal] = useState(false);
+  const [showForm60Modal, setShowForm60Modal] = useState(false);
   const [copiedNotification, setCopiedNotification] = useState(false);
 
   // Active per gram rate based on purity selection
@@ -105,6 +114,21 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
     };
   }, [bill, activeRatePerGram, rates.gold_22k]);
 
+  // Compliance rules (Config-driven thresholds, CA to confirm)
+  const isPanRequired = breakdown.finalAmountDue >= siteConfig.compliance.panRequirementThresholdInr;
+  const isPanValid = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/i.test(bill.customerPan?.trim() || '');
+  const isPanSatisfied = !isPanRequired || isPanValid || !!bill.hasForm60;
+
+  const effectiveCashAmount = bill.paymentMode === 'cash'
+    ? breakdown.finalAmountDue
+    : (bill.paymentMode === 'split' ? (bill.cashAmountReceived || 0) : 0);
+
+  // Cash limit: payments >= 2,00,000 in cash per day are restricted under Indian tax laws (CA to confirm)
+  const isCashBlocked = effectiveCashAmount >= siteConfig.compliance.cashTransactionLimitInr;
+
+  // Buyback limit: cash payouts > 10,000 for old gold purchase (CA to confirm)
+  const isOldGoldCashAlert = bill.oldGoldWeight > 0 && breakdown.oldGoldDeduction > siteConfig.compliance.cashDisbursementLimitInr && (bill.paymentMode === 'cash' || effectiveCashAmount > 0);
+
   const handleInputChange = (field: keyof BillInput, value: any) => {
     setBill((prev) => ({ ...prev, [field]: value }));
   };
@@ -116,7 +140,6 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
     const randomSuffix = Math.floor(1000 + Math.random() * 9000);
     setReceiptNumber(`AJ-${dateStr}-${randomSuffix}`);
   }, []);
-
 
   // Format WhatsApp Text Bill Summary
   const formatWhatsAppText = () => {
@@ -132,6 +155,9 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
     text += `Lower Roop Nagar, Jammu | Ph: +91 9682589725\n`;
     text += `----------------------------------------\n`;
     if (bill.customerName) text += `*Customer:* ${bill.customerName}\n`;
+    if (bill.customerPan) text += `*Customer PAN:* ${bill.customerPan.toUpperCase()}\n`;
+    if (bill.hasForm60) text += `*PAN Status:* Form 60 Declaration Attached\n`;
+    if (bill.paymentMode) text += `*Payment Mode:* ${bill.paymentMode.toUpperCase()}\n`;
     text += `*Date:* ${dateStr}\n`;
     text += `*Metal & Purity:* ${bill.metalPurity}\n`;
     text += `*Gross Wt:* ${bill.grossWeight.toFixed(3)}g\n`;
@@ -167,6 +193,7 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
   };
 
   const handleWhatsAppShare = () => {
+    if (isCashBlocked) return;
     const rawText = formatWhatsAppText();
     const encodedText = encodeURIComponent(rawText);
 
@@ -184,6 +211,11 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
     setBill({
       customerName: '',
       customerPhone: '',
+      customerPan: '',
+      hasForm60: false,
+      form60Details: null,
+      paymentMode: 'cash',
+      cashAmountReceived: 0,
       metalPurity: '22K',
       grossWeight: 10.0,
       stoneWeight: 0.0,
@@ -233,12 +265,25 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Column: Form Inputs (7 Cols) */}
         <div className="lg:col-span-7 space-y-5">
-          {/* Customer Metadata (Optional) */}
-          <div className="glass-panel p-4 rounded-xl border border-outline-variant/30 space-y-3 bg-surface-container/60">
-            <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
-              <User className="w-4 h-4" />
-              Customer Details (Optional)
-            </h3>
+          {/* Customer Metadata & Compliance */}
+          <div className="glass-panel p-4 rounded-xl border border-outline-variant/30 space-y-4 bg-surface-container/60">
+            <div className="flex items-center justify-between">
+              <h3 className="text-xs font-bold text-primary uppercase tracking-wider flex items-center gap-1.5">
+                <User className="w-4 h-4" />
+                Customer & Payment Details
+              </h3>
+              {isPanRequired && (
+                <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 border ${
+                  isPanSatisfied 
+                    ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300' 
+                    : 'bg-amber-950/60 border-amber-500/60 text-amber-300 animate-pulse'
+                }`}>
+                  <AlertTriangle className="w-3 h-3" />
+                  PAN / Form 60 Required (₹2L+)
+                </span>
+              )}
+            </div>
+
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="text-xs text-on-surface-variant block mb-1">Customer Name</label>
@@ -260,6 +305,106 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
                   onChange={(e) => handleInputChange('customerPhone', e.target.value)}
                   className="w-full bg-surface border border-outline-variant/50 focus:border-primary text-on-surface px-3 py-2 rounded-lg text-sm min-h-[44px] focus:outline-none"
                 />
+              </div>
+            </div>
+
+            {/* PAN & Form 60 Row */}
+            <div className="pt-2 border-t border-outline-variant/20 space-y-2">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                <label className="text-xs text-on-surface-variant font-medium flex items-center gap-1">
+                  <span>Customer PAN {isPanRequired ? <strong className="text-amber-400">*</strong> : '(Optional)'}</span>
+                  <span className="text-[10px] text-on-surface-variant/70">(CA to confirm)</span>
+                </label>
+
+                {!bill.hasForm60 ? (
+                  <button
+                    type="button"
+                    onClick={() => setShowForm60Modal(true)}
+                    className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1 self-start sm:self-auto cursor-pointer"
+                  >
+                    <FileText className="w-3.5 h-3.5" />
+                    <span>No PAN? File Form 60 Declaration</span>
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-emerald-400 font-semibold flex items-center gap-1">
+                      <Check className="w-3.5 h-3.5" />
+                      Form 60 Attached
+                    </span>
+                    <button
+                      type="button"
+                      onClick={() => setBill(prev => ({ ...prev, hasForm60: false, form60Details: null }))}
+                      className="text-[10px] text-red-400 hover:underline cursor-pointer"
+                    >
+                      (Remove)
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              {!bill.hasForm60 && (
+                <div className="relative">
+                  <input
+                    type="text"
+                    maxLength={10}
+                    placeholder="e.g. ABCDE1234F"
+                    value={bill.customerPan || ''}
+                    onChange={(e) => handleInputChange('customerPan', e.target.value.toUpperCase())}
+                    className={`w-full bg-surface border text-on-surface px-3 py-2 rounded-lg text-sm uppercase font-mono tracking-wider focus:outline-none ${
+                      isPanRequired && !isPanValid
+                        ? 'border-amber-500/70 focus:border-amber-400'
+                        : 'border-outline-variant/50 focus:border-primary'
+                    }`}
+                  />
+                  {bill.customerPan && (
+                    <span className="absolute right-3 top-2.5 text-xs font-bold">
+                      {isPanValid ? (
+                        <span className="text-emerald-400 flex items-center gap-0.5"><Check className="w-3.5 h-3.5" /> Valid PAN</span>
+                      ) : (
+                        <span className="text-amber-400 text-[10px]">10 chars (AAAAA9999A)</span>
+                      )}
+                    </span>
+                  )}
+                </div>
+              )}
+            </div>
+
+            {/* Payment Mode Selector */}
+            <div className="pt-2 border-t border-outline-variant/20 space-y-2">
+              <label className="text-xs text-on-surface-variant font-medium block">
+                Payment Mode Selection
+              </label>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {[
+                  { value: 'cash', label: 'Cash' },
+                  { value: 'upi', label: 'UPI / QR' },
+                  { value: 'card', label: 'Card (POS)' },
+                  { value: 'bank_transfer', label: 'Bank (NEFT)' },
+                ].map((mode) => {
+                  const isSelected = (bill.paymentMode || 'cash') === mode.value;
+                  const isThisCashBlocked = mode.value === 'cash' && breakdown.finalAmountDue >= siteConfig.compliance.cashTransactionLimitInr;
+
+                  return (
+                    <button
+                      key={mode.value}
+                      type="button"
+                      onClick={() => handleInputChange('paymentMode', mode.value)}
+                      className={`p-2.5 rounded-lg text-xs font-bold transition-all border cursor-pointer text-center flex flex-col items-center justify-center gap-1 ${
+                        isSelected
+                          ? isThisCashBlocked
+                            ? 'bg-red-950/60 border-red-500 text-red-300'
+                            : 'bg-primary/20 border-primary text-primary shadow-sm'
+                          : 'bg-surface border-outline-variant/30 text-on-surface-variant hover:bg-surface-container'
+                      }`}
+                    >
+                      <span>{mode.label}</span>
+                      {isThisCashBlocked && (
+                        <span className="text-[9px] text-red-400 uppercase font-mono font-normal">Limit ₹2L</span>
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             </div>
           </div>
@@ -606,29 +751,90 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
               </span>
             </div>
 
+            {/* Compliance Alerts & Blocker Banners (CA to confirm) */}
+            {isCashBlocked && (
+              <div className="p-3 bg-red-950/80 border-2 border-red-500 rounded-xl text-xs text-red-200 space-y-1 animate-pulse">
+                <div className="flex items-center gap-1.5 font-bold text-red-300 uppercase tracking-wide text-xs">
+                  <Ban className="w-4 h-4 text-red-400 shrink-0" />
+                  <span>Cash Payment Blocked (CA to confirm)</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-red-200/90">
+                  Cash payments of ₹2,00,000 or more per person per day are restricted under Indian tax laws (verify with CA/lawyer). Please switch payment mode to <strong>Bank Transfer (NEFT/RTGS), UPI, or Card</strong>.
+                </p>
+              </div>
+            )}
+
+            {isPanRequired && !isPanSatisfied && (
+              <div className="p-3 bg-amber-950/80 border-2 border-amber-500 rounded-xl text-xs text-amber-200 space-y-1">
+                <div className="flex items-center gap-1.5 font-bold text-amber-300 uppercase tracking-wide text-xs">
+                  <AlertTriangle className="w-4 h-4 text-amber-400 shrink-0" />
+                  <span>PAN / Form 60 Required (CA to confirm)</span>
+                </div>
+                <p className="text-[11px] leading-relaxed text-amber-200/90">
+                  Transactions of ₹2,00,000 or more require customer PAN verification or a Form 60 declaration under tax reporting rules (verify with CA/lawyer).
+                </p>
+              </div>
+            )}
+
+            {isOldGoldCashAlert && (
+              <div className="p-2.5 bg-blue-950/70 border border-blue-500/40 rounded-xl text-xs text-blue-200">
+                <span className="font-semibold block text-[11px]">⚠️ Cash Payout Alert (CA to confirm):</span>
+                <span className="text-[10px] text-blue-200/80">
+                  Old gold cash payouts exceeding ₹10,000 should be settled via Bank Transfer or Account Payee Cheque.
+                </span>
+              </div>
+            )}
+
             {/* Action Buttons: WhatsApp & Thermal Print */}
             <div className="space-y-3 pt-2">
               <button
                 type="button"
+                disabled={isCashBlocked}
                 onClick={handleWhatsAppShare}
-                className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer min-h-[48px]"
+                className={`w-full py-3.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-base min-h-[48px] ${
+                  isCashBlocked 
+                    ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700' 
+                    : 'bg-emerald-600 hover:bg-emerald-500 text-white font-bold cursor-pointer'
+                }`}
               >
                 <Share2 className="w-5 h-5" />
-                <span>Send WhatsApp Receipt</span>
+                <span>{isCashBlocked ? 'Cash Blocked: Switch Payment Mode' : 'Send WhatsApp Receipt'}</span>
               </button>
 
               <button
                 type="button"
+                disabled={isCashBlocked}
                 onClick={() => setShowThermalModal(true)}
-                className="w-full gold-bg-gradient font-bold text-on-primary-fixed py-3.5 px-4 rounded-xl shadow-lg hover:shadow-primary/20 transition-all flex items-center justify-center gap-2.5 text-base cursor-pointer min-h-[48px]"
+                className={`w-full py-3.5 px-4 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2.5 text-base min-h-[48px] ${
+                  isCashBlocked
+                    ? 'bg-slate-800 text-slate-400 cursor-not-allowed border border-slate-700'
+                    : 'gold-bg-gradient font-bold text-on-primary-fixed hover:shadow-primary/20 cursor-pointer'
+                }`}
               >
                 <Printer className="w-5 h-5" />
-                <span>Print Thermal Receipt / PDF</span>
+                <span>{isCashBlocked ? 'Cash Blocked: Switch Payment Mode' : 'Print Thermal Receipt / PDF'}</span>
               </button>
             </div>
           </div>
         </div>
       </div>
+
+      {/* Form 60 Declaration Modal */}
+      {showForm60Modal && (
+        <Form60Modal
+          initialCustomerName={bill.customerName}
+          onSave={(data) => {
+            setBill((prev) => ({
+              ...prev,
+              hasForm60: true,
+              form60Details: data,
+              customerName: prev.customerName || data.declarantName,
+            }));
+            setShowForm60Modal(false);
+          }}
+          onClose={() => setShowForm60Modal(false)}
+        />
+      )}
 
       {/* Thermal Receipt Modal */}
       {showThermalModal && (

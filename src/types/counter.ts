@@ -11,9 +11,27 @@ export type DailyRates = {
   updated_by?: string;
 };
 
+export type PaymentMode = 'cash' | 'upi' | 'card' | 'bank_transfer' | 'split';
+
+export type Form60Declaration = {
+  declarantName: string;
+  fatherOrSpouseName: string;
+  dateOfBirth: string;
+  residentialAddress: string;
+  panApplicationStatus: 'applied' | 'not_applied';
+  estimatedAgriculturalIncome: number;
+  estimatedOtherIncome: number;
+  verifiedDeclaration: boolean;
+};
+
 export type BillInput = {
   customerName: string;
   customerPhone: string;
+  customerPan?: string;
+  hasForm60?: boolean;
+  form60Details?: Form60Declaration | null;
+  paymentMode?: PaymentMode;
+  cashAmountReceived?: number;
   metalPurity: '22K' | '18K' | '14K' | '925Silver';
   grossWeight: number;
   stoneWeight: number;

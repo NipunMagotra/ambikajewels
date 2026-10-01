@@ -96,10 +96,15 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
                 <strong>Customer:</strong> {bill.customerName || 'Walk-in Customer'}
               </p>
               {bill.customerPhone && <p><strong>Ph:</strong> {bill.customerPhone}</p>}
+              {bill.customerPan && <p><strong>PAN:</strong> {bill.customerPan.toUpperCase()}</p>}
+              {bill.hasForm60 && <p><strong>PAN Status:</strong> Form 60 Attached</p>}
             </div>
             <div className="text-right">
               <p><strong>Date:</strong> {currentDate}</p>
               <p><strong>Time:</strong> {currentTime}</p>
+              {bill.paymentMode && (
+                <p><strong>Mode:</strong> {bill.paymentMode.toUpperCase()}</p>
+              )}
             </div>
           </div>
 

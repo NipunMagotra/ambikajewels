@@ -501,7 +501,7 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">PHONE NUMBER (FOR SHIPROCKET DISPATCH) *</label>
+                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">PHONE NUMBER (FOR INSURED DELIVERY & OTP) *</label>
                     <input 
                       required
                       type="tel" 
@@ -575,17 +575,17 @@ export default function CheckoutPage() {
                   </div>
                 </div>
 
-                {/* Mandatory Indian Income Tax PAN Card field for transactions > ₹2,00,000 */}
-                {finalTotal > 20000000 && (
+                {/* Mandatory PAN reporting threshold for high-value purchases (CA to confirm) */}
+                {finalTotal >= (siteConfig.compliance?.panRequirementThresholdInr ? siteConfig.compliance.panRequirementThresholdInr * 100 : 20000000) && (
                   <div className="mb-6 p-4 bg-amber-950/20 border border-amber-500/40 rounded-xs">
                     <div className="flex items-center gap-2 mb-1.5">
                       <span className="material-symbols-outlined text-amber-400 text-sm">gavel</span>
                       <span className="font-label-caps text-xs text-amber-300 font-bold tracking-wider">
-                        STATUTORY TAX REQUIREMENT (CBDT RULE 114B)
+                        STATUTORY TAX COMPLIANCE (CA TO CONFIRM)
                       </span>
                     </div>
                     <p className="text-xs text-on-surface-variant mb-3 leading-relaxed">
-                      Under Section 139A and Rule 114B of the Indian Income Tax Rules, customer Permanent Account Number (PAN) is legally mandatory for jewelry purchases exceeding ₹2,00,000.
+                      Customer Permanent Account Number (PAN) is required for precious jewelry purchases of ₹2,00,000 or above under Indian tax compliance regulations (verify with CA/lawyer).
                     </p>
                     <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">
                       CUSTOMER PAN NUMBER (10 CHARACTERS) *

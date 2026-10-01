@@ -87,6 +87,15 @@ export const siteConfig = {
     // TODO: Confirm with CA whether old gold exchange is gross consideration or margin scheme under GST rules
     oldGoldDeductBeforeGst: false,
   },
+  compliance: {
+    // Statutory PAN reporting threshold for jewelry/bullion purchases (CA to confirm)
+    panRequirementThresholdInr: 200000, // ₹2,00,000 threshold (CA to confirm)
+    // Statutory cash transaction limit per person per day (CA to confirm)
+    cashTransactionLimitInr: 200000, // ₹2,00,000 max cash per transaction/day (CA to confirm)
+    // Maximum cash disbursement allowed to customer for gold buyback/exchange (CA to confirm)
+    cashDisbursementLimitInr: 10000, // ₹10,000 max cash payout for old gold purchase (CA to confirm)
+    allowForm60Declaration: true,
+  },
   categories: [
     "Dogra Heritage Collection",
     "Gold Jewelry",
