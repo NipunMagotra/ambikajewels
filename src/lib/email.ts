@@ -155,7 +155,7 @@ export function generateOrderConfirmationEmailHtml(data: OrderEmailData): string
               <!-- Hallmarking & Trust Notice -->
               <div style="border-top: 1px solid #e0e0e0; padding-top: 16px; font-size: 12px; color: #777; line-height: 1.5;">
                 <p>
-                  <strong>BIS Hallmark Guarantee:</strong> All gold items are officially hallmarked with a unique 6-digit laser HUID in accordance with Bureau of Indian Standards regulations.
+                  <strong>BIS Hallmark Guarantee:</strong> All gold items are officially hallmarked with a unique 6-character alphanumeric laser HUID in accordance with Bureau of Indian Standards regulations.
                 </p>
                 <p>
                   <strong>Delivery Verification:</strong> Inspect the serialized security tape on arrival. Do not accept if broken.

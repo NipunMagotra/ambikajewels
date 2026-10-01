@@ -19,7 +19,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Handcrafted signature Dogra Jhumki worn by brides across Jammu region since generations.',
     material: '22K Solid Gold (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 14.5,
     gross_weight_grams: 15.2,
     dimensions: {
@@ -51,7 +51,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Authentic Jammu Dogri Naman design preserved and handcrafted by master karigars.',
     material: '22K Solid Gold with Natural Rubies (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 38.2,
     gross_weight_grams: 41.5,
     dimensions: {
@@ -83,7 +83,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'A staple of Dogra heritage bridal trousseaus crafted over 100 hours of artisanal embossing.',
     material: '22K Solid Gold (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 46.8,
     gross_weight_grams: 48.0,
     dimensions: {
@@ -117,7 +117,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Sculpted over 120 hours using heritage Meenakari enamel and Kundan setting techniques.',
     material: '22K Gold Kundan & Natural Emeralds (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 52.0,
     gross_weight_grams: 64.5,
     dimensions: {
@@ -149,7 +149,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Inspired by ancient Dogra royal court jewels.',
     material: '22K Gold with Certified Natural Polki (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 72.5,
     gross_weight_grams: 88.0,
     dimensions: {
@@ -347,7 +347,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Classical Dogra 22K gold design.',
     material: '22K Solid Gold with Adjustable Silk Dori (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 22.4,
     gross_weight_grams: 24.0,
     dimensions: {
@@ -479,7 +479,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Hand-engraved royal emblem with swivel back closure.',
     material: '22K Solid Gold with Natural Burmese Ruby (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 11.8,
     gross_weight_grams: 12.4,
     dimensions: {
@@ -511,7 +511,7 @@ export const mockProducts: Product[] = [
     craftsmanship_story: 'Cast in 45 grams of solid 22K hallmarked gold.',
     material: '22K Solid Heavy Gold (BIS Hallmarked)',
     purity: '22K (916 Purity)',
-    bis_hallmark: 'BIS Hallmarked with unique 6-digit HUID',
+    bis_hallmark: 'BIS Hallmarked with unique 6-character alphanumeric HUID',
     weight_grams: 45.0,
     gross_weight_grams: 45.0,
     dimensions: {

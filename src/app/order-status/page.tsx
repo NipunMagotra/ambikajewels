@@ -169,16 +169,16 @@ function OrderStatusContent() {
         <div className="flex flex-col sm:flex-row justify-between items-start pb-6 border-b border-outline-variant/30 gap-4">
           <div>
             <span className="font-headline-md text-2xl sm:text-3xl gold-text-gradient font-bold tracking-wider block print:text-black">
-              {siteConfig.legalBusinessName}
+              {order?.invoice?.seller?.name || siteConfig.legalBusinessName}
             </span>
             <p className="font-body-md text-xs text-on-surface-variant print:text-gray-700 whitespace-pre-line mt-1">
-              {siteConfig.address}
+              {order?.invoice?.seller?.address || siteConfig.address}
             </p>
             <p className="text-xs text-on-surface-variant print:text-gray-700 mt-1">
-              GSTIN: <strong>{siteConfig.gstin}</strong> | PAN: <strong>{siteConfig.pan}</strong>
+              GSTIN: <strong>{order?.invoice?.seller?.gstin || siteConfig.gstin || '[TO BE FILLED BY OWNER]'}</strong> | PAN: <strong>{order?.invoice?.seller?.pan || siteConfig.pan || '[TO BE FILLED BY OWNER]'}</strong>
             </p>
             <p className="text-xs text-on-surface-variant print:text-gray-700">
-              BIS Hallmark Reg: <strong>{siteConfig.bisHallmarkLicense}</strong> | Email: {siteConfig.contact.email}
+              BIS Hallmark Reg: <strong>{order?.invoice?.seller?.bis_hallmark || siteConfig.bisHallmarkLicense || '[TO BE FILLED BY OWNER]'}</strong> | Email: {order?.invoice?.seller?.email || siteConfig.contact.email}
             </p>
           </div>
 
@@ -187,10 +187,13 @@ function OrderStatusContent() {
               TAX INVOICE / CASH MEMO
             </span>
             <p className="font-headline-sm text-lg font-bold text-on-surface print:text-black">
-              #{orderId}
+              {order?.invoice?.invoice_number || `AJ/26-27/${String(orderId).replace(/\D/g, '') || '108249'}`}
             </p>
             <p className="text-xs text-on-surface-variant print:text-gray-600 mt-1">
-              Date: {new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+              Order Ref: #{order?.order_number || orderId}
+            </p>
+            <p className="text-xs text-on-surface-variant print:text-gray-600 mt-0.5">
+              Invoice Date: {order?.invoice?.invoice_date || new Date().toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
             </p>
             <p className="text-xs font-semibold text-green-400 print:text-green-700 mt-1">
               Payment Status: PAID (Razorpay Verified)
@@ -207,11 +210,16 @@ function OrderStatusContent() {
             <p className="font-bold text-sm text-on-surface print:text-black">
               {order?.customer_name || 'Verified Customer'}
             </p>
-            <p className="text-on-surface-variant print:text-gray-700 mt-1">
+            <p className="text-on-surface-variant print:text-gray-700 mt-1 whitespace-pre-line">
               {order?.shipping_address || 'Verified Destination, Jammu & Kashmir'}
             </p>
-            <p className="text-on-surface-variant print:text-gray-700 mt-1">
-              Place of Supply: Jammu & Kashmir (State Code: 01)
+            {order?.customer_phone && (
+              <p className="text-on-surface-variant print:text-gray-700 mt-0.5">
+                Contact: {order.customer_phone}
+              </p>
+            )}
+            <p className="text-on-surface-variant print:text-gray-700 mt-1 font-semibold text-primary print:text-black">
+              Place of Supply: {order?.invoice?.place_of_supply || 'Jammu & Kashmir (State Code: 01)'}
             </p>
           </div>
 
@@ -220,13 +228,13 @@ function OrderStatusContent() {
               LOGISTICS & DISPATCH SPECIFICATIONS:
             </span>
             <p className="text-on-surface-variant print:text-gray-700">
-              Logistics Provider: <strong>{order?.courier_partner || 'Shiprocket Express (Blue Dart)'}</strong>
+              Logistics Provider: <strong>{order?.courier_partner || 'BVC Logistics Secure Armed Network'}</strong>
             </p>
             <p className="text-on-surface-variant print:text-gray-700 mt-1">
-              Tracking AWB: <strong className="font-mono text-primary print:text-black">{order?.shiprocket_awb || 'AWB-LIVE-PENDING'}</strong>
+              Tracking Docket: <strong className="font-mono text-primary print:text-black">{order?.bvc_docket_number || order?.shiprocket_awb || 'BVC-ARMORED-PENDING'}</strong>
             </p>
             <p className="text-on-surface-variant print:text-gray-700 mt-1">
-              Packaging: <strong>Tamper-Evident Security Consignment</strong>
+              Packaging: <strong>Tamper-Evident Armored Consignment ({order?.bvc_security_bag_number || 'SEALED'})</strong>
             </p>
           </div>
         </div>
@@ -244,42 +252,95 @@ function OrderStatusContent() {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/15 text-on-surface-variant print:text-gray-800">
-              <tr>
-                <td className="py-3 font-semibold text-on-surface print:text-black">
-                  Authentic 22K Dogri Jhumki
-                  <span className="block text-[10px] font-normal text-on-surface-variant print:text-gray-600">Net Weight: 14.50g | Gross: 15.20g</span>
-                </td>
-                <td className="py-3">7113</td>
-                <td className="py-3">22K (916) BIS Hallmarked with HUID</td>
-                <td className="py-3 text-center">1</td>
-                <td className="py-3 text-right font-mono font-semibold">₹95,000.00</td>
-              </tr>
+              {Array.isArray(order?.invoice?.items) && order.invoice.items.length > 0 ? (
+                order.invoice.items.map((it: any, idx: number) => (
+                  <tr key={idx}>
+                    <td className="py-3 font-semibold text-on-surface print:text-black">
+                      {it.name}
+                    </td>
+                    <td className="py-3 font-mono">{it.hsn_code || '7113'}</td>
+                    <td className="py-3">{it.purity || '22K (916) BIS Hallmarked with 6-character alphanumeric HUID'}</td>
+                    <td className="py-3 text-center font-mono">{it.quantity || 1}</td>
+                    <td className="py-3 text-right font-mono font-semibold">
+                      ₹{((it.subtotal_paise || it.unit_price_paise || 0) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td className="py-3 font-semibold text-on-surface print:text-black">
+                    Authentic 22K Dogri Jhumki
+                    <span className="block text-[10px] font-normal text-on-surface-variant print:text-gray-600">Net Weight: 14.50g | Gross: 15.20g</span>
+                  </td>
+                  <td className="py-3 font-mono">7113</td>
+                  <td className="py-3">22K (916) BIS Hallmarked with 6-character alphanumeric HUID</td>
+                  <td className="py-3 text-center font-mono">1</td>
+                  <td className="py-3 text-right font-mono font-semibold">₹95,000.00</td>
+                </tr>
+              )}
             </tbody>
           </table>
         </div>
 
         {/* Financial Calculation Breakdown */}
-        <div className="flex justify-end pt-4 border-t border-outline-variant/30">
-          <div className="w-full sm:w-72 space-y-2 text-xs font-body-md text-on-surface-variant print:text-gray-800">
+        <div className="flex flex-col sm:flex-row justify-between items-start pt-4 border-t border-outline-variant/30 gap-6">
+          <div className="text-xs text-on-surface-variant print:text-gray-700 max-w-sm">
+            <span className="font-label-caps text-[10px] text-primary uppercase font-bold tracking-wider block mb-1">
+              AMOUNT IN WORDS:
+            </span>
+            <p className="font-semibold text-on-surface print:text-black italic">
+              {order?.invoice?.amount_in_words || 'Rupees Ninety Seven Thousand Eight Hundred Fifty Only'}
+            </p>
+            <p className="text-[10px] text-on-surface-variant/70 mt-2">
+              * GST treatment verified for precious jewelry under HSN 7113. <em>Confirm GST treatment with CA</em>.
+            </p>
+          </div>
+
+          <div className="w-full sm:w-80 space-y-2 text-xs font-body-md text-on-surface-variant print:text-gray-800">
             <div className="flex justify-between">
               <span>Item Taxable Subtotal</span>
-              <span className="font-mono">₹95,000.00</span>
+              <span className="font-mono">
+                ₹{((order?.invoice?.subtotal_paise || 9500000) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </span>
             </div>
+
+            {order?.invoice?.tax_split?.type === 'inter_state' ? (
+              <div className="flex justify-between">
+                <span>IGST ({order.invoice.tax_split.igstRateText} Inter-State)</span>
+                <span className="font-mono">
+                  ₹{((order.invoice.tax_split.igstPaise || 0) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                </span>
+              </div>
+            ) : (
+              <>
+                <div className="flex justify-between">
+                  <span>CGST ({order?.invoice?.tax_split?.cgstRateText || '1.5%'})</span>
+                  <span className="font-mono">
+                    ₹{((order?.invoice?.tax_split?.cgstPaise || 142500) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+                <div className="flex justify-between">
+                  <span>SGST / UTGST ({order?.invoice?.tax_split?.sgstRateText || '1.5%'})</span>
+                  <span className="font-mono">
+                    ₹{((order?.invoice?.tax_split?.sgstPaise || 142500) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+                  </span>
+                </div>
+              </>
+            )}
+
             <div className="flex justify-between">
-              <span>CGST (1.5% Precious Jewelry)</span>
-              <span className="font-mono">₹1,425.00</span>
-            </div>
-            <div className="flex justify-between">
-              <span>SGST / UTGST (1.5% Precious Jewelry)</span>
-              <span className="font-mono">₹1,425.00</span>
-            </div>
-            <div className="flex justify-between">
-              <span>Express Courier Shipping</span>
-              <span className="text-primary font-bold print:text-black">COMPLIMENTARY</span>
+              <span>BVC Insured Armed Transit</span>
+              <span className="text-primary font-bold print:text-black">
+                {order?.invoice?.shipping_paise && order.invoice.shipping_paise > 0
+                  ? `₹${(order.invoice.shipping_paise / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}`
+                  : 'COMPLIMENTARY'}
+              </span>
             </div>
             <div className="flex justify-between pt-2 border-t border-outline-variant/30 font-headline-sm text-base text-primary print:text-black font-bold">
               <span>Total Invoice Amount</span>
-              <span className="font-mono">₹97,850.00</span>
+              <span className="font-mono">
+                ₹{((order?.invoice?.total_paise || 9785000) / 100).toLocaleString('en-IN', { minimumFractionDigits: 2 })}
+              </span>
             </div>
           </div>
         </div>
@@ -287,13 +348,13 @@ function OrderStatusContent() {
         {/* Statutory Hallmarking Declaration */}
         <div className="mt-8 pt-6 border-t border-outline-variant/20 text-[11px] text-on-surface-variant print:text-gray-600 leading-relaxed space-y-1">
           <p>
-            <strong>BIS Hallmark Certification Guarantee:</strong> We certify that the precious jewelry described in this tax invoice complies with Indian Standards Specification for Gold / Silver Hallmarking. Each piece bears the triangular Bureau of Indian Standards mark, purity fineness, and a unique 6-digit laser HUID.
+            <strong>BIS Hallmark Certification Guarantee:</strong> We certify that the precious jewelry described in this tax invoice complies with Indian Standards Specification for Gold / Silver Hallmarking. Each piece bears the triangular Bureau of Indian Standards mark, purity fineness, and a unique 6-character alphanumeric laser HUID.
           </p>
           <p>
             <strong>Return & Inspection Policy:</strong> 7-Day return policy applies from confirmed delivery date, provided security tags and invoice copy remain untampered.
           </p>
           <p className="text-[10px] text-on-surface-variant/70 mt-2">
-            This is a computer-generated tax invoice issued in Jammu, J&K. No physical signature is required.
+            This is an official computer-generated tax invoice issued in Jammu, J&K. No physical signature is required.
           </p>
         </div>
 

@@ -100,6 +100,9 @@ export default function ProductCard({ product }: { product: Product }) {
           <p className="font-label-caps text-xs sm:text-sm text-amber-300 font-extrabold tracking-widest font-mono">
             {product.display_price}
           </p>
+          <span className="text-[10px] text-amber-200/70 block font-normal tracking-tight mt-0.5">
+            Inclusive of all taxes
+          </span>
         </div>
 
         {/* Mobile Action Buttons (Optimized Touch Responsive Layout) */}

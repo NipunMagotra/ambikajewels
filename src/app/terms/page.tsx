@@ -60,7 +60,7 @@ export default function TermsPage() {
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
-                    <strong>22K Gold (916 Purity):</strong> Solid gold crafted at 91.6% fineness, stamped with the official triangular BIS logo, purity fineness mark (22K916), and a laser-inscribed unique 6-digit alphanumeric <strong>Hallmark Unique Identification (HUID)</strong>.
+                    <strong>22K Gold (916 Purity):</strong> Solid gold crafted at 91.6% fineness, stamped with the official triangular BIS logo, purity fineness mark (22K916), and a laser-inscribed unique 6-character alphanumeric <strong>Hallmark Unique Identification (HUID)</strong>.
                   </li>
                   <li>
                     <strong>18K Gold (750 Purity) & 14K Gold (585 Purity):</strong> Hallmarked with official BIS stamps (18K750 / 14K585) and laser HUID.

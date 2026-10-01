@@ -51,8 +51,18 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
         {/* PRINTABLE RECEIPT CONTENT CONTAINER */}
         <div
           id="printable-receipt"
-          className="bg-white text-black p-5 rounded-lg text-xs font-mono space-y-3 shadow-inner border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 print:w-full print:bg-transparent"
+          className="relative bg-white text-black p-5 rounded-lg text-xs font-mono space-y-3 shadow-inner border border-slate-300 print:border-none print:shadow-none print:p-0 print:m-0 print:w-full print:bg-transparent overflow-hidden"
         >
+          {/* Watermark for No-GST Estimates */}
+          {!bill.includeGst && (
+            <div className="absolute inset-0 pointer-events-none flex items-center justify-center z-10 select-none">
+              <div className="transform -rotate-45 text-red-600/20 font-black text-xl sm:text-2xl tracking-widest border-4 border-dashed border-red-600/30 p-4 rounded-xl text-center uppercase leading-tight">
+                ESTIMATE, NOT A TAX INVOICE
+                <span className="text-xs font-extrabold tracking-normal block mt-1">CANNOT BE USED AS A BILL</span>
+              </div>
+            </div>
+          )}
+
           {/* Receipt Header */}
           <div className="text-center space-y-1 border-b border-slate-400 pb-2">
             <h2 className="text-base font-extrabold uppercase tracking-wide">Ambika Jewels</h2>
@@ -65,9 +75,15 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
             <p className="text-[10px] font-semibold text-slate-800">
               Ph: +91 9682589725 / +91 9086098457
             </p>
-            <div className="inline-block bg-slate-100 text-slate-900 px-2 py-0.5 rounded text-[10px] font-bold mt-1">
-              ESTIMATE RECEIPT / CASH MEMO
-            </div>
+            {bill.includeGst ? (
+              <div className="inline-block bg-slate-100 text-slate-900 px-2 py-0.5 rounded text-[10px] font-bold mt-1">
+                TAX INVOICE / CASH MEMO
+              </div>
+            ) : (
+              <div className="inline-block bg-red-100 text-red-700 border border-red-400 px-2.5 py-1 rounded text-[10px] font-black mt-1 tracking-wider">
+                ESTIMATE, NOT A TAX INVOICE
+              </div>
+            )}
           </div>
 
           {/* Metadata */}
@@ -174,7 +190,13 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
           {/* Receipt Footer & Terms */}
           <div className="text-[9px] text-slate-600 text-center space-y-1 pt-1">
             <p>100% BIS Hallmarked Gold Guarantee • Dogra Heritage Craft</p>
-            <p className="italic">Thank you for visiting Ambika Jewels!</p>
+            {!bill.includeGst ? (
+              <div className="p-1.5 border border-red-300 bg-red-50 text-red-800 text-[8px] font-bold rounded">
+                LEGAL NOTICE: This is an ESTIMATE QUOTE only and CANNOT be used as a tax invoice, bill of sale, or proof of commercial purchase under Indian GST laws.
+              </div>
+            ) : (
+              <p className="italic">Thank you for visiting Ambika Jewels!</p>
+            )}
             <div className="flex justify-between items-end pt-3 text-[10px]">
               <div>Customer Sign</div>
               <div>Authorized Signatory</div>

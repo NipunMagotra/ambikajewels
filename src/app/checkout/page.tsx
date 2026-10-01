@@ -63,6 +63,42 @@ export default function CheckoutPage() {
   const shipping = isFreeShipping ? 0 : siteConfig.shipping.flatRate;
   const finalTotal = cartTotal + tax + shipping;
 
+  // Rate-Lock countdown timer (guarantees precious metal prices for N minutes)
+  const rateLockDuration = (siteConfig.rates.rateLockMinutes || 15) * 60;
+  const [secondsRemaining, setSecondsRemaining] = useState(rateLockDuration);
+  const [rateLockExpired, setRateLockExpired] = useState(false);
+
+  useEffect(() => {
+    if (secondsRemaining <= 0) {
+      setRateLockExpired(true);
+      return;
+    }
+
+    const interval = setInterval(() => {
+      setSecondsRemaining((prev) => {
+        if (prev <= 1) {
+          setRateLockExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [secondsRemaining]);
+
+  const handleRefreshRateLock = () => {
+    setSecondsRemaining(rateLockDuration);
+    setRateLockExpired(false);
+    setErrorMessage(null);
+  };
+
+  const formatLockTime = (secs: number) => {
+    const mins = Math.floor(secs / 60);
+    const remainderSecs = secs % 60;
+    return `${mins.toString().padStart(2, '0')}:${remainderSecs.toString().padStart(2, '0')}`;
+  };
+
   const formatPrice = (paise: number) => {
     return new Intl.NumberFormat('en-IN', {
       style: 'currency',
@@ -130,6 +166,11 @@ export default function CheckoutPage() {
 
   // Trigger Razorpay Payment Integration
   const handleRazorpayPayment = async () => {
+    if (rateLockExpired) {
+      setErrorMessage(`The ${siteConfig.rates.rateLockMinutes || 15}-minute bullion rate lock has expired. Please click "REFRESH & RE-LOCK" above to confirm today's active price before proceeding.`);
+      return;
+    }
+
     if (!agreedToTerms) {
       setErrorMessage('Please accept the Terms & Conditions, Shipping Policy, and Cancellation & Refund Policy to proceed with payment.');
       return;
@@ -344,6 +385,47 @@ export default function CheckoutPage() {
               <span className={`font-label-caps text-[9px] sm:text-[10px] tracking-widest ${step === 3 ? 'text-primary font-bold' : 'text-on-surface-variant'}`}>SHIPROCKET</span>
             </div>
           </div>
+
+          {/* Live Bullion Rate-Lock Banner */}
+          {step < 3 && (
+            rateLockExpired ? (
+              <div className="mb-6 p-4 bg-red-950/50 border border-red-500/60 rounded-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-red-200">
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-red-400 text-xl">timer_off</span>
+                  <div>
+                    <strong className="block text-red-300 font-bold uppercase tracking-wider text-[11px]">RATE LOCK WINDOW EXPIRED</strong>
+                    <span>Daily live bullion rates have timed out. Please refresh to lock today's active rate and continue.</span>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  onClick={handleRefreshRateLock}
+                  className="gold-bg-gradient px-4 py-2 text-black font-bold font-label-caps text-xs rounded hover:brightness-110 shrink-0 cursor-pointer"
+                >
+                  REFRESH & RE-LOCK
+                </button>
+              </div>
+            ) : (
+              <div className="mb-6 p-3 sm:p-3.5 bg-amber-950/25 border border-amber-500/30 rounded-xs flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5 text-amber-200">
+                  <span className="material-symbols-outlined text-amber-400 text-lg">lock_clock</span>
+                  <div>
+                    <span className="font-bold text-amber-300 block text-[11px] tracking-wide">
+                      LIVE BULLION RATE LOCKED ({siteConfig.rates.rateLockMinutes || 15} MIN GUARANTEE)
+                    </span>
+                    <span className="text-amber-200/75 text-[10px]">
+                      Your order price is protected against intraday bullion rate fluctuations.
+                    </span>
+                  </div>
+                </div>
+                <div className="text-right shrink-0">
+                  <span className="font-mono text-sm sm:text-base font-bold text-amber-300 bg-background/80 px-2.5 py-1 rounded border border-amber-500/30">
+                    {formatLockTime(secondsRemaining)}
+                  </span>
+                </div>
+              </div>
+            )
+          )}
 
           {errorMessage && (
             <div className="mb-6 p-4 bg-red-950/40 border border-red-500/50 text-red-300 rounded-xs flex items-center gap-3 font-body-md text-xs sm:text-sm">

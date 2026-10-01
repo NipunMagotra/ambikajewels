@@ -1,9 +1,9 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'crypto';
-import { calculateOrderPricingServer } from '../src/lib/serverPricing.ts';
-import { verifyAdminSessionTokenString, createAdminSessionToken } from '../src/lib/adminAuth.ts';
-import { siteConfig } from '../src/config/siteConfig.ts';
+import { calculateOrderPricingServer } from '../src/lib/serverPricing';
+import { verifyAdminSessionTokenString, createAdminSessionToken } from '../src/lib/adminAuth';
+import { siteConfig } from '../src/config/siteConfig';
 
 describe('Phase 1 Follow-Up: Webhook, Pricing, Rates & RLS Tests', () => {
   const TEST_SECRET = 'test_webhook_secret_for_razorpay_999';

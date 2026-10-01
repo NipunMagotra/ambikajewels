@@ -1,12 +1,12 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
-import { calculateOrderPricingServer } from '../src/lib/serverPricing.ts';
+import { calculateOrderPricingServer } from '../src/lib/serverPricing';
 import {
   createAdminSessionToken,
   verifyAdminSessionTokenString,
   getAdminSecret,
   ADMIN_SESSION_MAX_AGE_SECONDS
-} from '../src/lib/adminAuth.ts';
+} from '../src/lib/adminAuth';
 
 describe('Phase 1 Security & Calculation Tests', () => {
   // Setup environment for testing

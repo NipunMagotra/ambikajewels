@@ -3,6 +3,8 @@
 import React, { useState, useMemo } from 'react';
 import { DailyRates, BillInput, BillBreakdown } from '@/types/counter';
 import { ThermalReceiptModal } from './ThermalReceiptModal';
+import { calculateJewelryPrice } from '@/lib/pricingEngine';
+import { siteConfig } from '@/config/siteConfig';
 import {
   Calculator,
   Share2,
@@ -19,6 +21,7 @@ import {
   Sparkles,
   ArrowRight,
   FileText,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface BillingCalculatorProps {
@@ -67,42 +70,38 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
     }
   }, [bill.metalPurity, rates, customRateOverride]);
 
-  // Compute breakdown in real time
+  // Compute breakdown using ONE SHARED pricing module (pricingEngine.ts)
   const breakdown: BillBreakdown = useMemo(() => {
-    const netWeight = Math.max(0, bill.grossWeight - bill.stoneWeight);
-    const netGoldValue = Math.round(netWeight * activeRatePerGram);
-
-    let makingCharges = 0;
-    if (bill.makingType === 'percent') {
-      makingCharges = Math.round(netGoldValue * (bill.makingRate / 100));
-    } else {
-      makingCharges = Math.round(netWeight * bill.makingRate);
-    }
-
-    const hallmarkingCharges = bill.includeHallmark
-      ? Math.round(bill.hallmarkCount * bill.hallmarkRate)
-      : 0;
-
-    const grossSubtotal = netGoldValue + makingCharges + hallmarkingCharges;
-
-    const gstAmount = bill.includeGst ? Math.round(grossSubtotal * (bill.gstRate / 100)) : 0;
-
-    // Old Gold Deduction
     const oldGoldRate = bill.oldGoldPurityRate > 0 ? bill.oldGoldPurityRate : rates.gold_22k;
-    const oldGoldDeduction = Math.round(bill.oldGoldWeight * oldGoldRate);
 
-    const finalAmountDue = Math.max(0, grossSubtotal + gstAmount - oldGoldDeduction);
+    const pricing = calculateJewelryPrice({
+      metalPurity: bill.metalPurity,
+      ratePerGram: activeRatePerGram,
+      grossWeightGrams: bill.grossWeight,
+      stoneWeightGrams: bill.stoneWeight,
+      makingType: bill.makingType,
+      makingRate: bill.makingRate,
+      includeHallmark: bill.includeHallmark,
+      hallmarkPieces: bill.hallmarkCount,
+      hallmarkRatePerPiece: bill.hallmarkRate,
+      includeGst: bill.includeGst,
+      gstRate: (bill.gstRate ?? 3) / 100,
+      oldGoldWeightGrams: bill.oldGoldWeight,
+      oldGoldRatePerGram: oldGoldRate,
+      // Keep current behavior: tax calculated before old-gold deduction (TODO: CA to confirm)
+      oldGoldDeductBeforeGst: siteConfig.tax.oldGoldDeductBeforeGst
+    });
 
     return {
-      netWeight,
-      appliedRatePerGram: activeRatePerGram,
-      netGoldValue,
-      makingCharges,
-      hallmarkingCharges,
-      grossSubtotal,
-      gstAmount,
-      oldGoldDeduction,
-      finalAmountDue,
+      netWeight: pricing.netWeightGrams,
+      appliedRatePerGram: pricing.ratePerGram,
+      netGoldValue: pricing.netMetalValueInr,
+      makingCharges: pricing.makingChargesInr,
+      hallmarkingCharges: pricing.hallmarkingChargesInr,
+      grossSubtotal: pricing.grossSubtotalInr,
+      gstAmount: pricing.gstAmountInr,
+      oldGoldDeduction: pricing.oldGoldDeductionInr,
+      finalAmountDue: pricing.finalPayableInr,
     };
   }, [bill, activeRatePerGram, rates.gold_22k]);
 
@@ -127,7 +126,9 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
       year: 'numeric',
     });
 
-    let text = `*AMBIKA JEWELS — ESTIMATE BILL*\n`;
+    let text = bill.includeGst
+      ? `*AMBIKA JEWELS — TAX INVOICE / CASH MEMO*\n`
+      : `*AMBIKA JEWELS — ESTIMATE QUOTE*\n*⚠️ ESTIMATE ONLY — NOT A TAX INVOICE / CANNOT BE USED AS A BILL*\n`;
     text += `Lower Roop Nagar, Jammu | Ph: +91 9682589725\n`;
     text += `----------------------------------------\n`;
     if (bill.customerName) text += `*Customer:* ${bill.customerName}\n`;
@@ -157,6 +158,9 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
     text += `----------------------------------------\n`;
     text += `*TOTAL AMOUNT DUE:* ₹${breakdown.finalAmountDue.toLocaleString('en-IN')}\n`;
     text += `----------------------------------------\n`;
+    if (!bill.includeGst) {
+      text += `*DISCLAIMER:* This document is an estimate only and CANNOT be used as a tax invoice, bill of sale, or commercial proof of purchase under Indian GST laws.\n`;
+    }
     text += `Thank you for shopping with Ambika Jewels!`;
 
     return text;
@@ -504,12 +508,25 @@ export const BillingCalculator: React.FC<BillingCalculatorProps> = ({ rates }) =
                     className={`px-4 py-2.5 rounded-lg text-xs font-bold transition-all border cursor-pointer w-full text-center ${
                       bill.includeGst
                         ? 'bg-emerald-950/60 border-emerald-500/50 text-emerald-300'
-                        : 'bg-surface border-outline-variant/40 text-on-surface-variant'
+                        : 'bg-red-950/50 border-red-500/60 text-red-300'
                     }`}
                   >
-                    {bill.includeGst ? 'GST (3%) Enabled' : 'No GST (Estimate Quote)'}
+                    {bill.includeGst ? '✓ GST (3%) Tax Invoice Enabled' : '⚠️ No GST (Unbilled Estimate Quote)'}
                   </button>
                 </div>
+                {!bill.includeGst && (
+                  <div className="mt-2.5 p-2.5 bg-red-950/40 border border-red-500/40 rounded-lg text-xs text-red-200 flex items-start gap-2">
+                    <AlertTriangle className="w-4 h-4 text-red-400 shrink-0 mt-0.5" />
+                    <div>
+                      <strong className="block text-red-300 font-bold uppercase tracking-wider text-[10px]">
+                        ESTIMATE ONLY — NOT A TAX INVOICE
+                      </strong>
+                      <span className="text-[10px] text-red-200/90 leading-tight block mt-0.5">
+                        Receipt will be watermarked "ESTIMATE, NOT A TAX INVOICE". Cannot be used as a commercial bill under Indian GST laws.
+                      </span>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

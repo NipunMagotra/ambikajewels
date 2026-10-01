@@ -63,6 +63,7 @@ export const siteConfig = {
   rates: {
     maxDeviationPercent: 10, // Max 10% change without confirm_large_change flag
     maxRateAgeHours: 24, // Stale if older than 24 hours
+    rateLockMinutes: 15, // Checkout price rate-lock window in minutes
   },
   
   shipping: {
@@ -78,6 +79,8 @@ export const siteConfig = {
   },
   tax: {
     gstRate: 0.03, // 3% GST on precious jewelry (HSN 7113)
+    // TODO: Confirm with CA whether old gold exchange is gross consideration or margin scheme under GST rules
+    oldGoldDeductBeforeGst: false,
   },
   categories: [
     "Dogra Heritage Collection",
