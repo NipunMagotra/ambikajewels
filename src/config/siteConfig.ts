@@ -1,18 +1,17 @@
 export const siteConfig = {
   name: "Ambika Jewels",
-  legalBusinessName: "Ambika Jewels",
+  legalBusinessName: process.env.STORE_LEGAL_NAME || "Ambika Jewels",
+  legalEntityType: process.env.STORE_ENTITY_TYPE || "[TO BE FILLED BY OWNER] (e.g. Sole Proprietorship / Partnership / Private Limited)",
   founder: "Shivani Anand",
   businessRepresentative: "Lakesh Kumar",
   
   // =========================================================================
-  // TODO: Replace with real client KYC identifiers once documents are handed over
+  // Statutory Seller KYC Identifiers (Consumer Protection E-Commerce Rules)
+  // [TO BE FILLED BY OWNER] - Build check fails in production if left placeholder
   // =========================================================================
-  // TODO: Replace with 10-character PAN (e.g. "AAAAA0000A")
-  pan: "", 
-  // TODO: Replace with 15-digit GSTIN (e.g. "01AAAAA0000A1Z5")
-  gstin: "", 
-  // TODO: Replace with BIS Hallmark License Number (leave empty if pending/unregistered)
-  bisHallmarkLicense: "", 
+  pan: process.env.STORE_PAN || "[TO BE FILLED BY OWNER]",
+  gstin: process.env.STORE_GSTIN || "[TO BE FILLED BY OWNER]",
+  bisHallmarkLicense: process.env.STORE_BIS_LICENSE || "[TO BE FILLED BY OWNER]",
   
   hsnCode: "7113",
   description: "Authentic Dogra Heritage Jewelry, Fine Solid Gold, Certified Diamonds, 925 Silver & Bespoke Jewelry Craftsmanship in Jammu.",
@@ -35,7 +34,8 @@ export const siteConfig = {
     designation: "Grievance Redressal & Compliance Officer",
     email: "contact@ambikajewelsshop.com",
     phone: "+919682589725",
-    address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013, India"
+    address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013, India",
+    responseTime: "Acknowledgement within 48 hours; resolution within 30 days (verify with CA/lawyer under Consumer Protection Rules)"
   },
   nodalOfficer: {
     name: "Shivani Anand",

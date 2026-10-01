@@ -58,7 +58,7 @@ export default function Footer() {
               CUSTOMER CARE
             </h3>
             <ul className="flex flex-col gap-2.5 font-body-md text-xs text-on-surface-variant">
-              <li><Link className="hover:text-primary transition-colors font-semibold text-primary" href="/track">Track Order (Shiprocket)</Link></li>
+              <li><Link className="hover:text-primary transition-colors font-semibold text-primary" href="/track">Track Order (BVC Armored Express)</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/contact">Contact Showroom</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/cart">Shopping Bag</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/services">3D CAD Customization</Link></li>
@@ -73,6 +73,7 @@ export default function Footer() {
               POLICIES & LEGAL
             </h3>
             <ul className="flex flex-col gap-2.5 font-body-md text-xs text-on-surface-variant">
+              <li><Link className="hover:text-primary transition-colors font-semibold text-amber-300" href="/seller-info">Legal & Seller Information</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/privacy-policy">Privacy Policy</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/terms">Terms & Conditions</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/refund-policy">Cancellation & Refund Policy</Link></li>
@@ -104,19 +105,10 @@ export default function Footer() {
                 LEGAL ENTITY & REGISTRATION
               </span>
               <p className="font-semibold text-on-surface">{siteConfig.legalBusinessName}</p>
-              {siteConfig.gstin ? (
-                <p className="text-on-surface-variant text-[11px]">GSTIN: {siteConfig.gstin}</p>
-              ) : (
-                <p className="text-on-surface-variant text-[11px]">GST: Details available on invoice</p>
-              )}
-              {siteConfig.pan ? (
-                <p className="text-on-surface-variant text-[11px]">PAN: {siteConfig.pan}</p>
-              ) : null}
-              {siteConfig.bisHallmarkLicense ? (
-                <p className="text-on-surface-variant text-[11px]">BIS License: {siteConfig.bisHallmarkLicense}</p>
-              ) : (
-                <p className="text-on-surface-variant text-[11px]">Purity: Tested & Certified Standards</p>
-              )}
+              <p className="text-on-surface-variant text-[11px] truncate">{siteConfig.legalEntityType}</p>
+              <p className="text-on-surface-variant text-[11px] font-mono">GSTIN: {siteConfig.gstin}</p>
+              <p className="text-on-surface-variant text-[11px] font-mono">PAN: {siteConfig.pan}</p>
+              <p className="text-on-surface-variant text-[11px]">BIS License: {siteConfig.bisHallmarkLicense}</p>
             </div>
 
             <div>
@@ -127,6 +119,7 @@ export default function Footer() {
               <p className="text-on-surface-variant text-[11px]">{siteConfig.grievanceOfficer.designation}</p>
               <p className="text-on-surface-variant text-[11px]">Email: <a href={`mailto:${siteConfig.grievanceOfficer.email}`} className="text-primary underline">{siteConfig.grievanceOfficer.email}</a></p>
               <p className="text-on-surface-variant text-[11px]">Phone: {siteConfig.grievanceOfficer.phone}</p>
+              <p className="text-on-surface-variant text-[10px] text-primary mt-1">{siteConfig.grievanceOfficer.responseTime}</p>
             </div>
 
             <div>
@@ -151,6 +144,9 @@ export default function Footer() {
               <p className="text-[10px] text-amber-400 mt-1 font-medium">
                 Jurisdiction: Courts of Jammu, J&K, India.
               </p>
+              <Link href="/seller-info" className="inline-block mt-2 text-[11px] text-primary font-semibold hover:underline">
+                View Complete Seller Disclosures →
+              </Link>
             </div>
           </div>
         </div>

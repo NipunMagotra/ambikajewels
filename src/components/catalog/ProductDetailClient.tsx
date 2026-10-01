@@ -53,14 +53,22 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     const name = product.name.toUpperCase();
     const cat = product.category.toUpperCase();
 
-    if (badges.some(b => b.includes('22K')) || name.includes('22K')) return '22K BIS HALLMARKED';
+    const isHallmarked = product.is_hallmarked ?? (product.bis_hallmark?.toLowerCase().includes('hallmark') || badges.some(b => b.includes('BIS')));
+
+    if (badges.some(b => b.includes('22K')) || name.includes('22K')) {
+      return isHallmarked ? '22K BIS HALLMARKED' : '22K SOLID GOLD';
+    }
     if (badges.some(b => b.includes('18K')) || name.includes('18K')) {
       return (badges.includes('CERTIFIED DIAMOND') || cat.includes('DIAMOND') || name.includes('DIAMOND'))
         ? '18K CERTIFIED DIAMOND'
-        : '18K HALLMARKED GOLD';
+        : (isHallmarked ? '18K BIS HALLMARKED GOLD' : '18K SOLID GOLD');
     }
-    if (badges.some(b => b.includes('14K')) || name.includes('14K')) return '14K HALLMARKED GOLD';
-    if (badges.some(b => b.includes('925')) || name.includes('925') || cat.includes('SILVER') || name.includes('SILVER')) return '925 STERLING SILVER';
+    if (badges.some(b => b.includes('14K')) || name.includes('14K')) {
+      return isHallmarked ? '14K BIS HALLMARKED GOLD' : '14K SOLID GOLD';
+    }
+    if (badges.some(b => b.includes('925')) || name.includes('925') || cat.includes('SILVER') || name.includes('SILVER')) {
+      return isHallmarked ? '925 STERLING HALLMARKED' : '925 STERLING SILVER';
+    }
     if (badges.some(b => b.includes('9K')) || name.includes('9K')) return '9K SOLID GOLD';
     if (badges.some(b => b.includes('BESPOKE'))) return 'BESPOKE CRAFTSMANSHIP';
     return null;
@@ -69,7 +77,16 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const purityBadge = getPurityBadge();
   const isSilver = product.category.toLowerCase().includes('silver') || product.name.toLowerCase().includes('silver');
   const isDiamond = product.category.toLowerCase().includes('diamond') || product.name.toLowerCase().includes('diamond');
-  const bottomBadgeText = isSilver ? '925 STERLING HALLMARKED' : isDiamond ? 'CERTIFIED NATURAL DIAMOND' : 'BIS HALLMARKED (GOVT OF INDIA)';
+  const isHallmarked = product.is_hallmarked ?? (product.bis_hallmark?.toLowerCase().includes('hallmark') || product.badges?.some(b => b.includes('BIS')));
+  const hasHuid = product.has_huid ?? (product.bis_hallmark?.toLowerCase().includes('huid') || false);
+
+  const bottomBadgeText = isSilver 
+    ? (isHallmarked ? '925 STERLING HALLMARKED' : '925 STERLING SILVER') 
+    : isDiamond 
+      ? 'CERTIFIED NATURAL DIAMOND' 
+      : isHallmarked 
+        ? (hasHuid ? 'BIS HALLMARKED WITH 6-CHAR ALPHANUMERIC HUID' : 'BIS HALLMARKED (GOVT OF INDIA)')
+        : 'AUTHENTIC HANDCRAFTED JEWELRY';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-16">

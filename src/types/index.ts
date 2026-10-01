@@ -16,6 +16,10 @@ export type Product = {
   material: string; // e.g. "22K Solid Gold (BIS Hallmarked)", "925 Sterling Silver"
   purity: string; // e.g. "22K (916)", "18K (750)", "925 Silver"
   bis_hallmark: string; // e.g. "BIS Hallmarked with HUID", "IGI / GIA Certified"
+  is_hallmarked?: boolean; // Data-driven: true if piece has undergone BIS/govt hallmarking
+  hallmark_type?: string; // e.g. "BIS 916 (22K)", "925 Sterling Silver"
+  has_huid?: boolean; // Data-driven: true if serialized with 6-character alphanumeric HUID
+  huid?: string; // Serialized HUID laser inscription
   weight_grams: number; // Net precious metal weight in grams
   gross_weight_grams?: number; // Total weight with stones/findings
   dimensions: {
