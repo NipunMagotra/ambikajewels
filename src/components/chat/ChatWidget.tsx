@@ -125,8 +125,9 @@ export default function ChatWidget() {
         </div>
 
         {/* AI Assistant Disclaimer Banner */}
-        <div className="bg-surface-container-lowest px-3 py-1 border-b border-outline-variant/30 text-[9px] text-on-surface-variant font-label-caps tracking-wider text-center">
-          AI Assistant • Please confirm live rates & stock with showroom
+        <div className="bg-surface-container-lowest px-3 py-1.5 border-b border-outline-variant/30 text-[10px] text-on-surface-variant font-label-caps tracking-wider text-center flex items-center justify-center gap-1.5">
+          <span className="material-symbols-outlined text-xs text-primary">info</span>
+          <span>AI assistant, confirm details with the store</span>
         </div>
 
         {/* Messages Area */}
@@ -208,6 +209,10 @@ export default function ChatWidget() {
             <span className="material-symbols-outlined text-sm">send</span>
           </button>
         </form>
+
+        <div className="bg-surface-container-lowest px-2 py-1 text-[10px] text-on-surface-variant/70 text-center border-t border-outline-variant/20">
+          AI assistant, confirm details with the store
+        </div>
 
       </div>
     </>

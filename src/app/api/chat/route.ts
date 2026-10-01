@@ -5,7 +5,7 @@ import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { storeKnowledge, faqItems } from '@/data/storeKnowledge';
 import { checkRateLimit } from '@/lib/rateLimit';
 
-// PII Redaction utility (DPDP compliance / Phase 3 Item 4)
+// PII Redaction utility (DPDP compliance / Phase 3 Item 4: redact phone/email/addresses before sending to Groq)
 export function redactPiiForChat(text: string): string {
   if (!text) return '';
   return text
@@ -17,6 +17,9 @@ export function redactPiiForChat(text: string): string {
     .replace(/\b[A-Z]{5}[0-9]{4}[A-Z]{1}\b/gi, '[PAN REDACTED]')
     // Redact Aadhaar (12 digits, optional spaces)
     .replace(/\b\d{4}\s?\d{4}\s?\d{4}\b/g, '[ID REDACTED]')
+    // Redact postal street/house addresses
+    .replace(/(?:my\s+(?:home\s+|shipping\s+)?address\s+is\s*[:\-]?\s*|deliver(?:y)?\s+to\s*[:\-]?\s*)([^\n,\.]{4,60})/gi, '[ADDRESS REDACTED]')
+    .replace(/\b(?:flat|house|h\.?\s*no\.?|plot|door|apt|apartment|block|sector|lane|street|road|rd|colony|nagar|mohalla|enclave|vihar)\s*[:#\s\-]?\s*[A-Za-z0-9\-\/]+(?:\s+[A-Za-z0-9\-\/]+){1,6}\b/gi, '[ADDRESS REDACTED]')
     // Redact 6-digit Indian PIN codes
     .replace(/\b[1-9][0-9]{5}\b/g, '[PINCODE REDACTED]');
 }
@@ -29,7 +32,12 @@ export function detectPromptInjection(text: string): boolean {
     /disregard\s+(all\s+)?(previous|prior|above)/i,
     /system\s+prompt/i,
     /reveal\s+(your|the)\s+(instructions|system\s+message|prompt)/i,
-    /you\s+are\s+now\s+(an\s+unrestricted|DAN|a\s+hacker|in\s+developer\s+mode)/i,
+    /output\s+(your|the)\s+(initial|original|system)\s+(prompt|instructions)/i,
+    /repeat\s+(everything|the\s+text)\s+(above|prior)/i,
+    /override\s+(all\s+)?(rules|filters|instructions)/i,
+    /you\s+are\s+now\s+(an\s+unrestricted|DAN|a\s+hacker|in\s+developer\s+mode|in\s+god\s+mode)/i,
+    /act\s+as\s+(an?\s+)?(unrestricted|jailbroken|evil|developer\s+mode)/i,
+    /new\s+instruction\s*:/i,
     /jailbreak/i,
     /bypass\s+(safety|content|system)\s+filter/i,
     /<\|im_start\|>/i,
