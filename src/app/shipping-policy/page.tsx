@@ -23,15 +23,24 @@ export default function ShippingPolicyPage() {
           </div>
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
+            {/* DRAFT FOR LAWYER REVIEW BANNER */}
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+              <div>
+                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal, Logistics & Compliance Sign-Off</p>
+                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This document outlines operational logistics terms for review by our legal counsel. Verify all carrier SLAs and liability caps with lawyer/CA.</p>
+              </div>
+            </div>
+
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
-                SECURE LOGISTICS & EXPRESS DELIVERY
+                SECURE ARMORED LOGISTICS & TRANSIT INSURANCE
               </span>
               <h1 className="font-headline-md text-2xl sm:text-4xl text-primary mb-2">
                 Shipping & Delivery Policy
               </h1>
               <p className="font-body-md text-xs sm:text-sm text-on-surface-variant">
-                Last Updated: September 2026 | Pan-India Logistics Powered by Shiprocket
+                Last Updated: September 2026 | High-Value Precious Transit via {siteConfig.shipping.courierPartner}
               </p>
             </div>
 
@@ -43,7 +52,7 @@ export default function ShippingPolicyPage() {
                   1. Serviceable Delivery Areas (India Only)
                 </h2>
                 <p className="mb-3">
-                  <strong>{siteConfig.legalBusinessName}</strong> delivers to serviceable PIN codes across India through courier partners integrated via <strong>Shiprocket</strong>. All dispatches originate directly from our registered showroom in Jammu.
+                  <strong>{siteConfig.legalBusinessName}</strong> delivers to serviceable PIN codes across India through specialized armored precious-cargo logistics partner <strong>BVC Logistics</strong>. All dispatches originate under secure vault protocol directly from our registered showroom in Jammu.
                 </p>
                 <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs">
                   <p className="font-semibold text-on-surface text-xs mb-1">Geographic Coverage:</p>

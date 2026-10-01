@@ -23,6 +23,15 @@ export default function TermsPage() {
           </div>
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
+            {/* DRAFT FOR LAWYER REVIEW BANNER */}
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+              <div>
+                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal Counsel Sign-Off</p>
+                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">These standard e-commerce terms of sale and bullion rate contract are drafts pending commercial legal review. Verify arbitration, force majeure, and liability clauses with lawyer.</p>
+              </div>
+            </div>
+
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
                 TERMS OF SERVICE & SALE CONTRACT

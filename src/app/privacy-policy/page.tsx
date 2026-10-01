@@ -6,7 +6,7 @@ import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Privacy Policy | Ambika Jewels Jammu',
-  description: 'Privacy Policy detailing data collection, DPDP Act 2023 compliance, Razorpay payment security, Shiprocket logistics data sharing, and Grievance Officer details.',
+  description: 'DPDP Act 2023 compliant privacy policy detailing data processors (Supabase, Razorpay, BVC Logistics, Groq, hosting), cross-border transfers, and retention policies.',
 };
 
 export default function PrivacyPolicyPage() {
@@ -23,9 +23,18 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
+            {/* DRAFT FOR LAWYER REVIEW BANNER */}
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+              <div>
+                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
+                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This privacy policy drafts DPDP Act 2023 compliance terms. Verify all third-party data processing agreements and cross-border transfer mechanisms with legal counsel.</p>
+              </div>
+            </div>
+
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
-                DATA PROTECTION & STATUTORY PRIVACY COMPLIANCE
+                DATA PROTECTION & PRIVACY COMPLIANCE
               </span>
               <h1 className="font-headline-md text-2xl sm:text-4xl text-primary mb-2">
                 Privacy Policy
@@ -46,7 +55,7 @@ export default function PrivacyPolicyPage() {
                   <strong>{siteConfig.legalBusinessName}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) is committed to honoring and protecting the privacy of our customers and visitors. We operate our flagship fine jewelry showroom and online store from {siteConfig.fullAddress}.
                 </p>
                 <p>
-                  This Privacy Policy describes our practices regarding the collection, storage, processing, and disclosure of personal data collected through our website (<Link href="/" className="text-primary underline font-medium">{siteConfig.domain}</Link>) in compliance with the <strong>Information Technology Act, 2000</strong>, the <strong>Information Technology (Reasonable Security Practices and Procedures and Sensitive Personal Data or Information) Rules, 2011</strong>, and the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>.
+                  This Privacy Policy describes our practices regarding the collection, storage, processing, and disclosure of personal data collected through our website (<Link href="/" className="text-primary underline font-medium">{siteConfig.domain}</Link>) in compliance with the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>, the <strong>Information Technology Act, 2000</strong>, and applicable Indian data protection frameworks.
                 </p>
               </section>
 
@@ -59,119 +68,108 @@ export default function PrivacyPolicyPage() {
                   We collect information necessary to fulfill luxury fine jewelry purchases, provide concierge support, and comply with Indian statutory requirements:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
-                  <li>
-                    <strong>Customer Contact & Identification:</strong> Full Name, Email Address, 10-digit Indian Mobile Number (for OTP and dispatch tracking).
-                  </li>
-                  <li>
-                    <strong>Shipping & Billing Coordinates:</strong> Physical Street Address, House/Flat Number, City, State, and 6-digit PIN Code.
-                  </li>
-                  <li>
-                    <strong>Statutory Tax Identifiers (PAN Card):</strong> In strict compliance with <strong>Section 139A and Rule 114B of the Indian Income Tax Rules, 1962</strong>, customer Permanent Account Number (PAN) is collected for precious jewelry transactions exceeding <strong>₹2,00,000 (Rupees Two Lakh)</strong>. Any collected PAN is stored with AES-256-GCM encryption, is never logged in server telemetry, and is never displayed on unauthenticated tracking screens.
-                  </li>
-                  <li>
-                    <strong>Order & Transaction Records:</strong> Purchased jewelry items, caratage/purity, invoice number, Razorpay payment reference ID, Shiprocket consignment AWB, and delivery confirmation timestamps.
-                  </li>
-                  <li>
-                    <strong>Technical & Browsing Data:</strong> IP address, device type, browser metadata, and functional session cookies.
-                  </li>
+                  <li><strong>Identity & Contact Information:</strong> Full name, verified mobile phone number, email address, and delivery destination.</li>
+                  <li><strong>Statutory Tax Identifiers (CBDT Rule 114B):</strong> Permanent Account Number (PAN) or Form 60 declaration where mandated by Indian tax law for transactions meeting statutory thresholds. PAN data is encrypted using AES-256-GCM.</li>
+                  <li><strong>Transactional Records:</strong> Purchased jewelry items, purity specifications (e.g. 22K 916 BIS Hallmarked), gross/net weight in grams, GST tax invoice numbers, and payment transaction IDs.</li>
+                  <li><strong>Technical & Session Data:</strong> Masked IP address, device telemetry, and essential browser storage required for cart persistence and rate-limiting defenses.</li>
                 </ul>
               </section>
 
-              {/* Purpose of Data Use */}
+              {/* Authorized Third-Party Data Processors */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  3. Purpose of Processing Your Data
+                  3. Authorized Third-Party Data Processors
                 </h2>
-                <p className="mb-3">Your personal data is processed strictly for lawful, necessary business functions:</p>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li>To process jewelry orders and manage delivery via our logistics partner <strong>Shiprocket</strong>.</li>
-                  <li>To verify payments and issue official GST Tax Invoices under HSN Code 7113.</li>
-                  <li>To send live order tracking updates, dispatch notices, and delivery OTP confirmations via SMS and Email.</li>
-                  <li>To deliver personalized 3D CAD design previews, custom gold exchange consultations, and concierge assistance.</li>
-                  <li>To comply with statutory legal obligations under the Prevention of Money Laundering Act (PMLA) and Indian Goods & Services Tax (GST) laws.</li>
-                </ul>
+                <p className="mb-3">
+                  We do not sell, rent, lease, or monetize your personal information. Data is shared exclusively with verified data processors strictly necessary for executing our e-commerce operations:
+                </p>
+                <div className="space-y-3">
+                  <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
+                    <p className="font-semibold text-on-surface">1. Supabase Inc. (Database & Cloud Infrastructure)</p>
+                    <p className="text-xs mt-1">Role: Secure storage of customer orders, product catalogs, and encrypted records. Hosted in AWS Asia-Pacific (Mumbai, ap-south-1) region with strict Row Level Security (RLS) policies.</p>
+                  </div>
+                  <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
+                    <p className="font-semibold text-on-surface">2. Razorpay Software Private Limited (Payment Gateway)</p>
+                    <p className="text-xs mt-1">Role: PCI-DSS Level 1 certified payment processing for UPI, NetBanking, debit/credit cards. Ambika Jewels never captures, receives, or stores raw card or banking credentials.</p>
+                  </div>
+                  <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
+                    <p className="font-semibold text-on-surface">3. BVC Logistics Private Limited (High-Value Armored Courier)</p>
+                    <p className="text-xs mt-1">Role: Secure armored transit, tamper-evident security pouch tracking, and OTP verification for delivery of high-value precious gold cargo across India.</p>
+                  </div>
+                  <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
+                    <p className="font-semibold text-on-surface">4. Groq Inc. (AI Concierge Cloud Inference)</p>
+                    <p className="text-xs mt-1">Role: Real-time language processing for our virtual jewelry concierge (Aanya). Strictly subject to automated client-side PII redaction prior to transmission.</p>
+                  </div>
+                  <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
+                    <p className="font-semibold text-on-surface">5. Cloud Hosting & Edge Delivery (Netlify / Vercel)</p>
+                    <p className="text-xs mt-1">Role: Content delivery network (CDN), serverless edge functions, SSL/TLS certificate termination, and DDoS protection.</p>
+                  </div>
+                </div>
               </section>
 
-              {/* Payment Security */}
+              {/* Cross-Border Data Transfer Disclosures */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  4. Payment Security & Zero Card Storage
+                  4. Cross-Border Data Transfers & Redaction Safeguards
                 </h2>
                 <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs space-y-2">
                   <p>
-                    All online payments made on our website are processed securely by <strong>Razorpay (Razorpay Software Private Limited)</strong>.
-                  </p>
-                  <p className="font-semibold text-primary">
-                    Ambika Jewels NEVER captures, receives, processes, or stores raw credit card numbers, debit card PINs, CVV codes, net banking passwords, or UPI security credentials on our servers.
+                    <strong>Automated Redaction Protocol:</strong> Before any customer query is processed by our AI concierge powered by Groq Inc., our server automatically detects and redacts phone numbers, email addresses, PAN numbers, Aadhaar identifiers, and street addresses.
                   </p>
                   <p className="text-xs text-on-surface-variant">
-                    All payment transmissions are encrypted via industry-standard 256-Bit Transport Layer Security (TLS/SSL) encryption.
+                    All core financial, order, and customer database records remain stored securely within India (AWS ap-south-1 Mumbai via Supabase). Any ephemeral cross-border transit for LLM inference is conducted under contractual confidentiality safeguards consistent with the DPDP Act, 2023.
                   </p>
                 </div>
               </section>
 
-              {/* Data Sharing with Third Parties */}
+              {/* Data Retention Schedule */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  5. Third-Party Data Disclosures
+                  5. Data Retention & Purge Schedule
                 </h2>
-                <p className="mb-3">
-                  We do not sell, rent, lease, or monetize your personal information to any marketing agencies or third parties. Personal data is shared exclusively with verified operational infrastructure providers:
-                </p>
-                <ul className="list-disc pl-5 space-y-2">
-                  <li>
-                    <strong>Shiprocket (BigFoot Retail Solutions Pvt. Ltd.):</strong> Customer name, shipping address, PIN code, and phone number are shared to generate courier waybills and coordinate secure express transit via Blue Dart, Delhivery, or Expressbees.
-                  </li>
-                  <li>
-                    <strong>Razorpay:</strong> Order identification, billing details, and total payable amount are transmitted securely to authenticate payment transactions.
-                  </li>
-                  <li>
-                    <strong>Statutory Authorities:</strong> Disclosed only if mandated by a formal, written request from Indian tax authorities, law enforcement agencies, or court orders under Indian jurisdiction.
-                  </li>
-                </ul>
+                <div className="space-y-2 text-xs">
+                  <p>We retain personal information strictly for as long as required to fulfill transactional purposes and statutory obligations:</p>
+                  <ul className="list-disc pl-5 space-y-1.5">
+                    <li><strong>Tax & GST Invoices (HSN 7113):</strong> Retained for <strong>8 financial years</strong> in accordance with Section 36 of the CGST Act, 2017 and Section 44AB of the Income Tax Act, 1961 (verify with CA/lawyer).</li>
+                    <li><strong>Encrypted PAN & Form 60 Records:</strong> Retained for statutory audit periods mandated by CBDT Rule 114B and Prevention of Money Laundering Act (PMLA) regulations.</li>
+                    <li><strong>AI Concierge Chat Histories:</strong> Chat conversation histories and rate-limiting counters are purged after <strong>30 calendar days</strong>.</li>
+                    <li><strong>Ephemeral Session Cookies:</strong> Expire automatically upon closing your browser or completing checkout.</li>
+                  </ul>
+                </div>
               </section>
 
-              {/* Cookies & Storage */}
+              {/* Customer Rights Under DPDP Act */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  6. Cookies & Local Storage
+                  6. Data Principal Rights (DPDP Act, 2023)
                 </h2>
-                <p>
-                  Our website uses functional browser storage and essential cookies strictly to maintain shopping bag contents, track anonymous user session states, and improve website loading speed. No third-party behavioral advertising trackers or cross-site tracking pixels are deployed.
-                </p>
-              </section>
-
-              {/* User Rights */}
-              <section>
-                <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  7. Customer Rights Under DPDP Act 2023
-                </h2>
-                <p className="mb-2">Under Indian data protection laws, you possess the right to:</p>
-                <ul className="list-disc pl-5 space-y-1.5">
-                  <li>Request a summary of personal data held about you.</li>
-                  <li>Request correction of inaccurate or incomplete contact or billing data.</li>
-                  <li>Request erasure of your personal data, subject to statutory tax retention periods (GST and PMLA regulations require preserving invoices for 6 to 8 financial years).</li>
-                  <li>Withdraw consent for marketing communications.</li>
+                <p className="mb-2">Under the Digital Personal Data Protection Act, 2023, you have the right to:</p>
+                <ul className="list-disc pl-5 space-y-1.5 text-xs">
+                  <li><strong>Right to Access:</strong> Request a summary of personal data held about you and processing activities undertaken.</li>
+                  <li><strong>Right to Correction & Updating:</strong> Request correction of inaccurate, misleading, or outdated personal contact information.</li>
+                  <li><strong>Right to Erasure / Deletion:</strong> Request deletion of your personal data, subject to mandatory statutory tax and accounting retention requirements under Indian law.</li>
+                  <li><strong>Right to Nominate:</strong> Nominate an individual to exercise your data rights in the event of incapacity.</li>
+                  <li><strong>Right to Grievance Redressal:</strong> Register any concerns or complaints regarding your personal data with our Grievance Officer.</li>
                 </ul>
               </section>
 
               {/* Grievance Redressal Officer */}
               <section className="pt-4 border-t border-outline-variant/20">
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-2 font-semibold">
-                  8. Grievance Redressal Officer (IT Rules & E-Commerce Regulations)
+                  7. Grievance Redressal & Compliance Officer
                 </h2>
-                <p className="mb-3">
-                  In compliance with Rule 5(6) of the Consumer Protection (E-Commerce) Rules, 2020 and Rule 3(2) of the Information Technology (Intermediary Guidelines and Digital Media Ethics Code) Rules, 2021, our designated Grievance Officer details are published below:
+                <p className="mb-3 text-xs">
+                  In compliance with Rule 5(6) of the Consumer Protection (E-Commerce) Rules, 2020 and Section 13(1) of the DPDP Act, 2023:
                 </p>
-                <div className="p-4 bg-background border border-outline-variant/30 rounded-xs space-y-1">
-                  <p className="font-semibold text-on-surface">Grievance Redressal & Compliance Officer: {siteConfig.grievanceOfficer.name}</p>
-                  <p className="text-xs">Designation: {siteConfig.grievanceOfficer.designation}</p>
-                  <p className="text-xs">Organization: {siteConfig.legalBusinessName}</p>
-                  <p className="text-xs">Physical Address: {siteConfig.grievanceOfficer.address}</p>
-                  <p className="text-xs">Direct Email: <a href={`mailto:${siteConfig.grievanceOfficer.email}`} className="text-primary underline">{siteConfig.grievanceOfficer.email}</a></p>
-                  <p className="text-xs">Phone: {siteConfig.grievanceOfficer.phone}</p>
-                  <p className="text-xs text-amber-400 font-semibold mt-2">
-                    Grievance Acknowledgment: Within 48 hours | Resolution Window: Within 30 calendar days
+                <div className="p-4 bg-background border border-outline-variant/30 rounded-xs space-y-1 text-xs">
+                  <p className="font-semibold text-on-surface">Officer: {siteConfig.grievanceOfficer.name}</p>
+                  <p>Designation: {siteConfig.grievanceOfficer.designation}</p>
+                  <p>Organization: {siteConfig.legalBusinessName}</p>
+                  <p>Physical Address: {siteConfig.grievanceOfficer.address}</p>
+                  <p>Direct Email: <a href={`mailto:${siteConfig.grievanceOfficer.email}`} className="text-primary underline">{siteConfig.grievanceOfficer.email}</a></p>
+                  <p>Phone: {siteConfig.grievanceOfficer.phone}</p>
+                  <p className="text-amber-400 font-semibold mt-2">
+                    Statutory Response: {siteConfig.grievanceOfficer.responseTime}
                   </p>
                 </div>
               </section>

@@ -74,11 +74,14 @@ export default function Footer() {
             </h3>
             <ul className="flex flex-col gap-2.5 font-body-md text-xs text-on-surface-variant">
               <li><Link className="hover:text-primary transition-colors font-semibold text-amber-300" href="/seller-info">Legal & Seller Information</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/privacy-policy">Privacy Policy</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/authenticity">Hallmark & Authenticity</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/privacy-policy">Privacy Policy (DPDP)</Link></li>
               <li><Link className="hover:text-primary transition-colors" href="/terms">Terms & Conditions</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/refund-policy">Cancellation & Refund Policy</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/shipping-policy">Shipping & Delivery Policy</Link></li>
-              <li><Link className="hover:text-primary transition-colors" href="/contact">Grievance Redressal</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/refund-policy">Cancellation & Refund</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/shipping-policy">Shipping & Armored Delivery</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/exchange-policy">Exchange & Buyback</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/custom-orders-policy">Custom Orders & 3D CAD</Link></li>
+              <li><Link className="hover:text-primary transition-colors" href="/grievance-policy">Grievance Redressal</Link></li>
             </ul>
           </div>
           

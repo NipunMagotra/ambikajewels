@@ -23,6 +23,15 @@ export default function RefundPolicyPage() {
           </div>
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
+            {/* DRAFT FOR LAWYER REVIEW BANNER */}
+            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+              <div>
+                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
+                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This return and refund policy is a draft subject to review by commercial legal counsel under the Consumer Protection (E-Commerce) Rules, 2020. Confirm all return windows with lawyer.</p>
+              </div>
+            </div>
+
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
                 LEGAL COMPLIANCE & CUSTOMER ASSURANCE
@@ -57,7 +66,7 @@ export default function RefundPolicyPage() {
                 </h2>
                 <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs mb-3 space-y-2">
                   <p>
-                    <strong>Pre-Dispatch Cancellation:</strong> Customers may cancel their online order free of charge at any time <em>before the package is picked up by our logistics courier partner (Shiprocket)</em>.
+                    <strong>Pre-Dispatch Cancellation:</strong> Customers may cancel their online order free of charge at any time <em>before the package is picked up by our logistics courier partner ({siteConfig.shipping.courierPartner})</em>.
                   </p>
                   <p>
                     To cancel before dispatch, email us at <a href={`mailto:${siteConfig.contact.email}`} className="text-primary underline">{siteConfig.contact.email}</a> or call our showroom concierge at <strong>{siteConfig.contact.phone}</strong> with your Order Reference Number (e.g. <code>AMB-XXXXXX</code>).
