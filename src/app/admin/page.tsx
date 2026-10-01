@@ -62,7 +62,7 @@ export default async function AdminPage() {
               Customer Gold Savings Goals
             </h3>
             <p className="text-xs text-on-surface-variant">
-              Track bridal trousseau deposits, weight progress %, live gold growth, and WhatsApp updates.
+              Track bridal trousseau advance payments, weight progress %, live gold growth, and WhatsApp updates.
             </p>
           </Link>
         </div>

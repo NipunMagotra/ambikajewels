@@ -434,7 +434,7 @@ export const mockProducts: Product[] = [
     slug: 'custom-bespoke-gold-jewelry-service',
     description: 'Share your sketch or photo on WhatsApp (+91 9086098457). Our master karigars will create a 3D CAD design and craft your custom 22K/18K gold piece.',
     price: 5000000,
-    display_price: '₹50,000 (Advance Deposit)',
+    display_price: '₹50,000 (Advance Booking)',
     category: 'Gold Exchange & Custom',
     images: ['/products/temple-lakshmi.png', '/products/royal-kundan.png'],
     badges: ['BESPOKE 3D CAD', 'GOLD EXCHANGE'],

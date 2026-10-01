@@ -161,13 +161,13 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
     const remainingGrams = Math.max(0, goal.targetWeightGrams - totalAccumulatedGrams);
     const estimatedCostToComplete = Math.round(remainingGrams * activeRate);
 
-    let text = `*AMBIKA JEWELS — GOLD SAVINGS PROGRESS UPDATE*\n`;
+    let text = `*AMBIKA JEWELS — ADVANCE GOLD BOOKING UPDATE*\n`;
     text += `Customer: *${goal.customerName}*\n`;
     text += `Event Goal: *${goal.eventName}*\n`;
     text += `Target: ${goal.targetWeightGrams}g (${goal.targetPurity})\n`;
     text += `----------------------------------------\n`;
-    text += `*Accumulated Gold:* ${totalAccumulatedGrams.toFixed(3)} grams (${progressPct}% complete)\n`;
-    text += `*Total Amount Deposited:* ₹${totalPaidRupees.toLocaleString('en-IN')}\n`;
+    text += `*Accumulated Weight Toward Purchase:* ${totalAccumulatedGrams.toFixed(3)} grams (${progressPct}% complete)\n`;
+    text += `*Total Advance Paid:* ₹${totalPaidRupees.toLocaleString('en-IN')}\n`;
     text += `*Current Gold Valuation Today:* ₹${currentValuation.toLocaleString('en-IN')} (at ₹${activeRate}/g)\n`;
     text += `----------------------------------------\n`;
     text += `*Remaining Gold Balance:* ${remainingGrams.toFixed(3)} grams\n`;
@@ -193,14 +193,14 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
         <div>
           <div className="flex items-center gap-2">
             <span className="bg-primary/20 text-primary border border-primary/40 text-xs font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
-              Wedding Trousseau & Savings
+              Wedding Trousseau & Advance Booking
             </span>
           </div>
           <h2 className="text-2xl sm:text-3xl text-primary font-headline-md font-bold mt-1">
-            Customer Gold Savings & Weight Goal Tracker
+            Customer Gold Advance Booking & Target Weight Tracker
           </h2>
           <p className="text-xs sm:text-sm text-on-surface-variant">
-            Track gold accumulation schemes, bridal trousseau deposits, and live gold market growth per customer.
+            Track bridal advance installments, gold weight progress toward purchase, and live gold rate valuations per customer.
           </p>
         </div>
 
@@ -217,7 +217,7 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
           }`}
         >
           <Plus className="w-4 h-4" />
-          <span>New Customer Savings Goal</span>
+          <span>New Customer Advance Goal</span>
         </button>
       </div>
 
@@ -226,11 +226,11 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
           <div className="flex items-center gap-2">
             <span className="material-symbols-outlined text-amber-400 text-base">gavel</span>
             <h4 className="text-xs sm:text-sm font-bold text-amber-300">
-              Savings & Gold Accumulation Feature Status: PAUSED (Pending Legal Review)
+              Gold Advance Booking Feature Status: INACTIVE (Pending CA & Legal Review)
             </h4>
           </div>
           <p className="text-xs text-on-surface-variant leading-relaxed">
-            Customer gold savings, chit accumulation, and installment booking features are subject to strict regulatory requirements under Indian corporate and deposit rules. This feature is set to <strong>INACTIVE (OFF)</strong> until the business structure, terms of advance booking, and maturity conditions are formally reviewed and approved by your Chartered Accountant and legal counsel.
+            Customer gold advance booking and installment purchase features are subject to strict regulatory requirements under Indian corporate laws and Banning of Unregulated Deposit Schemes Act (verify with CA/lawyer). This feature is kept strictly <strong>INACTIVE (FLAG OFF)</strong> until the business structure, terms of advance booking, and 365-day delivery limits are formally approved by your Chartered Accountant and legal counsel.
           </p>
           <p className="text-[11px] text-amber-400/80 font-mono">
             Feature Flag: NEXT_PUBLIC_ENABLE_SAVINGS_GOALS = false
@@ -241,7 +241,7 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
       {/* Loading state */}
       {isLoading ? (
         <div className="text-center py-12 text-on-surface-variant text-sm animate-pulse">
-          Loading customer savings goals...
+          Loading customer advance goals...
         </div>
       ) : goals.length === 0 ? (
         /* Empty state */
@@ -249,9 +249,9 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
           <div className="w-14 h-14 rounded-full bg-primary/10 border border-primary/30 flex items-center justify-center mx-auto text-primary">
             <PiggyBank className="w-7 h-7" />
           </div>
-          <h3 className="text-xl font-bold text-primary font-headline-md">No Savings Goals Logged Yet</h3>
+          <h3 className="text-xl font-bold text-primary font-headline-md">No Advance Goals Logged Yet</h3>
           <p className="text-xs sm:text-sm text-on-surface-variant">
-            Create a gold accumulation or bridal trousseau savings goal for your customer to track past deposits, live market valuations, and remaining weight.
+            Create an advance booking or bridal trousseau goal for your customer to track past advance payments, live market valuations, and remaining weight.
           </p>
           <button
             onClick={() => setShowAddModal(true)}
@@ -358,13 +358,13 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
                   {/* Total Paid & Accumulated */}
                   <div className="bg-surface/80 p-3.5 rounded-xl border border-outline-variant/30 space-y-1">
                     <span className="text-[11px] text-on-surface-variant uppercase font-semibold block">
-                      Total Deposited & Accumulated
+                      Total Advance Paid & Allocated
                     </span>
                     <div className="text-base font-bold text-on-surface font-mono">
                       {totalAccumulatedGrams.toFixed(3)}g Gold
                     </div>
                     <div className="text-xs text-on-surface-variant">
-                      Rupees Deposited: <strong className="text-on-surface">₹{totalPaidRupees.toLocaleString('en-IN')}</strong>
+                      Advance Paid: <strong className="text-on-surface">₹{totalPaidRupees.toLocaleString('en-IN')}</strong>
                     </div>
                   </div>
 
@@ -554,7 +554,7 @@ export const SavingsGoalTracker: React.FC<SavingsGoalTrackerProps> = ({ rates })
               <div className="flex items-center gap-2">
                 <Coins className="w-5 h-5 text-primary" />
                 <h3 className="text-lg font-bold text-primary font-headline-md">
-                  Log Purchase / Deposit
+                  Log Advance Installment / Payment
                 </h3>
               </div>
               <button
