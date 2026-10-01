@@ -194,7 +194,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
 
           {/* Receipt Footer & Terms */}
           <div className="text-[9px] text-slate-600 text-center space-y-1 pt-1">
-            <p>100% BIS Hallmarked Gold Guarantee • Dogra Heritage Craft</p>
+            <p>BIS Hallmarked Gold as per Applicable Purity • Dogra Heritage Craft</p>
             {!bill.includeGst ? (
               <div className="p-1.5 border border-red-300 bg-red-50 text-red-800 text-[8px] font-bold rounded">
                 LEGAL NOTICE: This is an ESTIMATE QUOTE only and CANNOT be used as a tax invoice, bill of sale, or proof of commercial purchase under Indian GST laws.

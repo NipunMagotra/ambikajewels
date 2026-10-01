@@ -1,9 +1,9 @@
 export default function TrustBadges() {
   const pillars = [
     { icon: 'verified', label: 'BIS HALLMARKED GOLD (HUID)' },
-    { icon: 'diamond', label: 'CERTIFIED DIAMONDS' },
+    { icon: 'diamond', label: 'GIA / IGI CERTIFIED DIAMONDS' },
     { icon: 'sync', label: 'GOLD EXCHANGE PROGRAM' },
-    { icon: 'local_shipping', label: 'FREE EXPRESS SHIPPING' }
+    { icon: 'local_shipping', label: 'INSURED ARMORED TRANSIT' }
   ];
 
   return (

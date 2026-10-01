@@ -2,20 +2,20 @@ export default function TestimonialsSection() {
   const commitments = [
     {
       title: 'BIS Hallmarked Purity',
-      subtitle: 'GOVERNMENT CERTIFIED GOLD',
-      description: 'Every gold creation is stamped with BIS hallmark standards ensuring guaranteed metal purity (22K, 18K, 14K, and 9K) and uncompromised authenticity.',
+      subtitle: 'BIS ASSAYED & HALLMARKED',
+      description: 'Eligible gold creations carry official Bureau of Indian Standards (BIS) hallmark and 6-character HUID laser engraving verifying assayed purity.',
       icon: 'verified'
     },
     {
-      title: 'Certified Real Diamonds',
-      subtitle: 'GIA & IGI STANDARDS',
-      description: 'Our natural diamonds and solitaire engagement rings adhere to international 4C grading standards with authentic gemological documentation.',
+      title: 'Laboratory-Certified Diamonds',
+      subtitle: 'GIA & IGI DOCUMENTATION',
+      description: 'Natural diamonds and solitaire rings are backed by authentic third-party laboratory documentation (GIA / IGI) grading color, clarity, and cut.',
       icon: 'diamond'
     },
     {
-      title: 'Secure Express Delivery',
-      subtitle: 'PAN-INDIA DOORSTEP SHIPMENT',
-      description: 'Dispatched through Shiprocket in specialized tamper-evident security packaging with verified courier tracking until handed to you.',
+      title: 'Secure Armored Delivery',
+      subtitle: 'PAN-INDIA INSURED SHIPMENT',
+      description: 'Dispatched via BVC Logistics in tamper-evident security bags with armed transit security, live tracking, and secure OTP handover.',
       icon: 'local_shipping'
     },
     {

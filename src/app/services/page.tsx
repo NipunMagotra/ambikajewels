@@ -76,7 +76,7 @@ export default function ServicesPage() {
               Gold Exchange & <span className="italic font-normal gold-text-gradient">Customization</span>
             </h1>
             <p className="font-body-md text-xs sm:text-base text-on-surface-variant font-light leading-relaxed">
-              At Ambika Jewels, we offer personalized services including 100% Gold Exchange, old gold melting & redesign, bespoke 3D CAD customization, and private consultations.
+              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting & redesign, bespoke 3D CAD customization, and private consultations.
             </p>
           </div>
         </section>

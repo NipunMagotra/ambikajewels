@@ -77,17 +77,17 @@ export const storeKnowledge = {
   ],
 
   purityAndCertification: [
-    "100% official BIS Hallmarked Gold in 22K, 18K, 14K, and 9K purity.",
+    "Official BIS Hallmarked Gold in 22K, 18K, 14K, and 9K purity per BIS standards.",
     "Certified real diamonds in 18K & 14K gold with GIA and IGI certificates.",
     "925 Hallmarked Silver & traditional silver collections.",
     "Transparent pricing formula: Daily Gold Rate + Making Charges + 3% GST."
   ],
 
   policies: [
-    "100% gold exchange and custom redesign policy.",
-    "Lifetime buyback & exchange options.",
-    "Free express home delivery across India on all orders over ₹50,000.",
-    "Free lifetime cleaning, polishing, and stone inspection in-store."
+    "Transparent gold exchange and custom redesign policy based on XRF purity testing.",
+    "Lifetime buyback & exchange options (as per stated terms in Exchange Policy).",
+    "Free insured armored delivery across India on orders exceeding threshold.",
+    "Complimentary in-store cleaning and stone inspection (subject to fair wear and tear)."
   ],
 
   services: [

@@ -85,7 +85,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     : isDiamond 
       ? 'CERTIFIED NATURAL DIAMOND' 
       : isHallmarked 
-        ? (hasHuid ? 'BIS HALLMARKED WITH 6-CHAR ALPHANUMERIC HUID' : 'BIS HALLMARKED (GOVT OF INDIA)')
+        ? (hasHuid ? 'BIS HALLMARKED WITH 6-CHAR ALPHANUMERIC HUID' : 'BIS HALLMARKED (BUREAU OF INDIAN STANDARDS)')
         : 'AUTHENTIC HANDCRAFTED JEWELRY';
 
   return (
@@ -264,7 +264,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             <div>
               <span className="text-[10px] text-on-surface-variant/70 block uppercase">Hallmarking / HUID</span>
-              <span className="font-semibold text-on-surface text-[11px]">{product.bis_hallmark || 'Govt of India BIS Hallmarked'}</span>
+              <span className="font-semibold text-on-surface text-[11px]">{product.bis_hallmark || 'BIS Assayed & Hallmarked'}</span>
             </div>
 
             <div>

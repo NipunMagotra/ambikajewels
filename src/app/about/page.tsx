@@ -25,7 +25,7 @@ export default function AboutPage() {
     {
       icon: 'currency_exchange',
       title: 'Gold Exchange & Custom Melting',
-      description: '100% transparent gold exchange. Bring old gold to be melted and redesigned into modern bespoke heirloom jewelry.'
+      description: 'Transparent gold exchange as per stated store terms. Bring old gold to be melted and redesigned into modern bespoke heirloom jewelry.'
     },
     {
       icon: 'storefront',
