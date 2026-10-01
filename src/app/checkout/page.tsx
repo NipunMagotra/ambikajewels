@@ -475,25 +475,31 @@ export default function CheckoutPage() {
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">FIRST NAME *</label>
+                    <label htmlFor="checkout-first-name" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">FIRST NAME *</label>
                     <input 
                       required
+                      id="checkout-first-name"
+                      name="firstName"
+                      autoComplete="given-name"
                       type="text" 
                       value={formData.firstName}
                       onChange={e => setFormData({...formData, firstName: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. Ananya"
                     />
                   </div>
 
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">LAST NAME *</label>
+                    <label htmlFor="checkout-last-name" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">LAST NAME *</label>
                     <input 
                       required
+                      id="checkout-last-name"
+                      name="lastName"
+                      autoComplete="family-name"
                       type="text" 
                       value={formData.lastName}
                       onChange={e => setFormData({...formData, lastName: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. Sharma"
                     />
                   </div>
@@ -501,75 +507,93 @@ export default function CheckoutPage() {
 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-5 mb-6">
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">PHONE NUMBER (FOR INSURED DELIVERY & OTP) *</label>
+                    <label htmlFor="checkout-phone" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">PHONE NUMBER (FOR INSURED DELIVERY & OTP) *</label>
                     <input 
                       required
+                      id="checkout-phone"
+                      name="phone"
+                      autoComplete="tel"
                       type="tel" 
                       value={formData.phone}
                       onChange={e => setFormData({...formData, phone: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. 9876543210"
                     />
                   </div>
 
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">EMAIL ADDRESS *</label>
+                    <label htmlFor="checkout-email" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">EMAIL ADDRESS *</label>
                     <input 
                       required
+                      id="checkout-email"
+                      name="email"
+                      autoComplete="email"
                       type="email" 
                       value={formData.email}
                       onChange={e => setFormData({...formData, email: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. ananya@example.com"
                     />
                   </div>
                 </div>
 
                 <div className="mb-6">
-                  <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">STREET ADDRESS (HOUSE NO, BUILDING, STREET) *</label>
+                  <label htmlFor="checkout-address" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">STREET ADDRESS (HOUSE NO, BUILDING, STREET) *</label>
                   <textarea 
                     required
+                    id="checkout-address"
+                    name="address"
+                    autoComplete="street-address"
                     value={formData.address}
                     onChange={e => setFormData({...formData, address: e.target.value})}
                     rows={2}
-                    className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors resize-none"
+                    className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors resize-none"
                     placeholder="e.g. House No. 42, Sector 1, Lower Roop Nagar"
                   ></textarea>
                 </div>
 
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-5 mb-6">
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">CITY *</label>
+                    <label htmlFor="checkout-city" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">CITY *</label>
                     <input 
                       required
+                      id="checkout-city"
+                      name="city"
+                      autoComplete="address-level2"
                       type="text" 
                       value={formData.city}
                       onChange={e => setFormData({...formData, city: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. Jammu"
                     />
                   </div>
 
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">STATE *</label>
+                    <label htmlFor="checkout-state" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">STATE *</label>
                     <input 
                       required
+                      id="checkout-state"
+                      name="state"
+                      autoComplete="address-level1"
                       type="text" 
                       value={formData.state}
                       onChange={e => setFormData({...formData, state: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. Jammu & Kashmir"
                     />
                   </div>
 
                   <div>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">PINCODE *</label>
+                    <label htmlFor="checkout-pincode" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">PINCODE *</label>
                     <input 
                       required
+                      id="checkout-pincode"
+                      name="pincode"
+                      autoComplete="postal-code"
                       type="text" 
                       value={formData.pincode}
                       onChange={e => setFormData({...formData, pincode: e.target.value})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. 180013"
                     />
                   </div>
@@ -577,9 +601,9 @@ export default function CheckoutPage() {
 
                 {/* Mandatory PAN reporting threshold for high-value purchases (CA to confirm) */}
                 {finalTotal >= (siteConfig.compliance?.panRequirementThresholdInr ? siteConfig.compliance.panRequirementThresholdInr * 100 : 20000000) && (
-                  <div className="mb-6 p-4 bg-amber-950/20 border border-amber-500/40 rounded-xs">
+                  <div className="mb-6 p-4 bg-amber-950/20 border border-amber-500/40 rounded-xs" role="region" aria-label="Statutory PAN Compliance Information">
                     <div className="flex items-center gap-2 mb-1.5">
-                      <span className="material-symbols-outlined text-amber-400 text-sm">gavel</span>
+                      <span className="material-symbols-outlined text-amber-400 text-sm" aria-hidden="true">gavel</span>
                       <span className="font-label-caps text-xs text-amber-300 font-bold tracking-wider">
                         STATUTORY TAX COMPLIANCE (CA TO CONFIRM)
                       </span>
@@ -587,28 +611,32 @@ export default function CheckoutPage() {
                     <p className="text-xs text-on-surface-variant mb-3 leading-relaxed">
                       Customer Permanent Account Number (PAN) is required for precious jewelry purchases of ₹2,00,000 or above under Indian tax compliance regulations (verify with CA/lawyer).
                     </p>
-                    <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">
+                    <label htmlFor="checkout-pan" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">
                       CUSTOMER PAN NUMBER (10 CHARACTERS) *
                     </label>
                     <input 
                       required
+                      id="checkout-pan"
+                      name="panNumber"
                       type="text" 
                       maxLength={10}
                       value={formData.panNumber}
                       onChange={e => setFormData({...formData, panNumber: e.target.value.toUpperCase()})}
-                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-mono text-base uppercase py-2 outline-none transition-colors"
+                      className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-mono text-base uppercase py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. ABCDE1234F"
                     />
                   </div>
                 )}
 
                 <div className="mb-6">
-                  <label className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">SPECIAL DELIVERY NOTES (OPTIONAL)</label>
+                  <label htmlFor="checkout-notes" className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant block mb-1.5 font-semibold">SPECIAL DELIVERY NOTES (OPTIONAL)</label>
                   <input 
+                    id="checkout-notes"
+                    name="notes"
                     type="text" 
                     value={formData.notes}
                     onChange={e => setFormData({...formData, notes: e.target.value})}
-                    className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none transition-colors"
+                    className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                     placeholder="e.g., Deliver before 5 PM or ring doorbell"
                   />
                 </div>
@@ -665,28 +693,30 @@ export default function CheckoutPage() {
 
                 {/* Razorpay Compliance Checkbox */}
                 <div className="bg-background/80 border border-outline-variant/30 p-4 mb-6 rounded-xs">
-                  <label className="flex items-start gap-3 cursor-pointer">
+                  <label htmlFor="checkout-agree-terms" className="flex items-start gap-3 cursor-pointer">
                     <input 
+                      required
+                      id="checkout-agree-terms"
+                      name="agreeTerms"
                       type="checkbox"
                       checked={agreedToTerms}
-                      onChange={e => {
-                        setAgreedToTerms(e.target.checked);
-                        if (e.target.checked) setErrorMessage(null);
-                      }}
-                      className="mt-0.5 accent-primary h-4 w-4 shrink-0 rounded cursor-pointer"
+                      onChange={e => setAgreedToTerms(e.target.checked)}
+                      className="mt-0.5 accent-primary h-4 w-4 shrink-0 rounded cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                     />
                     <span className="font-body-md text-xs text-on-surface-variant leading-relaxed">
-                      I have read and agree to the <Link href="/terms" target="_blank" className="text-primary underline font-semibold">Terms & Conditions</Link>, <Link href="/shipping-policy" target="_blank" className="text-primary underline font-semibold">Shipping Policy</Link>, and <Link href="/refund-policy" target="_blank" className="text-primary underline font-semibold">Cancellation & Refund Policy</Link> of Ambika Jewels.
+                      I have read and agree to the <Link href="/terms" target="_blank" className="text-primary underline font-semibold focus-visible:ring-1 focus-visible:ring-primary">Terms & Conditions</Link>, <Link href="/shipping-policy" target="_blank" className="text-primary underline font-semibold focus-visible:ring-1 focus-visible:ring-primary">Shipping Policy</Link>, and <Link href="/refund-policy" target="_blank" className="text-primary underline font-semibold focus-visible:ring-1 focus-visible:ring-primary">Cancellation & Refund Policy</Link> of Ambika Jewels.
                     </span>
                   </label>
 
                   {/* DPDP Act 2023: Unticked Optional Marketing Consent */}
-                  <label className="flex items-start gap-3 cursor-pointer mt-3 pt-3 border-t border-outline-variant/20">
+                  <label htmlFor="checkout-marketing-consent" className="flex items-start gap-3 cursor-pointer mt-3 pt-3 border-t border-outline-variant/20">
                     <input 
+                      id="checkout-marketing-consent"
+                      name="marketingConsent"
                       type="checkbox"
                       checked={marketingConsent}
                       onChange={e => setMarketingConsent(e.target.checked)}
-                      className="mt-0.5 accent-primary h-4 w-4 shrink-0 rounded cursor-pointer"
+                      className="mt-0.5 accent-primary h-4 w-4 shrink-0 rounded cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
                     />
                     <span className="font-body-md text-xs text-on-surface-variant leading-relaxed">
                       (Optional) Send me WhatsApp & SMS updates regarding new Dogra heritage collections, bridal launches, and showroom events.

@@ -93,12 +93,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       {/* Product Image Gallery */}
       <div className="flex flex-col-reverse sm:flex-row gap-4">
         {/* Thumbnails */}
-        <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[500px] scrollbar-thin">
+        <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[500px] scrollbar-thin" role="region" aria-label="Product image thumbnails">
           {product.images.map((img, i) => (
             <button
               key={i}
+              type="button"
               onClick={() => setActiveImage(img)}
-              className={`w-16 h-16 sm:w-20 sm:h-20 bg-surface-container border transition-all shrink-0 rounded-xs overflow-hidden ${
+              aria-label={`View image ${i + 1} of ${product.name}`}
+              aria-pressed={activeImage === img}
+              className={`w-16 h-16 sm:w-20 sm:h-20 bg-surface-container border transition-all shrink-0 rounded-xs overflow-hidden focus-visible:ring-2 focus-visible:ring-primary focus:outline-none ${
                 activeImage === img ? 'border-primary ring-1 ring-primary' : 'border-outline-variant/40 hover:border-primary/50'
               }`}
             >
@@ -159,16 +162,18 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <button
                 type="button"
                 onClick={() => setShowPriceBreakup(!showPriceBreakup)}
-                className="mt-3 text-xs text-primary hover:text-primary-container font-semibold flex items-center gap-1.5 cursor-pointer transition-colors"
+                aria-expanded={showPriceBreakup}
+                aria-controls="pdp-price-breakup-details"
+                className="mt-3 text-xs text-primary hover:text-primary-container font-semibold flex items-center gap-1.5 cursor-pointer transition-colors focus-visible:ring-2 focus-visible:ring-primary focus:outline-none"
               >
-                <span className="material-symbols-outlined text-sm">
+                <span className="material-symbols-outlined text-sm" aria-hidden="true">
                   {showPriceBreakup ? 'expand_less' : 'price_change'}
                 </span>
                 <span>{showPriceBreakup ? 'Hide Price Breakup' : 'View Transparent Price Breakup (Metal + Making + GST)'}</span>
               </button>
 
               {showPriceBreakup && (
-                <div className="mt-3 p-3.5 bg-surface-container border border-outline-variant/30 rounded-xs text-xs font-body-md space-y-2">
+                <div id="pdp-price-breakup-details" role="region" aria-label="Transparent price calculation breakup" className="mt-3 p-3.5 bg-surface-container border border-outline-variant/30 rounded-xs text-xs font-body-md space-y-2">
                   <div className="flex justify-between items-center text-on-surface-variant">
                     <span>Precious Metal ({netWeight.toFixed(2)}g {product.purity || '22K'})</span>
                     <span className="font-mono font-semibold text-on-surface">₹{estimatedMetalValue.toLocaleString('en-IN')}</span>
@@ -219,12 +224,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
           <h3 className="font-label-caps text-xs text-on-surface-variant mb-3 tracking-widest font-semibold">
             METAL FINISH: <span className="text-primary">{selectedFinish.toUpperCase()}</span>
           </h3>
-          <div className="flex gap-4">
+          <div className="flex gap-4" role="radiogroup" aria-label="Select metal finish">
             {product.metal_finishes.map(finish => (
               <button
                 key={finish}
+                type="button"
                 onClick={() => setSelectedFinish(finish)}
-                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 ${
+                aria-label={`Select ${finish} metal finish`}
+                aria-pressed={selectedFinish === finish}
+                className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer ${
                   selectedFinish === finish ? 'border-primary shadow-[0_0_10px_rgba(230,202,101,0.4)]' : 'border-transparent'
                 } relative group transition-all`}
                 title={finish}
@@ -304,23 +312,29 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         {/* Quantity & Actions */}
         <div className="mt-auto pt-4 border-t border-outline-variant/30 flex flex-col gap-3">
           <div className="flex flex-col sm:flex-row items-stretch gap-3">
-            <div className="flex items-center border border-outline px-4 py-3 min-w-[120px] justify-between bg-surface-container">
-              <span className="font-label-caps text-[10px] text-on-surface-variant mr-2">QTY:</span>
+            <div className="flex items-center border border-outline px-4 py-3 min-w-[120px] justify-between bg-surface-container" role="group" aria-label="Item quantity selector">
+              <span className="font-label-caps text-[10px] text-on-surface-variant mr-2" id="pdp-qty-label">QTY:</span>
               <button 
+                type="button"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="text-on-surface hover:text-primary transition-colors text-xl font-bold px-2"
+                aria-label="Decrease quantity"
+                className="text-on-surface hover:text-primary transition-colors text-xl font-bold px-2 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer"
               >-</button>
-              <span className="font-label-caps text-sm mx-3 font-bold">{quantity}</span>
+              <span className="font-label-caps text-sm mx-3 font-bold" aria-labelledby="pdp-qty-label" aria-live="polite" aria-atomic="true">{quantity}</span>
               <button 
+                type="button"
                 onClick={() => setQuantity(quantity + 1)}
-                className="text-on-surface hover:text-primary transition-colors text-xl font-bold px-2"
+                aria-label="Increase quantity"
+                className="text-on-surface hover:text-primary transition-colors text-xl font-bold px-2 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer"
               >+</button>
             </div>
             
             <button 
+              type="button"
               onClick={handleAddToCart}
               disabled={isAdding || product.stock_status === 'out_of_stock'}
-              className="flex-1 bg-surface-container border border-primary text-primary px-4 py-3.5 font-label-caps text-xs hover:bg-primary/10 transition-all font-bold tracking-wider disabled:opacity-50"
+              aria-label={isAdding ? 'Item added to shopping bag' : `Add ${product.name} to shopping bag`}
+              className="flex-1 bg-surface-container border border-primary text-primary px-4 py-3.5 font-label-caps text-xs hover:bg-primary/10 transition-all font-bold tracking-wider disabled:opacity-50 focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer"
             >
               {isAdding ? '✓ ADDED TO BAG' : product.stock_status === 'out_of_stock' ? 'OUT OF STOCK' : '+ ADD TO BAG'}
             </button>
@@ -330,9 +344,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
-            className="w-full gold-bg-gradient px-4 py-4 font-label-caps text-xs hover:brightness-110 transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 tracking-wider shadow-md"
+            aria-label="Inquire or purchase this piece directly on WhatsApp with our Jammu showroom concierge"
+            className="w-full gold-bg-gradient px-4 py-4 font-label-caps text-xs hover:brightness-110 transition-all font-bold disabled:opacity-50 flex items-center justify-center gap-2 tracking-wider shadow-md focus-visible:ring-2 focus-visible:ring-primary focus:outline-none cursor-pointer"
           >
-            <span className="material-symbols-outlined text-base">chat_bubble</span>
+            <span className="material-symbols-outlined text-base" aria-hidden="true">chat_bubble</span>
             {product.stock_status === 'out_of_stock' ? 'OUT OF STOCK' : 'BUY NOW ON WHATSAPP'}
           </a>
         </div>
@@ -340,17 +355,17 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         {/* Badges */}
         <div className="mt-6 flex items-center justify-around border border-outline-variant/30 p-3 bg-surface-container/30">
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">verified</span>
+            <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">verified</span>
             <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">{bottomBadgeText}</span>
           </div>
-          <div className="w-[1px] h-6 bg-outline-variant/40"></div>
+          <div className="w-[1px] h-6 bg-outline-variant/40" aria-hidden="true"></div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">local_shipping</span>
-            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">SHIPROCKET DELIVERY</span>
+            <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">local_shipping</span>
+            <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">BVC ARMORED TRANSIT</span>
           </div>
-          <div className="w-[1px] h-6 bg-outline-variant/40"></div>
+          <div className="w-[1px] h-6 bg-outline-variant/40" aria-hidden="true"></div>
           <div className="flex items-center gap-2">
-            <span className="material-symbols-outlined text-primary text-lg">assignment_return</span>
+            <span className="material-symbols-outlined text-primary text-lg" aria-hidden="true">assignment_return</span>
             <span className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant font-semibold">7-DAY RETURNS</span>
           </div>
         </div>
