@@ -202,7 +202,7 @@ export default function CheckoutPage() {
     setErrorMessage(null);
 
     try {
-      // 1. Create Razorpay Order Server-Side
+      // 1. Create Razorpay Order Server-Side (also pre-inserts a pending order in Supabase)
       const res = await fetch('/api/razorpay/create-order', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -210,6 +210,19 @@ export default function CheckoutPage() {
           amount: finalTotal,
           items: state.items,
           rate_lock_token: rateLockToken,
+          rate_timestamp: Date.now(),
+          customer_info: {
+            first_name: formData.firstName,
+            last_name: formData.lastName,
+            email: formData.email,
+            phone: formData.phone,
+            address: formData.address,
+            city: formData.city,
+            state: formData.state,
+            pincode: formData.pincode,
+            pan_number: formData.panNumber ? formData.panNumber.toUpperCase() : undefined,
+            notes: formData.notes
+          },
           notes: {
             customer_name: `${formData.firstName} ${formData.lastName}`,
             email: formData.email,
@@ -236,6 +249,7 @@ export default function CheckoutPage() {
             razorpay_payment_id: `pay_mock_${Date.now()}`,
             razorpay_signature: 'mock_signature',
             is_mock: true,
+            supabase_order_id: orderData.supabase_order_id,
             customer_info: {
               first_name: formData.firstName,
               last_name: formData.lastName,
@@ -305,6 +319,7 @@ export default function CheckoutPage() {
                 razorpay_order_id: response.razorpay_order_id,
                 razorpay_payment_id: response.razorpay_payment_id,
                 razorpay_signature: response.razorpay_signature,
+                supabase_order_id: orderData.supabase_order_id,
                 customer_info: {
                   first_name: formData.firstName,
                   last_name: formData.lastName,

@@ -64,7 +64,8 @@ export async function POST(request: Request) {
       customer_info,
       items,
       total_amount,
-      is_mock
+      is_mock,
+      supabase_order_id
     }: {
       razorpay_order_id: string;
       razorpay_payment_id: string;
@@ -73,6 +74,7 @@ export async function POST(request: Request) {
       items: CartItem[];
       total_amount: number;
       is_mock?: boolean;
+      supabase_order_id?: string;
     } = body;
 
     const key_secret = process.env.RAZORPAY_KEY_SECRET;
@@ -152,7 +154,26 @@ export async function POST(request: Request) {
     }
 
     // F6: Non-guessable order identifiers
-    const orderNumber = generateSecureOrderNumber();
+    // If create-order pre-inserted a pending row, we'll resolve its order_number;
+    // otherwise generate a new one (backwards-compat / webhook-only path).
+    let orderNumber = generateSecureOrderNumber();
+
+    // Resolve existing pending order from Supabase (pre-inserted by create-order route)
+    if (supabase_order_id && dbClient) {
+      try {
+        const { data: pendingOrder } = await dbClient
+          .from('orders')
+          .select('order_number')
+          .eq('id', supabase_order_id)
+          .maybeSingle();
+
+        if (pendingOrder?.order_number) {
+          orderNumber = pendingOrder.order_number;
+        }
+      } catch (lookupErr) {
+        console.warn('[VERIFY] Could not look up pending order, using new order number:', lookupErr);
+      }
+    }
 
     // 3. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
     const encryptedPan = customer_info?.pan_number
@@ -221,40 +242,59 @@ export async function POST(request: Request) {
       });
     }
 
-    // 5. Persist Order in Supabase Database (Idempotent Upsert on razorpay_payment_id)
+    // 5. Persist Order in Supabase Database
+    //    Two paths:
+    //    A) If create-order pre-inserted a pending row → UPDATE it to confirmed/paid
+    //    B) Fallback: upsert a new row (webhook-only path / backwards compatibility)
+    const paymentUpdatePayload = {
+      customer_name: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
+      customer_phone: customer_info.phone,
+      customer_email: customer_info.email,
+      shipping_address: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
+      pincode: customer_info.pincode,
+      pan_number: encryptedPan, // Stored encrypted (CBDT Rule 114B compliant)
+      total: total_amount,
+      subtotal: Math.round(total_amount * 100 / 103),
+      tax: total_amount - Math.round(total_amount * 100 / 103),
+      shipping: 0,
+      items: items,
+      status: 'confirmed' as const,
+      payment_status: 'paid' as const,
+      payment_method: 'razorpay',
+      payment_id: razorpay_payment_id,
+      razorpay_payment_id: razorpay_payment_id,
+      razorpay_order_id: razorpay_order_id,
+      bvc_status: bvcStatus,
+      bvc_docket_number: bvcDocketNumber,
+      bvc_shipment_id: bvcShipmentId,
+      bvc_security_bag_number: bvcSecurityBag,
+      shiprocket_status: bvcStatus,
+      shiprocket_order_id: bvcDocketNumber ? String(bvcDocketNumber) : null,
+      shiprocket_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
+      shipping_provider: 'bvc',
+      tracking_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
+      notes: customer_info.notes || ''
+    };
+
     if (dbClient) {
       try {
-        await dbClient.from('orders').upsert({
-          order_number: orderNumber,
-          customer_name: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
-          customer_phone: customer_info.phone,
-          customer_email: customer_info.email,
-          shipping_address: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
-          pincode: customer_info.pincode,
-          pan_number: encryptedPan, // Stored encrypted (CBDT Rule 114B compliant)
-          total: total_amount,
-          subtotal: Math.round(total_amount * 100 / 103),
-          tax: total_amount - Math.round(total_amount * 100 / 103),
-          shipping: 0,
-          items: items,
-          status: 'confirmed',
-          payment_status: 'paid',
-          payment_method: 'razorpay',
-          payment_id: razorpay_payment_id,
-          razorpay_payment_id: razorpay_payment_id,
-          razorpay_order_id: razorpay_order_id,
-          bvc_status: bvcStatus,
-          bvc_docket_number: bvcDocketNumber,
-          bvc_shipment_id: bvcShipmentId,
-          bvc_security_bag_number: bvcSecurityBag,
-          shiprocket_status: bvcStatus,
-          shiprocket_order_id: bvcDocketNumber ? String(bvcDocketNumber) : null,
-          shiprocket_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
-          notes: customer_info.notes || ''
-        }, {
-          onConflict: 'razorpay_payment_id',
-          ignoreDuplicates: true
-        });
+        if (supabase_order_id) {
+          // Path A: Update the existing pending order created by create-order
+          await dbClient
+            .from('orders')
+            .update(paymentUpdatePayload)
+            .eq('id', supabase_order_id);
+          console.log(`[ORDER CONFIRMED] Updated pending order ${supabase_order_id} → confirmed/paid.`);
+        } else {
+          // Path B: Backwards-compatible upsert (webhook / legacy clients)
+          await dbClient.from('orders').upsert({
+            order_number: orderNumber,
+            ...paymentUpdatePayload
+          }, {
+            onConflict: 'razorpay_payment_id',
+            ignoreDuplicates: true
+          });
+        }
       } catch (dbErr) {
         console.error('Error persisting verified order to Supabase:', dbErr);
       }
