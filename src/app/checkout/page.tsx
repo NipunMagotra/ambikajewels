@@ -63,6 +63,35 @@ export default function CheckoutPage() {
   const shipping = isFreeShipping ? 0 : siteConfig.shipping.flatRate;
   const finalTotal = cartTotal + tax + shipping;
 
+  const [showPhoneConfirmModal, setShowPhoneConfirmModal] = useState(false);
+  const [hasDismissedTypo, setHasDismissedTypo] = useState(false);
+
+  const getEmailSuggestion = (emailStr: string): string | null => {
+    const parts = emailStr.trim().toLowerCase().split('@');
+    if (parts.length === 2) {
+      const [user, domain] = parts;
+      const typoDomains: Record<string, string> = {
+        'gamil.com': 'gmail.com',
+        'gmal.com': 'gmail.com',
+        'gmial.com': 'gmail.com',
+        'gmaill.com': 'gmail.com',
+        'yaho.com': 'yahoo.com',
+        'yahooo.com': 'yahoo.com',
+        'hotmial.com': 'hotmail.com',
+        'hotmai.com': 'hotmail.com',
+        'outlok.com': 'outlook.com',
+        'outloo.com': 'outlook.com',
+        'iclud.com': 'icloud.com',
+      };
+      if (typoDomains[domain]) {
+        return `${user}@${typoDomains[domain]}`;
+      }
+    }
+    return null;
+  };
+
+  const emailSuggestion = getEmailSuggestion(formData.email);
+
   // Rate-Lock countdown timer (guarantees precious metal prices for N minutes)
   const rateLockDuration = (siteConfig.rates.rateLockMinutes || 15) * 60;
   const [secondsRemaining, setSecondsRemaining] = useState(rateLockDuration);
@@ -172,6 +201,12 @@ export default function CheckoutPage() {
       return;
     }
 
+    if (emailSuggestion && !hasDismissedTypo) {
+      setErrorMessage(`Notice: Did you mean "${emailSuggestion}"? Please click "Use Suggested Email" under the field or submit again to proceed with ${formData.email}.`);
+      setHasDismissedTypo(true);
+      return;
+    }
+
     // 4. PAN Card Validation (> ₹2,00,000 as mandated by Indian CBDT Rule 114B)
     if (finalTotal > 20000000) {
       const cleanPan = formData.panNumber.trim().toUpperCase();
@@ -181,7 +216,8 @@ export default function CheckoutPage() {
       }
     }
 
-    setStep(2);
+    // Open Phone & Contact Confirmation Modal before Step 2
+    setShowPhoneConfirmModal(true);
   };
 
   const [agreedToTerms, setAgreedToTerms] = useState(false);
@@ -549,6 +585,24 @@ export default function CheckoutPage() {
                       className="w-full bg-transparent border-b border-outline focus:border-primary text-on-surface font-body-md text-base sm:text-sm py-2 outline-none focus-visible:ring-1 focus-visible:ring-primary transition-colors"
                       placeholder="e.g. ananya@example.com"
                     />
+                    {emailSuggestion && (
+                      <div className="mt-2 p-2 bg-amber-950/40 border border-amber-500/40 rounded-xs flex items-center justify-between text-xs text-amber-200">
+                        <span className="flex items-center gap-1.5 text-[11px]">
+                          <span className="material-symbols-outlined text-amber-400 text-sm">tips_and_updates</span>
+                          Did you mean <strong>{emailSuggestion}</strong>?
+                        </span>
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setFormData({ ...formData, email: emailSuggestion });
+                            setHasDismissedTypo(true);
+                          }}
+                          className="bg-amber-500 text-black px-2 py-0.5 rounded-xs font-bold text-[10px] uppercase hover:bg-amber-400 cursor-pointer"
+                        >
+                          Use Suggestion
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
 
@@ -688,7 +742,7 @@ export default function CheckoutPage() {
                   <h4 className="font-label-caps text-xs text-on-surface mb-3 font-semibold tracking-wider border-b border-outline-variant/20 pb-2">ORDER BREAKDOWN</h4>
                   {state.items.map((item, idx) => (
                     <div key={idx} className="flex justify-between items-center font-body-md text-xs sm:text-sm text-on-surface-variant mb-2">
-                      <span>{item.name} x {item.quantity}</span>
+                      <span>{item.name} {item.selected_size ? `(${item.selected_size})` : ''} ({item.metal_finish}) × {item.quantity}</span>
                       <span>{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   ))}
@@ -818,6 +872,69 @@ export default function CheckoutPage() {
 
           </div>
         </div>
+
+        {/* PHONE & DELIVERY CONFIRMATION MODAL */}
+        {showPhoneConfirmModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-fade-in" role="dialog" aria-modal="true" aria-labelledby="modal-confirm-title">
+            <div className="bg-surface border border-primary/40 rounded-xs max-w-lg w-full p-6 sm:p-8 shadow-2xl relative space-y-5">
+              <div className="flex items-center gap-3 border-b border-outline-variant/30 pb-3">
+                <span className="material-symbols-outlined text-primary text-2xl">verified_user</span>
+                <div>
+                  <h3 id="modal-confirm-title" className="font-headline-sm text-lg sm:text-xl text-primary font-bold">
+                    Confirm Delivery & OTP Details
+                  </h3>
+                  <p className="text-xs text-on-surface-variant">Please double-check your shipping contact details</p>
+                </div>
+              </div>
+
+              <div className="p-4 bg-primary/10 border border-primary/30 rounded-xs space-y-3">
+                <div className="flex items-start justify-between">
+                  <span className="text-[11px] font-label-caps text-on-surface-variant uppercase font-semibold">Mobile Phone (Delivery OTP):</span>
+                  <span className="font-mono text-base font-bold text-primary tracking-wider">+91 {formData.phone}</span>
+                </div>
+                <div className="flex items-start justify-between">
+                  <span className="text-[11px] font-label-caps text-on-surface-variant uppercase font-semibold">Email (Invoice & Tracking):</span>
+                  <span className="text-xs font-semibold text-on-surface break-all">{formData.email}</span>
+                </div>
+                <div className="flex items-start justify-between">
+                  <span className="text-[11px] font-label-caps text-on-surface-variant uppercase font-semibold">Recipient:</span>
+                  <span className="text-xs font-semibold text-on-surface">{formData.firstName} {formData.lastName}</span>
+                </div>
+                <div className="border-t border-outline-variant/20 pt-2 text-xs text-on-surface-variant">
+                  <span className="text-[10px] font-label-caps text-on-surface-variant uppercase block font-semibold">Destination Address:</span>
+                  <p className="mt-0.5 text-on-surface leading-snug">{formData.address}, {formData.city}, {formData.state} - {formData.pincode}</p>
+                </div>
+              </div>
+
+              <div className="text-[11px] text-on-surface-variant bg-surface-container p-3 rounded-xs flex items-start gap-2 border border-outline-variant/20">
+                <span className="material-symbols-outlined text-sm text-primary shrink-0 mt-0.5">info</span>
+                <span>
+                  <strong>Important:</strong> Our insured armored courier (BVC Logistics) requires an active phone number to generate your delivery OTP and confirm physical identity at your door.
+                </span>
+              </div>
+
+              <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowPhoneConfirmModal(false);
+                    setStep(2);
+                  }}
+                  className="flex-1 gold-bg-gradient py-3 px-4 font-label-caps text-xs font-bold shadow-md hover:brightness-110 cursor-pointer text-center tracking-wider"
+                >
+                  ✓ CONFIRM & PROCEED TO PAYMENT
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setShowPhoneConfirmModal(false)}
+                  className="py-3 px-4 border border-outline-variant hover:border-primary text-xs font-label-caps font-semibold text-on-surface cursor-pointer text-center"
+                >
+                  EDIT DETAILS
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
       </main>
       <Footer />
       <MobileBottomNav />

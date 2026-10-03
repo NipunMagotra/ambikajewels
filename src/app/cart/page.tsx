@@ -66,10 +66,17 @@ export default function CartPage() {
                           <h3 className="font-headline-sm text-sm sm:text-base lg:text-headline-sm text-on-surface hover:text-primary transition-colors line-clamp-2">
                             <Link href={`/collections/${item.slug || item.product_id}`}>{item.name}</Link>
                           </h3>
-                          <p className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mt-1">FINISH: {item.metal_finish.toUpperCase()}</p>
+                          <div className="font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mt-1 flex flex-wrap items-center gap-2">
+                            <span>FINISH: {item.metal_finish.toUpperCase()}</span>
+                            {item.selected_size && (
+                              <span className="text-primary font-semibold bg-primary/10 border border-primary/20 px-1.5 py-0.2 rounded-xs">
+                                SIZE: {item.selected_size}
+                              </span>
+                            )}
+                          </div>
                         </div>
                         <button 
-                          onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { product_id: item.product_id, metal_finish: item.metal_finish } })}
+                          onClick={() => dispatch({ type: 'REMOVE_ITEM', payload: { product_id: item.product_id, metal_finish: item.metal_finish, selected_size: item.selected_size } as any })}
                           className="text-on-surface-variant/60 hover:text-error transition-colors p-1"
                           title="Remove item"
                         >
@@ -80,12 +87,12 @@ export default function CartPage() {
                       <div className="flex flex-wrap justify-between items-center gap-2 mt-3 pt-2 border-t border-outline-variant/15">
                         <div className="flex items-center border border-outline/40 px-2 py-1 bg-background">
                           <button 
-                            onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { product_id: item.product_id, metal_finish: item.metal_finish, quantity: Math.max(1, item.quantity - 1) } })}
+                            onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { product_id: item.product_id, metal_finish: item.metal_finish, selected_size: item.selected_size, quantity: Math.max(1, item.quantity - 1) } as any })}
                             className="text-on-surface hover:text-primary px-1.5 text-base font-bold"
                           >-</button>
                           <span className="font-label-caps text-xs mx-2 font-bold">{item.quantity}</span>
                           <button 
-                            onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { product_id: item.product_id, metal_finish: item.metal_finish, quantity: item.quantity + 1 } })}
+                            onClick={() => dispatch({ type: 'UPDATE_QUANTITY', payload: { product_id: item.product_id, metal_finish: item.metal_finish, selected_size: item.selected_size, quantity: item.quantity + 1 } as any })}
                             className="text-on-surface hover:text-primary px-1.5 text-base font-bold"
                           >+</button>
                         </div>

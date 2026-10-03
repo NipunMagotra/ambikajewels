@@ -16,6 +16,21 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [showPriceBreakup, setShowPriceBreakup] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
+  const isRing = product.category.toLowerCase().includes('ring') || product.name.toLowerCase().includes('ring');
+  const isBangle = product.category.toLowerCase().includes('bangle') || 
+                   product.category.toLowerCase().includes('kada') || 
+                   product.category.toLowerCase().includes('bracelet') || 
+                   product.name.toLowerCase().includes('bangle') || 
+                   product.name.toLowerCase().includes('kada');
+
+  const ringSizes = ['10', '11', '12', '13', '14 (Standard)', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
+  const bangleSizes = ['2.2 (2-2/16")', '2.4 (2-4/16")', '2.6 (2-6/16" - Most Popular)', '2.8 (2-8/16")', '2.10 (2-10/16")'];
+
+  const [selectedSize, setSelectedSize] = useState<string>(
+    isRing ? '14 (Standard)' : isBangle ? '2.6 (2-6/16" - Most Popular)' : ''
+  );
+  const [showSizeGuide, setShowSizeGuide] = useState(false);
+
   const totalRupees = Math.round(product.price / 100);
   const preTaxSubtotal = Math.round(totalRupees / 1.03);
   const gstRupees = totalRupees - preTaxSubtotal;
@@ -37,6 +52,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         quantity: quantity,
         image: product.images[0],
         metal_finish: selectedFinish,
+        selected_size: selectedSize || undefined,
         slug: product.slug,
         weight_grams: product.weight_grams,
         dimensions: product.dimensions
@@ -246,6 +262,66 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             ))}
           </div>
         </div>
+
+        {/* Ring / Bangle Size Selector */}
+        {(isRing || isBangle) && (
+          <div className="mb-6 p-4 bg-surface-container/70 border border-primary/20 rounded-xs">
+            <div className="flex items-center justify-between mb-2">
+              <h3 className="font-label-caps text-xs text-on-surface-variant tracking-widest font-semibold flex items-center gap-1.5">
+                <span className="material-symbols-outlined text-sm text-primary">straighten</span>
+                SELECT {isRing ? 'RING SIZE (INDIAN STANDARD)' : 'BANGLE SIZE (INDIAN)'}:
+                <span className="text-primary font-bold ml-1">{selectedSize}</span>
+              </h3>
+              
+              <button
+                type="button"
+                onClick={() => setShowSizeGuide(!showSizeGuide)}
+                className="text-[11px] text-primary hover:underline font-semibold flex items-center gap-1 cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-xs">help</span>
+                <span>Size Guide</span>
+              </button>
+            </div>
+
+            {/* Size Options Pills */}
+            <div className="flex flex-wrap gap-2 mt-2" role="radiogroup" aria-label={`Select ${isRing ? 'ring' : 'bangle'} size`}>
+              {(isRing ? ringSizes : bangleSizes).map((sz) => (
+                <button
+                  key={sz}
+                  type="button"
+                  onClick={() => setSelectedSize(sz)}
+                  aria-pressed={selectedSize === sz}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-xs border transition-all cursor-pointer ${
+                    selectedSize === sz
+                      ? 'border-primary bg-primary text-on-primary-fixed shadow-sm'
+                      : 'border-outline-variant/40 bg-surface hover:border-primary/50 text-on-surface'
+                  }`}
+                >
+                  {sz}
+                </button>
+              ))}
+            </div>
+
+            {/* Size Guide Info Dropdown */}
+            {showSizeGuide && (
+              <div className="mt-3 p-3 bg-surface border border-outline-variant/30 rounded-xs text-xs space-y-1.5 text-on-surface-variant">
+                <p className="font-bold text-primary flex items-center gap-1">
+                  <span className="material-symbols-outlined text-sm">info</span>
+                  {isRing ? 'Indian Standard Ring Size Guide:' : 'Standard Indian Bangle Sizing:'}
+                </p>
+                {isRing ? (
+                  <p className="text-[11px] leading-relaxed">
+                    Standard Indian women&apos;s ring sizes usually range from <strong>10 to 14</strong>. Standard men&apos;s ring sizes range from <strong>16 to 22</strong>. Need custom resizing? Our Jammu karigars offer complimentary sizing adjustments after order confirmation on WhatsApp.
+                  </p>
+                ) : (
+                  <p className="text-[11px] leading-relaxed">
+                    Bangle sizes represent the inner diameter in inches: <strong>2.2</strong> (2&quot; 2/16 - Small), <strong>2.4</strong> (2&quot; 4/16 - Medium), <strong>2.6</strong> (2&quot; 6/16 - Standard/Most Popular), <strong>2.8</strong> (2&quot; 8/16 - Large).
+                  </p>
+                )}
+              </div>
+            )}
+          </div>
+        )}
 
         {/* Specifications & Compliance Table */}
         <div className="mb-6 border border-outline-variant/30 bg-surface-container/60 p-4 rounded-xs">

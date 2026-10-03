@@ -25,7 +25,9 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
   switch (action.type) {
     case 'ADD_ITEM': {
       const existingItemIndex = state.items.findIndex(
-        (item) => item.product_id === action.payload.product_id && item.metal_finish === action.payload.metal_finish
+        (item) => item.product_id === action.payload.product_id && 
+                  item.metal_finish === action.payload.metal_finish &&
+                  (item.selected_size || '') === (action.payload.selected_size || '')
       );
       if (existingItemIndex >= 0) {
         const newItems = [...state.items];
@@ -38,14 +40,18 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       return {
         ...state,
         items: state.items.filter(
-          (item) => !(item.product_id === action.payload.product_id && item.metal_finish === action.payload.metal_finish)
+          (item) => !(item.product_id === action.payload.product_id && 
+                      item.metal_finish === action.payload.metal_finish &&
+                      (item.selected_size || '') === ((action.payload as any).selected_size || ''))
         ),
       };
     case 'UPDATE_QUANTITY':
       return {
         ...state,
         items: state.items.map((item) =>
-          item.product_id === action.payload.product_id && item.metal_finish === action.payload.metal_finish
+          item.product_id === action.payload.product_id && 
+          item.metal_finish === action.payload.metal_finish &&
+          (item.selected_size || '') === ((action.payload as any).selected_size || '')
             ? { ...item, quantity: action.payload.quantity }
             : item
         ),

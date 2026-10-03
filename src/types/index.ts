@@ -42,6 +42,7 @@ export type CartItem = {
   quantity: number;
   image: string;
   metal_finish: string;
+  selected_size?: string;
   slug?: string;
   weight_grams?: number;
   dimensions?: {
