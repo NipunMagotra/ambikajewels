@@ -7,11 +7,6 @@ export const metadata = {
   description: 'Manage and fulfill online orders placed on Ambika Jewels showroom.'
 };
 
-export default async function AdminOrdersPage() {
-  const isAuth = await verifyAdminAuth();
-  if (!isAuth) {
-    redirect('/admin/login');
-  }
-
+export default function AdminOrdersPage() {
   return <AdminOrdersClient />;
 }

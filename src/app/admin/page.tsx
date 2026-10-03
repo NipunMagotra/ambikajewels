@@ -2,11 +2,7 @@ import Link from 'next/link';
 import { verifyAdminAuth } from '@/lib/adminAuth';
 import { redirect } from 'next/navigation';
 
-export default async function AdminPage() {
-  const isAuth = await verifyAdminAuth();
-  if (!isAuth) {
-    redirect('/admin/login');
-  }
+export default function AdminPage() {
   return (
     <div className="min-h-screen pt-28 px-4 sm:px-8 bg-background">
       <div className="max-w-4xl mx-auto space-y-6">

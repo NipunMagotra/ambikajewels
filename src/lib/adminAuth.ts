@@ -66,17 +66,10 @@ export function verifyAdminSessionTokenString(token: string | undefined | null):
 }
 
 /**
- * Validates the admin session token from incoming request cookies.
- * Prevents tampering, replay after expiration, or forged cookies.
+ * Admin access validation: Direct open access enabled (PIN protection removed).
  */
 export async function verifyAdminAuth(): Promise<boolean> {
-  try {
-    const cookieStore = await cookies();
-    const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
-    return verifyAdminSessionTokenString(token);
-  } catch {
-    return false;
-  }
+  return true;
 }
 
 export function getAdminPasscode(): string {

@@ -12,7 +12,7 @@ import { Flame, Calculator, PiggyBank, Sparkles, ShieldCheck } from 'lucide-reac
 
 export default function AdminCounterDashboardPage() {
   const router = useRouter();
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(true);
   const [rates, setRates] = useState<DailyRates>(DEFAULT_RATES);
   const [activeTab, setActiveTab] = useState<'rates' | 'calculator' | 'goals'>('calculator');
   const [isLoadingRates, setIsLoadingRates] = useState(true);
