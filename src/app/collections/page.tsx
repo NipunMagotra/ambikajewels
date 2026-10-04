@@ -92,36 +92,40 @@ export default async function CollectionsPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
-        <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
-          <div className="text-center mb-6 sm:mb-stack-lg">
-            <span className="font-label-caps text-[10px] sm:text-xs text-primary tracking-[0.2em] block mb-2 font-semibold">COUTURE COLLECTION</span>
-            <h1 className="font-headline-md text-3xl sm:text-5xl lg:text-6xl text-primary">
+      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+        <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">
+          {/* Collection Heading */}
+          <div className="text-center mb-4 sm:mb-6">
+            <span className="font-sans text-[10px] sm:text-xs text-[var(--accent-gold)] tracking-[0.3em] uppercase block mb-1 font-semibold">
+              COUTURE COLLECTION
+            </span>
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal">
               {category || 'Timeless Heritage'}
             </h1>
           </div>
 
           <FilterBar />
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-stack-md lg:gap-stack-lg">
+          {/* Products appear naturally below filter section with controlled spacing */}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
             {displayProducts.length > 0 ? (
               displayProducts.map((product) => (
                 <ProductCard key={product.id} product={product} />
               ))
             ) : (
-              <div className="col-span-full py-16 sm:py-24 text-center px-4 max-w-md mx-auto">
-                <span className="material-symbols-outlined text-4xl text-primary mb-3 block">diamond</span>
-                <h3 className="font-headline-sm text-lg sm:text-xl text-on-surface mb-2 font-semibold">
+              <div className="col-span-full py-10 sm:py-16 text-center px-4 max-w-lg mx-auto bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px] my-4">
+                <span className="material-symbols-outlined text-3xl text-[var(--accent-gold)] mb-2 block">diamond</span>
+                <h3 className="font-serif text-lg sm:text-xl text-[var(--text-primary)] mb-2 font-normal">
                   Bespoke Jewelry On Order
                 </h3>
-                <p className="text-xs sm:text-sm text-on-surface-variant mb-6 leading-relaxed">
+                <p className="font-sans text-xs text-[var(--text-secondary)] mb-6 leading-relaxed font-light">
                   Looking for a custom design in this collection? Our master Dogra karigars craft bespoke pieces in 22K/18K/14K gold and 925 silver at our Jammu showroom.
                 </p>
                 <a
                   href="https://wa.me/919086098457?text=Namaste!%20I%20am%20interested%20in%20a%20custom%20piece%20from%20Ambika%20Jewels."
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="inline-flex items-center gap-2 border border-primary px-6 py-3 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all font-bold tracking-widest"
+                  className="btn-gold-primary"
                 >
                   <span className="material-symbols-outlined text-sm">chat_bubble</span>
                   INQUIRE ON WHATSAPP

@@ -26,7 +26,7 @@ export default function ChatWidget() {
     { 
       id: 'initial', 
       sender: 'bot', 
-      text: "Namaste! I'm Aanya from Ambika Jewels. I'm here to help you choose the right gold and diamond jewelry or make custom designs. How can I help you today?" 
+      text: "Namaste! I'm Aanya from Ambika Jewels. I'm here to assist you with authentic Dogra heritage jewelry, bridal collections, or custom 3D CAD designs. How may I help you today?" 
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -79,7 +79,7 @@ export default function ChatWidget() {
       setMessages(prev => [...prev, {
         id: String(Date.now() + 2),
         sender: 'bot',
-        text: 'Sorry, I am having trouble connecting. Please try again or chat with our shop on WhatsApp.'
+        text: 'Sorry, I am having trouble connecting right now. Please message our Jammu showroom directly on WhatsApp for instant assistance.'
       }]);
     } finally {
       setIsLoading(false);
@@ -93,65 +93,81 @@ export default function ChatWidget() {
 
   return (
     <>
-      {/* Floating Action Button */}
+      {/* Floating Action Button - Positioned SAFELY above mobile bottom nav */}
       <button 
         onClick={() => setIsOpen(true)}
-        className={`fixed bottom-20 lg:bottom-8 right-4 lg:right-8 w-12 h-12 sm:w-14 sm:h-14 bg-primary-container border-[1.5px] border-primary rounded-full flex items-center justify-center text-primary shadow-xl hover:bg-primary hover:text-on-primary transition-all z-40 ${isOpen ? 'scale-0' : 'scale-100'}`}
+        className={`fixed right-4 lg:right-8 w-12 h-12 sm:w-13 sm:h-13 bg-[var(--bg-card)] border-[1.5px] border-[var(--accent-gold)] rounded-full flex items-center justify-center text-[var(--accent-gold)] shadow-2xl hover:bg-[var(--accent-gold)] hover:text-white transition-all z-40 cursor-pointer ${
+          isOpen ? 'scale-0' : 'scale-100'
+        }`}
+        style={{
+          bottom: 'calc(4.75rem + env(safe-area-inset-bottom, 0px))',
+        }}
         aria-label="Ask Ambika Assistant"
       >
         <span className="material-symbols-outlined text-xl sm:text-2xl">chat</span>
       </button>
 
       {/* Chat Window */}
-      <div className={`fixed bottom-20 lg:bottom-8 right-3 left-3 sm:left-auto sm:right-8 w-auto sm:w-96 max-h-[540px] sm:max-h-[620px] h-[78vh] bg-surface-container border border-outline-variant shadow-2xl flex flex-col z-50 transition-all duration-300 origin-bottom-right rounded-xs ${isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'}`}>
+      <div 
+        className={`fixed right-3 left-3 sm:left-auto sm:right-8 w-auto sm:w-96 max-h-[520px] sm:max-h-[600px] h-[75vh] bg-[var(--bg-card)] border border-[var(--border-subtle)] shadow-2xl flex flex-col z-50 transition-all duration-300 origin-bottom-right rounded-[2px] ${
+          isOpen ? 'scale-100 opacity-100' : 'scale-0 opacity-0 pointer-events-none'
+        }`}
+        style={{
+          bottom: 'calc(5rem + env(safe-area-inset-bottom, 0px))',
+        }}
+      >
         
         {/* Header */}
-        <div className="bg-surface-container-high border-b border-outline-variant p-3.5 flex justify-between items-center">
+        <div className="bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] p-3.5 flex justify-between items-center">
           <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center shrink-0 border border-primary/30">
-              <span className="material-symbols-outlined text-primary text-base">support_agent</span>
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-card)] flex items-center justify-center shrink-0 border border-[var(--accent-gold)]/40">
+              <span className="material-symbols-outlined text-[var(--accent-gold)] text-base">support_agent</span>
             </div>
             <div>
-              <h4 className="font-label-caps text-xs text-primary font-bold tracking-wider">ASK AMBIKA</h4>
-              <p className="text-[9px] text-on-surface-variant font-label-caps tracking-wider flex items-center gap-1">
+              <h4 className="font-sans text-xs text-[var(--accent-gold)] font-bold tracking-[0.16em] uppercase">ASK AMBIKA</h4>
+              <p className="text-[9px] text-[var(--text-secondary)] font-sans tracking-wider flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
                 Aanya • Personal Jewelry Guide
               </p>
             </div>
           </div>
-          <button onClick={() => setIsOpen(false)} className="text-on-surface-variant hover:text-primary transition-colors p-1" aria-label="Close Chat">
+          <button 
+            onClick={() => setIsOpen(false)} 
+            className="text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors p-1 cursor-pointer" 
+            aria-label="Close Chat"
+          >
             <span className="material-symbols-outlined text-xl">close</span>
           </button>
         </div>
 
-        {/* AI Assistant Disclaimer Banner */}
-        <div className="bg-surface-container-lowest px-3 py-1.5 border-b border-outline-variant/30 text-[10px] text-on-surface-variant font-label-caps tracking-wider text-center flex items-center justify-center gap-1.5">
-          <span className="material-symbols-outlined text-xs text-primary">info</span>
-          <span>AI assistant, confirm details with the store</span>
+        {/* Disclaimer Banner */}
+        <div className="bg-[var(--bg-surface)] px-3 py-1.5 border-b border-[var(--border-subtle)] text-[9.5px] text-[var(--text-secondary)] font-sans tracking-wider text-center flex items-center justify-center gap-1.5">
+          <span className="material-symbols-outlined text-xs text-[var(--accent-gold)]">info</span>
+          <span>AI assistant, confirm details with showroom</span>
         </div>
 
         {/* Messages Area */}
-        <div className="flex-1 overflow-y-auto p-3.5 custom-scrollbar bg-surface flex flex-col gap-3">
+        <div className="flex-1 overflow-y-auto p-3.5 custom-scrollbar bg-[var(--bg-main)] flex flex-col gap-3">
           {messages.map(msg => (
             <div key={msg.id} className={`flex flex-col ${msg.sender === 'user' ? 'items-end' : 'items-start'}`}>
-              <div className={`max-w-[88%] p-3 font-body-md text-xs sm:text-sm leading-relaxed ${
+              <div className={`max-w-[88%] p-3 font-sans text-xs sm:text-[13px] leading-relaxed rounded-[2px] ${
                 msg.sender === 'user' 
-                  ? 'bg-primary text-on-primary rounded-l-lg rounded-tr-lg font-medium shadow-sm' 
-                  : 'bg-surface-container-high text-on-surface border border-outline-variant/40 rounded-r-lg rounded-tl-lg shadow-xs'
+                  ? 'bg-[var(--accent-gold)] text-white font-medium shadow-sm' 
+                  : 'bg-[var(--bg-card)] text-[var(--text-primary)] border border-[var(--border-subtle)] shadow-xs'
               }`}>
                 {msg.text}
               </div>
               
-              {/* Product Recommendations (Links to product page without quoting fluctuating rates) */}
+              {/* Product Recommendations */}
               {msg.products && msg.products.length > 0 && (
                 <div className="mt-2.5 flex gap-2 overflow-x-auto max-w-full custom-scrollbar pb-1.5">
                   {msg.products.map(p => (
-                    <Link key={p.id} href={`/collections/${p.slug}`} className="block w-24 shrink-0 bg-surface-container-low border border-outline-variant/30 p-1.5 rounded-xs hover:border-primary transition-colors">
-                      <div className="aspect-[3/4] bg-surface border border-outline-variant/20 overflow-hidden mb-1">
-                        <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${p.images[0]}')` }} />
+                    <Link key={p.id} href={`/collections/${p.slug || p.id}`} className="block w-24 shrink-0 bg-[var(--bg-card)] border border-[var(--border-subtle)] p-1.5 rounded-[2px] hover:border-[var(--accent-gold)] transition-colors">
+                      <div className="aspect-[3/4] bg-[var(--bg-surface)] border border-[var(--border-subtle)] overflow-hidden mb-1">
+                        <div className="w-full h-full bg-cover bg-center" style={{ backgroundImage: `url('${p.images?.[0] || '/hero-clean.png'}')` }} />
                       </div>
-                      <p className="font-label-caps text-[9px] text-on-surface truncate">{p.name}</p>
-                      <p className="font-label-caps text-[8px] text-primary font-semibold tracking-wider uppercase mt-0.5">View Details →</p>
+                      <p className="font-serif text-[10px] text-[var(--text-primary)] truncate">{p.name}</p>
+                      <p className="font-sans text-[8px] text-[var(--accent-gold)] font-semibold tracking-wider uppercase mt-0.5">View Details →</p>
                     </Link>
                   ))}
                 </div>
@@ -167,14 +183,14 @@ export default function ChatWidget() {
             </div>
           ))}
 
-          {/* Quick Prompts on initial load */}
+          {/* Quick Prompts */}
           {messages.length === 1 && !isLoading && (
             <div className="mt-2 flex flex-wrap gap-1.5">
               {QUICK_PROMPTS.map((prompt, idx) => (
                 <button
                   key={idx}
                   onClick={() => sendQuery(prompt)}
-                  className="text-[10px] font-label-caps bg-surface-container-high hover:bg-primary-container text-on-surface hover:text-primary border border-outline-variant/60 rounded-full px-2.5 py-1 transition-all cursor-pointer"
+                  className="text-[10px] font-sans bg-[var(--bg-card)] hover:bg-[var(--accent-gold)] text-[var(--text-secondary)] hover:text-white border border-[var(--border-subtle)] rounded-full px-2.5 py-1 transition-all cursor-pointer"
                 >
                   {prompt}
                 </button>
@@ -183,35 +199,35 @@ export default function ChatWidget() {
           )}
 
           {isLoading && (
-            <div className="flex gap-1 items-center bg-surface-container-high border border-outline-variant rounded-r-lg rounded-tl-lg p-2.5 w-14 h-9">
-              <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce"></div>
-              <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
-              <div className="w-1.5 h-1.5 bg-primary rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+            <div className="flex gap-1.5 items-center bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2px] p-2.5 w-16 h-8">
+              <div className="w-1.5 h-1.5 bg-[var(--accent-gold)] rounded-full animate-bounce"></div>
+              <div className="w-1.5 h-1.5 bg-[var(--accent-gold)] rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+              <div className="w-1.5 h-1.5 bg-[var(--accent-gold)] rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
             </div>
           )}
           <div ref={messagesEndRef} />
         </div>
 
         {/* Input Area */}
-        <form onSubmit={handleSend} className="p-2.5 bg-surface-container-high border-t border-outline-variant flex gap-2">
+        <form onSubmit={handleSend} className="p-2.5 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex gap-2">
           <input 
             type="text" 
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
             placeholder="Ask Aanya in simple English..."
-            className="flex-1 bg-surface border border-outline-variant text-on-surface font-body-md text-base sm:text-sm p-2 outline-none focus:border-primary transition-colors rounded-xs"
+            className="flex-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-sans text-xs p-2.5 outline-none focus:border-[var(--accent-gold)] transition-colors rounded-[2px]"
           />
           <button 
             type="submit" 
             disabled={!inputValue.trim() || isLoading}
-            className="bg-primary text-on-primary w-9 h-9 sm:w-10 sm:h-10 flex items-center justify-center disabled:opacity-50 hover:bg-primary-container hover:text-primary transition-colors border border-primary shrink-0"
+            className="btn-gold-primary px-3 py-2 disabled:opacity-40 shrink-0"
           >
             <span className="material-symbols-outlined text-sm">send</span>
           </button>
         </form>
 
-        <div className="bg-surface-container-lowest px-2 py-1 text-[10px] text-on-surface-variant/70 text-center border-t border-outline-variant/20">
-          AI assistant, confirm details with the store
+        <div className="bg-[var(--bg-surface)] px-2 py-1 text-[9px] text-[var(--text-secondary)]/80 text-center border-t border-[var(--border-subtle)] font-sans">
+          AI assistant, confirm details with showroom
         </div>
 
       </div>

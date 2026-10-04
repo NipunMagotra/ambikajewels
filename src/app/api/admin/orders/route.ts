@@ -4,9 +4,9 @@ import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 
 export const dynamic = 'force-dynamic';
 
-export async function GET() {
+export async function GET(request?: Request) {
   try {
-    const isAuth = await verifyAdminAuth();
+    const isAuth = await verifyAdminAuth(request);
     if (!isAuth) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized. Admin session required.' },
@@ -51,7 +51,7 @@ export async function GET() {
 
 export async function PATCH(request: Request) {
   try {
-    const isAuth = await verifyAdminAuth();
+    const isAuth = await verifyAdminAuth(request);
     if (!isAuth) {
       return NextResponse.json(
         { success: false, message: 'Unauthorized. Admin session required.' },

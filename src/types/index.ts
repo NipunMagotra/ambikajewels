@@ -40,7 +40,7 @@ export type CartItem = {
   name: string;
   price: number;
   quantity: number;
-  image: string;
+  image?: string;
   metal_finish: string;
   selected_size?: string;
   slug?: string;

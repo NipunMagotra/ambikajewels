@@ -109,7 +109,7 @@ function OrderStatusContent() {
             <button
               type="submit"
               disabled={loading || !verificationInput.trim()}
-              className="gold-bg-gradient w-full py-3 font-label-caps text-xs font-bold shadow-md hover:brightness-110 transition-all disabled:opacity-50 tracking-wider"
+              className="btn-gold-primary w-full py-3.5 text-xs font-semibold disabled:opacity-50"
             >
               {loading ? 'VERIFYING...' : 'UNLOCK TAX INVOICE'}
             </button>
@@ -147,14 +147,14 @@ function OrderStatusContent() {
         <div className="flex gap-2.5">
           <button
             onClick={handlePrint}
-            className="gold-bg-gradient px-4 py-2.5 font-label-caps text-xs font-bold shadow-md hover:brightness-110 transition-all flex items-center gap-1.5"
+            className="btn-gold-primary px-4 py-2.5 text-xs flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-sm">print</span>
             PRINT INVOICE
           </button>
           <Link
             href={`/track?orderId=${orderId}${token ? `&token=${encodeURIComponent(token)}` : ''}`}
-            className="border border-primary px-4 py-2.5 font-label-caps text-xs text-primary font-bold hover:bg-primary/10 transition-colors flex items-center gap-1.5"
+            className="btn-gold-secondary px-4 py-2.5 text-xs flex items-center gap-1.5"
           >
             <span className="material-symbols-outlined text-sm">local_shipping</span>
             TRACK SHIPMENT
@@ -363,7 +363,7 @@ function OrderStatusContent() {
 
       {/* Return to Shop Bottom */}
       <div className="mt-8 text-center print:hidden">
-        <Link href="/collections" className="gold-bg-gradient px-8 py-3.5 font-label-caps text-xs font-bold inline-block shadow-md tracking-wider">
+        <Link href="/collections" className="btn-gold-primary py-3.5 px-8 text-xs inline-block">
           RETURN TO CATALOG
         </Link>
       </div>

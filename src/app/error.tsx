@@ -50,7 +50,7 @@ export default function ErrorBoundary({
           <button
             type="button"
             onClick={() => reset()}
-            className="gold-bg-gradient py-3.5 px-6 font-label-caps text-xs font-bold text-black shadow-md hover:brightness-110 transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+            className="btn-gold-primary py-3.5 px-6 text-xs flex items-center justify-center gap-1.5 cursor-pointer"
           >
             <span className="material-symbols-outlined text-base">refresh</span>
             <span>TRY AGAIN</span>
@@ -58,7 +58,7 @@ export default function ErrorBoundary({
 
           <Link
             href="/"
-            className="py-3.5 px-6 border border-outline-variant hover:border-primary text-on-surface text-xs font-label-caps font-semibold transition-all flex items-center justify-center"
+            className="btn-gold-secondary py-3.5 px-6 text-xs flex items-center justify-center"
           >
             <span>RETURN HOME</span>
           </Link>

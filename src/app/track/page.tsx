@@ -123,7 +123,7 @@ function TrackOrderContent() {
             <button 
               type="submit"
               disabled={loading || !orderId.trim() || (!contact.trim() && !token)}
-              className="gold-bg-gradient px-8 py-3.5 font-label-caps text-xs font-bold shadow-md hover:brightness-110 transition-all disabled:opacity-50 tracking-wider flex items-center justify-center gap-2 w-full sm:w-auto"
+              className="btn-gold-primary py-3.5 px-8 text-xs flex items-center justify-center gap-2 w-full sm:w-auto disabled:opacity-50"
             >
               {loading ? (
                 <span>TRACKING...</span>

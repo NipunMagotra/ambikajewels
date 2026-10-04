@@ -92,7 +92,7 @@ export async function GET() {
 export async function POST(request: Request) {
   try {
     // 1. Authenticate via Admin Session Cookie
-    const isAuthed = await verifyAdminAuth();
+    const isAuthed = await verifyAdminAuth(request);
     if (!isAuthed) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized: Admin authentication required to update rates.' },

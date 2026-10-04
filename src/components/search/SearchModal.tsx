@@ -64,51 +64,51 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   return (
     <div
-      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/80 backdrop-blur-md animate-fade-in"
+      className="fixed inset-0 z-[100] flex items-start justify-center pt-16 sm:pt-24 px-4 bg-black/85 backdrop-blur-md animate-fade-in"
       onClick={onClose}
       role="dialog"
       aria-modal="true"
       aria-labelledby="search-modal-title"
     >
       <div
-        className="bg-surface-container border border-primary/40 rounded-xs max-w-2xl w-full shadow-2xl overflow-hidden relative"
+        className="bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2px] max-w-2xl w-full shadow-2xl overflow-hidden relative"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Search Header Bar */}
-        <div className="flex items-center px-4 py-3.5 border-b border-outline-variant/30 gap-3">
-          <span className="material-symbols-outlined text-primary text-xl">search</span>
+        <div className="flex items-center px-4 py-3.5 border-b border-[var(--border-subtle)] gap-3 bg-[var(--bg-surface)]">
+          <span className="material-symbols-outlined text-[var(--accent-gold)] text-xl">search</span>
           <input
             ref={inputRef}
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
             placeholder="Search jewelry by name, purity (22K, 18K), Dogra heritage, diamonds..."
-            className="flex-1 bg-transparent text-on-surface text-sm sm:text-base outline-none placeholder:text-on-surface-variant/60"
+            className="flex-1 bg-transparent text-[var(--text-primary)] font-sans text-sm sm:text-base outline-none placeholder:text-[var(--text-secondary)]/60"
             aria-label="Search catalog"
           />
           {query && (
             <button
               type="button"
               onClick={() => setQuery('')}
-              className="text-on-surface-variant hover:text-white p-1 text-xs"
+              className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1 text-xs cursor-pointer"
             >
               ✕
             </button>
           )}
-          <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono bg-surface border border-outline-variant/40 rounded text-on-surface-variant">
+          <kbd className="hidden sm:inline-block px-2 py-0.5 text-[10px] font-mono bg-[var(--bg-main)] border border-[var(--border-subtle)] rounded text-[var(--text-secondary)]">
             ESC
           </kbd>
         </div>
 
         {/* Quick Filter Pills */}
-        <div className="flex items-center gap-1.5 px-4 py-2 bg-surface/50 border-b border-outline-variant/20 overflow-x-auto">
-          <span className="text-[10px] font-label-caps text-on-surface-variant/70 shrink-0 font-semibold mr-1">QUICK:</span>
+        <div className="flex items-center gap-1.5 px-4 py-2 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] overflow-x-auto no-scrollbar">
+          <span className="text-[10px] font-sans text-[var(--accent-gold)] shrink-0 font-semibold mr-1 uppercase tracking-wider">QUICK:</span>
           {['22K Gold', 'Polki Choker', 'Dogra Jhumki', 'Diamond', '925 Silver', 'Bridal'].map((tag) => (
             <button
               key={tag}
               type="button"
               onClick={() => setQuery(tag)}
-              className="px-2.5 py-1 text-[11px] rounded-xs bg-surface border border-outline-variant/30 hover:border-primary text-on-surface hover:text-primary transition-colors shrink-0 cursor-pointer"
+              className="px-2.5 py-1 text-[11px] rounded-[2px] bg-[var(--bg-card)] border border-[var(--border-subtle)] hover:border-[var(--accent-gold)] text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors shrink-0 cursor-pointer"
             >
               {tag}
             </button>
@@ -116,12 +116,12 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         </div>
 
         {/* Search Results List */}
-        <div className="max-h-[380px] overflow-y-auto p-2 divide-y divide-outline-variant/10">
+        <div className="max-h-[380px] overflow-y-auto p-2 divide-y divide-[var(--border-subtle)] bg-[var(--bg-card)]">
           {results.length === 0 ? (
-            <div className="py-12 text-center text-on-surface-variant space-y-2">
-              <span className="material-symbols-outlined text-3xl text-on-surface-variant/60">search_off</span>
-              <p className="text-sm">No jewelry found matching &quot;{query}&quot;</p>
-              <p className="text-xs text-on-surface-variant/70">
+            <div className="py-12 text-center text-[var(--text-secondary)] space-y-2">
+              <span className="material-symbols-outlined text-3xl text-[var(--text-secondary)]/60">search_off</span>
+              <p className="text-sm font-serif">No jewelry found matching &quot;{query}&quot;</p>
+              <p className="text-xs text-[var(--text-secondary)]/70 font-sans">
                 Try searching for <em>&quot;necklace&quot;, &quot;22K&quot;, &quot;jhumka&quot;,</em> or <em>&quot;polki&quot;</em>
               </p>
             </div>
@@ -133,8 +133,8 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   key={product.id}
                   href={`/collections/${product.slug || product.id}`}
                   onClick={onClose}
-                  className={`flex items-center justify-between p-3 rounded-xs transition-all ${
-                    isSelected ? 'bg-primary/10 border-l-2 border-primary' : 'hover:bg-surface/60'
+                  className={`flex items-center justify-between p-3 rounded-[2px] transition-all ${
+                    isSelected ? 'bg-[var(--bg-surface)] border-l-2 border-[var(--accent-gold)]' : 'hover:bg-[var(--bg-surface)]'
                   }`}
                 >
                   <div className="flex items-center gap-3">
@@ -142,19 +142,21 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                       <img
                         src={product.images[0]}
                         alt={product.name}
-                        className="w-12 h-12 object-cover rounded-xs border border-outline-variant/30 shrink-0"
+                        referrerPolicy="no-referrer"
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
+                        className="w-12 h-12 object-cover rounded-[2px] border border-[var(--border-subtle)] shrink-0"
                       />
                     )}
                     <div>
-                      <h4 className="font-headline-sm text-sm text-on-surface group-hover:text-primary font-semibold">
+                      <h4 className="font-serif text-sm text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] font-normal">
                         {product.name}
                       </h4>
-                      <div className="flex items-center gap-2 mt-0.5 text-[11px] text-on-surface-variant">
-                        <span className="text-primary font-semibold">{product.category}</span>
+                      <div className="flex items-center gap-2 mt-0.5 text-[11px] text-[var(--text-secondary)] font-sans">
+                        <span className="text-[var(--accent-gold)] font-medium">{product.category}</span>
                         <span>&bull;</span>
                         <span>{product.purity || '22K Gold'}</span>
                         {product.badges && product.badges[0] && (
-                          <span className="text-[9px] bg-primary/20 text-primary px-1.5 py-0.2 rounded-xs font-bold">
+                          <span className="text-[9px] bg-[var(--bg-surface)] text-[var(--accent-gold)] border border-[var(--border-subtle)] px-1.5 py-0.2 rounded-[2px] font-semibold uppercase">
                             {product.badges[0]}
                           </span>
                         )}
@@ -163,10 +165,10 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
                   </div>
 
                   <div className="text-right shrink-0">
-                    <span className="font-mono font-bold text-sm text-primary block">
+                    <span className="font-serif font-medium text-sm text-[var(--accent-gold)] block">
                       {product.display_price}
                     </span>
-                    <span className="text-[10px] text-on-surface-variant/70">
+                    <span className="text-[10px] text-[var(--text-secondary)]/70 font-sans">
                       Incl. 3% GST
                     </span>
                   </div>
@@ -177,15 +179,15 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
         </div>
 
         {/* Modal Footer */}
-        <div className="px-4 py-2.5 bg-surface border-t border-outline-variant/30 flex items-center justify-between text-[11px] text-on-surface-variant/70">
+        <div className="px-4 py-2.5 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] flex items-center justify-between text-[11px] text-[var(--text-secondary)] font-sans">
           <div className="flex items-center gap-3">
-            <span>Use <kbd className="px-1 py-0.5 bg-surface-container rounded border border-outline-variant/30">↑</kbd> <kbd className="px-1 py-0.5 bg-surface-container rounded border border-outline-variant/30">↓</kbd> to navigate</span>
-            <span><kbd className="px-1.5 py-0.5 bg-surface-container rounded border border-outline-variant/30">↵</kbd> to open</span>
+            <span>Use <kbd className="px-1 py-0.5 bg-[var(--bg-card)] rounded border border-[var(--border-subtle)] text-[var(--text-primary)]">↑</kbd> <kbd className="px-1 py-0.5 bg-[var(--bg-card)] rounded border border-[var(--border-subtle)] text-[var(--text-primary)]">↓</kbd> to navigate</span>
+            <span><kbd className="px-1.5 py-0.5 bg-[var(--bg-card)] rounded border border-[var(--border-subtle)] text-[var(--text-primary)]">↵</kbd> to open</span>
           </div>
           <Link
             href="/collections"
             onClick={onClose}
-            className="text-primary hover:underline font-semibold"
+            className="text-[var(--accent-gold)] hover:opacity-80 font-semibold uppercase tracking-wider transition-colors"
           >
             View All Collections &rarr;
           </Link>

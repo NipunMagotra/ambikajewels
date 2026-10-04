@@ -3,61 +3,61 @@ export default function TestimonialsSection() {
     {
       title: 'BIS Hallmarked Purity',
       subtitle: 'BIS ASSAYED & HALLMARKED',
-      description: 'Eligible gold creations carry official Bureau of Indian Standards (BIS) hallmark and 6-character HUID laser engraving verifying assayed purity.',
+      description: 'Every gold creation carries an official Bureau of Indian Standards (BIS) hallmark and unique 6-character HUID laser engraving.',
       icon: 'verified'
     },
     {
       title: 'Laboratory-Certified Diamonds',
-      subtitle: 'GIA & IGI DOCUMENTATION',
-      description: 'Natural diamonds and solitaire rings are backed by authentic third-party laboratory documentation (GIA / IGI) grading color, clarity, and cut.',
+      subtitle: 'GIA & IGI DOCUMENTED',
+      description: 'Natural diamonds and solitaire rings are backed by authentic third-party laboratory documentation grading color, cut, and clarity.',
       icon: 'diamond'
     },
     {
       title: 'Secure Armored Delivery',
       subtitle: 'PAN-INDIA INSURED SHIPMENT',
-      description: 'Dispatched via BVC Logistics in tamper-evident security bags with armed transit security, live tracking, and secure OTP handover.',
+      description: 'Dispatched via BVC Logistics in tamper-evident security bags with armored transit, real-time tracking, and OTP verification.',
       icon: 'local_shipping'
     },
     {
       title: 'Jammu Flagship Showroom',
       subtitle: 'AUTHENTIC DOGRA JEWELRY',
-      description: 'Visit our physical boutique in Lower Roop Nagar, Jammu for private bridal viewings, custom 3D CAD design, and authentic Dogra heirloom craftsmanship.',
+      description: 'Visit our boutique in Lower Roop Nagar, Jammu for private bridal viewings, custom 3D CAD design, and gold exchange.',
       icon: 'storefront'
     }
   ];
 
   return (
-    <section className="py-12 sm:py-16 bg-surface-container-lowest border-t border-outline-variant/20 px-4 sm:px-margin-mobile lg:px-margin-desktop">
+    <section className="py-10 sm:py-14 bg-[var(--bg-main)] border-t border-[var(--border-subtle)] px-4 sm:px-margin-mobile lg:px-margin-desktop">
       <div className="container mx-auto">
-        <div className="text-center max-w-lg mx-auto mb-10 sm:mb-12">
-          <span className="font-label-caps text-[9px] sm:text-[10px] text-primary tracking-[0.3em] font-semibold block mb-1">
+        <div className="text-center max-w-lg mx-auto mb-8 sm:mb-10">
+          <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold block mb-1">
             THE AMBIKA COMMITMENT
           </span>
-          <h3 className="font-headline-md text-2xl sm:text-3xl lg:text-4xl text-on-surface">
+          <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[var(--text-primary)] font-normal">
             Standards of Heritage Craftsmanship
-          </h3>
-          <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mt-2">
-            Every piece crafted at our Jammu showroom reflects dedicated goldsmith artistry and uncompromising modern quality standards.
+          </h2>
+          <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mt-1.5 font-light">
+            Every piece crafted at our Jammu showroom reflects dedicated goldsmith artistry and uncompromising quality standards.
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
           {commitments.map((item, idx) => (
             <div 
               key={idx}
-              className="bg-surface-container/40 border border-outline-variant/20 p-5 sm:p-6 flex flex-col justify-between rounded-xs hover:border-primary/40 transition-colors"
+              className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 sm:p-6 flex flex-col justify-between rounded-[2px] hover:border-[var(--accent-gold)]/50 transition-colors"
             >
               <div>
-                <span className="material-symbols-outlined text-primary text-2xl sm:text-3xl mb-3 block">
+                <span className="material-symbols-outlined text-[var(--accent-gold)] text-2xl sm:text-3xl mb-3 block">
                   {item.icon}
                 </span>
-                <span className="font-label-caps text-[8.5px] text-primary tracking-widest font-semibold block mb-1">
+                <span className="font-sans text-[8.5px] text-[var(--accent-gold)] tracking-[0.2em] uppercase font-semibold block mb-1">
                   {item.subtitle}
                 </span>
-                <h4 className="font-headline-sm text-base sm:text-lg text-on-surface font-semibold mb-2">
+                <h3 className="font-serif text-base sm:text-lg text-[var(--text-primary)] font-normal mb-2">
                   {item.title}
-                </h4>
-                <p className="font-body-md text-xs text-on-surface-variant leading-relaxed">
+                </h3>
+                <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed font-light">
                   {item.description}
                 </p>
               </div>

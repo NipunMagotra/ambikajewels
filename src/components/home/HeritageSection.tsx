@@ -2,43 +2,71 @@ import Link from 'next/link';
 
 export default function HeritageSection() {
   return (
-    <section className="my-12 sm:my-20 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-margin-desktop px-4 sm:px-margin-mobile lg:px-margin-desktop">
+    <section className="my-8 sm:my-14 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-12 px-4 sm:px-margin-mobile lg:px-margin-desktop">
+      {/* Image & Master Karigar Quote */}
       <div className="relative order-2 lg:order-1">
-        <div className="aspect-[4/3] sm:aspect-square bg-surface-container-high overflow-hidden gold-border">
+        <div className="aspect-[4/3] sm:aspect-square bg-[var(--bg-surface)] overflow-hidden border border-[var(--border-card)] rounded-[2px] shadow-[var(--card-shadow)]">
           <div 
-            className="w-full h-full bg-cover bg-center" 
-            style={{ backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuAxCxqZhg2CKKEAVGcZl7zv_1RQ-KPMeKGw6IJYS5T1KZpC_FC7KPtSIuwDfQSsfmGSjFRtm6Qq26FaosGr_2kn10YMi87hprslng2Ybc2fVt0b7FUxmQAT4v82Mh_84jKxkEwEwQyK4TvIW0l4rp9eIBwd1dyLvlT_Q5GBx1Ff9HUkLqfndkpDq6xTf8sSrKXMY9aIaFLYFzW77lbNe-pO77HGDE4tc1XxQ3goDHO0EUbLiX3Zrus')" }}
+            className="w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105" 
+            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=1000&q=80')" }}
           />
         </div>
         
         {/* Desktop Absolute Badge */}
-        <div className="absolute -bottom-8 -right-8 w-60 h-56 bg-surface-container border border-outline-variant p-5 hidden lg:block shadow-xl">
-          <p className="font-body-md text-sm italic text-on-surface-variant leading-relaxed">
+        <div className="absolute -bottom-6 -right-6 w-64 bg-[var(--bg-card)] border border-[var(--border-card)] p-5 hidden lg:block shadow-xl rounded-[2px]">
+          <p className="font-serif text-sm italic text-[var(--text-primary)] leading-relaxed">
             &ldquo;Every piece of jewelry is a story carved in gold, a memory meant to last generations.&rdquo;
           </p>
-          <p className="font-label-caps text-xs text-primary mt-3 font-semibold">— MASTER KARIGAR</p>
+          <p className="font-sans text-[10px] text-[var(--accent-gold)] mt-3 font-semibold tracking-[0.2em] uppercase">
+            &mdash; MASTER KARIGAR
+          </p>
         </div>
 
         {/* Mobile Inline Quote */}
-        <div className="mt-4 lg:hidden bg-surface-container border border-outline-variant/30 p-4 text-center">
-          <p className="font-body-md text-xs italic text-on-surface-variant">
+        <div className="mt-3 lg:hidden bg-[var(--bg-card)] border border-[var(--border-card)] p-4 text-center rounded-[2px] shadow-sm">
+          <p className="font-serif text-xs sm:text-sm italic text-[var(--text-primary)]">
             &ldquo;Every piece of jewelry is a story carved in gold, a memory meant to last generations.&rdquo;
           </p>
-          <p className="font-label-caps text-[10px] text-primary mt-2 font-semibold">— MASTER KARIGAR</p>
+          <p className="font-sans text-[10px] text-[var(--accent-gold)] mt-2 font-semibold tracking-[0.2em] uppercase">
+            &mdash; MASTER KARIGAR
+          </p>
         </div>
       </div>
       
-      <div className="lg:pl-8 order-1 lg:order-2 text-center lg:text-left">
-        <span className="font-label-caps text-xs text-primary tracking-[0.25em] mb-2 block font-semibold">OUR SPECIALTY</span>
-        <h3 className="font-headline-md text-3xl sm:text-4xl lg:text-5xl text-on-surface mb-4">
-          Dogra Heritage & <span className="italic font-normal gold-text-gradient">Custom Artistry</span>
-        </h3>
-        <p className="font-body-md text-sm sm:text-base text-on-surface-variant/90 mb-6 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
-          Founded by Shivani Anand and Lakesh Kumar, Ambika Jewels is Jammu&apos;s premier showroom specializing in authentic Dogra heritage jewelry (Dogri Jhumki, Naman & Long Sets), gold exchange, and custom 3D CAD jewelry redesign.
+      {/* Narrative Story */}
+      <div className="lg:pl-6 order-1 lg:order-2 text-center lg:text-left">
+        <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold mb-2 block">
+          SINCE 1984
+        </span>
+        <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal mb-3 sm:mb-4 leading-tight">
+          A Legacy of <span className="italic font-normal gold-text-gradient">Authentic Craft</span>
+        </h2>
+        <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-4 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
+          Founded in the heart of Muthi, Jammu, Ambika Jewels stands as a beacon of purity and craftsmanship. Every piece is handcrafted by master artisans using generations-old Dogra techniques, ensuring a legacy that shines through time.
         </p>
-        <Link href="/about" className="inline-block border border-primary px-8 py-3.5 font-label-caps text-xs text-primary hover:bg-primary hover:text-on-primary transition-all duration-300 w-full sm:w-auto font-bold tracking-widest text-center">
-          OUR STORY & LEGACY
-        </Link>
+
+        {/* Heritage Trust Badges */}
+        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center my-6 py-4 border-y border-[var(--border-subtle)]">
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-[var(--accent-gold)] text-xl">verified</span>
+            <span className="font-sans text-[10px] sm:text-xs text-[var(--text-primary)] tracking-wider uppercase font-semibold">
+              100% BIS Hallmarked Gold
+            </span>
+          </div>
+          <div className="hidden sm:block w-[1px] h-4 bg-[var(--border-subtle)]"></div>
+          <div className="flex items-center gap-2.5">
+            <span className="material-symbols-outlined text-[var(--accent-gold)] text-xl">design_services</span>
+            <span className="font-sans text-[10px] sm:text-xs text-[var(--text-primary)] tracking-wider uppercase font-semibold">
+              Artisanal Handcrafts
+            </span>
+          </div>
+        </div>
+
+        <div>
+          <Link href="/about" className="btn-gold-secondary w-full sm:w-auto text-center inline-block">
+            LEARN ABOUT OUR PROCESS
+          </Link>
+        </div>
       </div>
     </section>
   );

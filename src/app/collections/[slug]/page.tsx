@@ -94,28 +94,33 @@ export default async function ProductPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
-        <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
+      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+        <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">
           {/* Breadcrumb */}
-          <div className="flex flex-wrap items-center gap-1.5 font-label-caps text-[9px] sm:text-[10px] text-on-surface-variant mb-4 sm:mb-stack-md">
-            <Link href="/" className="hover:text-primary">HOME</Link>
+          <div className="flex flex-wrap items-center gap-1.5 font-sans text-[9px] sm:text-[10px] text-[var(--text-secondary)] mb-4 uppercase tracking-wider font-medium">
+            <Link href="/" className="hover:text-[var(--accent-gold)] transition-colors">HOME</Link>
             <span>/</span>
-            <Link href="/collections" className="hover:text-primary">COLLECTIONS</Link>
+            <Link href="/collections" className="hover:text-[var(--accent-gold)] transition-colors">COLLECTIONS</Link>
             <span>/</span>
-            <Link href={`/collections?category=${encodeURIComponent(product.category)}`} className="hover:text-primary">{product.category.toUpperCase()}</Link>
+            <Link href={`/collections?category=${encodeURIComponent(product.category)}`} className="hover:text-[var(--accent-gold)] transition-colors">{product.category.toUpperCase()}</Link>
             <span>/</span>
-            <span className="text-primary truncate max-w-[150px] sm:max-w-none">{product.name.toUpperCase()}</span>
+            <span className="text-[var(--accent-gold)] truncate max-w-[150px] sm:max-w-none">{product.name.toUpperCase()}</span>
           </div>
 
           <ProductDetailClient product={product as Product} />
 
-          {/* Related Products */}
+          {/* Related Products: You May Also Desire */}
           {relatedProducts && relatedProducts.length > 0 && (
-            <div className="mt-12 sm:mt-section-gap">
-              <h3 className="font-headline-md text-2xl lg:text- headline-md text-primary mb-6 sm:mb-stack-lg text-center">
-                You May Also Desire
-              </h3>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-stack-md lg:gap-stack-lg">
+            <div className="mt-10 sm:mt-14 border-t border-[var(--border-subtle)] pt-8 sm:pt-10">
+              <div className="text-center mb-6 sm:mb-8">
+                <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase block mb-1 font-semibold">
+                  COMPLETE THE ENSEMBLE
+                </span>
+                <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[var(--text-primary)] font-normal">
+                  You May Also Desire
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
                 {relatedProducts.map(p => (
                   <ProductCard key={p.id} product={p as Product} />
                 ))}

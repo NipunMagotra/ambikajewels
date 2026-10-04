@@ -66,10 +66,36 @@ export function verifyAdminSessionTokenString(token: string | undefined | null):
 }
 
 /**
- * Admin access validation: Direct open access enabled (PIN protection removed).
+ * Validates the admin session token cryptographically from incoming request cookies or headers.
+ * Prevents tampering, replay after expiration, or forged cookies.
  */
-export async function verifyAdminAuth(): Promise<boolean> {
-  return true;
+export async function verifyAdminAuth(request?: Request): Promise<boolean> {
+  try {
+    // 1. Check direct Request headers if provided (for API route testing & Bearer / Cookie header support)
+    if (request) {
+      const authHeader = request.headers.get('authorization');
+      if (authHeader && authHeader.startsWith('Bearer ')) {
+        const token = authHeader.slice(7).trim();
+        if (verifyAdminSessionTokenString(token)) return true;
+      }
+
+      const cookieHeader = request.headers.get('cookie');
+      if (cookieHeader) {
+        const match = cookieHeader.match(new RegExp(`(?:^|;\\s*)${ADMIN_COOKIE_NAME}=([^;]+)`));
+        if (match) {
+          const cookieVal = decodeURIComponent(match[1]);
+          if (verifyAdminSessionTokenString(cookieVal)) return true;
+        }
+      }
+    }
+
+    // 2. Next.js cookies() store
+    const cookieStore = await cookies();
+    const token = cookieStore.get(ADMIN_COOKIE_NAME)?.value;
+    return verifyAdminSessionTokenString(token);
+  } catch {
+    return false;
+  }
 }
 
 export function getAdminPasscode(): string {

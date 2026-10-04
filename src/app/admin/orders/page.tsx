@@ -7,6 +7,10 @@ export const metadata = {
   description: 'Manage and fulfill online orders placed on Ambika Jewels showroom.'
 };
 
-export default function AdminOrdersPage() {
+export default async function AdminOrdersPage() {
+  const isAuth = await verifyAdminAuth();
+  if (!isAuth) {
+    redirect('/admin/login?redirect=/admin/orders');
+  }
   return <AdminOrdersClient />;
 }

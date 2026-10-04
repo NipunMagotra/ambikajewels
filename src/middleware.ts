@@ -41,12 +41,31 @@ async function verifyEdgeToken(token: string | undefined): Promise<boolean> {
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // If user visits /admin/login, redirect straight to /admin since PIN is removed
-  if (pathname === '/admin/login') {
-    return NextResponse.redirect(new URL('/admin', request.url));
+  // 1. Allow public admin login endpoints
+  if (pathname === '/admin/login' || pathname === '/api/admin/login') {
+    return NextResponse.next();
   }
 
-  // Direct open admin access
+  // 2. Protect /admin and /api/admin paths
+  if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
+    const sessionToken = request.cookies.get(ADMIN_COOKIE_NAME)?.value ||
+      request.headers.get('authorization')?.replace(/^Bearer\s+/i, '');
+    const isValid = await verifyEdgeToken(sessionToken);
+
+    if (!isValid) {
+      if (pathname.startsWith('/api/admin')) {
+        return NextResponse.json(
+          { success: false, error: 'Unauthorized: Valid admin session required.' },
+          { status: 401 }
+        );
+      }
+
+      const loginUrl = new URL('/admin/login', request.url);
+      loginUrl.searchParams.set('redirect', pathname);
+      return NextResponse.redirect(loginUrl);
+    }
+  }
+
   return NextResponse.next();
 }
 

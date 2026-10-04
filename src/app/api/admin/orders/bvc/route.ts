@@ -16,7 +16,7 @@ import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 export async function GET(request: Request) {
   try {
     // ── 1. Admin Authentication ──────────────────────────────────────────
-    const isAuthed = await verifyAdminAuth();
+    const isAuthed = await verifyAdminAuth(request);
     if (!isAuthed) {
       return NextResponse.json(
         { success: false, error: 'Unauthorized. Please log in to the admin panel.' },

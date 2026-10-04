@@ -3,7 +3,6 @@ import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MandalaDivider from '@/components/ui/MandalaDivider';
 import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
-import Link from 'next/link';
 
 export const metadata = {
   title: 'Bespoke Services & Gold Exchange | Ambika Jewels Jammu',
@@ -65,18 +64,18 @@ export default function ServicesPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap bg-background text-on-background">
+      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         {/* Page Banner */}
-        <section className="relative py-16 sm:py-20 bg-surface-container border-b border-outline-variant/30 text-center">
+        <section className="relative py-12 sm:py-16 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] text-center">
           <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-3xl">
-            <span className="font-label-caps text-[10px] sm:text-xs text-primary tracking-[0.35em] block mb-2 font-semibold">
-              EXPERT CRAFTSMANSHIP & SERVICES
+            <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.35em] uppercase block mb-2 font-semibold">
+              EXPERT CRAFTSMANSHIP &amp; SERVICES
             </span>
-            <h1 className="font-headline-md text-3xl sm:text-5xl text-primary mb-4">
-              Gold Exchange & <span className="italic font-normal gold-text-gradient">Customization</span>
+            <h1 className="font-serif text-3xl sm:text-5xl text-[var(--text-primary)] font-normal mb-3">
+              Gold Exchange &amp; <span className="italic font-normal gold-text-gradient">Customization</span>
             </h1>
-            <p className="font-body-md text-xs sm:text-base text-on-surface-variant font-light leading-relaxed">
-              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting & redesign, bespoke 3D CAD customization, and private consultations.
+            <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed max-w-2xl mx-auto">
+              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting &amp; redesign, bespoke 3D CAD customization, and private consultations.
             </p>
           </div>
         </section>
@@ -84,38 +83,38 @@ export default function ServicesPage() {
         <MandalaDivider />
 
         {/* Services List */}
-        <section className="py-12 sm:py-16 container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8">
+        <section className="py-8 sm:py-12 container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
             {services.map((s) => (
-              <div key={s.id} className="bg-surface-container border border-outline-variant/30 p-6 sm:p-8 rounded-xs flex flex-col justify-between hover:border-primary/50 transition-colors">
+              <div key={s.id} className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-6 sm:p-7 rounded-[2px] flex flex-col justify-between hover:border-[var(--accent-gold)]/50 transition-colors">
                 <div>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="w-12 h-12 bg-primary-container/40 border border-primary/30 rounded-full flex items-center justify-center text-primary shrink-0">
-                      <span className="material-symbols-outlined text-2xl">{s.icon}</span>
+                  <div className="flex items-center gap-3 mb-3.5">
+                    <div className="w-10 h-10 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent-gold)] shrink-0">
+                      <span className="material-symbols-outlined text-xl">{s.icon}</span>
                     </div>
                     <div>
-                      <span className="font-label-caps text-[9px] text-primary tracking-widest block font-semibold">{s.subtitle}</span>
-                      <h3 className="font-headline-sm text-lg sm:text-xl text-on-surface font-semibold">{s.title}</h3>
+                      <span className="font-sans text-[9px] text-[var(--accent-gold)] tracking-widest uppercase block font-semibold">{s.subtitle}</span>
+                      <h2 className="font-serif text-lg sm:text-xl text-[var(--text-primary)] font-normal">{s.title}</h2>
                     </div>
                   </div>
-                  <p className="font-body-md text-xs sm:text-sm text-on-surface-variant/90 mb-4 leading-relaxed font-light">
+                  <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-4 leading-relaxed font-light">
                     {s.description}
                   </p>
-                  <ul className="flex flex-col gap-2 mb-6 border-t border-outline-variant/20 pt-4">
+                  <ul className="flex flex-col gap-2 mb-5 border-t border-[var(--border-subtle)] pt-3.5">
                     {s.highlights.map((h, i) => (
-                      <li key={i} className="font-body-md text-xs text-on-surface-variant flex items-center gap-2">
-                        <span className="material-symbols-outlined text-primary text-sm">check_circle</span>
+                      <li key={i} className="font-sans text-xs text-[var(--text-secondary)] flex items-center gap-2">
+                        <span className="material-symbols-outlined text-[var(--accent-gold)] text-sm">check_circle</span>
                         <span>{h}</span>
                       </li>
                     ))}
                   </ul>
                 </div>
-                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                <div className="pt-2">
                   <a
                     href={`https://wa.me/919086098457?text=Namaste!%20I%20am%20interested%20in%20${encodeURIComponent(s.title)}.`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="gold-bg-gradient font-label-caps text-[10px] sm:text-[11px] py-3 px-6 font-bold tracking-widest text-center shadow-sm flex items-center justify-center gap-2"
+                    className="btn-gold-primary w-full sm:w-auto inline-block"
                   >
                     <span className="material-symbols-outlined text-sm">chat_bubble</span> ENQUIRE ON WHATSAPP
                   </a>
@@ -126,16 +125,16 @@ export default function ServicesPage() {
         </section>
 
         {/* Contact Banner */}
-        <section className="py-12 px-4 sm:px-margin-mobile lg:px-margin-desktop container mx-auto">
-          <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 rounded-xs flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
+        <section className="py-8 px-4 sm:px-margin-mobile lg:px-margin-desktop container mx-auto">
+          <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-6 sm:p-8 rounded-[2px] flex flex-col lg:flex-row items-center justify-between gap-6 text-center lg:text-left">
             <div>
-              <h3 className="font-headline-md text-2xl text-on-surface mb-2">Visit Our Showroom & Boutique</h3>
-              <p className="font-body-md text-xs sm:text-sm text-on-surface-variant/80 font-light">
-                Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013 <br />
+              <h2 className="font-serif text-2xl text-[var(--text-primary)] font-normal mb-1.5">Visit Our Showroom &amp; Boutique</h2>
+              <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+                Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&amp;K 180013 <br />
                 Hours: Mon–Sat 10:00 AM – 8:00 PM | Sunday: Open
               </p>
             </div>
-            <div className="flex flex-col sm:flex-row gap-3 shrink-0">
+            <div className="flex flex-col sm:flex-row gap-2.5 shrink-0">
               <WhatsAppButton />
               <CallButton />
             </div>

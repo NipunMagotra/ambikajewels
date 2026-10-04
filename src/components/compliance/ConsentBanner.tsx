@@ -33,11 +33,9 @@ export default function ConsentBanner() {
   }, []);
 
   const applyConsent = (prefs: ConsentPreferences) => {
-    // If non-essential consent is not granted, block non-essential scripts
     if (typeof window !== 'undefined') {
       (window as any).__AMBIKA_CONSENT__ = prefs;
       if (!prefs.analytics) {
-        // Disable third-party tracking cookies/scripts
         (window as any)['ga-disable-analytics'] = true;
       }
     }
@@ -89,55 +87,55 @@ export default function ConsentBanner() {
     <div 
       role="region" 
       aria-label="Privacy and Cookie Consent"
-      className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-6 bg-surface-container-high/95 backdrop-blur-md border-t border-outline-variant/40 shadow-2xl transition-all animate-in fade-in slide-in-from-bottom-4 duration-300"
+      className="fixed bottom-0 left-0 right-0 z-50 p-4 sm:p-5 bg-[var(--bg-card)]/95 backdrop-blur-md border-t border-[var(--border-subtle)] shadow-2xl transition-all"
     >
       <div className="container mx-auto max-w-5xl">
         <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           <div className="flex-1 pr-0 md:pr-4">
-            <div className="flex items-center gap-2 mb-1.5">
-              <span className="material-symbols-outlined text-primary text-base">shield</span>
-              <h3 className="font-label-caps text-xs text-primary font-bold tracking-wider">
-                PRIVACY & DATA PROTECTION (DPDP ACT 2023)
+            <div className="flex items-center gap-2 mb-1">
+              <span className="material-symbols-outlined text-[var(--accent-gold)] text-base">shield</span>
+              <h3 className="font-sans text-xs text-[var(--accent-gold)] font-bold tracking-[0.2em] uppercase">
+                PRIVACY &amp; DATA PROTECTION (DPDP ACT 2023)
               </h3>
             </div>
-            <p className="text-xs text-on-surface-variant leading-relaxed">
+            <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed font-light">
               Ambika Jewels uses essential cookies to process jewelry orders securely and maintain your shopping bag. 
               Non-essential analytics and marketing scripts are <strong>blocked by default</strong> until you give explicit consent. 
-              Read our <Link href="/privacy-policy" className="text-primary underline font-medium hover:text-primary-container">Privacy Policy</Link> for our full data processor disclosures.
+              Read our <Link href="/privacy-policy" className="text-[var(--accent-gold)] underline font-medium hover:opacity-80">Privacy Policy</Link> for full data processor disclosures.
             </p>
 
             {showDetails && (
-              <div className="mt-4 pt-4 border-t border-outline-variant/30 grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs">
-                <div className="bg-surface-container p-2.5 rounded-xs border border-outline-variant/20">
+              <div className="mt-3.5 pt-3.5 border-t border-[var(--border-subtle)] grid grid-cols-1 sm:grid-cols-3 gap-3 text-xs font-sans">
+                <div className="bg-[var(--bg-surface)] p-2.5 rounded-[2px] border border-[var(--border-subtle)]">
                   <div className="flex items-center justify-between mb-1">
-                    <span className="font-semibold text-on-surface text-[11px]">Essential (Orders)</span>
-                    <span className="text-[10px] text-primary font-bold uppercase">Always Active</span>
+                    <span className="font-medium text-[var(--text-primary)] text-[11px]">Essential (Orders)</span>
+                    <span className="text-[9.5px] text-[var(--accent-gold)] font-bold uppercase">Always Active</span>
                   </div>
-                  <p className="text-[10px] text-on-surface-variant">Required for secure checkout, rate-lock protection, and cart state.</p>
+                  <p className="text-[10px] text-[var(--text-secondary)]">Required for secure checkout, rate-lock protection, and cart state.</p>
                 </div>
-                <div className="bg-surface-container p-2.5 rounded-xs border border-outline-variant/20">
+                <div className="bg-[var(--bg-surface)] p-2.5 rounded-[2px] border border-[var(--border-subtle)]">
                   <label className="flex items-center justify-between mb-1 cursor-pointer">
-                    <span className="font-semibold text-on-surface text-[11px]">Analytics</span>
+                    <span className="font-medium text-[var(--text-primary)] text-[11px]">Analytics</span>
                     <input 
                       type="checkbox" 
                       checked={analyticsConsent} 
                       onChange={e => setAnalyticsConsent(e.target.checked)}
-                      className="accent-primary w-3.5 h-3.5 cursor-pointer"
+                      className="accent-[#9E7A23] w-3.5 h-3.5 cursor-pointer"
                     />
                   </label>
-                  <p className="text-[10px] text-on-surface-variant">Helps us measure site performance without profiling individuals.</p>
+                  <p className="text-[10px] text-[var(--text-secondary)]">Helps us measure site performance without profiling individuals.</p>
                 </div>
-                <div className="bg-surface-container p-2.5 rounded-xs border border-outline-variant/20">
+                <div className="bg-[var(--bg-surface)] p-2.5 rounded-[2px] border border-[var(--border-subtle)]">
                   <label className="flex items-center justify-between mb-1 cursor-pointer">
-                    <span className="font-semibold text-on-surface text-[11px]">Marketing (Opt-in)</span>
+                    <span className="font-medium text-[var(--text-primary)] text-[11px]">Marketing (Opt-in)</span>
                     <input 
                       type="checkbox" 
                       checked={marketingConsent} 
                       onChange={e => setMarketingConsent(e.target.checked)}
-                      className="accent-primary w-3.5 h-3.5 cursor-pointer"
+                      className="accent-[#9E7A23] w-3.5 h-3.5 cursor-pointer"
                     />
                   </label>
-                  <p className="text-[10px] text-on-surface-variant">Optional updates on Dogra heritage collections. Unticked by default.</p>
+                  <p className="text-[10px] text-[var(--text-secondary)]">Optional updates on Dogra heritage collections. Unticked by default.</p>
                 </div>
               </div>
             )}
@@ -148,19 +146,19 @@ export default function ConsentBanner() {
               <>
                 <button
                   onClick={() => setShowDetails(true)}
-                  className="w-full sm:w-auto px-3.5 py-2 text-xs font-label-caps border border-outline-variant hover:border-primary text-on-surface transition-colors rounded-xs"
+                  className="btn-gold-secondary text-[10px] py-2 px-3 w-full sm:w-auto"
                 >
                   PREFERENCES
                 </button>
                 <button
                   onClick={handleAcceptEssentialOnly}
-                  className="w-full sm:w-auto px-3.5 py-2 text-xs font-label-caps border border-outline-variant hover:border-primary text-on-surface transition-colors rounded-xs"
+                  className="btn-gold-secondary text-[10px] py-2 px-3 w-full sm:w-auto"
                 >
                   ESSENTIAL ONLY
                 </button>
                 <button
                   onClick={handleAcceptAll}
-                  className="w-full sm:w-auto px-4 py-2 text-xs font-label-caps bg-primary text-on-primary font-bold hover:bg-primary/90 transition-all rounded-xs shadow-sm"
+                  className="btn-gold-primary text-[10px] py-2 px-4 w-full sm:w-auto"
                 >
                   ACCEPT ALL
                 </button>
@@ -169,13 +167,13 @@ export default function ConsentBanner() {
               <>
                 <button
                   onClick={() => setShowDetails(false)}
-                  className="w-full sm:w-auto px-3 py-2 text-xs font-label-caps border border-outline-variant text-on-surface transition-colors rounded-xs"
+                  className="btn-gold-secondary text-[10px] py-2 px-3 w-full sm:w-auto"
                 >
                   BACK
                 </button>
                 <button
                   onClick={handleSaveCustom}
-                  className="w-full sm:w-auto px-4 py-2 text-xs font-label-caps bg-primary text-on-primary font-bold hover:bg-primary/90 transition-all rounded-xs"
+                  className="btn-gold-primary text-[10px] py-2 px-4 w-full sm:w-auto"
                 >
                   SAVE CHOICES
                 </button>

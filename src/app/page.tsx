@@ -28,9 +28,11 @@ export default async function Home() {
     }
   }
 
-  // F5: Fallback to mockProducts only if explicitly enabled in siteConfig
-  if (displayProducts.length === 0 && siteConfig.features.useMockProductsFallback) {
-    displayProducts = mockProducts.filter(p => p.is_featured).slice(0, 8);
+  // Augment with mockProducts if fewer than 4 to keep the 4-column luxury grid complete
+  if (displayProducts.length < 4 && siteConfig.features.useMockProductsFallback) {
+    const existingIds = new Set(displayProducts.map(p => p.id));
+    const fallbacks = mockProducts.filter(p => !existingIds.has(p.id) && p.is_featured);
+    displayProducts = [...displayProducts, ...fallbacks].slice(0, 8);
   }
 
   return (

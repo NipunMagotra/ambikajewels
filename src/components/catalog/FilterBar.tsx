@@ -20,15 +20,15 @@ export default function FilterBar() {
   };
 
   return (
-    <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center mb-6 sm:mb-stack-lg gap-3 sm:gap-4 bg-surface-container p-3 sm:p-4 rounded-xs border border-outline-variant/20">
-      {/* Category Pills Slider */}
-      <div className="flex gap-2 overflow-x-auto w-full lg:w-auto pb-1.5 lg:pb-0 no-scrollbar touch-pan-x">
+    <div className="flex flex-col lg:flex-row justify-between items-stretch lg:items-center mb-4 sm:mb-6 gap-3 sm:gap-4 bg-[var(--bg-surface)] p-3 sm:p-3.5 rounded-[2px] border border-[var(--border-subtle)] shadow-[var(--card-shadow)]">
+      {/* Category Pills Slider - Horizontally scrollable without text clipping */}
+      <div className="flex gap-2 overflow-x-auto w-full lg:w-auto pb-1 lg:pb-0 no-scrollbar touch-pan-x scroll-smooth">
         <button 
           onClick={() => updateFilters('category', 'All')}
-          className={`px-3.5 py-1.5 font-label-caps text-[10px] sm:text-xs rounded-full whitespace-nowrap transition-colors shrink-0 ${
+          className={`px-3.5 py-1.5 font-sans text-[11px] sm:text-xs rounded-full whitespace-nowrap transition-all shrink-0 cursor-pointer uppercase tracking-wider ${
             currentCategory === 'All' 
-              ? 'bg-primary text-on-primary font-bold' 
-              : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
+              ? 'bg-[var(--accent-gold)] text-white font-semibold shadow-xs' 
+              : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-gold)] border border-[var(--border-subtle)]'
           }`}
         >
           All Collections
@@ -39,10 +39,10 @@ export default function FilterBar() {
             <button 
               key={cat}
               onClick={() => updateFilters('category', cat)}
-              className={`px-3.5 py-1.5 font-label-caps text-[10px] sm:text-xs rounded-full whitespace-nowrap transition-colors shrink-0 ${
+              className={`px-3.5 py-1.5 font-sans text-[11px] sm:text-xs rounded-full whitespace-nowrap transition-all shrink-0 cursor-pointer uppercase tracking-wider ${
                 isActive 
-                  ? 'bg-primary text-on-primary font-bold shadow-sm' 
-                  : 'bg-surface-container-high text-on-surface-variant hover:bg-surface-variant'
+                  ? 'bg-[var(--accent-gold)] text-white font-semibold shadow-xs' 
+                  : 'bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--accent-gold)] border border-[var(--border-subtle)]'
               }`}
             >
               {cat}
@@ -51,19 +51,19 @@ export default function FilterBar() {
         })}
       </div>
       
-      {/* Sort Dropdown */}
-      <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto pt-2 lg:pt-0 border-t lg:border-t-0 border-outline-variant/20">
-        <span className="font-label-caps text-[10px] sm:text-xs text-on-surface-variant flex items-center gap-1 shrink-0">
-          <span className="material-symbols-outlined text-sm">sort</span> SORT BY:
+      {/* Compact, Aligned Sort Dropdown */}
+      <div className="flex items-center justify-between sm:justify-end gap-2 w-full lg:w-auto pt-2.5 lg:pt-0 border-t lg:border-t-0 border-[var(--border-subtle)] shrink-0">
+        <span className="font-sans text-[10px] sm:text-xs text-[var(--text-secondary)] flex items-center gap-1 shrink-0 uppercase tracking-wider font-semibold">
+          <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]">sort</span> SORT BY:
         </span>
         <select 
           value={currentSort}
           onChange={(e) => updateFilters('sort', e.target.value)}
-          className="bg-surface-container-high sm:bg-transparent text-on-surface font-label-caps text-[10px] sm:text-xs focus:outline-none border border-outline-variant/30 sm:border-0 sm:border-b sm:border-outline-variant p-1.5 sm:pb-1 rounded-xs"
+          className="bg-[var(--bg-card)] text-[var(--text-primary)] font-sans text-[11px] sm:text-xs focus:outline-none focus:border-[var(--accent-gold)] border border-[var(--border-card)] px-2.5 py-1.5 rounded-[2px] cursor-pointer"
         >
-          <option value="newest" className="bg-surface-container text-on-surface">Newest Arrivals</option>
-          <option value="price_asc" className="bg-surface-container text-on-surface">Price: Low to High</option>
-          <option value="price_desc" className="bg-surface-container text-on-surface">Price: High to Low</option>
+          <option value="newest" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Newest Arrivals</option>
+          <option value="price_asc" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Price: Low to High</option>
+          <option value="price_desc" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Price: High to Low</option>
         </select>
       </div>
     </div>

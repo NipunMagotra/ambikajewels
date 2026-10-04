@@ -7,10 +7,6 @@ import Link from 'next/link';
 export default function AdminLoginPage() {
   const router = useRouter();
 
-  useEffect(() => {
-    router.replace('/admin');
-  }, [router]);
-
   const [passcode, setPasscode] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
@@ -35,7 +31,8 @@ export default function AdminLoginPage() {
       const data = await res.json();
 
       if (data.success) {
-        router.push('/admin');
+        const target = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('redirect')) || '/admin';
+        router.push(target);
         router.refresh();
       } else {
         setError(data.message || 'Invalid admin passcode.');
