@@ -10,18 +10,22 @@ import { siteConfig } from '@/config/siteConfig';
 export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const { dispatch } = useCart();
-  const [selectedFinish, setSelectedFinish] = useState(product.metal_finishes[0]);
+  const [selectedFinish, setSelectedFinish] = useState(product.metal_finishes?.[0] || 'Gold');
   const [quantity, setQuantity] = useState(1);
-  const [activeImage, setActiveImage] = useState(product.images[0]);
+  const [activeImage, setActiveImage] = useState(product.images?.[0] || '/hero-clean.png');
   const [showPriceBreakup, setShowPriceBreakup] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  const isRing = product.category.toLowerCase().includes('ring') || product.name.toLowerCase().includes('ring');
-  const isBangle = product.category.toLowerCase().includes('bangle') || 
-                   product.category.toLowerCase().includes('kada') || 
-                   product.category.toLowerCase().includes('bracelet') || 
-                   product.name.toLowerCase().includes('bangle') || 
-                   product.name.toLowerCase().includes('kada');
+  const catStr = (product.category || '').toLowerCase();
+  const nameStr = (product.name || '').toLowerCase();
+
+  const isRing = catStr.includes('ring') || nameStr.includes('ring');
+  const isBangle = catStr.includes('bangle') || 
+                   catStr.includes('kada') || 
+                   catStr.includes('bracelet') || 
+                   nameStr.includes('bangle') || 
+                   nameStr.includes('kada') ||
+                   nameStr.includes('bracelet');
 
   const ringSizes = ['10', '11', '12', '13', '14 (Standard)', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24'];
   const bangleSizes = ['2.2 (2-2/16")', '2.4 (2-4/16")', '2.6 (2-6/16" - Most Popular)', '2.8 (2-8/16")', '2.10 (2-10/16")'];
@@ -31,7 +35,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   );
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
-  const totalRupees = Math.round(product.price / 100);
+  const totalRupees = Math.round((product.price || 0) / 100);
   const preTaxSubtotal = Math.round(totalRupees / 1.03);
   const gstRupees = totalRupees - preTaxSubtotal;
   const hallmarkFee = 45;
@@ -50,7 +54,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         name: product.name,
         price: product.price,
         quantity: quantity,
-        image: product.images[0],
+        image: (product.images && product.images[0]) || '/hero-clean.png',
         metal_finish: selectedFinish,
         selected_size: selectedSize || undefined,
         slug: product.slug,
@@ -110,7 +114,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       <div className="flex flex-col-reverse sm:flex-row gap-4">
         {/* Thumbnails */}
         <div className="flex sm:flex-col gap-3 overflow-x-auto sm:overflow-y-auto max-h-[500px] scrollbar-thin" role="region" aria-label="Product image thumbnails">
-          {product.images.map((img, i) => (
+          {(product.images || []).map((img, i) => (
             <button
               key={i}
               type="button"
@@ -241,7 +245,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             METAL FINISH: <span className="text-primary">{selectedFinish.toUpperCase()}</span>
           </h3>
           <div className="flex gap-4" role="radiogroup" aria-label="Select metal finish">
-            {product.metal_finishes.map(finish => (
+            {(product.metal_finishes && product.metal_finishes.length > 0 ? product.metal_finishes : ['Gold']).map(finish => (
               <button
                 key={finish}
                 type="button"
@@ -361,12 +365,14 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <span className="font-semibold text-on-surface text-[11px]">{product.gross_weight_grams || product.weight_grams} grams</span>
             </div>
 
-            <div>
-              <span className="text-[10px] text-on-surface-variant/70 block uppercase">Dimensions (L × B × H)</span>
-              <span className="font-semibold text-on-surface text-[11px]">
-                {product.dimensions.length_cm} × {product.dimensions.breadth_cm} × {product.dimensions.height_cm} cm
-              </span>
-            </div>
+            {product.dimensions && (
+              <div>
+                <span className="text-[10px] text-on-surface-variant/70 block uppercase">Dimensions (L × B × H)</span>
+                <span className="font-semibold text-on-surface text-[11px]">
+                  {product.dimensions.length_cm} × {product.dimensions.breadth_cm} × {product.dimensions.height_cm} cm
+                </span>
+              </div>
+            )}
 
             <div>
               <span className="text-[10px] text-on-surface-variant/70 block uppercase">HSN Code</span>

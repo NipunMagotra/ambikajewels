@@ -5,13 +5,15 @@ import type { CartItem } from '@/types';
 
 type CartState = {
   items: CartItem[];
+  lastAddedItem?: CartItem | null;
 };
 
 type CartAction =
   | { type: 'ADD_ITEM'; payload: CartItem }
-  | { type: 'REMOVE_ITEM'; payload: { product_id: string; metal_finish: string } }
-  | { type: 'UPDATE_QUANTITY'; payload: { product_id: string; metal_finish: string; quantity: number } }
+  | { type: 'REMOVE_ITEM'; payload: { product_id: string; metal_finish: string; selected_size?: string } }
+  | { type: 'UPDATE_QUANTITY'; payload: { product_id: string; metal_finish: string; quantity: number; selected_size?: string } }
   | { type: 'CLEAR_CART' }
+  | { type: 'CLEAR_TOAST' }
   | { type: 'LOAD_CART'; payload: CartState };
 
 const CartContext = createContext<{
@@ -32,9 +34,9 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
       if (existingItemIndex >= 0) {
         const newItems = [...state.items];
         newItems[existingItemIndex].quantity += action.payload.quantity;
-        return { ...state, items: newItems };
+        return { ...state, items: newItems, lastAddedItem: action.payload };
       }
-      return { ...state, items: [...state.items, action.payload] };
+      return { ...state, items: [...state.items, action.payload], lastAddedItem: action.payload };
     }
     case 'REMOVE_ITEM':
       return {
@@ -56,17 +58,24 @@ const cartReducer = (state: CartState, action: CartAction): CartState => {
             : item
         ),
       };
+    case 'CLEAR_TOAST':
+      return { ...state, lastAddedItem: null };
     case 'CLEAR_CART':
-      return { items: [] };
+      return { items: [], lastAddedItem: null };
     case 'LOAD_CART':
-      return action.payload;
+      return { ...action.payload, lastAddedItem: null };
     default:
       return state;
   }
 };
 
+const initialState: CartState = {
+  items: [],
+  lastAddedItem: null,
+};
+
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [state, dispatch] = useReducer(cartReducer, { items: [] });
+  const [state, dispatch] = useReducer(cartReducer, initialState);
 
   useEffect(() => {
     const savedCart = localStorage.getItem('ambika_cart');
@@ -93,8 +102,13 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   );
 };
 
-const defaultCartContext = {
-  state: { items: [] },
+const defaultCartContext: {
+  state: CartState;
+  dispatch: React.Dispatch<CartAction>;
+  cartCount: number;
+  cartTotal: number;
+} = {
+  state: initialState,
   dispatch: (() => {}) as React.Dispatch<CartAction>,
   cartCount: 0,
   cartTotal: 0,

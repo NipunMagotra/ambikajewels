@@ -5,6 +5,7 @@ import { siteConfig } from "@/config/siteConfig";
 import { CartProvider } from "@/context/CartContext";
 import ChatWidget from "@/components/chat/ChatWidget";
 import ConsentBanner from "@/components/compliance/ConsentBanner";
+import ToastNotification from "@/components/ui/ToastNotification";
 
 export const metadata: Metadata = {
   title: `${siteConfig.name} | Modern Heritage`,
@@ -36,6 +37,7 @@ export default function RootLayout({
       <body>
         <CartProvider>
           {children}
+          <ToastNotification />
           <ChatWidget />
           <ConsentBanner />
         </CartProvider>

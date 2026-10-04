@@ -5,11 +5,25 @@ import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
 import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
+import SearchModal from '@/components/search/SearchModal';
 
 export default function Header() {
   const { cartCount } = useCart();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+
+  // Global Cmd+K or Ctrl+K shortcut to open instant search
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
+        e.preventDefault();
+        setSearchOpen((prev) => !prev);
+      }
+    };
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Prevent body scroll when mobile menu is open
   useEffect(() => {
@@ -114,6 +128,20 @@ export default function Header() {
               </Link>
             </nav>
 
+            {/* Search Trigger Button */}
+            <button
+              type="button"
+              onClick={() => setSearchOpen(true)}
+              className="flex items-center gap-1.5 text-primary hover:text-white transition-colors p-1 cursor-pointer"
+              aria-label="Search jewelry collections (Cmd+K)"
+              title="Search jewelry collections (⌘K)"
+            >
+              <span className="material-symbols-outlined text-xl">search</span>
+              <span className="hidden md:inline-flex items-center gap-1 text-[10px] font-mono bg-surface-container px-1.5 py-0.5 rounded border border-outline-variant/30 text-on-surface-variant">
+                ⌘K
+              </span>
+            </button>
+
             <Link href="/cart" className="flex items-center gap-1.5 text-primary hover:opacity-80 transition-opacity p-1">
               <div className="relative">
                 <span className="material-symbols-outlined text-xl">shopping_bag</span>
@@ -128,6 +156,9 @@ export default function Header() {
           </div>
         </div>
       </header>
+
+      {/* Global Instant Search Modal */}
+      <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
 
       {/* Mobile Menu Drawer - OUTSIDE header to avoid clipping */}
       {mobileMenuOpen && (

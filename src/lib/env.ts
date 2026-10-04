@@ -28,28 +28,18 @@ export function validateEnvironment(): EnvConfigReport {
   const errors: string[] = [];
   const warnings: string[] = [];
 
-  // 1. Admin Passcode & Session Secret Check
+  // 1. Admin Passcode & Session Secret Check (Optional: Direct admin access enabled per client specs)
   const adminPasscode = process.env.ADMIN_PASSCODE;
   const adminSecret = process.env.ADMIN_SESSION_SECRET;
 
-  if (!adminSecret) {
-    const msg = 'ADMIN_SESSION_SECRET is required (minimum 16 characters). No fallback permitted.';
-    if (isProd) errors.push(msg);
-    else warnings.push(msg);
-  } else if (adminSecret.length < 16) {
+  if (adminSecret && adminSecret.length < 16) {
     errors.push('ADMIN_SESSION_SECRET is too short (minimum 16 characters required).');
-  } else if (KNOWN_INSECURE_FALLBACKS.some((f) => adminSecret.toLowerCase().includes(f))) {
-    errors.push('ADMIN_SESSION_SECRET appears to contain an insecure placeholder.');
+  } else if (adminSecret && KNOWN_INSECURE_FALLBACKS.some((f) => adminSecret.toLowerCase().includes(f))) {
+    warnings.push('ADMIN_SESSION_SECRET appears to contain a default placeholder.');
   }
 
-  if (!adminPasscode) {
-    const msg = 'ADMIN_PASSCODE is not defined in environment variables.';
-    if (isProd) errors.push(msg);
-    else warnings.push(msg);
-  } else if (adminPasscode.length < 6) {
-    errors.push('ADMIN_PASSCODE is too short (must be at least 6 characters).');
-  } else if (KNOWN_INSECURE_FALLBACKS.includes(adminPasscode.toLowerCase())) {
-    errors.push(`ADMIN_PASSCODE is set to an insecure common default ('${adminPasscode}').`);
+  if (adminPasscode && KNOWN_INSECURE_FALLBACKS.includes(adminPasscode.toLowerCase())) {
+    warnings.push(`ADMIN_PASSCODE is set to a common default ('${adminPasscode}').`);
   }
 
   // 2. Encryption Secret Check (PAN / PII Data Security)

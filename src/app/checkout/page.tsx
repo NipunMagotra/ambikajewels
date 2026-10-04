@@ -7,6 +7,7 @@ import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
+import { getEmailSuggestion } from '@/lib/checkoutValidation';
 
 // Declare global Window interface for Razorpay SDK
 declare global {
@@ -65,30 +66,6 @@ export default function CheckoutPage() {
 
   const [showPhoneConfirmModal, setShowPhoneConfirmModal] = useState(false);
   const [hasDismissedTypo, setHasDismissedTypo] = useState(false);
-
-  const getEmailSuggestion = (emailStr: string): string | null => {
-    const parts = emailStr.trim().toLowerCase().split('@');
-    if (parts.length === 2) {
-      const [user, domain] = parts;
-      const typoDomains: Record<string, string> = {
-        'gamil.com': 'gmail.com',
-        'gmal.com': 'gmail.com',
-        'gmial.com': 'gmail.com',
-        'gmaill.com': 'gmail.com',
-        'yaho.com': 'yahoo.com',
-        'yahooo.com': 'yahoo.com',
-        'hotmial.com': 'hotmail.com',
-        'hotmai.com': 'hotmail.com',
-        'outlok.com': 'outlook.com',
-        'outloo.com': 'outlook.com',
-        'iclud.com': 'icloud.com',
-      };
-      if (typoDomains[domain]) {
-        return `${user}@${typoDomains[domain]}`;
-      }
-    }
-    return null;
-  };
 
   const emailSuggestion = getEmailSuggestion(formData.email);
 
