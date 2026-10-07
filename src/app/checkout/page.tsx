@@ -189,7 +189,7 @@ export default function CheckoutPage() {
     if (finalTotal > 20000000) {
       const cleanPan = formData.panNumber.trim().toUpperCase();
       if (!/^[A-Z]{5}[0-9]{4}[A-Z]{1}$/.test(cleanPan)) {
-        setErrorMessage('Under Indian Income Tax Rule 114B, customer PAN card is mandatory for jewelry transactions exceeding ₹2 Lakh. Please enter a valid 10-character PAN (e.g. ABCDE1234F).');
+        setErrorMessage('Under Indian Income Tax Rule 114B, customer PAN card is mandatory for jewellery transactions exceeding ₹2 Lakh. Please enter a valid 10-character PAN (e.g. ABCDE1234F).');
         return;
       }
     }
@@ -752,7 +752,7 @@ export default function CheckoutPage() {
                       </span>
                     </div>
                     <p className="text-xs text-[var(--text-secondary)] mb-3 leading-relaxed">
-                      Customer PAN card is mandatory for jewelry purchases of ₹2,00,000 or above under Indian tax regulations.
+                      Customer PAN card is mandatory for jewellery purchases of ₹2,00,000 or above under Indian tax regulations.
                     </p>
                     <label htmlFor="checkout-pan" className="font-mono text-[10px] sm:text-xs text-[var(--text-secondary)] block mb-1.5 font-semibold">
                       CUSTOMER PAN NUMBER (10 CHARACTERS) *

@@ -24,13 +24,15 @@ export default function GrievancePolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">Statutory grievance mechanism pursuant to Consumer Protection (E-Commerce) Rules, 2020. Confirm exact escalation pathways with legal counsel.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">Statutory grievance mechanism pursuant to Consumer Protection (E-Commerce) Rules, 2020. Confirm exact escalation pathways with legal counsel.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">

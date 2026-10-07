@@ -30,8 +30,9 @@ export default function AdminLoginPage() {
 
       const data = await res.json();
 
-      if (data.success) {
-        const target = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('redirect')) || '/admin';
+      if (res.ok) {
+        const rawTarget = (typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('redirect')) || '/admin';
+        const target = rawTarget.startsWith('/') && !rawTarget.startsWith('//') ? rawTarget : '/admin';
         router.push(target);
         router.refresh();
       } else {

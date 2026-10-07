@@ -137,7 +137,7 @@ async function fetchProductsFromDb(category?: string | null, searchTerms: string
       id: String(item.id),
       name: item.name,
       slug: item.slug || item.id,
-      category: item.category || 'Jewelry',
+      category: item.category || 'Jewellery',
       images: Array.isArray(item.images) && item.images.length > 0 ? item.images : ['/hero-clean.png']
     }));
   } catch (err) {
@@ -163,9 +163,9 @@ async function callGroqLlama3(
     const messages: any[] = [
       {
         role: 'system',
-        content: `You are Aanya, the official AI Jewelry Concierge for Ambika Jewels located in Lower Roop Nagar, Jammu. 
+        content: `You are Aanya, the official AI Jewellery Concierge for Ambika Jewels located in Lower Roop Nagar, Jammu. 
 
-Your role is to assist customers with showroom collections, Dogra heritage jewelry, gold exchange inquiries, and showroom visit scheduling.
+Your role is to assist customers with showroom collections, Dogra heritage jewellery, gold exchange enquiries, and showroom visit scheduling.
 
 ### 🛑 CRITICAL COMPLIANCE & SAFETY GUARDRAILS (ZERO TOLERANCE) 🛑
 
@@ -179,7 +179,7 @@ Your role is to assist customers with showroom collections, Dogra heritage jewel
    - If information is not in the knowledge base, state: "I don't have that specific detail right now. Please message our showroom team on WhatsApp at +91 9086098457 and Shivani or Lakesh will be happy to assist you directly."
 
 3. **DISCLAIMER REQUIREMENT:**
-   - Always remember you are an AI assistant. Remind users that all orders, rates, and custom jewelry details must be confirmed directly with the showroom team.
+   - Always remember you are an AI assistant. Remind users that all orders, rates, and custom jewellery details must be confirmed directly with the showroom team.
 
 4. **TONE:** Culturally respectful, honoring Dogra heritage, warm, and concise.
 
@@ -253,7 +253,7 @@ export async function POST(request: Request) {
     // 3. Prompt Injection Defense (Phase 3 Item 4)
     if (detectPromptInjection(trimmedMessage)) {
       return NextResponse.json({
-        text: 'Namaste! I am Aanya, the jewelry concierge for Ambika Jewels in Jammu. I am here to assist you with our handcrafted Dogra jewelry, bridal collections, and showroom policies. How may I help you with our jewelry today?',
+        text: 'Namaste! I am Aanya, the jewellery concierge for Ambika Jewels in Jammu. I am here to assist you with our handcrafted Dogra jewellery, bridal collections, and showroom policies. How may I help you with our jewellery today?',
         disclaimer: 'AI assistant — please confirm all details with the store.'
       });
     }
@@ -339,7 +339,7 @@ export async function POST(request: Request) {
     return NextResponse.json({ 
       text: wantsContact 
         ? "Namaste! You can reach Ambika Jewels directly on WhatsApp or Call using the buttons below:" 
-        : `Namaste! Ambika Jewels is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you with our handcrafted jewelry today?`,
+        : `Namaste! Ambika Jewels is located at:\n${storeKnowledge.address}\n\nOur showroom hours are:\n• Monday – Saturday: 10:00 AM – 8:00 PM\n• Sunday: Open (10:00 AM – 8:00 PM)\n\nHow can I assist you with our handcrafted jewellery today?`,
       showContactOptions: wantsContact ? true : undefined,
       disclaimer
     });

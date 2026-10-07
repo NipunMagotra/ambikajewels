@@ -119,10 +119,10 @@ export default function Header() {
               <Link href="/collections?category=Bridal Couture" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
                 BRIDAL
               </Link>
-              <Link href="/collections?category=Diamond Jewelry" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
+              <Link href="/collections?category=Diamond Jewellery" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
                 DIAMONDS
               </Link>
-              <Link href="/collections?category=Gold Jewelry" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
+              <Link href="/collections?category=Gold Jewellery" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
                 GOLD
               </Link>
             </nav>
@@ -134,7 +134,7 @@ export default function Header() {
               AMBIKA JEWELS
             </span>
             <span className="font-sans text-[7px] sm:text-[8px] tracking-[0.35em] text-[var(--accent-gold)] block mt-1 uppercase font-semibold">
-              JAMMU &bull; FINE JEWELRY
+              JAMMU &bull; FINE JEWELLERY
             </span>
           </Link>
 
@@ -170,8 +170,8 @@ export default function Header() {
               type="button"
               onClick={() => setSearchOpen(true)}
               className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors p-2 cursor-pointer"
-              aria-label="Search jewelry collections (Cmd+K)"
-              title="Search jewelry collections (⌘K)"
+              aria-label="Search jewellery collections (Cmd+K)"
+              title="Search jewellery collections (⌘K)"
             >
               <span className="material-symbols-outlined text-lg sm:text-xl">search</span>
               <span className="hidden md:inline-flex items-center text-[10px] font-mono bg-[var(--bg-surface)] px-1.5 py-0.5 rounded border border-[var(--border-subtle)] text-[var(--text-secondary)]">

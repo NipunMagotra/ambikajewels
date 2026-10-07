@@ -19,12 +19,12 @@ export default function CategoryGrid() {
     {
       name: 'BANGLES',
       image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=400&q=80',
-      link: '/collections?category=Gold Jewelry'
+      link: '/collections?category=Gold Jewellery'
     },
     {
       name: 'RINGS',
       image: 'https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=400&q=80',
-      link: '/collections?category=Diamond Jewelry'
+      link: '/collections?category=Diamond Jewellery'
     }
   ];
 
@@ -38,31 +38,31 @@ export default function CategoryGrid() {
     },
     {
       name: 'Dogra Heritage Collection',
-      subtitle: 'Authentic 22K Dogri Jhumkis & Namans',
+      subtitle: 'Authentic 22K Dogri Jhumkis & Naman Sets',
       image: '/products/heritage-ruby-haar.png',
       span: 'lg:col-span-5 h-[260px] sm:h-[340px]',
       link: '/collections?category=Dogra Heritage Collection'
     },
     {
-      name: 'Certified Diamond Jewelry',
+      name: 'Certified Diamond Jewellery',
       subtitle: 'Solitaires, Tennis Bracelets & Studs',
       image: 'https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80',
       span: 'lg:col-span-4 h-[220px] sm:h-[260px]',
-      link: '/collections?category=Diamond Jewelry'
+      link: '/collections?category=Diamond Jewellery'
     },
     {
       name: '925 Sterling Silver',
       subtitle: 'Traditional Payals & Oxidized Chokers',
       image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80',
       span: 'lg:col-span-4 h-[220px] sm:h-[260px]',
-      link: '/collections?category=Silver Jewelry (925)'
+      link: '/collections?category=Silver Jewellery (925)'
     },
     {
       name: 'Gold Heirlooms',
       subtitle: '22K & 14K Everyday Chains & Kadas',
       image: '/products/minimalist-gold-chain.png',
       span: 'lg:col-span-4 h-[220px] sm:h-[260px]',
-      link: '/collections?category=Gold Jewelry'
+      link: '/collections?category=Gold Jewellery'
     }
   ];
 

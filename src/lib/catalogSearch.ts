@@ -30,7 +30,12 @@ export function searchCatalog(products: Product[], query: string, maxDefault: nu
 
     const searchableText = `${name} ${desc} ${cat} ${purity} ${badges} ${tags}`;
 
-    // All search terms must match the product
-    return terms.every((term) => searchableText.includes(term));
+    // All search terms must match the product (with jewelry/jewellery synonym support)
+    return terms.every((term) => {
+      const termVariants = [term];
+      if (term.includes('jewelry')) termVariants.push(term.replace(/jewelry/g, 'jewellery'));
+      if (term.includes('jewellery')) termVariants.push(term.replace(/jewellery/g, 'jewelry'));
+      return termVariants.some((v) => searchableText.includes(v));
+    });
   });
 }

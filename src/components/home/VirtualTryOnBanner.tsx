@@ -7,7 +7,7 @@ export default function VirtualTryOnBanner() {
             CONCIERGE VIDEO SHOPPING
           </span>
           <h3 className="font-serif text-xl sm:text-2xl lg:text-3xl text-[var(--text-primary)] font-normal mb-2">
-            Experience Jewelry Live On Video Call
+            Experience Jewellery Live on Video Call
           </h3>
           <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl mx-auto lg:mx-0 font-light">
             Examine craftsmanship up close and consult our expert Karigars live from the comfort of your home.

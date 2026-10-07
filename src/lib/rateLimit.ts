@@ -52,6 +52,12 @@ const upstashLimiters = redis
         analytics: true,
         prefix: 'ratelimit:create_order',
       }),
+      verifyPayment: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(15, '5 m'),
+        analytics: true,
+        prefix: 'ratelimit:verify_payment',
+      }),
       serviceability: new Ratelimit({
         redis,
         limiter: Ratelimit.slidingWindow(30, '1 m'),
@@ -97,7 +103,7 @@ function checkLocalFallback(key: string, max: number, windowMs: number): boolean
   return true;
 }
 
-export type RateLimiterType = 'adminLogin' | 'track' | 'chat' | 'orders' | 'createOrder' | 'serviceability' | 'silverPrice' | 'dataRequest';
+export type RateLimiterType = 'adminLogin' | 'track' | 'chat' | 'orders' | 'createOrder' | 'verifyPayment' | 'serviceability' | 'silverPrice' | 'dataRequest';
 
 /**
  * Executes a distributed rate limit check using Upstash Redis.
@@ -127,6 +133,7 @@ export async function checkRateLimit(
   // chat: 20 per 1 min
   // orders: 10 per 10 min
   // createOrder: 10 per 5 min
+  // verifyPayment: 15 per 5 min
   // serviceability: 30 per 1 min
   // silverPrice: 20 per 1 min
   // dataRequest: 5 per 15 min
@@ -136,6 +143,7 @@ export async function checkRateLimit(
     chat: { max: 20, ms: 60 * 1000 },
     orders: { max: 10, ms: 10 * 60 * 1000 },
     createOrder: { max: 10, ms: 5 * 60 * 1000 },
+    verifyPayment: { max: 15, ms: 5 * 60 * 1000 },
     serviceability: { max: 30, ms: 60 * 1000 },
     silverPrice: { max: 20, ms: 60 * 1000 },
     dataRequest: { max: 5, ms: 15 * 60 * 1000 },

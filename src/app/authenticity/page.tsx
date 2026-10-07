@@ -24,13 +24,15 @@ export default function AuthenticityPolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Technical & Regulatory Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">Hallmarking standards outlined herein are based on the Bureau of Indian Standards (BIS) Act, 2016. Verify all legal claims and BIS license numbers with legal counsel.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Technical & Regulatory Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">Hallmarking standards outlined herein are based on the Bureau of Indian Standards (BIS) Act, 2016. Verify all legal claims and BIS license numbers with legal counsel.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -52,7 +54,7 @@ export default function AuthenticityPolicyPage() {
                   1. Our Purity Commitment
                 </h2>
                 <p className="mb-3">
-                  At <strong>{siteConfig.legalBusinessName}</strong>, purity is our sacred covenant. Founded in Jammu, we craft solid gold, authentic Dogra heritage jewelry, natural diamonds, and 925 sterling silver jewelry that strictly adhere to Indian statutory quality benchmarks.
+                  At <strong>{siteConfig.legalBusinessName}</strong>, purity is our sacred covenant. Founded in Jammu, we craft solid gold, authentic Dogra heritage jewellery, natural diamonds, and 925 sterling silver jewellery that strictly adhere to Indian statutory quality benchmarks.
                 </p>
               </section>
 
@@ -62,7 +64,7 @@ export default function AuthenticityPolicyPage() {
                   2. Mandatory 3 Marks of BIS Hallmarked Gold
                 </h2>
                 <p className="mb-3">
-                  In compliance with Ministry of Consumer Affairs, Food & Public Distribution orders, every piece of gold jewelry sold by Ambika Jewels bears the official 3 mandatory laser inscriptions:
+                  In compliance with Ministry of Consumer Affairs, Food & Public Distribution orders, every piece of gold jewellery sold by Ambika Jewels bears the official 3 mandatory laser inscriptions:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs my-4">
                   <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs">
@@ -86,14 +88,14 @@ export default function AuthenticityPolicyPage() {
               {/* How to Verify on BIS Care App */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  3. How to Verify Your Jewelry on the BIS Care App
+                  3. How to Verify Your Jewellery on the BIS Care App
                 </h2>
                 <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs space-y-2 text-xs">
                   <p>Every customer can independently verify the authenticity of their purchase using the official Government of India app:</p>
                   <ol className="list-decimal pl-5 space-y-1.5">
                     <li>Download the official <strong>&quot;BIS Care&quot;</strong> mobile application from Google Play Store or Apple App Store.</li>
                     <li>Open the app and select <strong>&quot;Verify HUID&quot;</strong> on the home dashboard.</li>
-                    <li>Type the 6-character alphanumeric code laser-inscribed on your jewelry and printed on your official tax invoice.</li>
+                    <li>Type the 6-character alphanumeric code laser-inscribed on your jewellery and printed on your official tax invoice.</li>
                     <li>The app will display the Jeweller Registration Number, Assaying & Hallmarking Centre (AHC), Date of Hallmarking, and certified Karat Purity.</li>
                   </ol>
                 </div>
@@ -119,7 +121,7 @@ export default function AuthenticityPolicyPage() {
                   5. 925 Sterling Silver Standards
                 </h2>
                 <p className="text-xs">
-                  All silver ornaments, payals, temple coins, and jewelry crafted by Ambika Jewels contain a minimum of <strong>92.5% pure silver</strong>, alloyed with fine copper for optimal structural integrity. Each piece is stamped with the standardized <code>925</code> purity mark.
+                  All silver ornaments, payals, temple coins, and jewellery crafted by Ambika Jewels contain a minimum of <strong>92.5% pure silver</strong>, alloyed with fine copper for optimal structural integrity. Each piece is stamped with the standardized <code>925</code> purity mark.
                 </p>
               </section>
 

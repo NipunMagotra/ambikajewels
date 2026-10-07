@@ -6,7 +6,7 @@ import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Custom Orders & 3D CAD Policy | Ambika Jewels Jammu',
-  description: 'Terms and design milestones for bespoke bridal jewelry, 3D CAD rendering approvals, advance deposits, and casting tolerances at Ambika Jewels.',
+  description: 'Terms and design milestones for bespoke bridal jewellery, 3D CAD rendering approvals, advance deposits, and casting tolerances at Ambika Jewels.',
 };
 
 export default function CustomOrdersPolicyPage() {
@@ -24,13 +24,15 @@ export default function CustomOrdersPolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This bespoke crafting policy outlines custom manufacturing milestones. Verify all advance-deposit forfeiture clauses with legal counsel under Indian Contract Act.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This bespoke crafting policy outlines custom manufacturing milestones. Verify all advance-deposit forfeiture clauses with legal counsel under Indian Contract Act.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -49,7 +51,7 @@ export default function CustomOrdersPolicyPage() {
               {/* Introduction */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  1. Bespoke Customization Process
+                  1. Bespoke Customisation Process
                 </h2>
                 <p className="mb-3">
                   At <strong>{siteConfig.legalBusinessName}</strong>, we offer personalized 3D Computer-Aided Design (CAD) modeling for bridal chokers, Dogra heritage heirlooms, solitaire engagement rings, and bespoke ornaments. Every custom piece undergoes rigorous craftsmanship and BIS hallmarking.
@@ -62,7 +64,7 @@ export default function CustomOrdersPolicyPage() {
                   2. Design Milestones & Approval Protocol
                 </h2>
                 <ol className="list-decimal pl-5 space-y-2 text-xs">
-                  <li><strong>Concept Consultation:</strong> Customer provides reference sketches, dimensions, or selects heritage motifs with our jewelry designers.</li>
+                  <li><strong>Concept Consultation:</strong> Customer provides reference sketches, dimensions, or selects heritage motifs with our jewellery designers.</li>
                   <li><strong>3D CAD Renders:</strong> A detailed photorealistic 3D render is shared via WhatsApp or email displaying precise millimeter dimensions and stone settings.</li>
                   <li><strong>Formal Customer Sign-Off:</strong> Production commences only after explicit written approval of the 3D CAD render by the customer.</li>
                   <li><strong>Lost-Wax Casting & Hallmarking:</strong> The wax model is cast into solid gold, hand-set with certified stones, hand-polished, and submitted to the BIS assaying center for HUID laser engraving.</li>

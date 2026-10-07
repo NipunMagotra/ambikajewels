@@ -1,36 +1,115 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Ambika Jewels — Fine Jewelry E-Commerce & Showroom Platform
 
-## Getting Started
+> **Authentic Dogra Heritage & Fine Jewelry**  
+> Jammu, Jammu & Kashmir (UT)
 
-First, run the development server:
+Ambika Jewels is a production-grade, secure Next.js e-commerce platform and in-store counter operations suite designed for fine jewelry retail. It features certified hallmarked gold, diamond, and 925 sterling silver collections, authentic Dogra craftsmanship, real-time bullion rate tracking, and enterprise-grade payment and logistics integrations.
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+---
+
+## 📁 Repository Directory Structure
+
+```text
+├── docs/                                # Centralized project & business documentation
+│   ├── BUSINESS_KNOWLEDGE_BASE.md       # Showroom guide, brand heritage, Karigar history & USPs
+│   ├── PROJECT_OVERVIEW.md              # Technical architecture, system design & API specifications
+│   ├── SECURITY_AUDIT_REPORT.md         # 6-phase security audit findings & remediation verification
+│   ├── CLIENT_ONBOARDING_AND_CREDENTIALS_CHECKLIST.md  # Production cutover & API keys checklist
+│   ├── LEGAL_SAVINGS_SCHEME_CHECKLIST.md # Statutory compliance & regulatory requirements
+│   ├── PROPOSAL_STAFF_ACCOUNTS_AUDIT_LOG.md            # Role-based access control architecture proposal
+│   └── dependency-graph.svg             # Madge/Graphviz architectural module dependency diagram
+├── public/                              # Optimized static assets & product imagery
+│   ├── hero-clean.png                   # Primary showroom banner & fallback product visual
+│   └── products/                        # High-resolution heritage jewelry photography
+├── src/                                 # Next.js Application Source Code
+│   ├── app/                             # App Router pages and REST API routes
+│   │   ├── (storefront)/                # Catalog, product details, cart, checkout, legal policies
+│   │   ├── admin/                       # In-store counter tools, rate board, orders management
+│   │   └── api/                         # Secured API endpoints (Razorpay, BVC, rate lock, chat, etc.)
+│   ├── components/                      # Modular React UI components
+│   │   ├── catalog/                     # Product cards, detail client, and filtering
+│   │   ├── counter/                     # Showroom billing calculator, rate tickers, Form 60 modal
+│   │   ├── layout/                      # Responsive header, mega menu, footer, mobile nav
+│   │   ├── home/                        # Hero, Dogra heritage storytelling, bestsellers, trust badges
+│   │   ├── chat/                        # AI concierge assistant widget (Aanya)
+│   │   ├── compliance/                  # DPDP consent and regulatory banners
+│   │   ├── search/                      # Instant catalog search modal (⌘K)
+│   │   └── ui/                          # Shared UI buttons, toasts, dividers
+│   ├── config/                          # Central store metadata, tax rules, and thresholds
+│   ├── context/                         # Client-side state (Shopping Cart with localStorage sync)
+│   ├── data/                            # Verified catalog seeds and showroom FAQ knowledge base
+│   ├── lib/                             # Core utilities, security engines, and external integrations
+│   │   ├── adminAuth.ts                 # Timing-safe HMAC session token authentication
+│   │   ├── bvcLogistics.ts              # BVC Secure Logistics armored transit integration
+│   │   ├── catalogSearch.ts             # Fuzzy token-based catalog search engine
+│   │   ├── checkoutValidation.ts        # Phone normalization & Rule 114B PAN verification
+│   │   ├── counterStore.ts              # Daily Jammu bullion rate state
+│   │   ├── encryption.ts                # AES-256-GCM encryption for customer PII & PAN
+│   │   ├── pricingEngine.ts             # Client-side dynamic pricing calculation
+│   │   ├── serverPricing.ts             # Tamper-proof server-side pricing verification engine
+│   │   ├── rateLimit.ts                 # Upstash Redis token-bucket rate limiter
+│   │   ├── rateLock.ts                  # Bullion rate lock signature generation
+│   │   ├── supabase.ts                  # Supabase database client singleton
+│   │   └── whatsapp.ts                  # WhatsApp concierge direct messaging deep links
+│   ├── types/                           # TypeScript interfaces for products, orders, and counter tools
+│   └── middleware.ts                    # Zero-trust route guarding for admin endpoints
+├── supabase/                            # Database schemas, migrations, and seed data
+│   ├── schema.sql                       # Core PostgreSQL schema with RLS policies
+│   ├── seed.sql                         # Initial catalog database records
+│   └── migrations/                      # Applied schema migrations & proposals
+├── tests/                               # Comprehensive automated test suites (130+ unit & integration tests)
+└── scripts/                             # Operational & security verification scripts
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+---
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 🚀 Getting Started
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+### 1. Prerequisites
+- Node.js 20+ (recommended LTS)
+- npm or pnpm
 
-## Learn More
+### 2. Environment Configuration
+Copy `.env.example` to `.env.local` and configure your credentials:
+```bash
+cp .env.example .env.local
+```
 
-To learn more about Next.js, take a look at the following resources:
+### 3. Install Dependencies
+```bash
+npm install
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### 4. Run Development Server
+```bash
+npm run dev
+```
+Open [http://localhost:3000](http://localhost:3000) in your browser.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+---
 
-## Deploy on Vercel
+## 🧪 Testing & Verification
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Run the comprehensive test suite (covers security, pricing engines, auth, and accessibility):
+```bash
+npm test
+```
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Run production readiness placeholder audits:
+```bash
+npm run check-production
+```
+
+Build the production bundle:
+```bash
+npm run build
+```
+
+---
+
+## 🔒 Security & Compliance Architecture
+
+- **Server-Side Pricing Engine**: Client cart prices are strictly untrusted; all item totals, GST (3%), and shipping fees are calculated authoritatively on the server.
+- **Rule 114B PAN Compliance**: Statutory PAN collection for high-value orders (≥ ₹2,00,000) encrypted with AES-256-GCM.
+- **Armored Logistics**: Direct API integration with BVC Logistics for tamper-evident transit and vault-to-vault secure delivery.
+- **Zero-Trust Admin Protection**: Admin portals and routes are guarded at the Next.js middleware layer with timing-safe HMAC sessions.

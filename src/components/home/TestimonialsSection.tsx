@@ -20,7 +20,7 @@ export default function TestimonialsSection() {
     },
     {
       title: 'Jammu Flagship Showroom',
-      subtitle: 'AUTHENTIC DOGRA JEWELRY',
+      subtitle: 'AUTHENTIC DOGRA JEWELLERY',
       description: 'Visit our boutique in Lower Roop Nagar, Jammu for private bridal viewings, custom 3D CAD design, and gold exchange.',
       icon: 'storefront'
     }

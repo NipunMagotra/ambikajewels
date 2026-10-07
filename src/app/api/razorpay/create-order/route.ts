@@ -194,7 +194,7 @@ export async function POST(request: Request) {
 
     const validatedAmount = validatedPricing.total_paise;
 
-    // 8. CBDT Rule 114B — Mandatory PAN for jewelry purchases exceeding ₹2,00,000
+    // 8. CBDT Rule 114B — Mandatory PAN for jewellery purchases exceeding ₹2,00,000
     //    Threshold is config-driven via siteConfig.compliance.panRequirementThresholdInr (in INR).
     //    This gate fires BEFORE any DB insert or Razorpay call to avoid orphaned records.
     const panThresholdPaise = siteConfig.compliance.panRequirementThresholdInr * 100;

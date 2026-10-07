@@ -1,7 +1,7 @@
 /**
  * BVC Logistics eSHIP API Client & High-Value Fulfillment Module
  * 
- * Specialized secure delivery integration for fine gold jewelry and high-value cargo.
+ * Specialized secure delivery integration for fine gold jewellery and high-value cargo.
  * Features:
  * - Persistent API Key/Secret authentication with secure headers
  * - Dynamic pricing calculator: Base Freight + (Cart Value * Ad Valorem Insurance) + 18% GST
@@ -120,7 +120,7 @@ export function calculateBvcDynamicPricing(
   const cartValueInr = Math.max(0, declaredValuePaise / 100);
   const baseFreightInr = customBaseFreight !== undefined ? customBaseFreight : config.baseFreightInr;
   
-  // Ad Valorem transit insurance: 0.20% (0.002) of declared jewelry invoice value
+  // Ad Valorem transit insurance: 0.20% (0.002) of declared jewellery invoice value
   const adValoremInsuranceInr = Math.round(cartValueInr * config.adValoremRate * 100) / 100;
   
   // Subtotal before tax
@@ -227,7 +227,7 @@ export async function checkBvcPincodeServiceability(
   }
 
   // Safe Fallback / Development Simulation
-  // BVC covers almost all Tier 1, 2, and 3 PIN codes for high-value gold bullion and jewelry
+  // BVC covers almost all Tier 1, 2, and 3 PIN codes for high-value gold bullion and jewellery
   const isEstimatedServiceable = isValidPincode;
   const isRegional = destination.startsWith('18') || destination.startsWith('19'); // J&K / Northern region
 
@@ -351,7 +351,7 @@ export async function createBvcShipment(
     service_type: 'SECURED_ARMORED_EXPRESS',
     security_bag_number: securityBagNumber,
     product_category: 'GOLD_JEWELLERY',
-    hsn_code: '7113', // Mandated HSN Code for Gold Jewelry
+    hsn_code: '7113', // Mandated HSN Code for Gold Jewellery
     declared_value: declaredValueInr,
     invoice_number: `INV-${input.orderNumber.replace('AMB-', '')}`,
     invoice_value: declaredValueInr,

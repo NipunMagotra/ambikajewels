@@ -67,7 +67,7 @@ export const ThermalReceiptModal: React.FC<ThermalReceiptModalProps> = ({
           <div className="text-center space-y-1 border-b border-slate-400 pb-2">
             <h2 className="text-base font-extrabold uppercase tracking-wide">Ambika Jewels</h2>
             <p className="text-[10px] text-slate-700 leading-tight">
-              Fine Gold, Silver & Dogra Heritage Fine Jewelry
+              Fine Gold, Silver & Dogra Heritage Fine Jewellery
             </p>
             <p className="text-[10px] text-slate-600">
               Shop No.3, E.W.S Colony, Sec-1, Lower Roop Nagar, Jammu

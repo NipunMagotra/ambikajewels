@@ -51,11 +51,11 @@ export async function GET(request: Request) {
     // 3. Query Supabase if configured (uses server-only supabaseAdmin if service-role key is set)
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
     if (dbClient) {
-      const { data, error } = await dbClient
-        .from('orders')
-        .select('*')
-        .eq('id', orderId)
-        .maybeSingle();
+      const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(orderId);
+      const query = dbClient.from('orders').select('*');
+      const { data, error } = isUuid
+        ? await query.or(`id.eq.${orderId},order_number.eq.${orderId}`).maybeSingle()
+        : await query.eq('order_number', orderId).maybeSingle();
 
       if (!error && data) {
         // Authenticate against database record
@@ -209,7 +209,7 @@ export async function GET(request: Request) {
         ];
 
     const invoiceItems = rawItems.map((item: any) => ({
-      name: item.name || 'Fine Precious Jewelry',
+      name: item.name || 'Fine Precious Jewellery',
       quantity: Math.max(1, Number(item.quantity) || 1),
       unit_price_paise: Number(item.unit_price_paise || item.price || Math.round(subtotalPaise / rawItems.length)),
       subtotal_paise: Number(item.subtotal_paise || (item.price ? item.price * (item.quantity || 1) : Math.round(subtotalPaise / rawItems.length))),

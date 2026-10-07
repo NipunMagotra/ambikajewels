@@ -6,7 +6,7 @@ import { checkRateLimit } from '@/lib/rateLimit';
 /**
  * BVC Logistics Pincode Serviceability & Dynamic Pricing Calculator Endpoint
  * 
- * Computes live, insured transit charges for high-value gold and diamond jewelry:
+ * Computes live, insured transit charges for high-value gold and diamond jewellery:
  * Total Shipping Fee = Base Freight + (Cart Value * Ad Valorem Insurance Rate) + 18% GST.
  */
 export async function POST(request: Request) {

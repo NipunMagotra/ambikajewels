@@ -7,16 +7,16 @@ export interface FAQItem {
 
 export const storeKnowledge = {
   name: "Ambika Jewels",
-  tagline: "Authentic Dogra Heritage & Fine Custom Jewelry",
+  tagline: "Authentic Dogra Heritage & Fine Custom Jewellery",
   owner: "Shivani Anand",
   businessRepresentative: "Lakesh Kumar",
-  experienceYears: "Trusted Jammu Jeweler",
+  experienceYears: "Trusted Jammu Jeweller",
   locationName: "Jammu, Jammu & Kashmir",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
   landmarks: "Near E.W.S Colony, Sector 1, Lower Roop Nagar",
   phone: "+91 9682589725",
   whatsapp: "+91 9086098457",
-  email: "contact@ambikajewelsshop.com",
+  email: "contact@ambikajewelsonline.com",
   
   hours: {
     mondayToSaturday: "10:00 AM – 8:00 PM",
@@ -34,7 +34,7 @@ export const storeKnowledge = {
     "9K Gold (375 Hallmarked)"
   ],
 
-  diamondJewelry: [
+  diamondJewellery: [
     "Available in 18K Gold",
     "Available in 14K Gold",
     "Certified real diamonds with official GIA and IGI certificates"
@@ -42,7 +42,7 @@ export const storeKnowledge = {
 
   silverCollection: [
     "925 Hallmarked Silver",
-    "Traditional Silver Jewelry",
+    "Traditional Silver Jewellery",
     "Other Exclusive Silver Collections"
   ],
 
@@ -54,8 +54,8 @@ export const storeKnowledge = {
   ],
 
   goldExchangeAndCustomization: [
-    "Exchange old gold jewelry for brand new designs.",
-    "Melt existing gold jewelry to create completely new customized pieces.",
+    "Exchange old gold jewellery for brand new designs.",
+    "Melt existing gold jewellery to create completely new customized pieces.",
     "Upgrade older family heirlooms into modern designer collections."
   ],
 
@@ -68,8 +68,8 @@ export const storeKnowledge = {
   ],
 
   whyChooseUs: [
-    "Unique and exclusive jewelry designs not commonly available elsewhere.",
-    "Genuine gold, certified diamonds, and 925 silver jewelry.",
+    "Unique and exclusive jewellery designs not commonly available elsewhere.",
+    "Genuine gold, certified diamonds, and 925 silver jewellery.",
     "Specialization in traditional Dogra heritage collections.",
     "Full gold exchange and old gold melting customization services.",
     "Wide range for weddings, bridal couture, and everyday wear.",
@@ -92,9 +92,9 @@ export const storeKnowledge = {
 
   services: [
     "Gold Exchange Program (Exchange old gold for new designs)",
-    "Jewelry Customization (Melt & redesign old gold into custom pieces)",
+    "Jewellery Customisation (Melt & redesign old gold into custom pieces)",
     "Bespoke 3D CAD design preview for custom ideas",
-    "Signature Dogra Heritage Jewelry consultations",
+    "Signature Dogra Heritage Jewellery consultations",
     "In-store private boutique & showroom appointments",
     "Live WhatsApp video shopping calls"
   ]
@@ -103,55 +103,55 @@ export const storeKnowledge = {
 export const faqItems: FAQItem[] = [
   {
     question: "When was the store established?",
-    answer: "Namaste! Our jewelry showroom is located in Jammu, founded by owner Shivani Anand and business representative Lakesh Kumar, offering premium quality jewelry and authentic Dogra heritage collections.",
+    answer: "Namaste! Our jewellery showroom is located in Jammu, founded by owner Shivani Anand and business representative Lakesh Kumar, offering premium-quality jewellery and authentic Dogra heritage collections.",
     keywords: ["established", "founded", "history", "year", "owner", "start", "old", "shivani", "lakesh"],
     category: "about"
   },
   {
-    question: "What types of jewelry do you sell?",
-    answer: "We offer a complete range of jewelry including Gold Necklaces, Chokers, Earrings, Bangles, Bracelets, Kadas, Rings, Bridal Jewelry, Men's Jewelry, 925 Silver Jewelry, Diamond Jewelry, Traditional Dogra Jewelry, Everyday Wear, and Custom Jewelry.",
-    keywords: ["types", "sell", "offer", "products", "collections", "items", "categories", "jewelry", "gold", "diamond", "silver", "bridal", "mens"],
+    question: "What types of jewellery do you sell?",
+    answer: "We offer a complete range of jewellery including Gold Necklaces, Chokers, Earrings, Bangles, Bracelets, Kadas, Rings, Bridal Jewellery, Men's Jewellery, 925 Silver Jewellery, Diamond Jewellery, Traditional Dogra Jewellery, Everyday Wear, and Custom Jewellery.",
+    keywords: ["types", "sell", "offer", "products", "collections", "items", "categories", "jewellery", "jewelry", "gold", "diamond", "silver", "bridal", "mens"],
     category: "products"
   },
   {
-    question: "Do you sell Dogra jewelry?",
-    answer: "Yes! We specialize in authentic traditional Dogra heritage jewelry reflecting Jammu's rich cultural heritage. Popular offerings include Dogri Jhumki, Dogri Naman Set, Dogri Long Set, and custom Dogra designs.",
+    question: "Do you sell Dogra jewellery?",
+    answer: "Yes! We specialize in authentic traditional Dogra heritage jewellery reflecting Jammu's rich cultural heritage. Popular offerings include Dogri Jhumki, Dogri Naman Set, Dogri Long Set, and custom Dogra designs.",
     keywords: ["dogra", "dogri", "heritage", "naman", "jhumki", "jhumka", "long set", "jammu", "traditional", "culture", "cultural"],
     category: "specialty"
   },
   {
-    question: "Do you sell bridal jewelry?",
-    answer: "Yes! We have an extensive bridal jewelry collection, including royal gold chokers, Kundan sets, Polki, Haathphool, and complete bridal wedding suites.",
+    question: "Do you sell bridal jewellery?",
+    answer: "Yes! We have an extensive bridal jewellery collection, including royal gold chokers, Kundan sets, Polki, Haathphool, and complete bridal wedding suites.",
     keywords: ["bridal", "bride", "wedding", "marriage", "haathphool", "choker", "dulhan"],
     category: "bridal"
   },
   {
-    question: "Do you customize jewelry?",
-    answer: "Yes! We specialize in custom jewelry creation. You can bring any design, sketch, or photo on WhatsApp (+91 9086098457), and our karigars will create custom jewelry for you. We also melt old gold to craft brand-new customized pieces.",
+    question: "Do you customize jewellery?",
+    answer: "Yes! We specialize in custom jewellery creation. You can bring any design, sketch, or photo on WhatsApp (+91 9086098457), and our karigars will create custom jewellery for you. We also melt old gold to craft brand-new customized pieces.",
     keywords: ["custom", "customize", "customized", "personalize", "make", "design", "redesign", "bespoke", "sketch", "photo"],
     category: "services"
   },
   {
     question: "Can I exchange my old gold?",
-    answer: "Yes! Under our Gold Exchange program, customers can exchange old gold jewelry for new designs, or have their old gold melted and transformed into fresh modern jewelry.",
+    answer: "Yes! Under our Gold Exchange program, customers can exchange old gold jewellery for new designs, or have their old gold melted and transformed into fresh modern jewellery.",
     keywords: ["exchange", "old gold", "melt", "trade", "upgrade", "replace", "gold exchange"],
     category: "services"
   },
   {
     question: "What gold purity is available?",
-    answer: "Our gold jewelry is available in 22K Gold (916), 18K Gold (750), 14K Gold (585), and 9K Gold (375). All pieces carry official hallmarking.",
+    answer: "Our gold jewellery is available in 22K Gold (916), 18K Gold (750), 14K Gold (585), and 9K Gold (375). All pieces carry official hallmarking.",
     keywords: ["purity", "carat", "karat", "22k", "18k", "14k", "9k", "916", "750", "bis", "hallmark"],
     category: "purity"
   },
   {
-    question: "What silver jewelry do you offer?",
-    answer: "We offer 925 Hallmarked Silver jewelry, traditional silver ornaments, and exclusive modern silver collections.",
+    question: "What silver jewellery do you offer?",
+    answer: "We offer 925 Hallmarked Silver jewellery, traditional silver ornaments, and exclusive modern silver collections.",
     keywords: ["silver", "925", "sterling", "silverware", "chandi"],
     category: "silver"
   },
   {
-    question: "Do you sell diamond jewelry?",
-    answer: "Yes! All our certified real diamond jewelry is available in 18K Gold and 14K Gold settings with official GIA/IGI certification.",
+    question: "Do you sell diamond jewellery?",
+    answer: "Yes! All our certified real diamond jewellery is available in 18K Gold and 14K Gold settings with official GIA/IGI certification.",
     keywords: ["diamond", "diamonds", "heera", "solitaire", "vvs", "gia", "igi"],
     category: "diamond"
   },

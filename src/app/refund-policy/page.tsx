@@ -6,7 +6,7 @@ import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Cancellation, Return & Refund Policy | Ambika Jewels Jammu',
-  description: 'Detailed Cancellation, Return and Refund Policy for fine jewelry orders at Ambika Jewels. 7-Day return policy, original payment refund timeline of 5-7 business days, and Gold Exchange terms.',
+  description: 'Detailed Cancellation, Return and Refund Policy for fine jewellery orders at Ambika Jewels. 7-Day return policy, original payment refund timeline of 5-7 business days, and Gold Exchange terms.',
 };
 
 export default function RefundPolicyPage() {
@@ -24,13 +24,15 @@ export default function RefundPolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This return and refund policy is a draft subject to review by commercial legal counsel under the Consumer Protection (E-Commerce) Rules, 2020. Confirm all return windows with lawyer.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This return and refund policy is a draft subject to review by commercial legal counsel under the Consumer Protection (E-Commerce) Rules, 2020. Confirm all return windows with lawyer.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -52,7 +54,7 @@ export default function RefundPolicyPage() {
                   1. Policy Overview
                 </h2>
                 <p className="mb-3">
-                  At <strong>{siteConfig.legalBusinessName}</strong>, we take extreme pride in crafting authentic BIS hallmarked Dogra heritage jewelry, solid 22K/18K/14K gold, certified natural diamonds, and 925 sterling silver jewelry. We want every customer to be completely satisfied with their purchase.
+                  At <strong>{siteConfig.legalBusinessName}</strong>, we take extreme pride in crafting authentic BIS hallmarked Dogra heritage jewellery, solid 22K/18K/14K gold, certified natural diamonds, and 925 sterling silver jewellery. We want every customer to be completely satisfied with their purchase.
                 </p>
                 <p>
                   This policy outlines our fair and transparent rules regarding order cancellations, return eligibility, inspection processes, and refund timelines in compliance with the <strong>Consumer Protection (E-Commerce) Rules, 2020</strong> and applicable Indian trade laws.
@@ -86,7 +88,7 @@ export default function RefundPolicyPage() {
                   3. 7-Day Return & Inspection Window
                 </h2>
                 <p className="mb-3">
-                  We provide a <strong>7-Day Return & Exchange Window</strong> for all eligible ready-stock jewelry items purchased through our website.
+                  We provide a <strong>7-Day Return & Exchange Window</strong> for all eligible ready-stock jewellery items purchased through our website.
                 </p>
                 <div className="bg-background p-4 border border-outline-variant/30 rounded-xs mb-3">
                   <p className="font-semibold text-on-surface mb-1">Return Eligibility Window:</p>
@@ -102,14 +104,14 @@ export default function RefundPolicyPage() {
                   4. Conditions for Accepting Returns
                 </h2>
                 <p className="mb-3">
-                  To protect the integrity of precious metals and high-value jewelry, returns are strictly subject to physical verification and must meet all of the following conditions:
+                  To protect the integrity of precious metals and high-value jewellery, returns are strictly subject to physical verification and must meet all of the following conditions:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
-                    <strong>Unworn & Unused Condition:</strong> The jewelry item must show zero signs of wear, usage, scratches, resizing, or alteration.
+                    <strong>Unworn & Unused Condition:</strong> The jewellery item must show zero signs of wear, usage, scratches, resizing, or alteration.
                   </li>
                   <li>
-                    <strong>Intact Security Tag:</strong> The official tamper-evident security barcode tag attached to the jewelry piece must remain completely intact, unbroken, and attached. Removing or tampering with the tag voids the return.
+                    <strong>Intact Security Tag:</strong> The official tamper-evident security barcode tag attached to the jewellery piece must remain completely intact, unbroken, and attached. Removing or tampering with the tag voids the return.
                   </li>
                   <li>
                     <strong>Original Packaging & Inclusions:</strong> The return must include the original Ambika Jewels presentation box, velvet pouch, protective padding, and security bubble wrap.
@@ -130,7 +132,7 @@ export default function RefundPolicyPage() {
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
-                    <strong>Bespoke 3D CAD Custom Orders:</strong> Jewelry made to individual customer specifications, sketches, CAD renders, or personal photographs.
+                    <strong>Bespoke 3D CAD Custom Orders:</strong> Jewellery made to individual customer specifications, sketches, CAD renders, or personal photographs.
                   </li>
                   <li>
                     <strong>Personalized & Engraved Items:</strong> Rings, pendants, or kadas that have undergone custom name/date engraving or customized size changes.
@@ -140,7 +142,7 @@ export default function RefundPolicyPage() {
                   </li>
                 </ul>
                 <p className="mt-2 text-xs italic text-on-surface-variant/80">
-                  * Note: Ambika Jewels does not sell raw bullion or loose gold coins online. All catalog pieces are finished, wearable, hallmarked articles of fine jewelry.
+                  * Note: Ambika Jewels does not sell raw bullion or loose gold coins online. All catalog pieces are finished, wearable, hallmarked articles of fine jewellery.
                 </p>
               </section>
 
@@ -155,7 +157,7 @@ export default function RefundPolicyPage() {
                 <ol className="list-decimal pl-5 space-y-2">
                   <li>Contact our concierge team at <a href={`mailto:${siteConfig.contact.email}`} className="text-primary underline">{siteConfig.contact.email}</a> with photos of the item and intact tag.</li>
                   <li>Once return eligibility is approved, an insured reverse pickup will be scheduled by our courier partner.</li>
-                  <li>Package the jewelry securely in the original box with tamper-evident seals provided by the courier executive.</li>
+                  <li>Package the jewellery securely in the original box with tamper-evident seals provided by the courier executive.</li>
                   <li>Retain the signed courier pickup receipt with tracking AWB until inspection is complete.</li>
                 </ol>
               </section>
@@ -190,7 +192,7 @@ export default function RefundPolicyPage() {
                   8. Showroom Gold Exchange Policy
                 </h2>
                 <p>
-                  Apart from the 7-day return policy, Ambika Jewels provides an ongoing <strong>Gold Exchange Program</strong> at our Jammu showroom. You may bring old gold jewelry to exchange for brand-new designer pieces. Valuation is calculated strictly on the prevailing local bullion market rate on the date of exchange, based on transparent digital karigar purity testing and standard alloy melting assessments.
+                  Apart from the 7-day return policy, Ambika Jewels provides an ongoing <strong>Gold Exchange Program</strong> at our Jammu showroom. You may bring old gold jewellery to exchange for brand-new designer pieces. Valuation is calculated strictly on the prevailing local bullion market rate on the date of exchange, based on transparent digital karigar purity testing and standard alloy melting assessments.
                 </p>
               </section>
 

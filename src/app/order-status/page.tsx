@@ -293,7 +293,7 @@ function OrderStatusContent() {
             </p>
             {/* Internal Compliance Checklist: Verify GST treatment with CA on margin scheme vs outward supply */}
             <p className="text-[10px] text-on-surface-variant/70 mt-2">
-              * Taxable value and GST computed in accordance with statutory guidelines for precious jewelry (HSN 7113).
+              * Taxable value and GST computed in accordance with statutory guidelines for precious jewellery (HSN 7113).
             </p>
           </div>
 
@@ -349,7 +349,7 @@ function OrderStatusContent() {
         {/* Statutory Hallmarking Declaration */}
         <div className="mt-8 pt-6 border-t border-outline-variant/20 text-[11px] text-on-surface-variant print:text-gray-600 leading-relaxed space-y-1">
           <p>
-            <strong>BIS Hallmark Certification Guarantee:</strong> We certify that the precious jewelry described in this tax invoice complies with Indian Standards Specification for Gold / Silver Hallmarking. Each piece bears the triangular Bureau of Indian Standards mark, purity fineness, and a unique 6-character alphanumeric laser HUID.
+            <strong>BIS Hallmark Certification Guarantee:</strong> We certify that the precious jewellery described in this tax invoice complies with Indian Standards Specification for Gold / Silver Hallmarking. Each piece bears the triangular Bureau of Indian Standards mark, purity fineness, and a unique 6-character alphanumeric laser HUID.
           </p>
           <p>
             <strong>Return & Inspection Policy:</strong> 7-Day return policy applies from confirmed delivery date, provided security tags and invoice copy remain untampered.

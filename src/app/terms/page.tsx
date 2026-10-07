@@ -6,7 +6,7 @@ import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Terms & Conditions | Ambika Jewels Jammu',
-  description: 'Terms and conditions governing online jewelry orders, BIS hallmarking standards, daily gold rate pricing policy, payments, and legal jurisdiction in Jammu, J&K.',
+  description: 'Terms and conditions governing online jewellery orders, BIS hallmarking standards, daily gold rate pricing policy, payments, and legal jurisdiction in Jammu, J&K.',
 };
 
 export default function TermsPage() {
@@ -24,13 +24,15 @@ export default function TermsPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal Counsel Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">These standard e-commerce terms of sale and bullion rate contract are drafts pending commercial legal review. Verify arbitration, force majeure, and liability clauses with lawyer.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal Counsel Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">These standard e-commerce terms of sale and bullion rate contract are drafts pending commercial legal review. Verify arbitration, force majeure, and liability clauses with lawyer.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -65,7 +67,7 @@ export default function TermsPage() {
                   2. Product Authenticity & BIS Hallmarking Standards
                 </h2>
                 <p className="mb-3">
-                  All jewelry offered by {siteConfig.legalBusinessName} complies with the mandatory hallmarking regulations established by the <strong>Bureau of Indian Standards (BIS)</strong> under the BIS Act, 2016:
+                  All jewellery offered by {siteConfig.legalBusinessName} complies with the mandatory hallmarking regulations established by the <strong>Bureau of Indian Standards (BIS)</strong> under the BIS Act, 2016:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
@@ -75,10 +77,10 @@ export default function TermsPage() {
                     <strong>18K Gold (750 Purity) & 14K Gold (585 Purity):</strong> Hallmarked with official BIS stamps (18K750 / 14K585) and laser HUID.
                   </li>
                   <li>
-                    <strong>Natural Certified Diamonds:</strong> Diamond jewelry is accompanied by third-party gemological certificates from internationally recognized laboratories (GIA / IGI) declaring color, clarity, cut, and carat weight.
+                    <strong>Natural Certified Diamonds:</strong> Diamond jewellery is accompanied by third-party gemological certificates from internationally recognized laboratories (GIA / IGI) declaring color, clarity, cut, and carat weight.
                   </li>
                   <li>
-                    <strong>925 Sterling Silver:</strong> Traditional Dogra and contemporary silver jewelry stamped with the official 925 fineness hallmark stamp.
+                    <strong>925 Sterling Silver:</strong> Traditional Dogra and contemporary silver jewellery stamped with the official 925 fineness hallmark stamp.
                   </li>
                   <li>
                     <strong>Dogra Heritage Craftsmanship:</strong> Authentic Dogri Jhumkis, Dogri Naman, and Long Haars handcrafted by master karigars of the Jammu region.
@@ -99,7 +101,7 @@ export default function TermsPage() {
                     <strong>Bullion Rate Fluctuations:</strong> Due to continuous international and domestic market fluctuations in precious metal rates (gold and silver), catalog prices are subject to periodic recalculation. Once an order is paid and confirmed via Razorpay, the transaction price is locked and will not be adjusted for subsequent market increases or decreases.
                   </p>
                   <p>
-                    <strong>Statutory Goods and Services Tax (GST):</strong> In accordance with Indian tax laws, fine precious metal jewelry (HSN Code 7113) attracts a mandatory statutory GST of <strong>3%</strong>, which is transparently itemized on your checkout review screen and tax invoice.
+                    <strong>Statutory Goods and Services Tax (GST):</strong> In accordance with Indian tax laws, fine precious metal jewellery (HSN Code 7113) attracts a mandatory statutory GST of <strong>3%</strong>, which is transparently itemized on your checkout review screen and tax invoice.
                   </p>
                 </div>
               </section>
@@ -128,7 +130,7 @@ export default function TermsPage() {
                   5. Mandatory PAN Card Requirement (&gt; ₹2,00,000)
                 </h2>
                 <p>
-                  Pursuant to <strong>Section 139A and Rule 114B of the Indian Income Tax Rules, 1962</strong>, every customer purchasing jewelry worth more than <strong>₹2,00,000 (Two Lakh Rupees)</strong> in a single transaction must provide their valid Permanent Account Number (PAN). Checkout will not proceed without this mandatory statutory disclosure.
+                  Pursuant to <strong>Section 139A and Rule 114B of the Indian Income Tax Rules, 1962</strong>, every customer purchasing jewellery worth more than <strong>₹2,00,000 (Two Lakh Rupees)</strong> in a single transaction must provide their valid Permanent Account Number (PAN). Checkout will not proceed without this mandatory statutory disclosure.
                 </p>
               </section>
 
@@ -138,7 +140,7 @@ export default function TermsPage() {
                   6. Bespoke 3D CAD Design & Customization
                 </h2>
                 <p className="mb-2">
-                  When requesting custom jewelry through WhatsApp (+91 9086098457) or sketch submission:
+                  When requesting custom jewellery through WhatsApp (+91 9086098457) or sketch submission:
                 </p>
                 <ul className="list-disc pl-5 space-y-1.5">
                   <li>A 3D CAD digital rendering is provided for customer review within 48 hours.</li>
@@ -153,7 +155,7 @@ export default function TermsPage() {
                   7. Intellectual Property Rights
                 </h2>
                 <p>
-                  All proprietary designs, photographs, traditional Dogra jewelry motifs, brand logos, website content, and text appearing on this site are the exclusive intellectual property of <strong>{siteConfig.legalBusinessName}</strong> and are protected under Indian Copyright and Trademark laws. Unauthorized reproduction or commercial use is strictly prohibited.
+                  All proprietary designs, photographs, traditional Dogra jewellery motifs, brand logos, website content, and text appearing on this site are the exclusive intellectual property of <strong>{siteConfig.legalBusinessName}</strong> and are protected under Indian Copyright and Trademark laws. Unauthorized reproduction or commercial use is strictly prohibited.
                 </p>
               </section>
 

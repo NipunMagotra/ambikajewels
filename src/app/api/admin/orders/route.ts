@@ -69,6 +69,20 @@ export async function PATCH(request: Request) {
       );
     }
 
+    const ALLOWED_STATUSES = ['pending_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
+
+    if (status !== undefined) {
+      if (!ALLOWED_STATUSES.includes(status as any)) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: `Invalid order status "${status}". Allowed statuses: ${ALLOWED_STATUSES.join(', ')}`
+          },
+          { status: 400 }
+        );
+      }
+    }
+
     if (!isSupabaseAdminConfigured || !supabaseAdmin) {
       return NextResponse.json(
         { success: false, message: 'Supabase admin client is not available.' },

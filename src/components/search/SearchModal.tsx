@@ -82,7 +82,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
             type="text"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Search jewelry by name, purity (22K, 18K), Dogra heritage, diamonds..."
+            placeholder="Search jewellery by name, purity (22K, 18K), Dogra heritage, diamonds..."
             className="flex-1 bg-transparent text-[var(--text-primary)] font-sans text-sm sm:text-base outline-none placeholder:text-[var(--text-secondary)]/60"
             aria-label="Search catalog"
           />
@@ -120,7 +120,7 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
           {results.length === 0 ? (
             <div className="py-12 text-center text-[var(--text-secondary)] space-y-2">
               <span className="material-symbols-outlined text-3xl text-[var(--text-secondary)]/60">search_off</span>
-              <p className="text-sm font-serif">No jewelry found matching &quot;{query}&quot;</p>
+              <p className="text-sm font-serif">No jewellery found matching &quot;{query}&quot;</p>
               <p className="text-xs text-[var(--text-secondary)]/70 font-sans">
                 Try searching for <em>&quot;necklace&quot;, &quot;22K&quot;, &quot;jhumka&quot;,</em> or <em>&quot;polki&quot;</em>
               </p>

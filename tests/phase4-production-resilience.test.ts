@@ -65,9 +65,9 @@ describe('Phase 4: Production Resilience & User Experience Suite', () => {
   });
 
   // =========================================================================
-  // 2. Indian Jewelry Standard Sizing Standards
+  // 2. Indian Jewellery Standard Sizing Standards
   // =========================================================================
-  describe('2. Indian Jewelry Standard Sizing Standards', () => {
+  describe('2. Indian Jewellery Standard Sizing Standards', () => {
     it('provides standard Indian ring sizes ranging from 10 to 24 with standard highlight', () => {
       assert.ok(STANDARD_INDIAN_RING_SIZES.length >= 15);
       assert.ok(STANDARD_INDIAN_RING_SIZES.includes('10'));

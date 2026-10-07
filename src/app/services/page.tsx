@@ -6,7 +6,7 @@ import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
 
 export const metadata = {
   title: 'Bespoke Services & Gold Exchange | Ambika Jewels Jammu',
-  description: 'Explore custom jewelry design, 3D CAD previews, old gold exchange, gold melting & redesigning, and private concierge services at Ambika Jewels in Jammu.',
+  description: 'Explore bespoke jewellery design, 3D CAD previews, old gold exchange, gold melting & redesigning, and private concierge services at Ambika Jewels in Jammu.',
 };
 
 export default function ServicesPage() {
@@ -16,7 +16,7 @@ export default function ServicesPage() {
       title: 'Gold Exchange Program',
       subtitle: 'Exchange Old Gold for Brand New Designs',
       icon: 'currency_exchange',
-      description: 'Upgrade your jewelry wardrobe easily. Bring in any old gold jewelry and exchange it at prevailing daily market gold rates for our new designer collections.',
+      description: 'Upgrade your jewellery collection effortlessly. Bring in any old gold jewellery and exchange it at prevailing daily market gold rates for our new designer collections.',
       highlights: [
         'Transparent valuation based on daily market bullion rate',
         'Digital purity testing and weight verification',
@@ -24,8 +24,8 @@ export default function ServicesPage() {
       ]
     },
     {
-      id: 'custom-jewelry',
-      title: 'Jewelry Customization & 3D CAD',
+      id: 'custom-jewellery',
+      title: 'Jewellery Customisation & 3D CAD',
       subtitle: 'Turn Any Sketch or Idea into Reality',
       icon: 'palette',
       description: 'Have a dream design or an Instagram photo? Send it to us on WhatsApp (+91 9086098457). Our master karigars will create a 3D CAD design preview for you within 2 days.',
@@ -72,10 +72,10 @@ export default function ServicesPage() {
               EXPERT CRAFTSMANSHIP &amp; SERVICES
             </span>
             <h1 className="font-serif text-3xl sm:text-5xl text-[var(--text-primary)] font-normal mb-3">
-              Gold Exchange &amp; <span className="italic font-normal gold-text-gradient">Customization</span>
+              Gold Exchange &amp; <span className="italic font-normal gold-text-gradient">Customisation</span>
             </h1>
             <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed max-w-2xl mx-auto">
-              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting &amp; redesign, bespoke 3D CAD customization, and private consultations.
+              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting &amp; redesign, bespoke 3D CAD customisation, and private consultations.
             </p>
           </div>
         </section>

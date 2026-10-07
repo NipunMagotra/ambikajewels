@@ -7,7 +7,7 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MandalaDivider from '@/components/ui/MandalaDivider';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
-import { getCartWhatsAppUrl } from '@/utils/whatsapp';
+import { getCartWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function CartPage() {
   const { state, dispatch, cartTotal } = useCart();

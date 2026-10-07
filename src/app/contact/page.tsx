@@ -14,7 +14,7 @@ export default function ContactPage() {
     name: '',
     email: '',
     phone: '',
-    subject: 'General Inquiry',
+    subject: 'General Enquiry',
     message: '',
   });
   const [marketingConsent, setMarketingConsent] = useState(false);
@@ -108,7 +108,7 @@ export default function ContactPage() {
             <div className="lg:col-span-7">
               <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-6 sm:p-7 rounded-[2px] h-full">
                 <h2 className="font-serif text-xl sm:text-2xl text-[var(--text-primary)] font-normal mb-1">Send Us a Message</h2>
-                <p className="font-sans text-xs text-[var(--text-secondary)] mb-5 font-light">Fill out the form below and our jewelry concierge will respond within 24 hours.</p>
+                <p className="font-sans text-xs text-[var(--text-secondary)] mb-5 font-light">Fill out the form below and our jewellery concierge will respond within 24 hours.</p>
 
                 {formSubmitted ? (
                   <div className="p-8 bg-[var(--bg-surface)] border border-[var(--border-card)] text-center rounded-[2px] space-y-3 py-12">
@@ -117,7 +117,7 @@ export default function ContactPage() {
                     </div>
                     <h3 className="font-serif text-xl text-[var(--text-primary)] font-normal">Thank You!</h3>
                     <p className="font-sans text-xs text-[var(--text-secondary)] max-w-md mx-auto font-light">
-                      Your inquiry has been sent successfully to <strong>{siteConfig.contact.email}</strong>. Our Jammu concierge team will contact you shortly.
+                      Your enquiry has been sent successfully to <strong>{siteConfig.contact.email}</strong>. Our Jammu concierge team will contact you shortly.
                     </p>
                     <button 
                       onClick={() => setFormSubmitted(false)}
@@ -172,14 +172,14 @@ export default function ContactPage() {
                     </div>
 
                     <div>
-                      <label className="font-sans text-[10px] text-[var(--accent-gold)] block mb-1 font-semibold uppercase tracking-wider">INQUIRY TYPE</label>
+                      <label className="font-sans text-[10px] text-[var(--accent-gold)] block mb-1 font-semibold uppercase tracking-wider">ENQUIRY TYPE</label>
                       <select 
                         value={formData.subject}
                         onChange={e => setFormData({...formData, subject: e.target.value})}
                         className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] focus:border-[var(--accent-gold)] text-[var(--text-primary)] font-sans text-xs sm:text-sm p-2.5 rounded-[2px] outline-none transition-colors cursor-pointer"
                       >
-                        <option value="General Inquiry" className="bg-[var(--bg-card)] text-[var(--text-primary)]">General Jewelry Inquiry</option>
-                        <option value="3D CAD Preview" className="bg-[var(--bg-card)] text-[var(--text-primary)]">3D CAD Bespoke Customization</option>
+                        <option value="General Enquiry" className="bg-[var(--bg-card)] text-[var(--text-primary)]">General Jewellery Enquiry</option>
+                        <option value="3D CAD Preview" className="bg-[var(--bg-card)] text-[var(--text-primary)]">3D CAD Bespoke Customisation</option>
                         <option value="Gold Exchange" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Gold Exchange &amp; Valuation</option>
                         <option value="Live Video Shopping" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Live Video Shopping Booking</option>
                         <option value="Order Tracking" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Online Order Tracking</option>

@@ -73,7 +73,7 @@ export default function SellerInfoPage() {
                 <div className="bg-surface-container-high p-3 rounded-xs border border-outline-variant/20">
                   <dt className="text-on-surface-variant font-label-caps text-[10px] uppercase">GSTIN (15-Digit)</dt>
                   <dd className="font-semibold text-on-surface font-mono text-sm mt-0.5">{siteConfig.gstin}</dd>
-                  <span className="text-[10px] text-on-surface-variant/80 mt-1 block">HSN Code: {siteConfig.hsnCode} (Precious Metal Jewelry)</span>
+                  <span className="text-[10px] text-on-surface-variant/80 mt-1 block">HSN Code: {siteConfig.hsnCode} (Precious Metal Jewellery)</span>
                 </div>
                 <div className="bg-surface-container-high p-3 rounded-xs border border-outline-variant/20">
                   <dt className="text-on-surface-variant font-label-caps text-[10px] uppercase">PAN (10-Character)</dt>
@@ -162,7 +162,7 @@ export default function SellerInfoPage() {
                 6. Governing Law & Jurisdiction
               </h2>
               <p className="text-xs text-on-surface-variant leading-relaxed">
-                All transactions, sales, custom manufacturing orders, and agreements on ambikajewelsshop.com 
+                All transactions, sales, custom manufacturing orders, and agreements on {siteConfig.domain}{" "}
                 shall be governed by and construed in accordance with the laws of India. Any legal dispute, 
                 claim, or proceedings arising out of or in connection with this platform shall be subject to the 
                 exclusive jurisdiction of the competent courts in <strong>Jammu, Jammu & Kashmir, India</strong>.

@@ -102,8 +102,9 @@ Ambika Jewels/
 │       └── counter.ts          # DailyRates, BillReceipt, GoldSavingsGoal definitions
 ├── supabase/
 │   ├── schema.sql              # Core E-commerce Schema: products, orders, faq_items, RLS
-│   └── pgold_schema.sql        # P-Gold Digital Gold accumulation & transactions schema
-└── DOCUMENT.md                 # Complete business knowledge base & operational guide
+├── docs/
+│   └── BUSINESS_KNOWLEDGE_BASE.md  # Complete business knowledge base & operational guide
+└── README.md
 ```
 
 ---

@@ -5,7 +5,7 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 
 export const metadata = {
   title: '404 - Page Not Found | Ambika Jewels',
-  description: 'The requested luxury jewelry page could not be located. Browse our Dogra heritage and fine gold collections.',
+  description: 'The requested luxury jewellery page could not be located. Browse our Dogra heritage and fine gold collections.',
 };
 
 export default function NotFound() {

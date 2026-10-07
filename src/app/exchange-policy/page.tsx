@@ -6,7 +6,7 @@ import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Gold Exchange & Buyback Policy | Ambika Jewels Jammu',
-  description: 'Transparent Gold Exchange and Buyback Policy for 22K/18K gold and certified diamond jewelry at Ambika Jewels Jammu showroom.',
+  description: 'Transparent Gold Exchange and Buyback Policy for 22K/18K gold and certified diamond jewellery at Ambika Jewels Jammu showroom.',
 };
 
 export default function ExchangePolicyPage() {
@@ -24,13 +24,15 @@ export default function ExchangePolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Tax Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This exchange and buyback terms document is subject to CA/lawyer verification regarding GST margin scheme application (Rule 32(5)) and second-hand precious metal handling.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Tax Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This exchange and buyback terms document is subject to CA/lawyer verification regarding GST margin scheme application (Rule 32(5)) and second-hand precious metal handling.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -52,14 +54,14 @@ export default function ExchangePolicyPage() {
                   1. Principles of Precious Metal Value Preservation
                 </h2>
                 <p className="mb-3">
-                  At <strong>{siteConfig.legalBusinessName}</strong>, we believe fine gold and natural diamonds are enduring assets passed across generations. We offer fair, transparent lifetime exchange and buyback terms for all fine jewelry purchased from our showroom or website.
+                  At <strong>{siteConfig.legalBusinessName}</strong>, we believe fine gold and natural diamonds are enduring assets passed across generations. We offer fair, transparent lifetime exchange and buyback terms for all fine jewellery purchased from our showroom or website.
                 </p>
               </section>
 
               {/* Gold Exchange Terms */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
-                  2. Gold Jewelry Exchange (22K, 18K & 14K)
+                  2. Gold Jewellery Exchange (22K, 18K & 14K)
                 </h2>
                 <div className="bg-background/80 p-4 border border-outline-variant/30 rounded-xs space-y-2 mb-3">
                   <p>
@@ -74,7 +76,7 @@ export default function ExchangePolicyPage() {
                 </div>
               </section>
 
-              {/* Diamond Jewelry Terms */}
+              {/* Diamond Jewellery Terms */}
               <section>
                 <h2 className="font-headline-sm text-lg sm:text-xl text-primary mb-3 font-semibold">
                   3. Diamond & Solitaire Exchange Terms

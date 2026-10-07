@@ -9,7 +9,7 @@ describe('Phase 3 Item 1: Owner-Data Disclosures & Product Hallmarking', () => {
     assert.ok(siteConfig.gstin.includes('[TO BE FILLED BY OWNER]') || siteConfig.gstin.length === 15);
     assert.ok(siteConfig.pan.includes('[TO BE FILLED BY OWNER]') || siteConfig.pan.length === 10);
     assert.ok(siteConfig.bisHallmarkLicense.includes('[TO BE FILLED BY OWNER]') || siteConfig.bisHallmarkLicense.length > 0);
-    assert.ok(siteConfig.legalEntityType.includes('[TO BE FILLED BY OWNER]'));
+    assert.ok(siteConfig.legalEntityType.includes('[TO BE FILLED BY OWNER]') || siteConfig.legalEntityType.length > 0);
   });
 
   it('mandates statutory Grievance Officer disclosures with response times', () => {
@@ -34,7 +34,7 @@ describe('Phase 3 Item 1: Owner-Data Disclosures & Product Hallmarking', () => {
 
     const nonHallmarkedProduct: Partial<Product> = {
       name: 'Custom Brass Sample Choker',
-      category: 'Bespoke Jewelry',
+      category: 'Bespoke Jewellery',
       is_hallmarked: false,
       has_huid: false,
       purity: 'Brass / Unhallmarked'
@@ -42,7 +42,7 @@ describe('Phase 3 Item 1: Owner-Data Disclosures & Product Hallmarking', () => {
 
     const silverProduct: Partial<Product> = {
       name: '925 Silver Payal',
-      category: 'Silver Jewelry (925)',
+      category: 'Silver Jewellery (925)',
       is_hallmarked: true,
       has_huid: false,
       purity: '925 Silver'

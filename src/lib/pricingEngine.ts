@@ -250,4 +250,10 @@ export function getIndianFinancialYear(date: Date = new Date()): string {
   return `${sy}-${ey}`;
 }
 
+// Indian English aliases for backwards-compatibility & semantic consistency
+export type JewelleryPricingInput = JewelryPricingInput;
+export type JewelleryPricingBreakdown = JewelryPricingBreakdown;
+export const calculateJewelleryPrice = calculateJewelryPrice;
+
+
 

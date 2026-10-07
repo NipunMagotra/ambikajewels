@@ -24,13 +24,15 @@ export default function PrivacyPolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This privacy policy drafts DPDP Act 2023 compliance terms. Verify all third-party data processing agreements and cross-border transfer mechanisms with legal counsel.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal & Compliance Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This privacy policy drafts DPDP Act 2023 compliance terms. Verify all third-party data processing agreements and cross-border transfer mechanisms with legal counsel.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -52,7 +54,7 @@ export default function PrivacyPolicyPage() {
                   1. Introduction & Scope
                 </h2>
                 <p className="mb-3">
-                  <strong>{siteConfig.legalBusinessName}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) is committed to honoring and protecting the privacy of our customers and visitors. We operate our flagship fine jewelry showroom and online store from {siteConfig.fullAddress}.
+                  <strong>{siteConfig.legalBusinessName}</strong> (&ldquo;we&rdquo;, &ldquo;our&rdquo;, or &ldquo;us&rdquo;) is committed to honoring and protecting the privacy of our customers and visitors. We operate our flagship fine jewellery showroom and online store from {siteConfig.fullAddress}.
                 </p>
                 <p>
                   This Privacy Policy describes our practices regarding the collection, storage, processing, and disclosure of personal data collected through our website (<Link href="/" className="text-primary underline font-medium">{siteConfig.domain}</Link>) in compliance with the <strong>Digital Personal Data Protection Act, 2023 (DPDP Act)</strong>, the <strong>Information Technology Act, 2000</strong>, and applicable Indian data protection frameworks.
@@ -65,12 +67,12 @@ export default function PrivacyPolicyPage() {
                   2. Personal Information We Collect
                 </h2>
                 <p className="mb-3">
-                  We collect information necessary to fulfill luxury fine jewelry purchases, provide concierge support, and comply with Indian statutory requirements:
+                  We collect information necessary to fulfill luxury fine jewellery purchases, provide concierge support, and comply with Indian statutory requirements:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li><strong>Identity & Contact Information:</strong> Full name, verified mobile phone number, email address, and delivery destination.</li>
                   <li><strong>Statutory Tax Identifiers (CBDT Rule 114B):</strong> Permanent Account Number (PAN) or Form 60 declaration where mandated by Indian tax law for transactions meeting statutory thresholds. PAN data is encrypted using AES-256-GCM.</li>
-                  <li><strong>Transactional Records:</strong> Purchased jewelry items, purity specifications (e.g. 22K 916 BIS Hallmarked), gross/net weight in grams, GST tax invoice numbers, and payment transaction IDs.</li>
+                  <li><strong>Transactional Records:</strong> Purchased jewellery items, purity specifications (e.g. 22K 916 BIS Hallmarked), gross/net weight in grams, GST tax invoice numbers, and payment transaction IDs.</li>
                   <li><strong>Technical & Session Data:</strong> Masked IP address, device telemetry, and essential browser storage required for cart persistence and rate-limiting defenses.</li>
                 </ul>
               </section>
@@ -98,7 +100,7 @@ export default function PrivacyPolicyPage() {
                   </div>
                   <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
                     <p className="font-semibold text-on-surface">4. Groq Inc. (AI Concierge Cloud Inference)</p>
-                    <p className="text-xs mt-1">Role: Real-time language processing for our virtual jewelry concierge (Aanya). Strictly subject to automated client-side PII redaction prior to transmission.</p>
+                    <p className="text-xs mt-1">Role: Real-time language processing for our virtual jewellery concierge (Aanya). Strictly subject to automated client-side PII redaction prior to transmission.</p>
                   </div>
                   <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
                     <p className="font-semibold text-on-surface">5. Cloud Hosting & Edge Delivery (Netlify / Vercel)</p>

@@ -416,7 +416,7 @@ export default function AdminOrdersClient() {
                       <span className="material-symbols-outlined text-sm">
                         {isExpanded ? 'expand_less' : 'expand_more'}
                       </span>
-                      <span>{isExpanded ? 'Hide Items' : `View ${order.items?.length || 0} Purchased Jewelry Item(s)`}</span>
+                      <span>{isExpanded ? 'Hide Items' : `View ${order.items?.length || 0} Purchased Jewellery Item(s)`}</span>
                     </button>
 
                     <button
@@ -432,7 +432,7 @@ export default function AdminOrdersClient() {
                   {isExpanded && order.items && (
                     <div className="bg-surface border border-outline-variant/30 rounded-xs p-3.5 space-y-2 mt-2">
                       <div className="text-[10px] font-label-caps text-on-surface-variant uppercase tracking-wider font-semibold border-b border-outline-variant/20 pb-1">
-                        JEWELRY PIECES IN THIS ORDER:
+                        JEWELLERY PIECES IN THIS ORDER:
                       </div>
                       {order.items.map((item, i) => (
                         <div key={i} className="flex items-center justify-between text-xs py-1.5 border-b border-outline-variant/10 last:border-b-0">

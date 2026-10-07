@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'About Us | Ambika Jewels Jammu',
-  description: 'Learn about Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewelry, Gold Exchange, 22K-9K gold, 925 silver, and custom jewelry.',
+  description: 'Learn about Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewellery, Gold Exchange, 22K–9K gold, 925 silver, and custom jewellery.',
 };
 
 export default function AboutPage() {
@@ -20,12 +20,12 @@ export default function AboutPage() {
     {
       icon: 'auto_awesome',
       title: 'Signature Dogra Heritage Collection',
-      description: 'Specialists in authentic Dogra traditional jewelry including Dogri Jhumki, Dogri Naman Sets, and Dogri Long Sets reflecting Jammu cultural heritage.'
+      description: 'Specialists in authentic Dogra traditional jewellery, including Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets reflecting Jammu cultural heritage.'
     },
     {
       icon: 'currency_exchange',
       title: 'Gold Exchange & Custom Melting',
-      description: 'Transparent gold exchange as per stated store terms. Bring old gold to be melted and redesigned into modern bespoke heirloom jewelry.'
+      description: 'Transparent gold exchange as per stated store terms. Bring old gold to be melted and redesigned into modern bespoke heirloom jewellery.'
     },
     {
       icon: 'storefront',
@@ -35,9 +35,9 @@ export default function AboutPage() {
   ];
 
   const milestones = [
-    { year: '01', title: 'Establishment in Jammu', detail: 'Founded our jewelry showroom and boutique in Lower Roop Nagar, Jammu by Shivani Anand.' },
+    { year: '01', title: 'Establishment in Jammu', detail: 'Our jewellery showroom and boutique were founded in Lower Roop Nagar, Jammu, by Shivani Anand.' },
     { year: '02', title: 'Signature Dogra Collection', detail: 'Introduced authentic Dogri Jhumki, Dogri Naman, and Long Sets crafted by master Jammu karigars.' },
-    { year: '03', title: 'Gold Exchange & 3D CAD', detail: 'Pioneered full gold exchange and 3D CAD custom design services for custom jewelry orders.' },
+    { year: '03', title: 'Gold Exchange & 3D CAD', detail: 'Pioneered full gold exchange and 3D CAD custom design services for custom jewellery orders.' },
     { year: '04', title: 'Expanded Multi-Purity Collections', detail: 'Offering 22K, 18K, 14K, 9K gold, 18K/14K diamond, 925 silver, and nationwide express delivery.' }
   ];
 
@@ -50,14 +50,14 @@ export default function AboutPage() {
         <section className="relative py-12 sm:py-16 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] overflow-hidden">
           <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop text-center relative z-10 max-w-3xl">
             <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.35em] uppercase block mb-2 font-semibold">
-              JAMMU &bull; FINE JEWELRY
+              JAMMU &bull; FINE JEWELLERY
             </span>
             <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-[var(--text-primary)] font-normal mb-4 leading-tight">
               Authentic Dogra Heritage &amp; <br />
-              <span className="italic font-normal gold-text-gradient">Modern Fine Jewelry</span>
+              <span className="italic font-normal gold-text-gradient">Modern Fine Jewellery</span>
             </h1>
             <p className="font-sans text-xs sm:text-base text-[var(--text-secondary)] leading-relaxed font-light max-w-2xl mx-auto">
-              Based in Jammu, Ambika Jewels is owned by Shivani Anand and managed alongside business representative Lakesh Kumar, offering premium quality jewelry, traditional Dogra collections, and customized gold services.
+              Based in Jammu, Ambika Jewels is owned by Shivani Anand and managed alongside business representative Lakesh Kumar, offering premium-quality jewellery, traditional Dogra collections, and customized gold services.
             </p>
           </div>
         </section>
@@ -86,7 +86,7 @@ export default function AboutPage() {
                 Preserving Heritage, <span className="italic font-normal gold-text-gradient">Crafting Perfection</span>
               </h2>
               <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-3 leading-relaxed font-light">
-                Ambika Jewels was established with a clear mission: to offer unique, exclusive jewelry designs with uncompromised quality and personal customer service. Alongside our flagship showroom in Jammu, we operate a personalized boutique managed directly by owner Shivani Anand.
+                Ambika Jewels was established with a clear mission: to offer unique, exclusive jewellery designs with uncompromised quality and personal customer service. Alongside our flagship showroom in Jammu, we operate a personalized boutique managed directly by owner Shivani Anand.
               </p>
               <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-6 leading-relaxed font-light">
                 We take immense pride in preserving Jammu&apos;s cultural legacy through our Signature Dogra Collection — including authentic Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets. In addition, our Gold Exchange program allows customers to melt old gold and transform it into brand-new modern heritage pieces.

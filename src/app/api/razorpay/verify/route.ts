@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
+import { checkRateLimit } from '@/lib/rateLimit';
 
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
@@ -56,7 +57,18 @@ export async function POST(request: Request) {
   try {
     cleanupOldIdempotencyRecords();
 
-    const body = await request.json();
+    // 0. Shared Upstash Redis Rate Limiting (15 attempts per 5 minutes)
+    const forwarded = request.headers.get('x-forwarded-for');
+    const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
+    const rateCheck = await checkRateLimit('verifyPayment', ip);
+    if (!rateCheck.success) {
+      return NextResponse.json(
+        { success: false, error: 'Too many verification requests. Please wait a few minutes before trying again.' },
+        { status: 429 }
+      );
+    }
+
+    const body = await request.json().catch(() => ({}));
     const {
       razorpay_order_id,
       razorpay_payment_id,
@@ -99,7 +111,9 @@ export async function POST(request: Request) {
         .update(`${razorpay_order_id}|${razorpay_payment_id}`)
         .digest('hex');
 
-      isSignatureValid = generatedSignature === razorpay_signature;
+      const sigBuf = Buffer.from(razorpay_signature);
+      const expBuf = Buffer.from(generatedSignature);
+      isSignatureValid = sigBuf.length === expBuf.length && crypto.timingSafeEqual(sigBuf, expBuf);
     }
 
     if (!isSignatureValid) {
@@ -117,29 +131,50 @@ export async function POST(request: Request) {
       return NextResponse.json({ ...cached.response, idempotent: true });
     }
 
-    // B. Check persistent Supabase database (uses server-only supabaseAdmin if configured)
+    // B. Check persistent Supabase database
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
+    let pendingOrder: any = null;
+
     if (dbClient) {
       try {
-        const { data: existingOrder } = await dbClient
+        if (razorpay_order_id) {
+          const { data } = await dbClient
+            .from('orders')
+            .select('*')
+            .eq('razorpay_order_id', razorpay_order_id)
+            .maybeSingle();
+          pendingOrder = data;
+        }
+
+        if (!pendingOrder && supabase_order_id) {
+          const { data } = await dbClient
+            .from('orders')
+            .select('*')
+            .eq('id', supabase_order_id)
+            .maybeSingle();
+          pendingOrder = data;
+        }
+
+        // Check if this payment ID was already marked paid in DB
+        const { data: existingPaidOrder } = await dbClient
           .from('orders')
           .select('*')
-          .or(`payment_id.eq.${razorpay_payment_id},razorpay_payment_id.eq.${razorpay_payment_id},razorpay_order_id.eq.${razorpay_order_id}`)
+          .or(`payment_id.eq.${razorpay_payment_id},razorpay_payment_id.eq.${razorpay_payment_id}`)
           .maybeSingle();
 
-        if (existingOrder) {
+        if (existingPaidOrder && (existingPaidOrder.payment_status === 'paid' || existingPaidOrder.status === 'confirmed')) {
           const accessToken = generateOrderAccessToken(
-            existingOrder.order_number || existingOrder.id,
-            existingOrder.email || existingOrder.customer_email || existingOrder.phone || existingOrder.customer_phone
+            existingPaidOrder.order_number || existingPaidOrder.id,
+            existingPaidOrder.email || existingPaidOrder.customer_email || existingPaidOrder.phone || existingPaidOrder.customer_phone || ''
           );
           const idempotentResponse = {
             success: true,
             message: 'Payment already verified (Idempotent)',
-            order_number: existingOrder.order_number || existingOrder.id,
+            order_number: existingPaidOrder.order_number || existingPaidOrder.id,
             token: accessToken,
             payment_id: razorpay_payment_id,
-            shiprocket_status: existingOrder.shiprocket_status,
-            shiprocket_order_id: existingOrder.shiprocket_order_id,
+            shiprocket_status: existingPaidOrder.shiprocket_status,
+            shiprocket_order_id: existingPaidOrder.shiprocket_order_id,
             idempotent: true
           };
           processedPayments.set(razorpay_payment_id, {
@@ -149,38 +184,58 @@ export async function POST(request: Request) {
           return NextResponse.json(idempotentResponse);
         }
       } catch (checkErr) {
-        console.error('Error during database idempotency check:', checkErr);
+        console.error('Error during database order lookup/idempotency check:', checkErr);
+      }
+    }
+
+    // 3. Authoritative Order Binding & Anti-Tampering Checks
+    if (dbClient && !pendingOrder && (isSupabaseAdminConfigured || process.env.NODE_ENV === 'production')) {
+      console.warn(`[SECURITY ALERT] Verification rejected: No pending order found for razorpay_order_id=${razorpay_order_id}`);
+      return NextResponse.json(
+        { success: false, error: 'Payment verification failed: No matching pending order found.' },
+        { status: 400 }
+      );
+    }
+
+    if (pendingOrder) {
+      // 3A. Bind order: DB razorpay_order_id must match incoming razorpay_order_id
+      if (pendingOrder.razorpay_order_id && razorpay_order_id && pendingOrder.razorpay_order_id !== razorpay_order_id) {
+        console.error(`[SECURITY ALERT] Order ID substitution attempt: DB=${pendingOrder.razorpay_order_id}, Request=${razorpay_order_id}`);
+        return NextResponse.json(
+          { success: false, error: 'Payment verification failed: Razorpay order ID mismatch.' },
+          { status: 400 }
+        );
+      }
+
+      // 3B. Amount verification: client-submitted total_amount must match DB pre-calculated total
+      if (typeof pendingOrder.total === 'number' && typeof total_amount === 'number' && total_amount !== pendingOrder.total) {
+        console.error(`[SECURITY ALERT] Payment amount mismatch: DB=${pendingOrder.total} paise, Submitted=${total_amount} paise`);
+        return NextResponse.json(
+          { success: false, error: 'Payment verification failed: Submitted amount does not match authorized order total.' },
+          { status: 400 }
+        );
       }
     }
 
     // F6: Non-guessable order identifiers
-    // If create-order pre-inserted a pending row, we'll resolve its order_number;
-    // otherwise generate a new one (backwards-compat / webhook-only path).
-    let orderNumber = generateSecureOrderNumber();
+    const orderNumber = pendingOrder?.order_number || generateSecureOrderNumber();
+    const verifiedTotalPaise = (pendingOrder && typeof pendingOrder.total === 'number') ? pendingOrder.total : total_amount;
+    const verifiedSubtotalPaise = (pendingOrder && typeof pendingOrder.subtotal === 'number')
+      ? pendingOrder.subtotal
+      : Math.round(verifiedTotalPaise * 100 / 103);
+    const verifiedTaxPaise = (pendingOrder && typeof pendingOrder.tax === 'number')
+      ? pendingOrder.tax
+      : verifiedTotalPaise - verifiedSubtotalPaise;
+    const verifiedItems = (pendingOrder && Array.isArray(pendingOrder.items) && pendingOrder.items.length > 0)
+      ? pendingOrder.items
+      : items;
 
-    // Resolve existing pending order from Supabase (pre-inserted by create-order route)
-    if (supabase_order_id && dbClient) {
-      try {
-        const { data: pendingOrder } = await dbClient
-          .from('orders')
-          .select('order_number')
-          .eq('id', supabase_order_id)
-          .maybeSingle();
-
-        if (pendingOrder?.order_number) {
-          orderNumber = pendingOrder.order_number;
-        }
-      } catch (lookupErr) {
-        console.warn('[VERIFY] Could not look up pending order, using new order number:', lookupErr);
-      }
-    }
-
-    // 3. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
+    // 4. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
     const encryptedPan = customer_info?.pan_number
       ? encryptSensitiveData(customer_info.pan_number)
-      : null;
+      : (pendingOrder?.pan_number || null);
 
-    // 4. Authenticate & Create Secured Shipment in BVC Logistics eSHIP API (Precious Cargo, HSN 7113)
+    // 5. Authenticate & Create Secured Shipment in BVC Logistics eSHIP API (Precious Cargo, HSN 7113)
     let bvcStatus = 'pending';
     let bvcDocketNumber: string | null = null;
     let bvcShipmentId: string | null = null;
@@ -191,16 +246,16 @@ export async function POST(request: Request) {
       const bvcResult = await createBvcShipment({
         orderNumber,
         customer: customer_info,
-        items: (items || []).map((it) => ({
+        items: (verifiedItems || []).map((it: any) => ({
           name: it.name,
           product_id: it.product_id,
-          sku: it.product_id || it.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase(),
+          sku: it.product_id || (it.name ? it.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase() : 'AMB-ITEM'),
           quantity: it.quantity,
-          price: it.price,
+          price: it.price || it.unit_price_paise,
           weight_grams: it.weight_grams,
           dimensions: it.dimensions
         })),
-        totalAmountPaise: total_amount,
+        totalAmountPaise: verifiedTotalPaise,
         razorpayPaymentId: razorpay_payment_id,
         razorpayOrderId: razorpay_order_id
       });
@@ -229,11 +284,11 @@ export async function POST(request: Request) {
         customerName: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
         customerEmail: customer_info.email,
         customerPhone: customer_info.phone,
-        amount: total_amount,
-        items: (items || []).map((it) => ({
+        amount: verifiedTotalPaise,
+        items: (verifiedItems || []).map((it: any) => ({
           name: it.name,
           quantity: it.quantity,
-          price: it.price
+          price: it.price || it.unit_price_paise
         })),
         errorMessage: bvcError || `BVC shipment booking was not completed (status: ${bvcStatus})`,
         securityBagNumber: bvcSecurityBag || undefined
@@ -242,22 +297,17 @@ export async function POST(request: Request) {
       });
     }
 
-    // 5. Persist Order in Supabase Database
-    //    Two paths:
-    //    A) If create-order pre-inserted a pending row → UPDATE it to confirmed/paid
-    //    B) Fallback: upsert a new row (webhook-only path / backwards compatibility)
-    const paymentUpdatePayload = {
-      customer_name: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
-      customer_phone: customer_info.phone,
-      customer_email: customer_info.email,
-      shipping_address: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
-      pincode: customer_info.pincode,
-      pan_number: encryptedPan, // Stored encrypted (CBDT Rule 114B compliant)
-      total: total_amount,
-      subtotal: Math.round(total_amount * 100 / 103),
-      tax: total_amount - Math.round(total_amount * 100 / 103),
-      shipping: 0,
-      items: items,
+    // 6. Persist / Update Order in Supabase Database
+    //    Guarantees authoritative server prices are never overwritten by client
+    const paymentUpdatePayload: Record<string, unknown> = {
+      customer_name: `${customer_info?.first_name || ''} ${customer_info?.last_name || ''}`.trim() || pendingOrder?.customer_name,
+      customer_phone: customer_info?.phone || pendingOrder?.customer_phone,
+      customer_email: customer_info?.email || pendingOrder?.customer_email,
+      shipping_address: customer_info?.address
+        ? `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`
+        : pendingOrder?.shipping_address,
+      pincode: customer_info?.pincode || pendingOrder?.pincode,
+      pan_number: encryptedPan,
       status: 'confirmed' as const,
       payment_status: 'paid' as const,
       payment_method: 'razorpay',
@@ -273,22 +323,26 @@ export async function POST(request: Request) {
       shiprocket_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
       shipping_provider: 'bvc',
       tracking_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
-      notes: customer_info.notes || ''
+      notes: customer_info?.notes || pendingOrder?.notes || ''
     };
 
     if (dbClient) {
       try {
-        if (supabase_order_id) {
-          // Path A: Update the existing pending order created by create-order
+        if (pendingOrder?.id) {
           await dbClient
             .from('orders')
             .update(paymentUpdatePayload)
-            .eq('id', supabase_order_id);
-          console.log(`[ORDER CONFIRMED] Updated pending order ${supabase_order_id} → confirmed/paid.`);
+            .eq('id', pendingOrder.id);
+          console.log(`[ORDER CONFIRMED] Updated pending order ${pendingOrder.id} → confirmed/paid.`);
         } else {
-          // Path B: Backwards-compatible upsert (webhook / legacy clients)
+          // Dev mock / legacy fallback
           await dbClient.from('orders').upsert({
             order_number: orderNumber,
+            total: verifiedTotalPaise,
+            subtotal: verifiedSubtotalPaise,
+            tax: verifiedTaxPaise,
+            shipping: 0,
+            items: verifiedItems,
             ...paymentUpdatePayload
           }, {
             onConflict: 'razorpay_payment_id',
@@ -300,28 +354,28 @@ export async function POST(request: Request) {
       }
     }
 
-    // 6. Generate unguessable verification token for seamless client access
+    // 7. Generate unguessable verification token for seamless client access
     const orderAccessToken = generateOrderAccessToken(
       orderNumber,
-      customer_info.email || customer_info.phone
+      customer_info?.email || customer_info?.phone || ''
     );
 
-    // 7. Send Real Transactional Confirmation Email via Resend
+    // 8. Send Real Transactional Confirmation Email via Resend
     sendOrderConfirmationEmail({
       orderNumber,
-      customerName: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
-      customerEmail: customer_info.email,
-      items: (items || []).map((it) => ({
+      customerName: `${customer_info?.first_name || ''} ${customer_info?.last_name || ''}`.trim(),
+      customerEmail: customer_info?.email,
+      items: (verifiedItems || []).map((it: any) => ({
         name: it.name,
         quantity: it.quantity,
-        price: it.price,
+        price: it.price || it.unit_price_paise,
         metal_finish: it.metal_finish
       })),
-      subtotal: Math.round(total_amount * 100 / 103),
-      tax: total_amount - Math.round(total_amount * 100 / 103),
+      subtotal: verifiedSubtotalPaise,
+      tax: verifiedTaxPaise,
       shipping: 0,
-      total: total_amount,
-      shippingAddress: `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`,
+      total: verifiedTotalPaise,
+      shippingAddress: `${customer_info?.address || ''}, ${customer_info?.city || ''}, ${customer_info?.state || ''} - ${customer_info?.pincode || ''}`,
       paymentId: razorpay_payment_id,
       bvcDocketNumber: bvcDocketNumber || undefined,
       securityBagNumber: bvcSecurityBag || undefined,

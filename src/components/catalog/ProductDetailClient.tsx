@@ -4,7 +4,7 @@ import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import type { Product } from '@/types';
-import { getProductWhatsAppUrl } from '@/utils/whatsapp';
+import { getProductWhatsAppUrl } from '@/lib/whatsapp';
 import { siteConfig } from '@/config/siteConfig';
 
 export default function ProductDetailClient({ product }: { product: Product }) {
@@ -106,7 +106,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
       ? 'CERTIFIED NATURAL DIAMOND' 
       : isHallmarked 
         ? (hasHuid ? 'BIS HALLMARKED WITH 6-CHAR ALPHANUMERIC HUID' : 'BIS HALLMARKED (BUREAU OF INDIAN STANDARDS)')
-        : 'AUTHENTIC HANDCRAFTED JEWELRY';
+        : 'AUTHENTIC HANDCRAFTED JEWELLERY';
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-14">
@@ -382,7 +382,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
             <div>
               <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">HSN Code</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.hsn_code} (Precious Jewelry)</span>
+              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.hsn_code} (Precious Jewellery)</span>
             </div>
 
             <div>

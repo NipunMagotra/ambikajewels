@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
-import { getProductWhatsAppUrl } from '@/utils/whatsapp';
+import { getProductWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function ProductCard({ product }: { product: Product }) {
   const [isWishlisted, setIsWishlisted] = useState(false);

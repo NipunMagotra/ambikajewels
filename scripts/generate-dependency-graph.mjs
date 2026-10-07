@@ -84,9 +84,8 @@ async function main() {
   }
 
   fs.writeFileSync('docs/dependency-graph.svg', svg, 'utf-8');
-  fs.writeFileSync('graph.svg', svg, 'utf-8');
 
-  console.log('Successfully generated docs/dependency-graph.svg and graph.svg');
+  console.log('Successfully generated docs/dependency-graph.svg');
 }
 
 main().catch(err => {

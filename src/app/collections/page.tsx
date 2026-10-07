@@ -24,7 +24,10 @@ export default async function CollectionsPage({
   if (isSupabaseConfigured) {
     let query = supabase.from('products').select('*');
     if (category && category !== 'All') {
-      query = query.eq('category', category);
+      const variants = [category];
+      if (category.includes('Jewelry')) variants.push(category.replace(/Jewelry/g, 'Jewellery'));
+      if (category.includes('Jewellery')) variants.push(category.replace(/Jewellery/g, 'Jewelry'));
+      query = query.in('category', variants);
     }
     if (sort === 'price_asc') {
       query = query.order('price', { ascending: true });
@@ -44,6 +47,12 @@ export default async function CollectionsPage({
     let filtered = [...mockProducts];
     if (category && category !== 'All') {
       const catLower = category.toLowerCase();
+      const catAlt = catLower.includes('jewelry')
+        ? catLower.replace(/jewelry/g, 'jewellery')
+        : catLower.includes('jewellery')
+          ? catLower.replace(/jewellery/g, 'jewelry')
+          : catLower;
+
       filtered = filtered.filter(p => {
         const pCat = p.category.toLowerCase();
         const pColl = p.collection.toLowerCase();
@@ -52,7 +61,12 @@ export default async function CollectionsPage({
         const pBadges = (p.badges || []).join(' ').toLowerCase();
 
         // 1. Direct category or collection match
-        if (pCat === catLower || pColl === catLower || pCat.includes(catLower) || catLower.includes(pCat)) {
+        if (
+          pCat === catLower || pCat === catAlt ||
+          pColl === catLower || pColl === catAlt ||
+          pCat.includes(catLower) || catLower.includes(pCat) ||
+          pCat.includes(catAlt) || catAlt.includes(pCat)
+        ) {
           return true;
         }
 
@@ -116,7 +130,7 @@ export default async function CollectionsPage({
               <div className="col-span-full py-10 sm:py-16 text-center px-4 max-w-lg mx-auto bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px] my-4">
                 <span className="material-symbols-outlined text-3xl text-[var(--accent-gold)] mb-2 block">diamond</span>
                 <h3 className="font-serif text-lg sm:text-xl text-[var(--text-primary)] mb-2 font-normal">
-                  Bespoke Jewelry On Order
+                  Bespoke Jewellery on Order
                 </h3>
                 <p className="font-sans text-xs text-[var(--text-secondary)] mb-6 leading-relaxed font-light">
                   Looking for a custom design in this collection? Our master Dogra karigars craft bespoke pieces in 22K/18K/14K gold and 925 silver at our Jammu showroom.
@@ -128,7 +142,7 @@ export default async function CollectionsPage({
                   className="btn-gold-primary"
                 >
                   <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                  INQUIRE ON WHATSAPP
+                  ENQUIRE ON WHATSAPP
                 </a>
               </div>
             )}

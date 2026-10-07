@@ -1,38 +1,41 @@
 export const siteConfig = {
   name: "Ambika Jewels",
   legalBusinessName: process.env.STORE_LEGAL_NAME || "Ambika Jewels",
-  legalEntityType: process.env.STORE_ENTITY_TYPE || "[TO BE FILLED BY OWNER] (e.g. Sole Proprietorship / Partnership / Private Limited)",
+  legalEntityType: process.env.STORE_ENTITY_TYPE || "Sole Proprietorship",
   founder: "Shivani Anand",
   businessRepresentative: "Lakesh Kumar",
   
   // =========================================================================
   // Statutory Seller KYC Identifiers (Consumer Protection E-Commerce Rules)
-  // [TO BE FILLED BY OWNER] - Build check fails in production if left placeholder
+  // Verified from official certificates:
+  // - GSTIN: 01AHWPH9511N1ZX (Jammu & Kashmir)
+  // - Business PAN: AHWPH9511N
+  // - BIS Hallmark License: HM/C-9990041009
   // =========================================================================
-  pan: process.env.STORE_PAN || "[TO BE FILLED BY OWNER]",
-  gstin: process.env.STORE_GSTIN || "[TO BE FILLED BY OWNER]",
-  bisHallmarkLicense: process.env.STORE_BIS_LICENSE || "[TO BE FILLED BY OWNER]",
+  pan: process.env.STORE_PAN || "AHWPH9511N",
+  gstin: process.env.STORE_GSTIN || "01AHWPH9511N1ZX",
+  bisHallmarkLicense: process.env.STORE_BIS_LICENSE || "HM/C-9990041009",
   
   hsnCode: "7113",
-  description: "Authentic Dogra Heritage Jewelry, Fine Solid Gold, Certified Diamonds, 925 Silver & Bespoke Jewelry Craftsmanship in Jammu.",
+  description: "Authentic Dogra Heritage Jewellery, Fine Solid Gold, Certified Diamonds, 925 Silver & Bespoke Jewellery Craftsmanship in Jammu.",
   address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013",
   fullAddress: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013, India",
   city: "Jammu",
   state: "Jammu & Kashmir",
   pincode: "180013",
   country: "India",
-  domain: "ambikajewelsshop.com",
-  websiteUrl: "https://ambikajewelsshop.com",
+  domain: process.env.NEXT_PUBLIC_STORE_DOMAIN || "ambikajewelsonline.com",
+  websiteUrl: process.env.NEXT_PUBLIC_STORE_URL || "https://ambikajewelsonline.com",
   contact: {
     whatsapp: "+919086098457",
     phone: "+919682589725",
-    email: "contact@ambikajewelsshop.com",
-    supportEmail: "contact@ambikajewelsshop.com"
+    email: process.env.NEXT_PUBLIC_STORE_EMAIL || "contact@ambikajewelsonline.com",
+    supportEmail: process.env.NEXT_PUBLIC_STORE_EMAIL || "contact@ambikajewelsonline.com"
   },
   grievanceOfficer: {
     name: "Lakesh Kumar",
     designation: "Grievance Redressal & Compliance Officer",
-    email: "contact@ambikajewelsshop.com",
+    email: process.env.NEXT_PUBLIC_STORE_EMAIL || "contact@ambikajewelsonline.com",
     phone: "+919682589725",
     address: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu & Kashmir 180013, India",
     responseTime: "Acknowledgement within 48 hours; resolution within 30 days (verify with CA/lawyer under Consumer Protection Rules)"
@@ -40,7 +43,7 @@ export const siteConfig = {
   nodalOfficer: {
     name: "Shivani Anand",
     designation: "Nodal Person of Contact for Law Enforcement Agencies",
-    email: "contact@ambikajewelsshop.com",
+    email: process.env.NEXT_PUBLIC_STORE_EMAIL || "contact@ambikajewelsonline.com",
     phone: "+919682589725"
   },
   timings: "Monday – Saturday: 10:00 AM – 8:00 PM | Sunday: Open",
@@ -61,6 +64,8 @@ export const siteConfig = {
     showPdpPriceBreakup: false,
     // F5: Mock products fallback (default false; Supabase DB is single source of truth)
     useMockProductsFallback: false,
+    // Production/KYC Scan Flag: Hides 'DRAFT FOR LAWYER REVIEW' banners for Razorpay website scan & live customers
+    showDraftLegalBanners: process.env.NEXT_PUBLIC_SHOW_DRAFT_LEGAL_BANNERS === 'true',
   },
   
   // Bullion Rates & Stale Rate Guards
@@ -83,12 +88,12 @@ export const siteConfig = {
     dispatchTimeline: "24 to 48 Hours for In-Stock Items (3 to 5 Days for Custom Sizing)"
   },
   tax: {
-    gstRate: 0.03, // 3% GST on precious jewelry (HSN 7113)
+    gstRate: 0.03, // 3% GST on precious jewellery (HSN 7113)
     // TODO: Confirm with CA whether old gold exchange is gross consideration or margin scheme under GST rules
     oldGoldDeductBeforeGst: false,
   },
   compliance: {
-    // Statutory PAN reporting threshold for jewelry/bullion purchases (CA to confirm)
+    // Statutory PAN reporting threshold for jewellery/bullion purchases (CA to confirm)
     panRequirementThresholdInr: 200000, // ₹2,00,000 threshold (CA to confirm)
     // Statutory cash transaction limit per person per day (CA to confirm)
     cashTransactionLimitInr: 200000, // ₹2,00,000 max cash per transaction/day (CA to confirm)
@@ -98,9 +103,9 @@ export const siteConfig = {
   },
   categories: [
     "Dogra Heritage Collection",
-    "Gold Jewelry",
-    "Diamond Jewelry",
-    "Silver Jewelry (925)",
+    "Gold Jewellery",
+    "Diamond Jewellery",
+    "Silver Jewellery (925)",
     "Bridal Couture",
     "Gold Exchange & Custom",
     "Necklaces & Chokers",

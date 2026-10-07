@@ -6,7 +6,7 @@ import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
   title: 'Shipping & Delivery Policy | Ambika Jewels Jammu',
-  description: 'Pan-India shipping policy for fine jewelry orders. Delivery timelines (2-5 business days), tamper-evident packaging, and Shiprocket live tracking.',
+  description: 'Pan-India shipping policy for fine jewellery orders. Delivery timelines (2-5 business days), tamper-evident packaging, and Shiprocket live tracking.',
 };
 
 export default function ShippingPolicyPage() {
@@ -24,13 +24,15 @@ export default function ShippingPolicyPage() {
 
           <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-10 lg:p-12 rounded-xs">
             {/* DRAFT FOR LAWYER REVIEW BANNER */}
-            <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
-              <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
-              <div>
-                <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal, Logistics & Compliance Sign-Off</p>
-                <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This document outlines operational logistics terms for review by our legal counsel. Verify all carrier SLAs and liability caps with lawyer/CA.</p>
+            {siteConfig.features.showDraftLegalBanners && (
+              <div className="bg-amber-500/10 border border-amber-500/30 p-4 mb-8 rounded-xs text-amber-300 text-xs font-semibold flex items-center gap-3">
+                <span className="material-symbols-outlined text-lg shrink-0">gavel</span>
+                <div>
+                  <p className="font-bold uppercase tracking-wider text-[11px]">DRAFT FOR LAWYER REVIEW — Pending Legal, Logistics & Compliance Sign-Off</p>
+                  <p className="text-[11px] text-amber-200/80 font-normal mt-0.5">This document outlines operational logistics terms for review by our legal counsel. Verify all carrier SLAs and liability caps with lawyer/CA.</p>
+                </div>
               </div>
-            </div>
+            )}
 
             <div className="border-b border-outline-variant/20 pb-4 mb-8">
               <span className="font-label-caps text-xs text-primary font-bold tracking-widest block mb-1">
@@ -68,7 +70,7 @@ export default function ShippingPolicyPage() {
                   2. Dispatch & Delivery Timelines
                 </h2>
                 <p className="mb-3">
-                  Every jewelry order is processed with extreme care, ultrasonic cleaning, hallmark inspection, and security packaging:
+                  Every jewellery order is processed with extreme care, ultrasonic cleaning, hallmark inspection, and security packaging:
                 </p>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 my-4">
                   <div className="bg-background p-4 border border-outline-variant/30 rounded-xs">
@@ -83,7 +85,7 @@ export default function ShippingPolicyPage() {
                   </div>
                 </div>
                 <div className="bg-surface-container-high p-3.5 border border-outline-variant/20 rounded-xs text-xs space-y-1">
-                  <p><strong>Dispatch Window:</strong> In-stock catalog jewelry is dispatched within <strong>24 to 48 business hours</strong> of payment confirmation.</p>
+                  <p><strong>Dispatch Window:</strong> In-stock catalog jewellery is dispatched within <strong>24 to 48 business hours</strong> of payment confirmation.</p>
                   <p><strong>Custom & Bespoke Orders:</strong> Customized ring resizing or 3D CAD bespoke creations require an additional <strong>3 to 5 crafting days</strong> before courier handover.</p>
                 </div>
               </section>
@@ -110,14 +112,14 @@ export default function ShippingPolicyPage() {
                   4. Tamper-Evident Packaging & Safe Transit
                 </h2>
                 <p className="mb-3">
-                  Given the high value of fine gold, diamond, and silver jewelry, your consignment is protected at every step:
+                  Given the high value of fine gold, diamond, and silver jewellery, your consignment is protected at every step:
                 </p>
                 <ul className="list-disc pl-5 space-y-2">
                   <li>
                     <strong>Secure Delivery Protocol:</strong> All shipments are dispatched in secure sealed boxes via authorized courier partners from our showroom doors until your verified delivery signature.
                   </li>
                   <li>
-                    <strong>Discreet & Tamper-Evident Packaging:</strong> Packages are shipped in durable, non-descript outer security boxes with unique serialized tamper-proof security tape. The outer carton bears no reference to "gold", "diamonds", or "jewelry" to deter pilferage.
+                    <strong>Discreet & Tamper-Evident Packaging:</strong> Packages are shipped in durable, non-descript outer security boxes with unique serialized tamper-proof security tape. The outer carton bears no reference to "gold", "diamonds", or "jewellery" to deter pilferage.
                   </li>
                   <li>
                     <strong>OTP / Signature Verification:</strong> High-value shipments require physical receipt and digital OTP / signature by the named recipient matching the checkout details.

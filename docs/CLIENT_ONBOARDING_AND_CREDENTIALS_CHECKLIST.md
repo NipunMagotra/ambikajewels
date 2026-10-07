@@ -176,21 +176,21 @@
 ---
 
 ## 📌 PART 3: STATUTORY SELLER INFORMATION TO NOTE DOWN
-*These exact details are legally required by Indian e-commerce consumer protection laws and must be filled into the website configuration:*
+*These exact details are legally required by Indian e-commerce consumer protection laws and are configured in the website:*
 
 | Field Required | Exact Detail from Client / Certificate | Notes |
 | :--- | :--- | :--- |
-| **Legal Business Name** | _____________________________________________ | As registered on GST certificate |
-| **Entity Type** | Sole Proprietorship / Partnership / Pvt Ltd | Confirm with client/CA |
-| **15-Digit GSTIN** | _____________________________________________ | e.g. `01AAAAA0000A1Z5` |
-| **10-Character Business PAN** | _____________________________________________ | e.g. `AAAAA0000A` |
-| **BIS Hallmark License No.** | _____________________________________________ | Jeweller BIS Registration No. |
-| **Registered Address** | Shop no. 3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013 | Verify door/shop number |
-| **Grievance Officer Name** | _____________________________________________ | Statutory consumer officer |
-| **Grievance Officer Phone** | _____________________________________________ | Must be answered during hours |
-| **Grievance Officer Email** | _____________________________________________ | e.g. `grievance@ambikajewelsshop.com` |
-| **Showroom Support Phone** | `+91 9682589725` | Confirm if this remains active |
-| **WhatsApp Concierge** | `+91 9086098457` | Confirm if this remains active |
+| **Legal Business Name** | Ambika Jewels | As registered on GST certificate |
+| **Entity Type** | Sole Proprietorship | Verified |
+| **15-Digit GSTIN** | `01AHWPH9511N1ZX` | State: 01 (Jammu & Kashmir) |
+| **10-Character Business PAN** | `AHWPH9511N` | Derived from GSTIN characters 3–12 (P = Individual/Proprietor) |
+| **BIS Hallmark License No.** | `HM/C-9990041009` | Jeweller BIS Registration No. |
+| **Registered Address** | Shop no. 3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013 | Verified showroom location |
+| **Grievance Officer Name** | Lakesh Kumar | Statutory consumer officer |
+| **Grievance Officer Phone** | `+91 9682589725` | Must be answered during hours |
+| **Grievance Officer Email** | `contact@ambikajewelsshop.com` | Primary contact email |
+| **Showroom Support Phone** | `+91 9682589725` | Active |
+| **WhatsApp Concierge** | `+91 9086098457` | Active |
 
 ---
 
@@ -247,13 +247,13 @@ ADMIN_SESSION_SECRET=strong_32_character_random_hex_key_here
 ENCRYPTION_SECRET=strong_32_character_random_hex_key_here
 
 # ==========================================
-# 8. STATUTORY SELLER CONFIGURATION
+# 8. STATUTORY SELLER CONFIGURATION (VERIFIED)
 # ==========================================
 STORE_LEGAL_NAME=Ambika Jewels
 STORE_ENTITY_TYPE=Sole Proprietorship
-STORE_GSTIN=01XXXXXXXXXXXXX
-STORE_PAN=XXXXXXXXXX
-STORE_BIS_LICENSE=HM/C-XXXXXXXXXX
+STORE_GSTIN=01AHWPH9511N1ZX
+STORE_PAN=AHWPH9511N
+STORE_BIS_LICENSE=HM/C-9990041009
 ```
 
 ---

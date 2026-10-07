@@ -2,7 +2,7 @@
  * Checkout Validation & Indian Statutory Compliance Helpers
  *
  * Provides standardized email typo suggestions, Indian mobile number validation,
- * PAN format checking, and Indian jewelry sizing constants.
+ * PAN format checking, and Indian jewellery sizing constants.
  */
 
 export const STANDARD_INDIAN_RING_SIZES = [

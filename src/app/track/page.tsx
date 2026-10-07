@@ -79,7 +79,7 @@ function TrackOrderContent() {
           LIVE CONSIGNMENT TRACKER
         </span>
         <h1 className="font-headline-md text-3xl sm:text-5xl text-primary font-semibold mb-3">
-          Track Your Jewelry Delivery
+          Track Your Jewellery Delivery
         </h1>
         <p className="font-body-md text-xs sm:text-sm text-on-surface-variant max-w-xl mx-auto">
           Enter your Order Reference Number and verified Phone or Email to view real-time delivery status securely.

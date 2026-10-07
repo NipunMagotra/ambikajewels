@@ -67,7 +67,7 @@ export function generateOrderConfirmationEmailHtml(data: OrderEmailData): string
           <tr style="background-color: #110909; text-align: center;">
             <td style="padding: 28px 20px;">
               <h1 style="color: #d4af37; margin: 0; font-size: 26px; letter-spacing: 2px; text-transform: uppercase;">${siteConfig.name}</h1>
-              <p style="color: #c59b40; margin: 4px 0 0 0; font-size: 11px; letter-spacing: 3px;">JAMMU &bull; FINE JEWELRY</p>
+              <p style="color: #c59b40; margin: 4px 0 0 0; font-size: 11px; letter-spacing: 3px;">JAMMU &bull; FINE JEWELLERY</p>
             </td>
           </tr>
 
@@ -77,7 +77,7 @@ export function generateOrderConfirmationEmailHtml(data: OrderEmailData): string
               <h2 style="color: #222; font-size: 20px; margin-top: 0;">Payment Received & Verified</h2>
               <p style="color: #555; font-size: 14px; line-height: 1.6;">
                 Dear <strong>${data.customerName}</strong>,<br /><br />
-                Thank you for choosing Ambika Jewels. Your payment has been received and verified via Razorpay. Your fine jewelry piece is now undergoing final quality control and hallmark inspection at our Jammu showroom before being packed in a tamper-evident security box for dispatch.
+                Thank you for choosing Ambika Jewels. Your payment has been received and verified via Razorpay. Your fine jewellery piece is now undergoing final quality control and hallmark inspection at our Jammu showroom before being packed in a tamper-evident security box for dispatch.
               </p>
 
               <!-- Order Summary Meta Box -->
@@ -147,7 +147,7 @@ export function generateOrderConfirmationEmailHtml(data: OrderEmailData): string
 
               <!-- Live Tracking CTA -->
               <div style="text-align: center; margin: 30px 0;">
-                <a href="https://ambikajewelsshop.com/track?orderId=${data.orderNumber}" style="background-color: #c59b40; color: #110909; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 2px; display: inline-block; letter-spacing: 1px; text-transform: uppercase;">
+                <a href="${siteConfig.websiteUrl}/track?orderId=${data.orderNumber}" style="background-color: #c59b40; color: #110909; font-weight: bold; font-size: 14px; text-decoration: none; padding: 14px 28px; border-radius: 2px; display: inline-block; letter-spacing: 1px; text-transform: uppercase;">
                   Track Consignment Live
                 </a>
               </div>
@@ -199,7 +199,7 @@ export async function sendOrderConfirmationEmail(data: OrderEmailData): Promise<
   }
 
   try {
-    const fromAddress = process.env.RESEND_FROM_EMAIL || 'Ambika Jewels <orders@ambikajewelsshop.com>';
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 'Ambika Jewels <orders@ambikajewelsonline.com>';
     const htmlContent = generateOrderConfirmationEmailHtml(data);
 
     const response = await fetch('https://api.resend.com/emails', {
@@ -282,7 +282,7 @@ export async function sendAdminBvcFailureAlert(
       🚨 CRITICAL ALERT: Payment Succeeded but BVC Logistics Booking Failed
     </h2>
     <p style="font-size: 14px; color: #333; line-height: 1.6;">
-      A customer has successfully completed payment for high-value gold jewelry on <strong>Ambika Jewels</strong>, but the automatic armored consignment booking in BVC eSHIP failed.
+      A customer has successfully completed payment for high-value gold jewellery on <strong>Ambika Jewels</strong>, but the automatic armored consignment booking in BVC eSHIP failed.
       <strong>Please manually create this secured shipment in your BVC Universe dashboard immediately to assign armored pickup and tamper-evident sealing.</strong>
     </p>
 
@@ -334,7 +334,7 @@ export async function sendAdminBvcFailureAlert(
   }
 
   try {
-    const fromAddress = process.env.RESEND_FROM_EMAIL || 'Ambika Jewels Alerts <alerts@ambikajewelsshop.com>';
+    const fromAddress = process.env.RESEND_FROM_EMAIL || 'Ambika Jewels Alerts <alerts@ambikajewelsonline.com>';
     const response = await fetch('https://api.resend.com/emails', {
       method: 'POST',
       headers: {

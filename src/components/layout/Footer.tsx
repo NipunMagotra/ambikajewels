@@ -17,7 +17,7 @@ export default function Footer() {
                 {siteConfig.name}
               </span>
               <span className="font-sans text-[7.5px] text-[var(--accent-gold)] tracking-[0.35em] block uppercase font-semibold mt-0.5">
-                JAMMU &bull; FINE JEWELRY
+                JAMMU &bull; FINE JEWELLERY
               </span>
             </Link>
             <p className="font-sans text-xs text-[var(--text-secondary)] mb-3 whitespace-pre-line leading-relaxed font-light">
@@ -45,9 +45,9 @@ export default function Footer() {
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/about">About Us</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors text-[var(--text-primary)] font-medium" href="/collections?category=Dogra Heritage Collection">Dogra Heritage Collection</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Bridal Couture">Bridal Couture</Link></li>
-              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Gold Jewelry">22K Gold Jewelry</Link></li>
-              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Diamond Jewelry">Certified Diamond Jewelry</Link></li>
-              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Silver Jewelry (925)">925 Sterling Silver</Link></li>
+              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Gold Jewellery">22K Gold Jewellery</Link></li>
+              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Diamond Jewellery">Certified Diamond Jewellery</Link></li>
+              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections?category=Silver Jewellery (925)">925 Sterling Silver</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/collections">All Collections</Link></li>
             </ul>
           </div>
@@ -133,7 +133,7 @@ export default function Footer() {
                 {siteConfig.fullAddress}
               </p>
               <p className="text-[var(--text-secondary)] text-[11px] mt-1 font-medium">
-                HSN Code: 7113 (Articles of Precious Metal Jewelry)
+                HSN Code: 7113 (Articles of Precious Metal Jewellery)
               </p>
             </div>
 
@@ -198,7 +198,7 @@ export default function Footer() {
               &copy; {new Date().getFullYear()} {siteConfig.legalBusinessName}. ALL RIGHTS RESERVED. <br />
               Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&amp;K 180013.<br />
               <span className="text-[10px] text-[var(--text-secondary)]/70">
-                Fine jewelry showroom operating under the jurisdiction of Jammu, Jammu &amp; Kashmir.
+                Fine jewellery showroom operating under the jurisdiction of Jammu, Jammu &amp; Kashmir.
               </span>
             </p>
           </div>

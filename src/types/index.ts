@@ -27,7 +27,7 @@ export type Product = {
     breadth_cm: number;
     height_cm: number;
   };
-  hsn_code: string; // e.g. "7113" for precious jewelry
+  hsn_code: string; // e.g. "7113" for precious jewellery
   country_of_origin: string; // "India"
   seller_details: string; // "Ambika Jewels, Lower Roop Nagar, Jammu 180013"
   care_instructions?: string;

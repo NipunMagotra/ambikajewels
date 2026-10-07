@@ -99,7 +99,7 @@ export default function ConsentBanner() {
               </h3>
             </div>
             <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed font-light">
-              Ambika Jewels uses essential cookies to process jewelry orders securely and maintain your shopping bag. 
+              Ambika Jewels uses essential cookies to process jewellery orders securely and maintain your shopping bag. 
               Non-essential analytics and marketing scripts are <strong>blocked by default</strong> until you give explicit consent. 
               Read our <Link href="/privacy-policy" className="text-[var(--accent-gold)] underline font-medium hover:opacity-80">Privacy Policy</Link> for full data processor disclosures.
             </p>
