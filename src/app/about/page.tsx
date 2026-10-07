@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 export const metadata = {
   title: 'About Us | Ambika Jewels Jammu',
-  description: 'Learn about Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewellery, Gold Exchange, 22K–9K gold, 925 silver, and custom jewellery.',
+  description: 'Learn about Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewellery, Gold Exchange, 22K to 9K gold, 925 silver, and custom jewellery.',
 };
 
 export default function AboutPage() {
@@ -44,7 +44,7 @@ export default function AboutPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         
         {/* About Hero */}
         <section className="relative py-12 sm:py-16 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] overflow-hidden">
@@ -89,7 +89,7 @@ export default function AboutPage() {
                 Ambika Jewels was established with a clear mission: to offer unique, exclusive jewellery designs with uncompromised quality and personal customer service. Alongside our flagship showroom in Jammu, we operate a personalized boutique managed directly by owner Shivani Anand.
               </p>
               <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-6 leading-relaxed font-light">
-                We take immense pride in preserving Jammu&apos;s cultural legacy through our Signature Dogra Collection — including authentic Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets. In addition, our Gold Exchange program allows customers to melt old gold and transform it into brand-new modern heritage pieces.
+                We take immense pride in preserving Jammu&apos;s cultural legacy through our Signature Dogra Collection, including authentic Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets. In addition, our Gold Exchange program allows customers to melt old gold and transform it into brand-new modern heritage pieces.
               </p>
 
               <div className="flex flex-col sm:flex-row gap-3 pt-1">

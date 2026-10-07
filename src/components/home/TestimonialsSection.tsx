@@ -41,20 +41,23 @@ export default function TestimonialsSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5 lg:gap-6">
           {commitments.map((item, idx) => (
             <div 
               key={idx}
-              className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 sm:p-6 flex flex-col justify-between rounded-[2px] hover:border-[var(--accent-gold)]/50 transition-colors"
+              className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-6 sm:p-7 flex flex-col justify-between rounded-[2px] hover:border-[var(--accent-gold)]/60 transition-all duration-300 relative group overflow-hidden"
             >
+              <div className="absolute top-0 left-0 right-0 h-[2px] bg-gradient-to-r from-transparent via-[var(--accent-gold)]/50 to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
               <div>
-                <span className="material-symbols-outlined text-[var(--accent-gold)] text-2xl sm:text-3xl mb-3 block">
-                  {item.icon}
-                </span>
-                <span className="font-sans text-[8.5px] text-[var(--accent-gold)] tracking-[0.2em] uppercase font-semibold block mb-1">
+                <div className="w-10 h-10 rounded-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] flex items-center justify-center mb-4">
+                  <span className="material-symbols-outlined text-[var(--accent-gold)] text-xl">
+                    {item.icon}
+                  </span>
+                </div>
+                <span className="font-sans text-[8.5px] text-[var(--accent-gold)] tracking-[0.25em] uppercase font-semibold block mb-1">
                   {item.subtitle}
                 </span>
-                <h3 className="font-serif text-base sm:text-lg text-[var(--text-primary)] font-normal mb-2">
+                <h3 className="font-serif text-lg text-[var(--text-primary)] font-normal mb-2 tracking-tight">
                   {item.title}
                 </h3>
                 <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed font-light">

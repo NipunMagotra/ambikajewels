@@ -415,7 +415,7 @@ export default function CheckoutPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         <div className="container mx-auto px-4 sm:px-6 lg:px-8 max-w-2xl">
           
           {/* Order Summary Accordion (Mobile & Desktop) */}

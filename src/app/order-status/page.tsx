@@ -375,7 +375,7 @@ export default function OrderStatusPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-24 lg:pb-section-gap">
         <Suspense fallback={
           <div className="container mx-auto px-4 py-20 text-center text-primary font-label-caps text-xs">
             GENERATING TAX INVOICE...

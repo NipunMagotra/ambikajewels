@@ -17,7 +17,7 @@ export default function Footer() {
                 {siteConfig.name}
               </span>
               <span className="font-sans text-[7.5px] text-[var(--accent-gold)] tracking-[0.35em] block uppercase font-semibold mt-0.5">
-                JAMMU &bull; FINE JEWELLERY
+                JAMMU &bull; ESTD. 1998 &bull; FINE JEWELLERY
               </span>
             </Link>
             <p className="font-sans text-xs text-[var(--text-secondary)] mb-3 whitespace-pre-line leading-relaxed font-light">

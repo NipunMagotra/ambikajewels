@@ -46,7 +46,7 @@ export const siteConfig = {
     email: process.env.NEXT_PUBLIC_STORE_EMAIL || "contact@ambikajewelsonline.com",
     phone: "+919682589725"
   },
-  timings: "Monday – Saturday: 10:00 AM – 8:00 PM | Sunday: Open",
+  timings: "Monday to Saturday: 10:00 AM to 8:00 PM | Sunday: Open",
   
   // TODO: Replace with verified social handles or keep clean URLs
   social: {

@@ -27,7 +27,7 @@ export default function ContactPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-5xl">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 font-sans text-[10px] text-[var(--text-secondary)] mb-4 uppercase tracking-wider font-medium">
@@ -225,7 +225,7 @@ export default function ContactPage() {
 
           {/* Location Map Section */}
           <div className="bg-[var(--bg-surface)] border border-[var(--border-card)] p-5 sm:p-6 rounded-[2px]">
-            <h2 className="font-serif text-lg text-[var(--text-primary)] font-normal mb-3">Location Map — Lower Roop Nagar, Jammu</h2>
+            <h2 className="font-serif text-lg text-[var(--text-primary)] font-normal mb-3">Location Map: Lower Roop Nagar, Jammu</h2>
             <div className="h-64 sm:h-80 w-full overflow-hidden relative rounded-[2px] border border-[var(--border-subtle)]">
               <iframe
                 src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13414.288277259163!2d74.8304221!3d32.7715891!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391e84e5a95f9227%3A0xb7cf9f3238914619!2sRoop%20Nagar%2C%20Jammu%2C%20Jammu%20and%20Kashmir%20180013!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"

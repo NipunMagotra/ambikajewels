@@ -2,16 +2,18 @@
 
 :root {
   --bg-main: #FAF7F2;
-  --bg-surface: #F4EEE8;
+  --bg-surface: #F5EFEB;
   --bg-card: #FFFFFF;
   --text-primary: #1A1110;
   --text-secondary: #685953;
   --accent-gold: #9E7A23;
   --accent-gold-highlight: #B8860B;
-  --border-subtle: rgba(158, 122, 35, 0.20);
+  --accent-burgundy: #4A121A;
+  --accent-burgundy-light: #6E1B27;
+  --border-subtle: rgba(158, 122, 35, 0.18);
   --border-card: rgba(158, 122, 35, 0.16);
-  --card-shadow: 0 4px 20px rgba(30, 20, 18, 0.05);
-  --header-bg: rgba(250, 247, 242, 0.95);
+  --card-shadow: 0 4px 24px rgba(30, 20, 18, 0.06);
+  --header-bg: rgba(250, 247, 242, 0.96);
   --footer-bg: #F4EEE8;
 }
 
@@ -23,10 +25,12 @@
   --text-secondary: #BEB2AC;
   --accent-gold: #D8B75A;
   --accent-gold-highlight: #E8CC70;
+  --accent-burgundy: #8C2232;
+  --accent-burgundy-light: #A82E40;
   --border-subtle: rgba(216, 183, 90, 0.20);
   --border-card: rgba(216, 183, 90, 0.20);
-  --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
-  --header-bg: rgba(16, 7, 7, 0.95);
+  --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
+  --header-bg: rgba(16, 7, 7, 0.96);
   --footer-bg: #0c0505;
 }
 
@@ -134,12 +138,47 @@
   .bg-theme-main { background-color: var(--bg-main); }
   .bg-theme-surface { background-color: var(--bg-surface); }
   .bg-theme-card { background-color: var(--bg-card); }
+  .bg-theme-burgundy { background-color: var(--accent-burgundy); }
   .text-theme-primary { color: var(--text-primary); }
   .text-theme-secondary { color: var(--text-secondary); }
   .text-theme-gold { color: var(--accent-gold); }
+  .text-theme-burgundy { color: var(--accent-burgundy); }
   .border-theme { border-color: var(--border-subtle); }
   .border-theme-card { border-color: var(--border-card); }
+  .border-theme-burgundy { border-color: var(--accent-burgundy); }
   .shadow-theme-card { box-shadow: var(--card-shadow); }
+
+  /* Luxury Gold Foil & Velvet Badges */
+  .badge-hallmark {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    background: var(--bg-surface);
+    color: var(--accent-gold);
+    border: 1px solid var(--border-subtle);
+    border-radius: 2px;
+  }
+
+  .badge-burgundy {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    font-family: var(--font-sans);
+    font-size: 9.5px;
+    font-weight: 600;
+    letter-spacing: 0.18em;
+    text-transform: uppercase;
+    padding: 3px 8px;
+    background: var(--accent-burgundy);
+    color: #FFFFFF;
+    border-radius: 2px;
+  }
 
   .text-headline-sm {
     font-family: var(--font-serif);

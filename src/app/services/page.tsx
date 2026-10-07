@@ -64,7 +64,7 @@ export default function ServicesPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         {/* Page Banner */}
         <section className="relative py-12 sm:py-16 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] text-center">
           <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-3xl">
@@ -81,6 +81,52 @@ export default function ServicesPage() {
         </section>
 
         <MandalaDivider />
+
+        {/* The 4-Step Bespoke Atelier Journey */}
+        <section className="py-8 sm:py-12 container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
+          <div className="text-center max-w-lg mx-auto mb-8 sm:mb-10">
+            <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold block mb-1">
+              THE ATELIER PROCESS
+            </span>
+            <h2 className="font-serif text-2xl sm:text-4xl text-[var(--text-primary)] font-normal">
+              How We Craft Your Bespoke Heirloom
+            </h2>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/50 transition-colors">
+              <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">01</span>
+              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Design Consultation</h3>
+              <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
+                Share your inspiration photo, sketch, or heirloom idea with our Jammu master karigars via WhatsApp or in showroom.
+              </p>
+            </div>
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/50 transition-colors">
+              <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">02</span>
+              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">3D CAD Digital Render</h3>
+              <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
+                Receive photorealistic 3D computer-aided designs and precise gold gram weight estimates within 48 hours for your approval.
+              </p>
+            </div>
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/50 transition-colors">
+              <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">03</span>
+              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Gold Melting or Sourcing</h3>
+              <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
+                Exchange old gold or have family heirloom gold melted in front of you, or select pure 22K/18K gold and natural gemstones.
+              </p>
+            </div>
+
+            <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/50 transition-colors">
+              <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">04</span>
+              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Hallmarking &amp; Delivery</h3>
+              <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
+                Hand-finished, laser-engraved with 6-digit BIS HUID hallmark, and delivered nationwide in armored velvet presentation packaging.
+              </p>
+            </div>
+          </div>
+        </section>
 
         {/* Services List */}
         <section className="py-8 sm:py-12 container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
@@ -131,7 +177,7 @@ export default function ServicesPage() {
               <h2 className="font-serif text-2xl text-[var(--text-primary)] font-normal mb-1.5">Visit Our Showroom &amp; Boutique</h2>
               <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
                 Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&amp;K 180013 <br />
-                Hours: Mon–Sat 10:00 AM – 8:00 PM | Sunday: Open
+                Hours: Monday to Saturday: 10:00 AM to 8:00 PM | Sunday: Open
               </p>
             </div>
             <div className="flex flex-col sm:flex-row gap-2.5 shrink-0">

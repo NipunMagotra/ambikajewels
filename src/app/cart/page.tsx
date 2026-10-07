@@ -28,7 +28,7 @@ export default function CartPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop max-w-6xl">
           {/* Header */}
           <div className="text-center mb-4 sm:mb-6">
@@ -52,7 +52,18 @@ export default function CartPage() {
               </Link>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 mt-4 sm:mt-6">
+            <>
+              {/* Bullion Rate Protection Ribbon */}
+              <div className="mb-6 p-3 sm:p-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[2px] flex items-center justify-between gap-3 text-xs">
+                <div className="flex items-center gap-2.5">
+                  <span className="material-symbols-outlined text-[var(--accent-gold)] text-lg shrink-0">shield</span>
+                  <span className="text-[var(--text-secondary)] text-[11px] font-light">
+                    <strong className="text-[var(--accent-gold)] font-medium">BULLION RATE PROTECTED:</strong> Your order total is secured against intraday gold rate fluctuations with fully insured armored transit by BVC Logistics.
+                  </span>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 lg:gap-10 mt-2">
               
               {/* Cart Items List */}
               <div className="col-span-1 lg:col-span-7 flex flex-col gap-3">
@@ -176,12 +187,17 @@ export default function CartPage() {
                       <span className="material-symbols-outlined text-[var(--accent-gold)] text-lg mb-1">lock</span>
                       <span className="font-sans text-[8.5px] text-[var(--text-secondary)] font-semibold tracking-wider uppercase">SECURE GATEWAY</span>
                     </div>
+                    {/* Complimentary Packaging Note */}
+                    <p className="text-[10px] text-[var(--text-secondary)] text-center mt-3 font-light italic col-span-2">
+                      Every order includes complimentary Dogra velvet heirloom packaging and BIS Hallmark authenticity documentation.
+                    </p>
                   </div>
                 </div>
               </div>
 
             </div>
-          )}
+          </>
+        )}
         </div>
       </main>
       <Footer />

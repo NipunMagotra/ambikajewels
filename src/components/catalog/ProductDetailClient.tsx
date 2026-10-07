@@ -247,10 +247,15 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
         {/* Metal Finish */}
         <div className="mb-5">
-          <h3 className="font-sans text-xs text-[var(--text-secondary)] mb-2.5 tracking-wider font-semibold uppercase">
-            METAL FINISH: <span className="text-[var(--accent-gold)]">{selectedFinish.toUpperCase()}</span>
-          </h3>
-          <div className="flex gap-3" role="radiogroup" aria-label="Select metal finish">
+          <div className="flex items-center justify-between mb-2.5">
+            <h3 className="font-sans text-xs text-[var(--text-secondary)] tracking-wider font-semibold uppercase">
+              METAL FINISH: <span className="text-[var(--accent-gold)]">{selectedFinish.toUpperCase()}</span>
+            </h3>
+            <span className="font-sans text-[9px] text-[var(--accent-gold)] tracking-widest uppercase font-semibold">
+              ATELIER HANDCRAFTED
+            </span>
+          </div>
+          <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Select metal finish">
             {(product.metal_finishes && product.metal_finishes.length > 0 ? product.metal_finishes : ['Gold']).map(finish => (
               <button
                 key={finish}
@@ -258,16 +263,19 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 onClick={() => setSelectedFinish(finish)}
                 aria-label={`Select ${finish} metal finish`}
                 aria-pressed={selectedFinish === finish}
-                className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full border-2 focus-visible:ring-1 focus-visible:ring-[var(--accent-gold)] focus:outline-none cursor-pointer ${
-                  selectedFinish === finish ? 'border-[var(--accent-gold)] shadow-[0_0_10px_rgba(216,183,90,0.4)]' : 'border-transparent'
-                } relative group transition-all`}
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-[2px] border transition-all cursor-pointer ${
+                  selectedFinish === finish 
+                    ? 'border-[var(--accent-gold)] bg-[var(--bg-surface)] ring-1 ring-[var(--accent-gold)] text-[var(--text-primary)] font-semibold shadow-xs' 
+                    : 'border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-gold)]/50 text-[var(--text-secondary)]'
+                }`}
                 title={finish}
               >
-                <span className={`absolute inset-0.5 rounded-full ${
+                <span className={`w-3.5 h-3.5 rounded-full border border-black/15 shadow-xs shrink-0 ${
                   finish === 'Gold' ? 'bg-[#FFD700]' : 
                   finish === 'Silver' ? 'bg-[#C0C0C0]' : 
                   'bg-[#B76E79]'
                 }`}></span>
+                <span className="font-sans text-xs uppercase tracking-wider">{finish}</span>
               </button>
             ))}
           </div>
@@ -395,6 +403,27 @@ export default function ProductDetailClient({ product }: { product: Product }) {
               <span className="font-light text-[var(--text-primary)] text-[11px]">{product.seller_details}</span>
             </div>
           </div>
+        </div>
+
+        {/* VIP Video Shopping Salon Card */}
+        <div className="mb-4 p-3 sm:p-3.5 bg-[var(--bg-surface)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px] flex items-center justify-between gap-3">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent-gold)] shrink-0">
+              <span className="material-symbols-outlined text-base">videocam</span>
+            </div>
+            <div>
+              <p className="font-serif text-xs sm:text-sm text-[var(--text-primary)] font-medium">VIP Video Shopping Salon</p>
+              <p className="font-sans text-[10px] text-[var(--text-secondary)] font-light">Inspect this heirloom live with our Jammu showroom karigars</p>
+            </div>
+          </div>
+          <a
+            href={`https://wa.me/919086098457?text=Namaste!%20I%20would%20like%20to%20schedule%20a%20private%20video%20appointment%20to%20view%20${encodeURIComponent(product.name)}.`}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-[9.5px] font-sans font-semibold text-[var(--accent-gold)] hover:bg-[var(--accent-gold)] hover:text-white border border-[var(--accent-gold)]/60 px-2.5 py-1.5 rounded-[2px] transition-colors uppercase tracking-wider shrink-0"
+          >
+            Schedule
+          </a>
         </div>
 
         {/* Quantity & Action Buttons */}

@@ -106,16 +106,36 @@ export default async function CollectionsPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">
           {/* Collection Heading */}
-          <div className="text-center mb-4 sm:mb-6">
-            <span className="font-sans text-[10px] sm:text-xs text-[var(--accent-gold)] tracking-[0.3em] uppercase block mb-1 font-semibold">
+          <div className="text-center mb-6 sm:mb-8">
+            <span className="font-sans text-[10px] sm:text-xs text-[var(--accent-gold)] tracking-[0.3em] uppercase block mb-1.5 font-semibold">
               COUTURE COLLECTION
             </span>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal">
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal mb-2.5">
               {category || 'Timeless Heritage'}
             </h1>
+            <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl mx-auto font-light leading-relaxed">
+              {category === 'Necklaces'
+                ? 'Bridal Haars, traditional Dogra Naman chokers, and everyday chains handcrafted in 22K hallmarked gold and certified diamonds.'
+                : category === 'Earrings'
+                ? 'Signature Dogri Jhumkis, Polki chandbalis, and solitaire studs reflecting Jammu royal craft and modern elegance.'
+                : category === 'Bangles'
+                ? 'Hand-embossed Dogra Kadas, antique bridal bangles, and lightweight daily bracelets with secure screw clasps.'
+                : category === 'Rings'
+                ? 'Statement cocktail rings, classic engagement solitaires, and Dogra filigree bands cast in 22K and 18K solid gold.'
+                : category === 'Pendants'
+                ? 'Sacred mandalas, diamond solitaires, and heritage motifs designed for auspicious daily wear.'
+                : category === 'Bridal Sets'
+                ? 'Complete trousseau ensembles featuring choker, long haar, matching earrings, and maang tikka for timeless ceremonies.'
+                : 'Explore authentic Dogra heritage heirlooms, bridal couture, and modern fine jewellery handcrafted by master karigars in Jammu.'}
+            </p>
+            <div className="mt-3 flex items-center justify-center gap-2">
+              <span className="font-sans text-[9.5px] text-[var(--accent-gold)] tracking-widest uppercase bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-1 rounded-full font-medium">
+                {displayProducts.length} HEIRLOOM CREATIONS AVAILABLE
+              </span>
+            </div>
           </div>
 
           <FilterBar />

@@ -13,7 +13,7 @@ export default function PrivacyPolicyPage() {
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-24 lg:pb-section-gap">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-24 lg:pb-section-gap">
         <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-4xl">
           {/* Breadcrumb */}
           <div className="flex items-center gap-2 font-label-caps text-[10px] text-on-surface-variant mb-6">

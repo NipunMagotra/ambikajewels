@@ -94,7 +94,7 @@ export default async function ProductPage({
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">
           {/* Breadcrumb */}
           <div className="flex flex-wrap items-center gap-1.5 font-sans text-[9px] sm:text-[10px] text-[var(--text-secondary)] mb-4 uppercase tracking-wider font-medium">

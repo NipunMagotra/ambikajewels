@@ -13,36 +13,36 @@ export default function HeritageSection() {
         </div>
         
         {/* Desktop Absolute Badge */}
-        <div className="absolute -bottom-6 -right-6 w-64 bg-[var(--bg-card)] border border-[var(--border-card)] p-5 hidden lg:block shadow-xl rounded-[2px]">
+        <div className="absolute -bottom-6 -right-6 w-72 bg-[var(--bg-card)] border border-[var(--border-card)] p-5 hidden lg:block shadow-xl rounded-[2px]">
           <p className="font-serif text-sm italic text-[var(--text-primary)] leading-relaxed">
-            &ldquo;Every piece of jewellery is a story carved in gold, a memory meant to last for generations.&rdquo;
+            &ldquo;Every piece of jewellery is a story carved in gold, an heirloom meant to be cherished across generations.&rdquo;
           </p>
           <p className="font-sans text-[10px] text-[var(--accent-gold)] mt-3 font-semibold tracking-[0.2em] uppercase">
-            &mdash; MASTER KARIGAR
+            MASTER KARIGAR &bull; JAMMU ATELIER
           </p>
         </div>
 
         {/* Mobile Inline Quote */}
-        <div className="mt-3 lg:hidden bg-[var(--bg-card)] border border-[var(--border-card)] p-4 text-center rounded-[2px] shadow-sm">
+        <div className="mt-3 lg:hidden bg-[var(--bg-card)] border border-[var(--border-card)] p-4 text-center rounded-[2px] shadow-xs">
           <p className="font-serif text-xs sm:text-sm italic text-[var(--text-primary)]">
-            &ldquo;Every piece of jewellery is a story carved in gold, a memory meant to last for generations.&rdquo;
+            &ldquo;Every piece of jewellery is a story carved in gold, an heirloom meant to be cherished across generations.&rdquo;
           </p>
           <p className="font-sans text-[10px] text-[var(--accent-gold)] mt-2 font-semibold tracking-[0.2em] uppercase">
-            &mdash; MASTER KARIGAR
+            MASTER KARIGAR &bull; JAMMU ATELIER
           </p>
         </div>
       </div>
       
       {/* Narrative Story */}
       <div className="lg:pl-6 order-1 lg:order-2 text-center lg:text-left">
-        <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold mb-2 block">
-          ESTD. 2021
+        <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.35em] uppercase font-semibold mb-2 block">
+          ESTD. 1998 &bull; JAMMU
         </span>
-        <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal mb-3 sm:mb-4 leading-tight">
-          A Legacy of <span className="italic font-normal gold-text-gradient">Authentic Craft</span>
+        <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal mb-3 sm:mb-4 leading-tight tracking-tight">
+          A Legacy of <span className="italic font-normal gold-text-gradient">Dogra Craftsmanship</span>
         </h2>
         <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-4 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
-          Founded in Lower Roop Nagar, Jammu, Ambika Jewels stands as a beacon of purity and craftsmanship. Every piece is handcrafted by master artisans using generations-old Dogra techniques, ensuring a legacy that shines through time.
+          Rooted in Lower Roop Nagar, Jammu, Ambika Jewels preserves authentic Dogra goldsmithing traditions. From intricate filigree Jhumkis to regal Naman sets, every creation is hand-forged by generational karigars and assayed with mandatory 6-digit HUID BIS hallmarking.
         </p>
 
         {/* Heritage Trust Badges */}
