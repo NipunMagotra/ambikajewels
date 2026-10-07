@@ -1,20 +1,84 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/context/CartContext';
 import type { Product } from '@/types';
 import { getProductWhatsAppUrl } from '@/lib/whatsapp';
 import { siteConfig } from '@/config/siteConfig';
 
+import type { Swiper as SwiperType } from 'swiper';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Navigation, Pagination, Keyboard, A11y } from 'swiper/modules';
+import mediumZoom from 'medium-zoom';
+
+import 'swiper/css';
+import 'swiper/css/navigation';
+import 'swiper/css/pagination';
+
 export default function ProductDetailClient({ product }: { product: Product }) {
   const router = useRouter();
   const { dispatch } = useCart();
+
+  const galleryImages = (product.images && product.images.length > 0)
+    ? product.images
+    : ['/hero-clean.png'];
+
+  const perspectiveLabels = [
+    '01 • MASTERPIECE SILHOUETTE',
+    '02 • 45° PROFILE & SETTING',
+    '03 • MACRO GEMSTONE & 22K HALLMARK',
+    '04 • ON-MODEL SCALE & PROPORTIONS',
+    '05 • ATELIER DETAILS'
+  ];
+
   const [selectedFinish, setSelectedFinish] = useState(product.metal_finishes?.[0] || 'Gold');
   const [quantity, setQuantity] = useState(1);
-  const [activeImage, setActiveImage] = useState(product.images?.[0] || '/hero-clean.png');
+  const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
+  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
+  const [activeImage, setActiveImage] = useState(galleryImages[0]);
+  const [isDriftActive, setIsDriftActive] = useState(false);
+  const [driftPos, setDriftPos] = useState({ x: 50, y: 50 });
+  const [isLoupeEnabled, setIsLoupeEnabled] = useState(true);
   const [showPriceBreakup, setShowPriceBreakup] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const mediumZoomRef = useRef<ReturnType<typeof mediumZoom> | null>(null);
+
+  useEffect(() => {
+    const images = document.querySelectorAll<HTMLImageElement>('.medium-zoomable');
+    if (images.length > 0) {
+      mediumZoomRef.current = mediumZoom(images, {
+        background: 'rgba(15, 13, 14, 0.96)',
+        margin: 24,
+        scrollOffset: 50,
+      });
+    }
+
+    return () => {
+      mediumZoomRef.current?.detach();
+    };
+  }, [galleryImages]);
+
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!isLoupeEnabled) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
+    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
+    setDriftPos({ x, y });
+    setIsDriftActive(true);
+  };
+
+  const handleMouseLeave = () => {
+    setIsDriftActive(false);
+  };
+
+  const handleOpenMediumZoom = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const targetImg = document.querySelector<HTMLImageElement>(`.medium-zoomable[data-slide-index="${activeSlideIndex}"]`);
+    if (targetImg && mediumZoomRef.current) {
+      mediumZoomRef.current.open({ target: targetImg });
+    }
+  };
 
   const catStr = (product.category || '').toLowerCase();
   const nameStr = (product.name || '').toLowerCase();
@@ -110,19 +174,23 @@ export default function ProductDetailClient({ product }: { product: Product }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-14">
-      {/* Product Image Gallery */}
+      {/* Product Image Gallery: Multi-Angle Swiper + Drift 2.8x Loupe + Medium-Zoom Lightbox */}
       <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
-        {/* Thumbnails */}
+        {/* Thumbnails (Preserving all a11y attributes for regression tests) */}
         <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[500px] no-scrollbar" role="region" aria-label="Product image thumbnails">
-          {(product.images || []).map((img, i) => (
+          {galleryImages.map((img, i) => (
             <button
               key={i}
               type="button"
-              onClick={() => setActiveImage(img)}
+              onClick={() => {
+                setActiveImage(img);
+                setActiveSlideIndex(i);
+                swiperInstance?.slideTo(i);
+              }}
               aria-label={`View image ${i + 1} of ${product.name}`}
               aria-pressed={activeImage === img}
-              className={`w-16 h-16 sm:w-20 sm:h-20 bg-[var(--bg-surface)] border transition-all shrink-0 rounded-[2px] overflow-hidden focus-visible:ring-1 focus-visible:ring-[var(--accent-gold)] focus:outline-none cursor-pointer ${
-                activeImage === img ? 'border-[var(--accent-gold)] ring-1 ring-[var(--accent-gold)]' : 'border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/60'
+              className={`w-16 h-16 sm:w-20 sm:h-20 bg-[var(--bg-surface)] border transition-all shrink-0 rounded-[2px] overflow-hidden focus-visible:ring-1 focus-visible:ring-[var(--accent-gold)] focus:outline-none cursor-pointer relative group ${
+                activeImage === img ? 'border-[var(--accent-gold)] ring-1 ring-[var(--accent-gold)] shadow-xs' : 'border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/60'
               }`}
             >
               <img 
@@ -130,26 +198,151 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 alt={`${product.name} thumbnail ${i + 1}`}
                 referrerPolicy="no-referrer"
                 onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
-                className="w-full h-full object-cover" 
+                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
               />
+              <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[7.5px] text-white/90 text-center py-0.5 uppercase tracking-wider font-mono">
+                0{i + 1}
+              </span>
             </button>
           ))}
         </div>
 
-        {/* Main Display Image */}
-        <div className="flex-1 bg-[var(--bg-surface)] aspect-[3/4] sm:aspect-square lg:aspect-auto lg:h-[620px] border border-[var(--border-card)] shadow-[var(--card-shadow)] overflow-hidden rounded-[2px] relative">
-          <img 
-            src={activeImage || '/hero-clean.png'} 
-            alt={product.name}
-            referrerPolicy="no-referrer"
-            onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
-            className="w-full h-full object-cover transition-transform duration-700 hover:scale-105" 
-          />
-          {purityBadge && (
-            <span className="absolute top-3 left-3 bg-[var(--bg-main)]/90 text-[var(--accent-gold)] font-sans text-[8.5px] sm:text-[9.5px] px-2.5 py-1 font-semibold tracking-[0.2em] backdrop-blur-xs border border-[var(--border-card)] rounded-[2px] uppercase">
-              {purityBadge}
-            </span>
-          )}
+        {/* Main Display: Swiper Carousel & Drift 2.8x Loupe Lens */}
+        <div className="flex-1 bg-[var(--bg-surface)] aspect-[3/4] sm:aspect-square lg:aspect-auto lg:h-[620px] border border-[var(--border-card)] shadow-[var(--card-shadow)] overflow-hidden rounded-[2px] relative flex flex-col justify-between">
+          
+          {/* Top Gallery HUD: Purity, Perspective Angle, & Zoom Controls */}
+          <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between pointer-events-none">
+            <div className="flex items-center gap-2">
+              {purityBadge && (
+                <span className="bg-[var(--bg-main)]/90 text-[var(--accent-gold)] font-sans text-[8.5px] sm:text-[9.5px] px-2.5 py-1 font-semibold tracking-[0.2em] backdrop-blur-xs border border-[var(--border-card)] rounded-[2px] uppercase">
+                  {purityBadge}
+                </span>
+              )}
+              <span className="hidden sm:inline-block bg-black/70 text-white font-mono text-[8px] sm:text-[9px] px-2 py-1 tracking-wider rounded-[2px] uppercase backdrop-blur-xs border border-white/10">
+                {perspectiveLabels[activeSlideIndex % perspectiveLabels.length]}
+              </span>
+            </div>
+
+            {/* Interactive Zoom Controls */}
+            <div className="flex items-center gap-1.5 pointer-events-auto">
+              <button
+                type="button"
+                onClick={() => setIsLoupeEnabled(!isLoupeEnabled)}
+                title={isLoupeEnabled ? 'Drift 2.8x Loupe Enabled' : 'Enable Drift Loupe'}
+                className={`px-2.5 py-1 rounded-[2px] text-[8.5px] font-mono tracking-wider transition-colors flex items-center gap-1 border backdrop-blur-xs cursor-pointer ${
+                  isLoupeEnabled 
+                    ? 'bg-[var(--accent-gold)] text-white border-[var(--accent-gold)] shadow-xs' 
+                    : 'bg-black/60 text-white/80 border-white/20 hover:text-white'
+                }`}
+              >
+                <span className="material-symbols-outlined text-[11px]">search</span>
+                <span className="hidden sm:inline">2.8X LOUPE</span>
+              </button>
+
+              <button
+                type="button"
+                onClick={handleOpenMediumZoom}
+                title="Fullscreen High-Resolution Inspection (Medium-Zoom)"
+                className="bg-black/60 hover:bg-[var(--accent-gold)] text-white/90 hover:text-white border border-white/20 hover:border-[var(--accent-gold)] px-2.5 py-1 rounded-[2px] text-[8.5px] font-mono tracking-wider transition-colors flex items-center gap-1 backdrop-blur-xs cursor-pointer"
+              >
+                <span className="material-symbols-outlined text-[11px]">fullscreen</span>
+                <span className="hidden sm:inline">EXPAND</span>
+              </button>
+            </div>
+          </div>
+
+          {/* Swiper Image Carousel with Drift Loupe Interaction */}
+          <div 
+            className="w-full h-full relative overflow-hidden"
+            onMouseMove={handleMouseMove}
+            onMouseLeave={handleMouseLeave}
+          >
+            <Swiper
+              modules={[Navigation, Pagination, Keyboard, A11y]}
+              onSwiper={setSwiperInstance}
+              onSlideChange={(s) => {
+                setActiveSlideIndex(s.activeIndex);
+                if (galleryImages[s.activeIndex]) {
+                  setActiveImage(galleryImages[s.activeIndex]);
+                }
+              }}
+              keyboard={{ enabled: true }}
+              navigation={{
+                prevEl: '.jewellery-prev-btn',
+                nextEl: '.jewellery-next-btn',
+              }}
+              pagination={{
+                clickable: true,
+                el: '.jewellery-pagination',
+              }}
+              spaceBetween={0}
+              slidesPerView={1}
+              className="w-full h-full jewellery-gallery-swiper"
+            >
+              {galleryImages.map((img, i) => (
+                <SwiperSlide key={i} className="w-full h-full relative overflow-hidden flex items-center justify-center">
+                  <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
+                    <img
+                      src={img}
+                      data-slide-index={i}
+                      alt={`${product.name} - ${perspectiveLabels[i % perspectiveLabels.length] || `Angle ${i + 1}`}`}
+                      referrerPolicy="no-referrer"
+                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
+                      className={`medium-zoomable w-full h-full object-cover transition-transform duration-200 select-none cursor-zoom-in ${
+                        isDriftActive && isLoupeEnabled && activeSlideIndex === i ? 'scale-[2.8]' : 'scale-100'
+                      }`}
+                      style={
+                        isDriftActive && isLoupeEnabled && activeSlideIndex === i
+                          ? { transformOrigin: `${driftPos.x}% ${driftPos.y}%` }
+                          : undefined
+                      }
+                    />
+
+                    {/* Drift 2.8x Loupe Target Crosshairs Indicator */}
+                    {isDriftActive && isLoupeEnabled && activeSlideIndex === i && (
+                      <div
+                        className="pointer-events-none absolute w-24 h-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--accent-gold)] shadow-[0_0_20px_rgba(216,183,90,0.6)] backdrop-brightness-110 hidden md:block z-10"
+                        style={{ left: `${driftPos.x}%`, top: `${driftPos.y}%` }}
+                      >
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <span className="text-[7.5px] font-mono font-bold text-white tracking-widest bg-black/80 px-1.5 py-0.5 rounded border border-[var(--accent-gold)]/50">
+                            2.8X LOUPE
+                          </span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SwiperSlide>
+              ))}
+            </Swiper>
+
+            {/* Custom Luxury Navigation Chevrons */}
+            <button
+              type="button"
+              aria-label="Previous jewelry angle"
+              className="jewellery-prev-btn absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 bg-[var(--bg-main)]/90 hover:bg-[var(--accent-gold)] text-[var(--accent-gold)] hover:text-white border border-[var(--border-subtle)] rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer backdrop-blur-xs"
+            >
+              <span className="material-symbols-outlined text-lg">chevron_left</span>
+            </button>
+            <button
+              type="button"
+              aria-label="Next jewelry angle"
+              className="jewellery-next-btn absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 bg-[var(--bg-main)]/90 hover:bg-[var(--accent-gold)] text-[var(--accent-gold)] hover:text-white border border-[var(--border-subtle)] rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer backdrop-blur-xs"
+            >
+              <span className="material-symbols-outlined text-lg">chevron_right</span>
+            </button>
+          </div>
+
+          {/* Bottom HUD: Pagination & Macro Inspection Hint */}
+          <div className="p-2.5 bg-gradient-to-t from-black/60 to-transparent absolute bottom-0 inset-x-0 z-20 flex items-center justify-between text-white/90">
+            <div className="jewellery-pagination flex gap-1.5 items-center"></div>
+            <p className="font-sans text-[9px] text-white/80 tracking-wider flex items-center gap-1 font-light">
+              <span className="material-symbols-outlined text-xs text-[var(--accent-gold)]">zoom_in</span>
+              <span className="hidden sm:inline">Hover for 2.8x Drift Loupe • Click image or EXPAND for Medium-Zoom</span>
+              <span className="sm:hidden">Swipe angles • Tap EXPAND to inspect</span>
+            </p>
+          </div>
+
         </div>
       </div>
 
