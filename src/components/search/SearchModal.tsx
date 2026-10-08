@@ -3,7 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { mockProducts } from '@/data/mockProducts';
+import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { searchCatalog } from '@/lib/catalogSearch';
 import type { Product } from '@/types';
 
@@ -17,14 +17,16 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState('');
   const [results, setResults] = useState<Product[]>([]);
+  const [catalog, setCatalog] = useState<Product[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
 
-  // Focus input when opened
+  // Focus input and load the real catalog when opened
   useEffect(() => {
-    if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 50);
-      setQuery('');
-      setResults(mockProducts.slice(0, 4)); // Show featured recommendations by default
+    if (!isOpen) return;
+    setTimeout(() => inputRef.current?.focus(), 50);
+    setQuery('');
+    if (isSupabaseConfigured) {
+      supabase.from('products').select('*').then(({ data }) => setCatalog((data as Product[]) || []));
     }
   }, [isOpen]);
 
@@ -55,10 +57,9 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
 
   // Real-time search filter
   useEffect(() => {
-    const matches = searchCatalog(mockProducts, query, 4);
-    setResults(matches);
+    setResults(searchCatalog(catalog, query, 4));
     setSelectedIndex(0);
-  }, [query]);
+  }, [query, catalog]);
 
   if (!isOpen) return null;
 

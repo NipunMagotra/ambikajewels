@@ -10,7 +10,6 @@ import { siteConfig } from '@/config/siteConfig';
 import type { Swiper as SwiperType } from 'swiper';
 import { Swiper, SwiperSlide } from 'swiper/react';
 import { Navigation, Pagination, Keyboard, A11y } from 'swiper/modules';
-import mediumZoom from 'medium-zoom';
 
 import 'swiper/css';
 import 'swiper/css/navigation';
@@ -27,7 +26,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const perspectiveLabels = [
     '01 • MASTERPIECE SILHOUETTE',
     '02 • 45° PROFILE & SETTING',
-    '03 • MACRO GEMSTONE & 22K HALLMARK',
+    '03 • CRAFTSMANSHIP & 22K HALLMARK',
     '04 • ON-MODEL SCALE & PROPORTIONS',
     '05 • ATELIER DETAILS'
   ];
@@ -37,48 +36,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
   const [activeSlideIndex, setActiveSlideIndex] = useState(0);
   const [activeImage, setActiveImage] = useState(galleryImages[0]);
-  const [isDriftActive, setIsDriftActive] = useState(false);
-  const [driftPos, setDriftPos] = useState({ x: 50, y: 50 });
-  const [isLoupeEnabled, setIsLoupeEnabled] = useState(true);
   const [showPriceBreakup, setShowPriceBreakup] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
-  const mediumZoomRef = useRef<ReturnType<typeof mediumZoom> | null>(null);
-
-  useEffect(() => {
-    const images = document.querySelectorAll<HTMLImageElement>('.medium-zoomable');
-    if (images.length > 0) {
-      mediumZoomRef.current = mediumZoom(images, {
-        background: 'rgba(15, 13, 14, 0.96)',
-        margin: 24,
-        scrollOffset: 50,
-      });
-    }
-
-    return () => {
-      mediumZoomRef.current?.detach();
-    };
-  }, [galleryImages]);
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!isLoupeEnabled) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = Math.max(0, Math.min(100, ((e.clientX - rect.left) / rect.width) * 100));
-    const y = Math.max(0, Math.min(100, ((e.clientY - rect.top) / rect.height) * 100));
-    setDriftPos({ x, y });
-    setIsDriftActive(true);
-  };
-
-  const handleMouseLeave = () => {
-    setIsDriftActive(false);
-  };
-
-  const handleOpenMediumZoom = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    const targetImg = document.querySelector<HTMLImageElement>(`.medium-zoomable[data-slide-index="${activeSlideIndex}"]`);
-    if (targetImg && mediumZoomRef.current) {
-      mediumZoomRef.current.open({ target: targetImg });
-    }
-  };
 
   const catStr = (product.category || '').toLowerCase();
   const nameStr = (product.name || '').toLowerCase();
@@ -210,7 +169,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         {/* Main Display: Swiper Carousel & Drift 2.8x Loupe Lens */}
         <div className="flex-1 bg-[var(--bg-surface)] aspect-[3/4] sm:aspect-square lg:aspect-auto lg:h-[620px] border border-[var(--border-card)] shadow-[var(--card-shadow)] overflow-hidden rounded-[2px] relative flex flex-col justify-between">
           
-          {/* Top Gallery HUD: Purity, Perspective Angle, & Zoom Controls */}
+          {/* Top Gallery HUD: Purity & Perspective Angle */}
           <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between pointer-events-none">
             <div className="flex items-center gap-2">
               {purityBadge && (
@@ -222,41 +181,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                 {perspectiveLabels[activeSlideIndex % perspectiveLabels.length]}
               </span>
             </div>
-
-            {/* Interactive Zoom Controls */}
-            <div className="flex items-center gap-1.5 pointer-events-auto">
-              <button
-                type="button"
-                onClick={() => setIsLoupeEnabled(!isLoupeEnabled)}
-                title={isLoupeEnabled ? 'Drift 2.8x Loupe Enabled' : 'Enable Drift Loupe'}
-                className={`px-2.5 py-1 rounded-[2px] text-[8.5px] font-mono tracking-wider transition-colors flex items-center gap-1 border backdrop-blur-xs cursor-pointer ${
-                  isLoupeEnabled 
-                    ? 'bg-[var(--accent-gold)] text-white border-[var(--accent-gold)] shadow-xs' 
-                    : 'bg-black/60 text-white/80 border-white/20 hover:text-white'
-                }`}
-              >
-                <span className="material-symbols-outlined text-[11px]">search</span>
-                <span className="hidden sm:inline">2.8X LOUPE</span>
-              </button>
-
-              <button
-                type="button"
-                onClick={handleOpenMediumZoom}
-                title="Fullscreen High-Resolution Inspection (Medium-Zoom)"
-                className="bg-black/60 hover:bg-[var(--accent-gold)] text-white/90 hover:text-white border border-white/20 hover:border-[var(--accent-gold)] px-2.5 py-1 rounded-[2px] text-[8.5px] font-mono tracking-wider transition-colors flex items-center gap-1 backdrop-blur-xs cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-[11px]">fullscreen</span>
-                <span className="hidden sm:inline">EXPAND</span>
-              </button>
-            </div>
           </div>
 
-          {/* Swiper Image Carousel with Drift Loupe Interaction */}
-          <div 
-            className="w-full h-full relative overflow-hidden"
-            onMouseMove={handleMouseMove}
-            onMouseLeave={handleMouseLeave}
-          >
+          {/* Swiper Image Carousel */}
+          <div className="w-full h-full relative overflow-hidden">
             <Swiper
               modules={[Navigation, Pagination, Keyboard, A11y]}
               onSwiper={setSwiperInstance}
@@ -288,29 +216,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                       alt={`${product.name} - ${perspectiveLabels[i % perspectiveLabels.length] || `Angle ${i + 1}`}`}
                       referrerPolicy="no-referrer"
                       onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
-                      className={`medium-zoomable w-full h-full object-cover transition-transform duration-200 select-none cursor-zoom-in ${
-                        isDriftActive && isLoupeEnabled && activeSlideIndex === i ? 'scale-[2.8]' : 'scale-100'
-                      }`}
-                      style={
-                        isDriftActive && isLoupeEnabled && activeSlideIndex === i
-                          ? { transformOrigin: `${driftPos.x}% ${driftPos.y}%` }
-                          : undefined
-                      }
+                      className="w-full h-full object-cover select-none"
                     />
-
-                    {/* Drift 2.8x Loupe Target Crosshairs Indicator */}
-                    {isDriftActive && isLoupeEnabled && activeSlideIndex === i && (
-                      <div
-                        className="pointer-events-none absolute w-24 h-24 -translate-x-1/2 -translate-y-1/2 rounded-full border border-[var(--accent-gold)] shadow-[0_0_20px_rgba(216,183,90,0.6)] backdrop-brightness-110 hidden md:block z-10"
-                        style={{ left: `${driftPos.x}%`, top: `${driftPos.y}%` }}
-                      >
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <span className="text-[7.5px] font-mono font-bold text-white tracking-widest bg-black/80 px-1.5 py-0.5 rounded border border-[var(--accent-gold)]/50">
-                            2.8X LOUPE
-                          </span>
-                        </div>
-                      </div>
-                    )}
                   </div>
                 </SwiperSlide>
               ))}
@@ -333,13 +240,11 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             </button>
           </div>
 
-          {/* Bottom HUD: Pagination & Macro Inspection Hint */}
+          {/* Bottom HUD: Pagination & Angle Counter */}
           <div className="p-2.5 bg-gradient-to-t from-black/60 to-transparent absolute bottom-0 inset-x-0 z-20 flex items-center justify-between text-white/90">
             <div className="jewellery-pagination flex gap-1.5 items-center"></div>
             <p className="font-sans text-[9px] text-white/80 tracking-wider flex items-center gap-1 font-light">
-              <span className="material-symbols-outlined text-xs text-[var(--accent-gold)]">zoom_in</span>
-              <span className="hidden sm:inline">Hover for 2.8x Drift Loupe • Click image or EXPAND for Medium-Zoom</span>
-              <span className="sm:hidden">Swipe angles • Tap EXPAND to inspect</span>
+              <span>{activeSlideIndex + 1} of {galleryImages.length} VIEWS</span>
             </p>
           </div>
 

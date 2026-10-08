@@ -179,28 +179,97 @@ export default function Footer() {
           </div>
         </div>
         
-        {/* Map and Copyright */}
-        <div className="grid grid-cols-12 gap-6 items-center border-t border-[var(--border-subtle)] pt-5">
-          <div className="col-span-12 lg:col-span-7 h-40 bg-[var(--bg-surface)] border border-[var(--border-card)] overflow-hidden relative rounded-[2px]">
-            <iframe
-              src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13414.288277259163!2d74.8304221!3d32.7715891!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391e84e5a95f9227%3A0xb7cf9f3238914619!2sRoop%20Nagar%2C%20Jammu%2C%20Jammu%20and%20Kashmir%20180013!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
-              width="100%"
-              height="100%"
-              className="border-0 opacity-90 contrast-[1.05] dark:invert dark:hue-rotate-180 dark:contrast-125 dark:opacity-85"
-              allowFullScreen={false}
-              loading="lazy"
-              referrerPolicy="no-referrer-when-downgrade"
-              title="Ambika Jewels Showroom Location - Lower Roop Nagar, Jammu"
-            />
+        {/* Jammu Showroom Location & Map */}
+        <div className="border-t border-[var(--border-subtle)] pt-6 pb-2">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-stretch">
+            {/* Showroom Details Card */}
+            <div className="col-span-12 lg:col-span-5 bg-[var(--bg-surface)] border border-[var(--border-card)] p-4 sm:p-5 rounded-[2px] flex flex-col justify-between shadow-xs">
+              <div>
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="w-2 h-2 rounded-full bg-[var(--accent-gold)]"></span>
+                  <span className="font-sans text-[10px] text-[var(--accent-gold)] tracking-[0.25em] uppercase font-semibold">
+                    VISIT OUR JAMMU SHOWROOM
+                  </span>
+                </div>
+                <h4 className="font-serif text-base sm:text-lg text-[var(--text-primary)] font-normal mb-1.5">
+                  Ambika Jewels Showroom &amp; Atelier
+                </h4>
+                <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed mb-3">
+                  Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, Jammu &amp; Kashmir 180013, India
+                </p>
+                <div className="font-sans text-[11px] text-[var(--text-secondary)] space-y-1 pb-3 border-b border-[var(--border-subtle)]">
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-xs text-[var(--accent-gold)]">schedule</span>
+                    <span>Monday &ndash; Saturday: 10:00 AM &ndash; 8:00 PM | Sunday: Open</span>
+                  </div>
+                  <div className="flex items-center gap-1.5">
+                    <span className="material-symbols-outlined text-xs text-[var(--accent-gold)]">call</span>
+                    <span>+91 9682589725 &bull; +91 9086098457</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="pt-3 flex flex-wrap gap-2.5 items-center">
+                <a
+                  href="https://www.google.com/maps/search/?api=1&query=Shop+no.3,+E.W.S+colony,+Sector+1,+Lower+Roop+Nagar,+Jammu,+Jammu+%26+Kashmir+180013"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--accent-gold)] text-white text-[11px] font-sans font-semibold tracking-wider uppercase rounded-[2px] hover:opacity-90 transition-opacity cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm">directions</span>
+                  <span>GET DIRECTIONS</span>
+                </a>
+                <a
+                  href="https://wa.me/919086098457?text=Namaste!%20I%20would%20like%20to%20visit%20the%20Ambika%20Jewels%20showroom%20in%20Jammu."
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[var(--bg-main)] border border-[var(--border-card)] text-[var(--text-primary)] text-[11px] font-sans font-medium tracking-wider uppercase rounded-[2px] hover:border-[var(--accent-gold)] transition-colors cursor-pointer"
+                >
+                  <span className="material-symbols-outlined text-sm text-emerald-600">chat</span>
+                  <span>BOOK APPOINTMENT</span>
+                </a>
+              </div>
+            </div>
+
+            {/* Embedded Google Map */}
+            <div className="col-span-12 lg:col-span-7 min-h-[220px] bg-[var(--bg-surface)] border border-[var(--border-card)] overflow-hidden relative rounded-[2px] shadow-xs flex flex-col">
+              <div className="bg-[var(--bg-card)]/90 backdrop-blur-xs px-3 py-1.5 border-b border-[var(--border-subtle)] flex items-center justify-between text-[10px] font-sans text-[var(--text-secondary)]">
+                <span className="flex items-center gap-1.5 font-medium text-[var(--text-primary)]">
+                  <span className="material-symbols-outlined text-xs text-[var(--accent-gold)]">location_on</span>
+                  Lower Roop Nagar, Jammu (180013)
+                </span>
+                <span className="text-[9px] uppercase tracking-wider text-[var(--accent-gold)]">Interactive Map</span>
+              </div>
+              <div className="flex-1 w-full relative min-h-[180px]">
+                <iframe
+                  src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d13414.288277259163!2d74.8304221!3d32.7715891!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x391e84e5a95f9227%3A0xb7cf9f3238914619!2sRoop%20Nagar%2C%20Jammu%2C%20Jammu%20and%20Kashmir%20180013!5e0!3m2!1sen!2sin!4v1700000000000!5m2!1sen!2sin"
+                  width="100%"
+                  height="100%"
+                  className="border-0 opacity-90 contrast-[1.05] dark:invert dark:hue-rotate-180 dark:contrast-125 dark:opacity-85 absolute inset-0"
+                  allowFullScreen={false}
+                  loading="lazy"
+                  referrerPolicy="no-referrer-when-downgrade"
+                  title="Ambika Jewels Showroom Location - Lower Roop Nagar, Jammu"
+                />
+              </div>
+            </div>
           </div>
-          <div className="col-span-12 lg:col-span-5 flex flex-col items-start lg:items-end justify-center gap-1.5">
-            <p className="font-sans text-xs text-[var(--text-secondary)] text-left lg:text-right leading-relaxed font-light">
+
+          {/* Copyright & Statutory */}
+          <div className="mt-6 pt-4 border-t border-[var(--border-subtle)] flex flex-col sm:flex-row items-center justify-between gap-2 text-center sm:text-left">
+            <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed font-light">
               &copy; {new Date().getFullYear()} {siteConfig.legalBusinessName}. ALL RIGHTS RESERVED. <br />
-              Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&amp;K 180013.<br />
               <span className="text-[10px] text-[var(--text-secondary)]/70">
                 Fine jewellery showroom operating under the jurisdiction of Jammu, Jammu &amp; Kashmir.
               </span>
             </p>
+            <div className="flex items-center gap-3 text-[10px] font-sans text-[var(--text-secondary)]">
+              <span>HSN: 7113</span>
+              <span>&bull;</span>
+              <span>BIS: HM/C-9990041009</span>
+              <span>&bull;</span>
+              <span>GSTIN: 01AHWPH9511N1ZX</span>
+            </div>
           </div>
         </div>
       </div>

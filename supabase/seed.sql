@@ -2,9 +2,9 @@
 -- Ambika Jewels — Seed Data
 -- ============================================
 
--- ============================================
--- PRODUCTS
--- ============================================
+-- PRODUCTS: intentionally not seeded. Add real inventory via the admin panel.
+-- (Demo products below are kept only as a commented reference.)
+/*
 INSERT INTO products (name, slug, description, price, display_price, category, images, badges, metal_finishes, stock_status, is_featured, collection, craftsmanship_story) VALUES
 
 -- Necklaces

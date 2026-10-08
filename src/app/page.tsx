@@ -3,7 +3,6 @@ import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MandalaDivider from '@/components/ui/MandalaDivider';
 import HeroSection from '@/components/home/HeroSection';
-import LiveBullionTicker from '@/components/home/LiveBullionTicker';
 import CategoryGrid from '@/components/home/CategoryGrid';
 import VirtualTryOnBanner from '@/components/home/VirtualTryOnBanner';
 import BestSellers from '@/components/home/BestSellers';
@@ -41,7 +40,6 @@ export default async function Home() {
       <Header />
       <main className="min-h-screen bg-background text-on-background overflow-x-hidden pb-20 lg:pb-0">
         <HeroSection />
-        <LiveBullionTicker />
         
         <div className="container mx-auto">
           <CategoryGrid />

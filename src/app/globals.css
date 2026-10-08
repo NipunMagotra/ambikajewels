@@ -396,17 +396,6 @@
     border-radius: 4px;
   }
 
-  /* Medium-Zoom Lightbox Overlay */
-  .medium-zoom-overlay {
-    z-index: 9998 !important;
-    background-color: rgba(15, 13, 14, 0.96) !important;
-    backdrop-filter: blur(10px);
-  }
-  .medium-zoom-image--opened {
-    z-index: 9999 !important;
-    cursor: zoom-out !important;
-    border-radius: 2px;
-  }
 }
 
 html {

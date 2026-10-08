@@ -63,138 +63,87 @@ export default function Header() {
 
   return (
     <>
-      <header className="fixed top-0 left-0 w-full z-50 transition-all shadow-xs">
-        {/* Top Royal Heritage Announcement & Trust Bar */}
-        <div className="bg-[var(--accent-burgundy)] text-[#F7EFE6] text-[9px] sm:text-[10px] font-sans py-1.5 px-3 sm:px-margin-mobile lg:px-margin-desktop border-b border-[var(--border-subtle)] flex items-center justify-between tracking-[0.16em] uppercase">
-          <div className="flex items-center gap-2 sm:gap-4 overflow-hidden whitespace-nowrap">
-            <span className="font-semibold text-[#E8CC70] flex items-center gap-1">
-              <span className="w-1.5 h-1.5 rounded-full bg-[#E8CC70]"></span>
-              JAMMU SHOWROOM
-            </span>
-            <span className="hidden sm:inline text-white/30">&bull;</span>
-            <span className="hidden sm:inline text-white/90">100% BIS Hallmarked 22K/18K Gold with 6-Digit HUID Laser Inscription</span>
-            <span className="sm:hidden text-white/90 truncate">BIS Hallmarked &bull; Insured Armored Delivery</span>
-          </div>
-          <div className="flex items-center gap-3 sm:gap-5 shrink-0">
-            <span className="hidden md:inline text-white/70">Pan-India Armored Transit by BVC</span>
-            <a 
-              href="https://wa.me/919086098457"
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-[#E8CC70] hover:text-white transition-colors flex items-center gap-1 font-semibold"
+      <header className="fixed top-0 left-0 w-full z-50 transition-all shadow-xs bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--border-subtle)]">
+        <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop h-16 flex items-center justify-between">
+          {/* Left: Mobile Menu Toggle / Desktop Navigation */}
+          <div className="flex items-center gap-2 sm:gap-6">
+            <button 
+              onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+              className="lg:hidden text-[var(--text-primary)] hover:text-[var(--accent-gold)] min-w-[44px] min-h-[44px] flex items-center justify-center p-2 focus:outline-none cursor-pointer"
+              aria-label="Toggle Navigation"
             >
-              <span>CONCIERGE</span>
-              <span className="material-symbols-outlined text-[11px]">chat</span>
-            </a>
-          </div>
-        </div>
-
-        {/* Main Minimal Luxury Header */}
-        <div className="bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--border-subtle)]">
-          <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop h-16 flex items-center justify-between">
-            {/* Left: Mobile Menu Toggle / Desktop Navigation */}
-            <div className="flex items-center gap-2 sm:gap-4 lg:gap-6">
-              <button 
-                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="lg:hidden text-[var(--text-primary)] hover:text-[var(--accent-gold)] min-w-[44px] min-h-[44px] flex items-center justify-center p-2 focus:outline-none cursor-pointer"
-                aria-label="Toggle Navigation"
-              >
-                <span className="material-symbols-outlined text-2xl">
-                  {mobileMenuOpen ? 'close' : 'menu'}
-                </span>
-              </button>
-
-              <nav className="hidden lg:flex items-center gap-6">
-                {/* Mega Dropdown for Categories */}
-                <div 
-                  className="relative"
-                  onMouseEnter={() => setCategoriesDropdownOpen(true)}
-                  onMouseLeave={() => setCategoriesDropdownOpen(false)}
-                >
-                  <button 
-                    className="text-[11px] font-sans tracking-[0.22em] uppercase font-semibold text-[var(--accent-gold)] hover:text-[var(--text-primary)] transition-colors flex items-center gap-1 py-2 cursor-pointer"
-                    onClick={() => setCategoriesDropdownOpen(!categoriesDropdownOpen)}
-                  >
-                    COLLECTIONS <span className="material-symbols-outlined text-xs">expand_more</span>
-                  </button>
-
-                  {categoriesDropdownOpen && (
-                    <div className="absolute top-full left-0 w-72 bg-[var(--bg-card)]/98 backdrop-blur-md border border-[var(--border-subtle)] shadow-2xl p-3 grid grid-cols-1 gap-1 animate-in fade-in slide-in-from-top-2 duration-150 rounded-[2px] z-50">
-                      <Link
-                        href="/collections"
-                        className="px-3 py-2 text-xs font-sans text-[var(--accent-gold)] hover:bg-[var(--bg-surface)] rounded-[2px] font-semibold border-b border-[var(--border-subtle)] mb-1 flex justify-between items-center tracking-wider uppercase"
-                        onClick={() => setCategoriesDropdownOpen(false)}
-                      >
-                        <span>ALL COLLECTIONS</span>
-                        <span className="material-symbols-outlined text-xs">arrow_forward</span>
-                      </Link>
-                      {siteConfig.categories.map((cat) => (
-                        <Link
-                          key={cat}
-                          href={`/collections?category=${encodeURIComponent(cat)}`}
-                          className="px-3 py-1.5 text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--accent-gold)] hover:bg-[var(--bg-surface)] rounded-[2px] transition-colors truncate tracking-wider uppercase"
-                          onClick={() => setCategoriesDropdownOpen(false)}
-                        >
-                          {cat}
-                        </Link>
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <Link href="/collections?category=Dogra Heritage Collection" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                  DOGRA HEIRLOOM
-                </Link>
-                <Link href="/collections?category=Bridal Couture" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                  BRIDAL
-                </Link>
-                <Link href="/collections?category=Diamond Jewellery" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                  DIAMONDS
-                </Link>
-                <Link href="/collections?category=Gold Jewellery" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                  22K GOLD
-                </Link>
-              </nav>
-            </div>
-
-            {/* Center: Brand Logo */}
-            <Link href="/" className="text-center group mx-2 truncate flex flex-col items-center">
-              <span className="font-serif text-lg sm:text-2xl lg:text-3xl tracking-[0.18em] sm:tracking-[0.24em] text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] font-normal leading-none block truncate transition-colors">
-                AMBIKA JEWELS
-              </span>
-              <span className="font-sans text-[7px] sm:text-[8px] tracking-[0.4em] text-[var(--accent-gold)] block mt-1 uppercase font-semibold">
-                JAMMU &bull; ESTD. 1998 &bull; FINE JEWELLERY
-              </span>
-            </Link>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-1 sm:gap-2 lg:gap-4">
-            <nav className="hidden lg:flex items-center gap-5 mr-1">
-              <Link href="/services" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                SERVICES
-              </Link>
-              <Link href="/collections?category=Dogra Heritage Collection" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                DOGRA
-              </Link>
-              <Link href="/about" className="text-[11px] font-sans tracking-[0.2em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                ABOUT US
-              </Link>
-            </nav>
-
-            {/* Theme Toggle Button (Light/Dark) */}
-            <button
-              type="button"
-              onClick={toggleTheme}
-              className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors p-2 cursor-pointer"
-              aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
-            >
-              <span className="material-symbols-outlined text-lg sm:text-xl">
-                {isDark ? 'light_mode' : 'dark_mode'}
+              <span className="material-symbols-outlined text-2xl">
+                {mobileMenuOpen ? 'close' : 'menu'}
               </span>
             </button>
 
-            {/* Search Trigger Button with comfortable 44px touch target */}
+            <nav className="hidden lg:flex items-center gap-6">
+              {/* Collections Dropdown */}
+              <div 
+                className="relative"
+                onMouseEnter={() => setCategoriesDropdownOpen(true)}
+                onMouseLeave={() => setCategoriesDropdownOpen(false)}
+              >
+                <Link 
+                  href="/collections"
+                  className="text-[11px] font-sans tracking-[0.22em] uppercase font-semibold text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors flex items-center gap-1 py-2 cursor-pointer"
+                  onClick={() => setCategoriesDropdownOpen(false)}
+                >
+                  COLLECTIONS <span className="material-symbols-outlined text-xs">expand_more</span>
+                </Link>
+
+                {categoriesDropdownOpen && (
+                  <div className="absolute top-full left-0 w-64 bg-[var(--bg-card)]/98 backdrop-blur-md border border-[var(--border-subtle)] shadow-xl p-2.5 grid grid-cols-1 gap-1 animate-in fade-in slide-in-from-top-2 duration-150 rounded-[2px] z-50">
+                    <Link
+                      href="/collections"
+                      className="px-3 py-1.5 text-xs font-sans text-[var(--accent-gold)] hover:bg-[var(--bg-surface)] rounded-[2px] font-semibold border-b border-[var(--border-subtle)] mb-1 flex justify-between items-center tracking-wider uppercase"
+                      onClick={() => setCategoriesDropdownOpen(false)}
+                    >
+                      <span>ALL JEWELLERY</span>
+                      <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                    </Link>
+                    {siteConfig.categories.map((cat) => (
+                      <Link
+                        key={cat}
+                        href={`/collections?category=${encodeURIComponent(cat)}`}
+                        className="px-3 py-1.5 text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--accent-gold)] hover:bg-[var(--bg-surface)] rounded-[2px] transition-colors truncate tracking-wider uppercase"
+                        onClick={() => setCategoriesDropdownOpen(false)}
+                      >
+                        {cat}
+                      </Link>
+                    ))}
+                  </div>
+                )}
+              </div>
+
+              <Link href="/collections?category=Dogra Heritage Collection" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
+                DOGRA HEIRLOOM
+              </Link>
+              <Link href="/collections?category=Bridal Couture" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
+                BRIDAL
+              </Link>
+              <Link href="/services" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
+                SERVICES
+              </Link>
+              <Link href="/about" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
+                ABOUT
+              </Link>
+            </nav>
+          </div>
+
+          {/* Center: Brand Logo */}
+          <Link href="/" className="text-center group mx-2 truncate flex flex-col items-center">
+            <span className="font-serif text-lg sm:text-2xl lg:text-2xl tracking-[0.22em] text-[var(--text-primary)] group-hover:text-[var(--accent-gold)] font-normal leading-none block truncate transition-colors">
+              AMBIKA JEWELS
+            </span>
+            <span className="font-sans text-[7px] sm:text-[8px] tracking-[0.35em] text-[var(--accent-gold)] block mt-1 uppercase font-semibold">
+              JAMMU &bull; ESTD. 1998
+            </span>
+          </Link>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-1 sm:gap-2 lg:gap-3">
+            {/* Search Trigger */}
             <button
               type="button"
               onClick={() => setSearchOpen(true)}
@@ -208,7 +157,20 @@ export default function Header() {
               </span>
             </button>
 
-            {/* Cart Bag with comfortable 44px touch target */}
+            {/* Theme Toggle Button */}
+            <button
+              type="button"
+              onClick={toggleTheme}
+              className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors p-2 cursor-pointer"
+              aria-label={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+              title={isDark ? "Switch to Light Mode" : "Switch to Dark Mode"}
+            >
+              <span className="material-symbols-outlined text-lg sm:text-xl">
+                {isDark ? 'light_mode' : 'dark_mode'}
+              </span>
+            </button>
+
+            {/* Cart Bag */}
             <Link 
               href="/cart" 
               className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors p-2"
@@ -217,17 +179,27 @@ export default function Header() {
               <div className="relative flex items-center justify-center">
                 <span className="material-symbols-outlined text-lg sm:text-xl">shopping_bag</span>
                 {cartCount > 0 && (
-                  <span className="absolute -top-1.5 -right-2 bg-[var(--accent-gold)] text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-sm">
+                  <span className="absolute -top-1.5 -right-2 bg-[var(--accent-gold)] text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
                     {cartCount}
                   </span>
                 )}
               </div>
-              <span className="text-[10px] font-sans font-semibold hidden sm:inline tracking-[0.18em] uppercase">BAG</span>
             </Link>
+
+            {/* Concierge Chat Link */}
+            <a
+              href="https://wa.me/919086098457"
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="Concierge WhatsApp"
+              className="hidden sm:flex min-w-[36px] min-h-[36px] items-center justify-center text-[var(--text-secondary)] hover:text-emerald-600 transition-colors p-1.5"
+              title="Chat with Showroom Concierge"
+            >
+              <span className="material-symbols-outlined text-xl text-emerald-600">chat</span>
+            </a>
           </div>
         </div>
-      </div>
-    </header>
+      </header>
 
       {/* Global Instant Search Modal */}
       <SearchModal isOpen={searchOpen} onClose={() => setSearchOpen(false)} />
@@ -247,7 +219,7 @@ export default function Header() {
           {/* Drawer Panel */}
           <div
             className="absolute left-0 right-0 bg-[var(--bg-card)] border-b border-[var(--border-subtle)] shadow-2xl flex flex-col overflow-y-auto"
-            style={{ top: '92px', maxHeight: 'calc(100dvh - 92px)' }}
+            style={{ top: '64px', maxHeight: 'calc(100dvh - 64px)' }}
           >
             <div className="flex flex-col gap-1 p-5 pb-4">
               <div className="font-sans text-[10px] text-[var(--accent-gold)] tracking-[0.3em] font-semibold border-b border-[var(--border-subtle)] pb-2 uppercase">
