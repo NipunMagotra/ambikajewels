@@ -78,7 +78,7 @@ export default function Header() {
             </button>
 
             <nav className="hidden lg:flex items-center gap-6">
-              {/* Collections Dropdown */}
+              {/* Categories Dropdown */}
               <div 
                 className="relative"
                 onMouseEnter={() => setCategoriesDropdownOpen(true)}
@@ -89,7 +89,7 @@ export default function Header() {
                   className="text-[11px] font-sans tracking-[0.22em] uppercase font-semibold text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors flex items-center gap-1 py-2 cursor-pointer"
                   onClick={() => setCategoriesDropdownOpen(false)}
                 >
-                  COLLECTIONS <span className="material-symbols-outlined text-xs">expand_more</span>
+                  CATEGORIES <span className="material-symbols-outlined text-xs">expand_more</span>
                 </Link>
 
                 {categoriesDropdownOpen && (
@@ -106,7 +106,11 @@ export default function Header() {
                       <Link
                         key={cat}
                         href={`/collections?category=${encodeURIComponent(cat)}`}
-                        className="px-3 py-1.5 text-[11px] font-sans text-[var(--text-secondary)] hover:text-[var(--accent-gold)] hover:bg-[var(--bg-surface)] rounded-[2px] transition-colors truncate tracking-wider uppercase"
+                        className={`px-3 py-1.5 text-[11px] font-sans hover:text-[var(--accent-gold)] hover:bg-[var(--bg-surface)] rounded-[2px] transition-colors truncate tracking-wider uppercase ${
+                          cat === 'Dogra Heritage Collection' || cat === 'Bridal Couture'
+                            ? 'text-[var(--accent-gold)] font-semibold'
+                            : 'text-[var(--text-secondary)] font-normal'
+                        }`}
                         onClick={() => setCategoriesDropdownOpen(false)}
                       >
                         {cat}
@@ -116,12 +120,6 @@ export default function Header() {
                 )}
               </div>
 
-              <Link href="/collections?category=Dogra Heritage Collection" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                DOGRA HEIRLOOM
-              </Link>
-              <Link href="/collections?category=Bridal Couture" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
-                BRIDAL
-              </Link>
               <Link href="/services" className="text-[11px] font-sans tracking-[0.22em] uppercase text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors font-medium">
                 SERVICES
               </Link>
@@ -223,7 +221,7 @@ export default function Header() {
           >
             <div className="flex flex-col gap-1 p-5 pb-4">
               <div className="font-sans text-[10px] text-[var(--accent-gold)] tracking-[0.3em] font-semibold border-b border-[var(--border-subtle)] pb-2 uppercase">
-                BROWSE COLLECTIONS
+                CATEGORIES
               </div>
 
               <Link
@@ -240,7 +238,11 @@ export default function Header() {
                   key={category}
                   href={`/collections?category=${encodeURIComponent(category)}`}
                   onClick={() => setMobileMenuOpen(false)}
-                  className="text-sm font-sans tracking-wide text-[var(--text-primary)] hover:text-[var(--accent-gold)] py-2.5 border-b border-[var(--border-subtle)] flex justify-between items-center"
+                  className={`text-sm font-sans tracking-wide hover:text-[var(--accent-gold)] py-2.5 border-b border-[var(--border-subtle)] flex justify-between items-center ${
+                    category === 'Dogra Heritage Collection' || category === 'Bridal Couture'
+                      ? 'text-[var(--accent-gold)] font-medium'
+                      : 'text-[var(--text-primary)]'
+                  }`}
                 >
                   <span>{category.toUpperCase()}</span>
                   <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]">chevron_right</span>

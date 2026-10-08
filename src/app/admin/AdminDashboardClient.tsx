@@ -1382,14 +1382,14 @@ export default function AdminDashboardClient() {
               <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Legal Entity</span>
                 <h4 className="text-sm font-serif font-medium text-[var(--text-primary)]">{siteConfig.legalBusinessName}</h4>
-                <p className="text-xs text-[var(--text-secondary)] font-mono">{siteConfig.businessStructure}</p>
+                <p className="text-xs text-[var(--text-secondary)] font-mono">{siteConfig.legalEntityType}</p>
               </div>
 
               <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Tax &amp; Hallmarking</span>
-                <p className="text-xs font-mono text-[var(--text-primary)]">GSTIN: {siteConfig.tax.gstin}</p>
-                <p className="text-xs font-mono text-[var(--text-primary)]">PAN: {siteConfig.tax.pan}</p>
-                <p className="text-xs font-mono text-[var(--accent-gold)] font-bold">BIS License: {siteConfig.tax.bisLicenseNumber}</p>
+                <p className="text-xs font-mono text-[var(--text-primary)]">GSTIN: {siteConfig.gstin}</p>
+                <p className="text-xs font-mono text-[var(--text-primary)]">PAN: {siteConfig.pan}</p>
+                <p className="text-xs font-mono text-[var(--accent-gold)] font-bold">BIS License: {siteConfig.bisHallmarkLicense}</p>
               </div>
 
               <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
@@ -1401,7 +1401,7 @@ export default function AdminDashboardClient() {
 
               <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
                 <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Showroom Address</span>
-                <p className="text-xs text-[var(--text-primary)] leading-relaxed">{siteConfig.contact.address}</p>
+                <p className="text-xs text-[var(--text-primary)] leading-relaxed">{siteConfig.address}</p>
                 <p className="text-[11px] text-[var(--accent-gold)] mt-1">{siteConfig.timings}</p>
               </div>
             </div>

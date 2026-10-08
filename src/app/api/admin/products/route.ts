@@ -1,7 +1,6 @@
 import { NextResponse } from 'next/server';
 import { verifyAdminAuth } from '@/lib/adminAuth';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
-import { formatInr } from '@/lib/pricingEngine';
 
 export const dynamic = 'force-dynamic';
 
@@ -15,6 +14,11 @@ function slugify(text: string): string {
     .replace(/--+/g, '-')
     .replace(/^-+/, '')
     .replace(/-+$/, '');
+}
+
+function formatInr(paise: number): string {
+  const rupees = Math.round(paise / 100);
+  return `₹${rupees.toLocaleString('en-IN')}`;
 }
 
 /**
