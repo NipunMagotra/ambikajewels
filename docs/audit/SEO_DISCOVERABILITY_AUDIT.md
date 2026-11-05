@@ -161,3 +161,4 @@ Tested Open Graph tags across WhatsApp, Facebook, and Twitter:
 - **Twitter Card:** `summary_large_image`.
 
 This concludes the Phase 7 SEO and Discoverability audit.
+

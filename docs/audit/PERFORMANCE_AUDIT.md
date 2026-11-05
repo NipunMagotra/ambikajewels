@@ -91,3 +91,4 @@ The platform maintains a lean third-party script profile:
 - **No Heavy Marketing Trackers:** Zero bloated third-party tracking pixels (e.g. Hotjar, Meta Pixel) delaying main thread execution.
 
 This concludes the Phase 8 Performance and Core Web Vitals audit.
+

@@ -1,0 +1,204 @@
+[
+  {
+    "sku": "AJ-DOG-001",
+    "name": "Authentic 22K Dogri Jhumki",
+    "slug": "authentic-22k-dogri-jhumki",
+    "totalImages": 2,
+    "primaryImage": "/products/kundan-chandbali.png",
+    "localImages": [
+      "/products/kundan-chandbali.png"
+    ],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-DOG-002",
+    "name": "Royal Dogri Naman Set",
+    "slug": "royal-dogri-naman-set",
+    "totalImages": 2,
+    "primaryImage": "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80",
+    "localImages": [
+      "/products/royal-kundan.png"
+    ],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-DOG-003",
+    "name": "Heritage Dogri Long Set",
+    "slug": "heritage-dogri-long-set",
+    "totalImages": 2,
+    "primaryImage": "/products/heritage-ruby-haar.png",
+    "localImages": [
+      "/products/heritage-ruby-haar.png",
+      "/products/temple-lakshmi.png"
+    ],
+    "cdnImages": [],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-BRI-004",
+    "name": "Royal Dogra Kundan Bridal Set",
+    "slug": "royal-dogra-kundan-bridal-set",
+    "totalImages": 2,
+    "primaryImage": "/products/royal-kundan.png",
+    "localImages": [
+      "/products/royal-kundan.png"
+    ],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-BRI-005",
+    "name": "Maharani Polki Bridal Haathphool & Choker",
+    "slug": "maharani-polki-bridal-haathphool-choker",
+    "totalImages": 2,
+    "primaryImage": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
+    "localImages": [
+      "/products/royal-kundan.png"
+    ],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-DIA-006",
+    "name": "18K Gold Solitaire Diamond Engagement Ring",
+    "slug": "18k-gold-solitaire-diamond-engagement-ring",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-DIA-007",
+    "name": "14K Gold Diamond Tennis Bracelet",
+    "slug": "14k-gold-diamond-tennis-bracelet",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-DIA-008",
+    "name": "18K Gold Emerald Cut Diamond Studs",
+    "slug": "18k-gold-emerald-cut-diamond-studs",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-SIL-009",
+    "name": "925 Sterling Silver Antique Oxidized Choker",
+    "slug": "925-sterling-silver-antique-oxidized-choker",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-SIL-010",
+    "name": "925 Silver Dogri Style Payal (Pair)",
+    "slug": "925-silver-dogri-style-payal-pair",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-GLD-011",
+    "name": "22K Gold Traditional Guluband Choker",
+    "slug": "22k-gold-traditional-guluband-choker",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-GLD-012",
+    "name": "14K Gold Lightweight Daily Pendant Chain",
+    "slug": "14k-gold-lightweight-daily-pendant-chain",
+    "totalImages": 1,
+    "primaryImage": "/products/minimalist-gold-chain.png",
+    "localImages": [
+      "/products/minimalist-gold-chain.png"
+    ],
+    "cdnImages": [],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-GLD-013",
+    "name": "9K Gold Sleek Stacking Ring",
+    "slug": "9k-gold-sleek-stacking-ring",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-CST-014",
+    "name": "Custom Bespoke Gold Jewellery Service",
+    "slug": "custom-bespoke-gold-jewellery-service",
+    "totalImages": 2,
+    "primaryImage": "/products/temple-lakshmi.png",
+    "localImages": [
+      "/products/temple-lakshmi.png",
+      "/products/royal-kundan.png"
+    ],
+    "cdnImages": [],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-MEN-015",
+    "name": "Royal Dogra 22K Gold Cufflinks",
+    "slug": "royal-dogra-22k-gold-cufflinks",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  },
+  {
+    "sku": "AJ-MEN-016",
+    "name": "Solid 22K Gold Men's Heavy Kada",
+    "slug": "solid-22k-gold-mens-heavy-kada",
+    "totalImages": 1,
+    "primaryImage": "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80",
+    "localImages": [],
+    "cdnImages": [
+      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80"
+    ],
+    "presentationValid": true
+  }
+]
