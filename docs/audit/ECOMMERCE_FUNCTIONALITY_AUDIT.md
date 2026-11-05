@@ -215,3 +215,4 @@ Before opening the storefront to live commercial transactions:
 - [ ] **Client Action:** Align on brand founding year (1998 heritage lineage vs 2021 legal entity).
 - [ ] **Client Action:** Populate live production inventory using `scripts/import-catalog.mjs` or Supabase SQL console.
 - [ ] **Client Action:** Configure live Razorpay API credentials (`RAZORPAY_KEY_ID`, `RAZORPAY_KEY_SECRET`, `RAZORPAY_WEBHOOK_SECRET`) in production hosting environment (Vercel).
+
