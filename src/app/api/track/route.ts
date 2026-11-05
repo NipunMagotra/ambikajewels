@@ -58,27 +58,29 @@ export async function GET(request: Request) {
         : await query.eq('order_number', orderId).maybeSingle();
 
       if (!error && data) {
-        // Authenticate against database record
+        // Authenticate against database record (support both customer_email/customer_phone schema and legacy email/phone)
         let isAuthenticated = false;
+        const dbEmail = (data.customer_email || data.email || '') as string;
+        const dbPhone = (data.customer_phone || data.phone || '') as string;
 
         if (token) {
           if (
-            (data.email && verifyOrderAccessToken(orderId, data.email, token)) ||
-            (data.phone && verifyOrderAccessToken(orderId, data.phone, token))
+            (dbEmail && verifyOrderAccessToken(orderId, dbEmail, token)) ||
+            (dbPhone && verifyOrderAccessToken(orderId, dbPhone, token))
           ) {
             isAuthenticated = true;
           }
         }
 
-        if (!isAuthenticated && email && data.email) {
-          if (data.email.toLowerCase().trim() === email) {
+        if (!isAuthenticated && email && dbEmail) {
+          if (dbEmail.toLowerCase().trim() === email) {
             isAuthenticated = true;
           }
         }
 
-        if (!isAuthenticated && phone && data.phone) {
+        if (!isAuthenticated && phone && dbPhone) {
           const cleanInputPhone = phone.replace(/\D/g, '').slice(-10);
-          const cleanDbPhone = data.phone.replace(/\D/g, '').slice(-10);
+          const cleanDbPhone = dbPhone.replace(/\D/g, '').slice(-10);
           if (cleanInputPhone.length === 10 && cleanInputPhone === cleanDbPhone) {
             isAuthenticated = true;
           }

@@ -70,3 +70,16 @@ test('4. Proof of Ownership: Valid signed HMAC token grants authenticated invoic
   assert.ok(data.order.invoice);
   assert.equal(data.order.invoice.hsn_code, '7113');
 });
+
+test('5. Proof of Ownership: Customer phone with customer_phone schema format grants authenticated invoice access', async () => {
+  const orderId = 'AMB-108249';
+  // Standard Indian 10-digit phone
+  const req = new Request(`http://localhost:3000/api/track?orderId=${orderId}&phone=%2B919682589725`);
+  const res = await GET(req);
+  const data = await res.json();
+
+  assert.equal(res.status, 200);
+  assert.equal(data.success, true);
+  assert.ok(data.order);
+  assert.equal(data.order.order_number, orderId);
+});
