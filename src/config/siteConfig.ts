@@ -63,7 +63,7 @@ export const siteConfig = {
     // F4: Hide PDP price breakup until dynamic product pricing schema is applied to database
     showPdpPriceBreakup: false,
     // F5: Mock products fallback (default false; Supabase DB is single source of truth)
-    useMockProductsFallback: false,
+    useMockProductsFallback: process.env.NEXT_PUBLIC_USE_MOCK_FALLBACK === 'true',
     // Production/KYC Scan Flag: Hides 'DRAFT FOR LAWYER REVIEW' banners for Razorpay website scan & live customers
     showDraftLegalBanners: process.env.NEXT_PUBLIC_SHOW_DRAFT_LEGAL_BANNERS === 'true',
   },

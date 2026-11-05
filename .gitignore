@@ -46,3 +46,7 @@ next-env.d.ts
 
 # Local agent customizations and skills
 .agents/
+
+# Playwright test artifacts
+/test-results/
+/playwright-report/

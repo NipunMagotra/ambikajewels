@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "test": "tsx --test tests/**/*.test.ts",
+    "test:e2e": "playwright test",
     "check-production": "node scripts/check-production-placeholders.mjs",
     "validate-catalog": "node scripts/validate-catalog.mjs",
     "import-catalog": "node scripts/import-catalog.mjs"
@@ -26,6 +27,8 @@
     "swiper": "^14.3.0"
   },
   "devDependencies": {
+    "@axe-core/playwright": "^4.14.0",
+    "@playwright/test": "^1.64.1",
     "@tailwindcss/postcss": "^4",
     "@types/node": "^20",
     "@types/react": "^19",
