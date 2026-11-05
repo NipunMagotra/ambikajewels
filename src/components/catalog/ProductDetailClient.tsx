@@ -38,6 +38,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const [activeImage, setActiveImage] = useState(galleryImages[0]);
   const [showPriceBreakup, setShowPriceBreakup] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
+  const [isCopied, setIsCopied] = useState(false);
 
   const catStr = (product.category || '').toLowerCase();
   const nameStr = (product.name || '').toLowerCase();
@@ -565,6 +566,32 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             <span className="material-symbols-outlined text-base" aria-hidden="true">chat_bubble</span>
             {product.stock_status === 'out_of_stock' ? 'OUT OF STOCK' : 'BUY NOW ON WHATSAPP'}
           </a>
+
+          <button
+            type="button"
+            onClick={() => {
+              if (typeof window !== 'undefined') {
+                if (navigator.share) {
+                  navigator.share({
+                    title: `${product.name} | Ambika Jewels Jammu`,
+                    text: `Heirloom jewellery handcrafted in Jammu: ${product.name}`,
+                    url: window.location.href,
+                  }).catch(() => {});
+                } else if (navigator.clipboard) {
+                  navigator.clipboard.writeText(window.location.href);
+                  setIsCopied(true);
+                  setTimeout(() => setIsCopied(false), 2500);
+                }
+              }
+            }}
+            aria-label="Share this heirloom creation"
+            className="w-full py-2.5 px-3 border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-sans font-medium rounded-[2px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
+          >
+            <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]" aria-hidden="true">
+              {isCopied ? 'check' : 'share'}
+            </span>
+            <span>{isCopied ? 'Link Copied to Clipboard!' : 'Share Heirloom with Family'}</span>
+          </button>
         </div>
 
         {/* Trust Badges Bar */}

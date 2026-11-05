@@ -33,6 +33,36 @@ export default function Footer() {
               <span className="font-semibold text-[var(--accent-gold)] block text-[9.5px] uppercase tracking-wider mb-0.5">Showroom Timings:</span>
               {siteConfig.timings}
             </div>
+            {siteConfig.social && (
+              <div className="mt-3.5 pt-2.5 border-t border-[var(--border-subtle)] flex items-center gap-3">
+                <span className="text-[9.5px] text-[var(--accent-gold)] uppercase tracking-wider font-semibold">CONNECT:</span>
+                {siteConfig.social.instagram && (
+                  <a
+                    href={siteConfig.social.instagram}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow Ambika Jewels on Instagram"
+                    className="text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors text-xs font-sans font-medium"
+                  >
+                    Instagram
+                  </a>
+                )}
+                {siteConfig.social.instagram && siteConfig.social.facebook && (
+                  <span className="text-[var(--border-subtle)]" aria-hidden="true">&bull;</span>
+                )}
+                {siteConfig.social.facebook && (
+                  <a
+                    href={siteConfig.social.facebook}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Follow Ambika Jewels on Facebook"
+                    className="text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors text-xs font-sans font-medium"
+                  >
+                    Facebook
+                  </a>
+                )}
+              </div>
+            )}
           </div>
           
           {/* Column 2: Navigation & Collections */}

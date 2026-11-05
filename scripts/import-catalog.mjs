@@ -247,3 +247,4 @@ import('@supabase/supabase-js').then(async ({ createClient }) => {
   console.error('\n❌ Could not load @supabase/supabase-js:', err.message);
   process.exit(1);
 });
+

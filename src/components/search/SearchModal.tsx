@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { searchCatalog } from '@/lib/catalogSearch';
+import { siteConfig } from '@/config/siteConfig';
+import { mockProducts } from '@/data/mockProducts';
 import type { Product } from '@/types';
 
 interface SearchModalProps {
@@ -26,7 +28,17 @@ export default function SearchModal({ isOpen, onClose }: SearchModalProps) {
     setTimeout(() => inputRef.current?.focus(), 50);
     setQuery('');
     if (isSupabaseConfigured) {
-      supabase.from('products').select('*').then(({ data }) => setCatalog((data as Product[]) || []));
+      supabase.from('products').select('*').then(({ data }) => {
+        if (data && data.length > 0) {
+          setCatalog(data as Product[]);
+        } else if (siteConfig.features.useMockProductsFallback) {
+          setCatalog(mockProducts);
+        } else {
+          setCatalog([]);
+        }
+      });
+    } else if (siteConfig.features.useMockProductsFallback) {
+      setCatalog(mockProducts);
     }
   }, [isOpen]);
 

@@ -125,3 +125,4 @@ Choose one of two simple ways to apply:
 1. **Idempotent Updates:** Re-importing the same CSV will update existing products matching on `slug` rather than creating duplicates.
 2. **Never Overwrite Real Stock with Placeholders:** If a piece is custom-ordered or out of stock, set `stock_status` to `out_of_stock`.
 3. **Image Hosting:** Place local images in `public/products/` or use secure HTTPS URLs (e.g. Unsplash, Supabase Storage bucket, or Cloudinary).
+
