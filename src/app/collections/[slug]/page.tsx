@@ -7,9 +7,7 @@ import ProductCard from '@/components/catalog/ProductCard';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Product } from '@/types';
 import Link from 'next/link';
-
 import { siteConfig } from '@/config/siteConfig';
-import { mockProducts } from '@/data/mockProducts';
 
 export const revalidate = 60;
 
@@ -27,10 +25,6 @@ export async function generateMetadata({
       const { data: dataById } = await supabase.from('products').select('name, description, images, price').eq('id', slug).single();
       if (dataById) prod = dataById;
     }
-  }
-  // F5: Fallback to mockProducts only if enabled
-  if (!prod && siteConfig.features.useMockProductsFallback) {
-    prod = mockProducts.find(p => p.slug === slug || p.id === slug);
   }
   
   if (!prod) return { title: 'Product Not Found | Ambika Jewels' };
@@ -93,11 +87,6 @@ export default async function ProductPage({
     }
   }
 
-  // F5: Fallback to mockProducts only if enabled
-  if (!product && siteConfig.features.useMockProductsFallback) {
-    product = mockProducts.find(p => p.slug === slug || p.id === slug);
-  }
-
   if (!product) {
     notFound();
   }
@@ -111,11 +100,6 @@ export default async function ProductPage({
       .neq('id', product.id)
       .limit(4);
     if (dbRelated && dbRelated.length > 0) relatedProducts = dbRelated as Product[];
-  }
-
-  // F5: Fallback to mockProducts only if enabled
-  if (relatedProducts.length === 0 && siteConfig.features.useMockProductsFallback) {
-    relatedProducts = mockProducts.filter(p => p.category === product?.category && p.id !== product?.id).slice(0, 4);
   }
 
   const baseUrl = siteConfig.websiteUrl || 'https://ambikajewelsonline.com';

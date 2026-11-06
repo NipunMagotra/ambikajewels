@@ -11,7 +11,7 @@ import {
   STANDARD_INDIAN_BANGLE_SIZES,
   PAN_THRESHOLD_PAISE,
 } from '../src/lib/checkoutValidation';
-import { mockProducts } from '../src/data/mockProducts';
+import { mockProducts } from './fixtures/testProducts';
 import type { CartItem } from '../src/types';
 
 describe('Phase 4: Production Resilience & User Experience Suite', () => {

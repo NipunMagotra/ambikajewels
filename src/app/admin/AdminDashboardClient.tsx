@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { siteConfig } from '@/config/siteConfig';
-import { mockProducts } from '@/data/mockProducts';
 import { BillingCalculator } from '@/components/counter/BillingCalculator';
 import type { DailyRates } from '@/types/counter';
 import { DEFAULT_RATES } from '@/lib/counterStore';
@@ -88,7 +87,6 @@ export default function AdminDashboardClient() {
     craftsmanship_story: ''
   });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
-  const [isSeedingPresets, setIsSeedingPresets] = useState(false);
 
   // Orders State
   const [orders, setOrders] = useState<OrderRecord[]>([]);
@@ -365,42 +363,7 @@ export default function AdminDashboardClient() {
     }
   };
 
-  // 1-Click Curated Presets Import
-  const handleImportPresets = async () => {
-    if (!confirm('Import authentic Jammu Dogra heritage collection presets into your store catalog?')) return;
-    try {
-      setIsSeedingPresets(true);
-      let count = 0;
-      for (const mock of mockProducts.slice(0, 8)) {
-        await fetch('/api/admin/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: mock.name,
-            category: mock.category,
-            price: mock.price,
-            isPaise: true,
-            description: mock.description,
-            images: mock.images,
-            badges: mock.badges,
-            metal_finishes: mock.metal_finishes,
-            stock_status: mock.stock_status,
-            is_featured: mock.is_featured,
-            collection: mock.collection,
-            craftsmanship_story: mock.craftsmanship_story
-          })
-        });
-        count++;
-      }
-      showNotification(`Imported ${count} heirloom creations to your catalog!`);
-      fetchProducts();
-    } catch (e) {
-      console.error(e);
-      alert('Error importing presets');
-    } finally {
-      setIsSeedingPresets(false);
-    }
-  };
+
 
   // Order Status Update
   const handleOrderStatusUpdate = async (orderId: string, newStatus: string) => {
@@ -769,17 +732,6 @@ export default function AdminDashboardClient() {
               </div>
 
               <div className="flex flex-wrap items-center gap-2">
-                {products.length === 0 && (
-                  <button
-                    onClick={handleImportPresets}
-                    disabled={isSeedingPresets}
-                    className="px-3.5 py-2 bg-[var(--bg-surface)] border border-[var(--accent-gold)] text-[var(--accent-gold)] text-xs font-sans font-semibold tracking-wider uppercase rounded-[2px] hover:bg-[var(--accent-gold)] hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-sm">download</span>
-                    <span>{isSeedingPresets ? 'Importing...' : 'Load Curated Dogra Presets'}</span>
-                  </button>
-                )}
-
                 <button
                   onClick={handleOpenAddModal}
                   className="px-4 py-2 bg-[var(--accent-gold)] text-white text-xs font-sans font-semibold tracking-wider uppercase rounded-[2px] hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer shadow-sm"
@@ -846,7 +798,7 @@ export default function AdminDashboardClient() {
                 <h3 className="font-serif text-lg text-[var(--text-primary)] mb-1">No products found</h3>
                 <p className="font-sans text-xs text-[var(--text-secondary)] mb-4">
                   {products.length === 0
-                    ? 'Your online store catalog is currently empty. Click "Add New Product" to create your first jewellery piece, or import curated Dogra heritage items.'
+                    ? 'Your online store catalog is currently empty. Click "Add Product Now" to create your first jewellery piece.'
                     : 'No products match your current search and filter criteria.'}
                 </p>
                 <div className="flex justify-center gap-3">
@@ -856,14 +808,6 @@ export default function AdminDashboardClient() {
                   >
                     Add Product Now
                   </button>
-                  {products.length === 0 && (
-                    <button
-                      onClick={handleImportPresets}
-                      className="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-card)] text-xs font-sans font-medium uppercase rounded-[2px]"
-                    >
-                      Import Dogra Presets
-                    </button>
-                  )}
                 </div>
               </div>
             ) : (

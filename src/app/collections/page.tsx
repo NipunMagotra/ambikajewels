@@ -6,7 +6,6 @@ import FilterBar from '@/components/catalog/FilterBar';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Product } from '@/types';
 import { siteConfig } from '@/config/siteConfig';
-import { mockProducts } from '@/data/mockProducts';
 
 export const revalidate = 60; // Revalidate every minute
 
@@ -40,67 +39,6 @@ export default async function CollectionsPage({
     if (dbProducts && dbProducts.length > 0) {
       displayProducts = dbProducts as Product[];
     }
-  }
-
-  // F5: Fallback to mockProducts only if explicitly enabled in siteConfig
-  if (displayProducts.length === 0 && siteConfig.features.useMockProductsFallback) {
-    let filtered = [...mockProducts];
-    if (category && category !== 'All') {
-      const catLower = category.toLowerCase();
-      const catAlt = catLower.includes('jewelry')
-        ? catLower.replace(/jewelry/g, 'jewellery')
-        : catLower.includes('jewellery')
-          ? catLower.replace(/jewellery/g, 'jewelry')
-          : catLower;
-
-      filtered = filtered.filter(p => {
-        const pCat = p.category.toLowerCase();
-        const pColl = p.collection.toLowerCase();
-        const pName = p.name.toLowerCase();
-        const pDesc = p.description.toLowerCase();
-        const pBadges = (p.badges || []).join(' ').toLowerCase();
-
-        // 1. Direct category or collection match
-        if (
-          pCat === catLower || pCat === catAlt ||
-          pColl === catLower || pColl === catAlt ||
-          pCat.includes(catLower) || catLower.includes(pCat) ||
-          pCat.includes(catAlt) || catAlt.includes(pCat)
-        ) {
-          return true;
-        }
-
-        // 2. Intelligent category keyword fallback
-        if (catLower.includes('necklace') || catLower.includes('choker')) {
-          return pName.includes('necklace') || pName.includes('choker') || pName.includes('haar') || pName.includes('naman') || pName.includes('chain');
-        }
-        if (catLower.includes('earring') || catLower.includes('jhumka')) {
-          return pName.includes('jhumki') || pName.includes('stud') || pName.includes('earring') || pName.includes('chandbali');
-        }
-        if (catLower.includes('bangle') || catLower.includes('kada') || catLower.includes('bracelet')) {
-          return pName.includes('kada') || pName.includes('bracelet') || pName.includes('bangle') || pName.includes('haathphool');
-        }
-        if (catLower.includes('ring') || catLower.includes('solitaire')) {
-          return pName.includes('ring') || pName.includes('solitaire');
-        }
-        if (catLower.includes('temple') || catLower.includes('antique')) {
-          return pName.includes('temple') || pName.includes('naman') || pName.includes('antique') || pDesc.includes('traditional');
-        }
-        if (catLower.includes('everyday') || catLower.includes('daily') || catLower.includes('lightweight')) {
-          return pDesc.includes('daily') || pDesc.includes('everyday') || pDesc.includes('lightweight') || pName.includes('daily');
-        }
-        if (catLower.includes('custom') || catLower.includes('bespoke')) {
-          return pBadges.includes('bespoke') || pName.includes('bespoke') || pName.includes('custom');
-        }
-        return false;
-      });
-    }
-    if (sort === 'price_asc') {
-      filtered.sort((a, b) => a.price - b.price);
-    } else if (sort === 'price_desc') {
-      filtered.sort((a, b) => b.price - a.price);
-    }
-    displayProducts = filtered;
   }
 
   return (

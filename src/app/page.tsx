@@ -10,8 +10,6 @@ import HeritageSection from '@/components/home/HeritageSection';
 import TestimonialsSection from '@/components/home/TestimonialsSection';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import type { Product } from '@/types';
-import { siteConfig } from '@/config/siteConfig';
-import { mockProducts } from '@/data/mockProducts';
 
 export const revalidate = 3600; // Revalidate every hour
 
@@ -22,17 +20,11 @@ export default async function Home() {
     const { data: featuredProducts } = await supabase
       .from('products')
       .select('*')
+      .eq('is_featured', true)
       .limit(8);
     if (featuredProducts && featuredProducts.length > 0) {
       displayProducts = featuredProducts as Product[];
     }
-  }
-
-  // Augment with mockProducts if fewer than 4 to keep the 4-column luxury grid complete
-  if (displayProducts.length < 4 && siteConfig.features.useMockProductsFallback) {
-    const existingIds = new Set(displayProducts.map(p => p.id));
-    const fallbacks = mockProducts.filter(p => !existingIds.has(p.id) && p.is_featured);
-    displayProducts = [...displayProducts, ...fallbacks].slice(0, 8);
   }
 
   return (

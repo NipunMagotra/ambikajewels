@@ -1,7 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { siteConfig } from '@/config/siteConfig';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
-import { mockProducts } from '@/data/mockProducts';
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = siteConfig.websiteUrl || 'https://ambikajewelsonline.com';
@@ -37,12 +36,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         productSlugs = data.map((p) => p.slug);
       }
     } catch {
-      // Fallback to mock product slugs
+      // Supabase query error
     }
-  }
-
-  if (productSlugs.length === 0) {
-    productSlugs = mockProducts.map((p) => p.slug);
   }
 
   const productRoutes: MetadataRoute.Sitemap = productSlugs.map((slug) => ({

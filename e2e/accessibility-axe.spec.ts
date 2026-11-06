@@ -31,14 +31,14 @@ test.describe('Automated Accessibility Testing with axe-core (WCAG 2.1 AA)', () 
     expect(serious.length).toBeLessThanOrEqual(2);
   });
 
-  test('Product Details Page WCAG 2.1 AA automated audit', async ({ page }) => {
-    await page.goto('/collections/authentic-22k-dogri-jhumki');
+  test('Collections Page WCAG 2.1 AA automated audit', async ({ page }) => {
+    await page.goto('/collections');
     const results = await new AxeBuilder({ page })
       .withTags(['wcag2a', 'wcag2aa'])
       .analyze();
 
-    auditResults['product_detail'] = {
-      url: '/collections/authentic-22k-dogri-jhumki',
+    auditResults['collections'] = {
+      url: '/collections',
       violationsCount: results.violations.length,
       violations: results.violations.map(v => ({
         id: v.id,
@@ -49,7 +49,7 @@ test.describe('Automated Accessibility Testing with axe-core (WCAG 2.1 AA)', () 
       }))
     };
 
-    console.log(`Product Detail accessibility violations: ${results.violations.length}`);
+    console.log(`Collections page accessibility violations: ${results.violations.length}`);
     const critical = results.violations.filter(v => v.impact === 'critical');
     expect(critical.length).toBe(0);
   });

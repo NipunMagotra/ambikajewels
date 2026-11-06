@@ -66,3 +66,4 @@ TARGETS.forEach(target => {
   fs.writeFileSync(target, masterContent, 'utf-8');
   console.log(`✓ Wrote combined audit to ${target} (${masterContent.length} bytes)`);
 });
+

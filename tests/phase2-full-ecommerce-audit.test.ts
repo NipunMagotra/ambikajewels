@@ -2,7 +2,7 @@ import { describe, it, before } from 'node:test';
 import assert from 'node:assert/strict';
 import crypto from 'crypto';
 import { siteConfig } from '../src/config/siteConfig';
-import { mockProducts } from '../src/data/mockProducts';
+import { mockProducts } from './fixtures/testProducts';
 import { searchCatalog } from '../src/lib/catalogSearch';
 import {
   isValidIndianPhone,

@@ -34,7 +34,7 @@ export default defineConfig({
     reuseExistingServer: true,
     timeout: 30 * 1000,
     env: {
-      NEXT_PUBLIC_USE_MOCK_FALLBACK: 'true'
+      NEXT_PUBLIC_USE_MOCK_FALLBACK: 'false'
     }
   }
 });
