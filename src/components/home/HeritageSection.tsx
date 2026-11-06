@@ -2,71 +2,96 @@ import Link from 'next/link';
 
 export default function HeritageSection() {
   return (
-    <section className="my-8 sm:my-14 grid grid-cols-1 lg:grid-cols-2 items-center gap-8 lg:gap-12 px-4 sm:px-margin-mobile lg:px-margin-desktop">
-      {/* Image & Master Karigar Quote */}
-      <div className="relative order-2 lg:order-1">
-        <div className="aspect-[4/3] sm:aspect-square bg-[var(--bg-surface)] overflow-hidden border border-[var(--border-card)] rounded-[2px] shadow-[var(--card-shadow)]">
-          <div 
-            className="w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105" 
-            style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=1000&q=80')" }}
-          />
-        </div>
+    <section className="py-20 lg:py-32 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)]">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-12">
         
-        {/* Desktop Absolute Badge */}
-        <div className="absolute -bottom-6 -right-6 w-72 bg-[var(--bg-card)] border border-[var(--border-card)] p-5 hidden lg:block shadow-xl rounded-[2px]">
-          <p className="font-serif text-sm italic text-[var(--text-primary)] leading-relaxed">
-            &ldquo;Every piece of jewellery is a story carved in gold, an heirloom meant to be cherished across generations.&rdquo;
-          </p>
-          <p className="font-sans text-[10px] text-[var(--accent-gold)] mt-3 font-semibold tracking-[0.2em] uppercase">
-            MASTER KARIGAR &bull; JAMMU ATELIER
-          </p>
-        </div>
-
-        {/* Mobile Inline Quote */}
-        <div className="mt-3 lg:hidden bg-[var(--bg-card)] border border-[var(--border-card)] p-4 text-center rounded-[2px] shadow-xs">
-          <p className="font-serif text-xs sm:text-sm italic text-[var(--text-primary)]">
-            &ldquo;Every piece of jewellery is a story carved in gold, an heirloom meant to be cherished across generations.&rdquo;
-          </p>
-          <p className="font-sans text-[10px] text-[var(--accent-gold)] mt-2 font-semibold tracking-[0.2em] uppercase">
-            MASTER KARIGAR &bull; JAMMU ATELIER
-          </p>
-        </div>
-      </div>
-      
-      {/* Narrative Story */}
-      <div className="lg:pl-6 order-1 lg:order-2 text-center lg:text-left">
-        <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.35em] uppercase font-semibold mb-2 block">
-          ESTD. 1998 &bull; JAMMU
-        </span>
-        <h2 className="font-serif text-2xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal mb-3 sm:mb-4 leading-tight tracking-tight">
-          A Legacy of <span className="italic font-normal gold-text-gradient">Dogra Craftsmanship</span>
-        </h2>
-        <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-4 leading-relaxed font-light max-w-lg mx-auto lg:mx-0">
-          Rooted in Lower Roop Nagar, Jammu, Ambika Jewels preserves authentic Dogra goldsmithing traditions. From intricate filigree Jhumkis to regal Naman sets, every creation is hand-forged by generational karigars and assayed with mandatory 6-digit HUID BIS hallmarking.
-        </p>
-
-        {/* Heritage Trust Badges */}
-        <div className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start items-center my-6 py-4 border-y border-[var(--border-subtle)]">
-          <div className="flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-[var(--accent-gold)] text-xl">verified</span>
-            <span className="font-sans text-[10px] sm:text-xs text-[var(--text-primary)] tracking-wider uppercase font-semibold">
-              100% BIS Hallmarked Gold
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+          
+          {/* Brand Philosophy Narrative (Left 6 Cols) */}
+          <div className="lg:col-span-6">
+            <span className="text-[10px] font-sans tracking-[0.3em] uppercase text-[var(--accent-gold)] font-medium block mb-3">
+              THE MAISON &bull; 06
             </span>
+
+            <h2 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal tracking-tight mb-6 leading-[1.14]">
+              Born in Jammu, <br />
+              <span className="italic font-light text-[var(--text-secondary)]">Forged for Generations.</span>
+            </h2>
+
+            <div className="space-y-4 text-xs sm:text-sm font-sans text-[var(--text-secondary)] font-light leading-relaxed mb-8">
+              <p>
+                Founded in Jammu by Shivani Anand and guided by representative Lakesh Kumar, Ambika Jewels began with a single conviction: that regional Dogra jewellery traditions belong at the forefront of contemporary fine jewellery.
+              </p>
+              <p>
+                We do not produce disposable ornaments. From multi-purity gold offerings (22K, 18K, 14K, 9K) to authentic 925 sterling silver and conflict-free natural diamonds certified by IGI and GIA, our pieces are fabricated with architectural precision and verified under strict Bureau of Indian Standards hallmarking.
+              </p>
+              <p>
+                Whether redesigning heirloom gold through our private melting studio or crafting bespoke creations via 3D CAD preview, our salon remains an intimate sanctuary of trust.
+              </p>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4 py-6 border-y border-[var(--border-subtle)] mb-8">
+              <div>
+                <span className="font-serif text-2xl text-[var(--text-primary)] block font-normal">1998</span>
+                <span className="font-sans text-[9.5px] text-[var(--text-tertiary)] uppercase tracking-wider">ESTABLISHED IN JAMMU</span>
+              </div>
+              <div>
+                <span className="font-serif text-2xl text-[var(--text-primary)] block font-normal">100% BIS</span>
+                <span className="font-sans text-[9.5px] text-[var(--text-tertiary)] uppercase tracking-wider">6-DIGIT HUID HALLMARKING</span>
+              </div>
+            </div>
+
+            <Link
+              href="/about"
+              className="btn-gold-primary"
+            >
+              EXPLORE OUR STORY &amp; SALON
+            </Link>
           </div>
-          <div className="hidden sm:block w-[1px] h-4 bg-[var(--border-subtle)]"></div>
-          <div className="flex items-center gap-2.5">
-            <span className="material-symbols-outlined text-[var(--accent-gold)] text-xl">design_services</span>
-            <span className="font-sans text-[10px] sm:text-xs text-[var(--text-primary)] tracking-wider uppercase font-semibold">
-              Artisanal Handcrafts
-            </span>
+
+          {/* Image-Led Spread (Right 6 Cols) */}
+          <div className="lg:col-span-6 grid grid-cols-2 gap-4">
+            <div className="space-y-4">
+              <div className="relative aspect-[3/4] overflow-hidden bg-[var(--bg-main)]">
+                <img
+                  src="/products/royal-kundan.png"
+                  alt="Dogra Royal Kundan Jewelry Craft"
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                <span className="text-[9px] font-sans uppercase tracking-widest text-[var(--accent-gold)] block mb-1">
+                  PATRON SERVICES
+                </span>
+                <p className="font-serif text-sm text-[var(--text-primary)]">
+                  Live Gold Melting &amp; 3D CAD Virtual Previews
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-4 pt-8">
+              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-subtle)]">
+                <span className="text-[9px] font-sans uppercase tracking-widest text-[var(--accent-gold)] block mb-1">
+                  ARMORED LOGISTICS
+                </span>
+                <p className="font-serif text-sm text-[var(--text-primary)]">
+                  Pan-India Insured Express via BVC Logistics
+                </p>
+              </div>
+              <div className="relative aspect-[3/4] overflow-hidden bg-[var(--bg-main)]">
+                <img
+                  src="/products/kundan-chandbali.png"
+                  alt="Fine Gold Karigar Atelier"
+                  loading="lazy"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
           </div>
+
         </div>
 
-        <div>
-          <Link href="/about" className="btn-gold-secondary w-full sm:w-auto text-center inline-block">
-            LEARN ABOUT OUR PROCESS
-          </Link>
-        </div>
       </div>
     </section>
   );

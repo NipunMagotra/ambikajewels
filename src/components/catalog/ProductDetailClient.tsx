@@ -1,44 +1,28 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
-import { useRouter } from 'next/navigation';
-import { useCart } from '@/context/CartContext';
+import { useState } from 'react';
 import type { Product } from '@/types';
+import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { getProductWhatsAppUrl } from '@/lib/whatsapp';
 import { siteConfig } from '@/config/siteConfig';
 
-import type { Swiper as SwiperType } from 'swiper';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import { Navigation, Pagination, Keyboard, A11y } from 'swiper/modules';
-
-import 'swiper/css';
-import 'swiper/css/navigation';
-import 'swiper/css/pagination';
-
 export default function ProductDetailClient({ product }: { product: Product }) {
-  const router = useRouter();
   const { dispatch } = useCart();
+  const { isInWishlist, toggleWishlist } = useWishlist();
 
   const galleryImages = (product.images && product.images.length > 0)
     ? product.images
     : ['/hero-clean.png'];
 
-  const perspectiveLabels = [
-    '01 • MASTERPIECE SILHOUETTE',
-    '02 • 45° PROFILE & SETTING',
-    '03 • CRAFTSMANSHIP & 22K HALLMARK',
-    '04 • ON-MODEL SCALE & PROPORTIONS',
-    '05 • ATELIER DETAILS'
-  ];
-
+  const [activeImageIdx, setActiveImageIdx] = useState(0);
   const [selectedFinish, setSelectedFinish] = useState(product.metal_finishes?.[0] || 'Gold');
   const [quantity, setQuantity] = useState(1);
-  const [swiperInstance, setSwiperInstance] = useState<SwiperType | null>(null);
-  const [activeSlideIndex, setActiveSlideIndex] = useState(0);
-  const [activeImage, setActiveImage] = useState(galleryImages[0]);
   const [showPriceBreakup, setShowPriceBreakup] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
   const [isCopied, setIsCopied] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
   const catStr = (product.category || '').toLowerCase();
   const nameStr = (product.name || '').toLowerCase();
@@ -59,6 +43,10 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   );
   const [showSizeGuide, setShowSizeGuide] = useState(false);
 
+  // Accordion tabs state
+  const [openTab, setOpenTab] = useState<'craft' | 'specs' | 'shipping' | 'care' | null>('specs');
+
+  // Transparent Indian jewellery pricing calculation
   const totalRupees = Math.round((product.price || 0) / 100);
   const preTaxSubtotal = Math.round(totalRupees / 1.03);
   const gstRupees = totalRupees - preTaxSubtotal;
@@ -68,6 +56,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const estimatedMakingCharge = Math.max(0, preTaxSubtotal - estimatedMetalValue - hallmarkFee);
 
   const whatsappUrl = getProductWhatsAppUrl(product, selectedFinish, quantity);
+  const isSaved = isInWishlist(product.id);
 
   const handleAddToCart = () => {
     setIsAdding(true);
@@ -78,7 +67,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
         name: product.name,
         price: product.price,
         quantity: quantity,
-        image: (product.images && product.images[0]) || '/hero-clean.png',
+        image: galleryImages[0],
         metal_finish: selectedFinish,
         selected_size: selectedSize || undefined,
         slug: product.slug,
@@ -89,527 +78,403 @@ export default function ProductDetailClient({ product }: { product: Product }) {
     
     setTimeout(() => {
       setIsAdding(false);
-    }, 1000);
+    }, 1200);
   };
 
-  const getPurityBadge = () => {
-    const badges = product.badges || [];
-    const name = product.name.toUpperCase();
-    const cat = product.category.toUpperCase();
-
-    const isHallmarked = product.is_hallmarked ?? (product.bis_hallmark?.toLowerCase().includes('hallmark') || badges.some(b => b.includes('BIS')));
-
-    if (badges.some(b => b.includes('22K')) || name.includes('22K')) {
-      return isHallmarked ? '22K BIS HALLMARKED' : '22K SOLID GOLD';
-    }
-    if (badges.some(b => b.includes('18K')) || name.includes('18K')) {
-      return (badges.includes('CERTIFIED DIAMOND') || cat.includes('DIAMOND') || name.includes('DIAMOND'))
-        ? '18K CERTIFIED DIAMOND'
-        : (isHallmarked ? '18K BIS HALLMARKED GOLD' : '18K SOLID GOLD');
-    }
-    if (badges.some(b => b.includes('14K')) || name.includes('14K')) {
-      return isHallmarked ? '14K BIS HALLMARKED GOLD' : '14K SOLID GOLD';
-    }
-    if (badges.some(b => b.includes('925')) || name.includes('925') || cat.includes('SILVER') || name.includes('SILVER')) {
-      return isHallmarked ? '925 STERLING HALLMARKED' : '925 STERLING SILVER';
-    }
-    if (badges.some(b => b.includes('9K')) || name.includes('9K')) return '9K SOLID GOLD';
-    if (badges.some(b => b.includes('BESPOKE'))) return 'BESPOKE CRAFTSMANSHIP';
-    return null;
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const { left, top, width, height } = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - left) / width) * 100;
+    const y = ((e.clientY - top) / height) * 100;
+    setMousePos({ x, y });
   };
 
-  const purityBadge = getPurityBadge();
-  const isSilver = product.category.toLowerCase().includes('silver') || product.name.toLowerCase().includes('silver');
-  const isDiamond = product.category.toLowerCase().includes('diamond') || product.name.toLowerCase().includes('diamond');
-  const isHallmarked = product.is_hallmarked ?? (product.bis_hallmark?.toLowerCase().includes('hallmark') || product.badges?.some(b => b.includes('BIS')));
-  const hasHuid = product.has_huid ?? (product.bis_hallmark?.toLowerCase().includes('huid') || false);
-
-  const bottomBadgeText = isSilver 
-    ? (isHallmarked ? '925 STERLING HALLMARKED' : '925 STERLING SILVER') 
-    : isDiamond 
-      ? 'CERTIFIED NATURAL DIAMOND' 
-      : isHallmarked 
-        ? (hasHuid ? 'BIS HALLMARKED WITH 6-CHAR ALPHANUMERIC HUID' : 'BIS HALLMARKED (BUREAU OF INDIAN STANDARDS)')
-        : 'AUTHENTIC HANDCRAFTED JEWELLERY';
+  const activeImage = galleryImages[activeImageIdx] || galleryImages[0];
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-14">
-      {/* Product Image Gallery: Multi-Angle Swiper + Drift 2.8x Loupe + Medium-Zoom Lightbox */}
-      <div className="flex flex-col-reverse sm:flex-row gap-3 sm:gap-4">
-        {/* Thumbnails (Preserving all a11y attributes for regression tests) */}
-        <div className="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto max-h-[500px] no-scrollbar" role="region" aria-label="Product image thumbnails">
-          {galleryImages.map((img, i) => (
-            <button
-              key={i}
-              type="button"
-              onClick={() => {
-                setActiveImage(img);
-                setActiveSlideIndex(i);
-                swiperInstance?.slideTo(i);
-              }}
-              aria-label={`View image ${i + 1} of ${product.name}`}
-              aria-pressed={activeImage === img}
-              className={`w-16 h-16 sm:w-20 sm:h-20 bg-[var(--bg-surface)] border transition-all shrink-0 rounded-[2px] overflow-hidden focus-visible:ring-1 focus-visible:ring-[var(--accent-gold)] focus:outline-none cursor-pointer relative group ${
-                activeImage === img ? 'border-[var(--accent-gold)] ring-1 ring-[var(--accent-gold)] shadow-xs' : 'border-[var(--border-subtle)] hover:border-[var(--accent-gold)]/60'
-              }`}
-            >
-              <img 
-                src={img} 
-                alt={`${product.name} thumbnail ${i + 1}`}
-                referrerPolicy="no-referrer"
-                onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
-                className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105" 
-              />
-              <span className="absolute bottom-0 inset-x-0 bg-black/60 text-[7.5px] text-white/90 text-center py-0.5 uppercase tracking-wider font-mono">
-                0{i + 1}
-              </span>
-            </button>
-          ))}
-        </div>
-
-        {/* Main Display: Swiper Carousel & Drift 2.8x Loupe Lens */}
-        <div className="flex-1 bg-[var(--bg-surface)] aspect-[3/4] sm:aspect-square lg:aspect-auto lg:h-[620px] border border-[var(--border-card)] shadow-[var(--card-shadow)] overflow-hidden rounded-[2px] relative flex flex-col justify-between">
+    <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-8 lg:py-14">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
+        
+        {/* Left Column: Editorial Multi-Angle Photography Gallery (7 Cols) */}
+        <div className="lg:col-span-7 flex flex-col gap-4">
           
-          {/* Top Gallery HUD: Purity & Perspective Angle */}
-          <div className="absolute top-3 inset-x-3 z-20 flex items-center justify-between pointer-events-none">
-            <div className="flex items-center gap-2">
-              {purityBadge && (
-                <span className="bg-[var(--bg-main)]/90 text-[var(--accent-gold)] font-sans text-[8.5px] sm:text-[9.5px] px-2.5 py-1 font-semibold tracking-[0.2em] backdrop-blur-xs border border-[var(--border-card)] rounded-[2px] uppercase">
-                  {purityBadge}
-                </span>
-              )}
-              <span className="hidden sm:inline-block bg-black/70 text-white font-mono text-[8px] sm:text-[9px] px-2 py-1 tracking-wider rounded-[2px] uppercase backdrop-blur-xs border border-white/10">
-                {perspectiveLabels[activeSlideIndex % perspectiveLabels.length]}
-              </span>
+          {/* Main Large Visual Stage */}
+          <div 
+            className="relative aspect-[4/5] w-full overflow-hidden bg-[var(--bg-surface)] cursor-crosshair group select-none"
+            onMouseEnter={() => setIsZoomed(true)}
+            onMouseLeave={() => setIsZoomed(false)}
+            onMouseMove={handleMouseMove}
+          >
+            <img
+              src={activeImage}
+              alt={product.name}
+              className={`w-full h-full object-cover transition-transform duration-300 ease-out ${
+                isZoomed ? 'scale-175' : 'scale-100'
+              }`}
+              style={
+                isZoomed
+                  ? { transformOrigin: `${mousePos.x}% ${mousePos.y}%` }
+                  : undefined
+              }
+            />
+
+            {/* Macro Stamp */}
+            <div className="absolute top-4 left-4 bg-[var(--bg-card)]/90 backdrop-blur-xs text-[var(--accent-gold)] font-sans text-[8.5px] px-2.5 py-1 tracking-[0.2em] uppercase font-medium border border-[var(--border-subtle)] pointer-events-none">
+              {product.purity || '22K BIS'} &bull; {product.weight_grams}G
+            </div>
+
+            {/* Hover Zoom Hint */}
+            <div className="absolute bottom-4 right-4 bg-black/60 text-white/80 text-[9px] font-sans px-2.5 py-1 tracking-wider uppercase pointer-events-none backdrop-blur-xs">
+              HOVER TO MAGNIFY
             </div>
           </div>
 
-          {/* Swiper Image Carousel */}
-          <div className="w-full h-full relative overflow-hidden">
-            <Swiper
-              modules={[Navigation, Pagination, Keyboard, A11y]}
-              onSwiper={setSwiperInstance}
-              onSlideChange={(s) => {
-                setActiveSlideIndex(s.activeIndex);
-                if (galleryImages[s.activeIndex]) {
-                  setActiveImage(galleryImages[s.activeIndex]);
-                }
-              }}
-              keyboard={{ enabled: true }}
-              navigation={{
-                prevEl: '.jewellery-prev-btn',
-                nextEl: '.jewellery-next-btn',
-              }}
-              pagination={{
-                clickable: true,
-                el: '.jewellery-pagination',
-              }}
-              spaceBetween={0}
-              slidesPerView={1}
-              className="w-full h-full jewellery-gallery-swiper"
-            >
+          {/* Thumbnail Track */}
+          {galleryImages.length > 1 && (
+            <div className="flex gap-3 overflow-x-auto pb-2 no-scrollbar">
               {galleryImages.map((img, i) => (
-                <SwiperSlide key={i} className="w-full h-full relative overflow-hidden flex items-center justify-center">
-                  <div className="w-full h-full relative overflow-hidden flex items-center justify-center">
-                    <img
-                      src={img}
-                      data-slide-index={i}
-                      alt={`${product.name} - ${perspectiveLabels[i % perspectiveLabels.length] || `Angle ${i + 1}`}`}
-                      referrerPolicy="no-referrer"
-                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
-                      className="w-full h-full object-cover select-none"
-                    />
-                  </div>
-                </SwiperSlide>
-              ))}
-            </Swiper>
-
-            {/* Custom Luxury Navigation Chevrons */}
-            <button
-              type="button"
-              aria-label="Previous jewelry angle"
-              className="jewellery-prev-btn absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 bg-[var(--bg-main)]/90 hover:bg-[var(--accent-gold)] text-[var(--accent-gold)] hover:text-white border border-[var(--border-subtle)] rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer backdrop-blur-xs"
-            >
-              <span className="material-symbols-outlined text-lg">chevron_left</span>
-            </button>
-            <button
-              type="button"
-              aria-label="Next jewelry angle"
-              className="jewellery-next-btn absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 bg-[var(--bg-main)]/90 hover:bg-[var(--accent-gold)] text-[var(--accent-gold)] hover:text-white border border-[var(--border-subtle)] rounded-full flex items-center justify-center transition-all shadow-md cursor-pointer backdrop-blur-xs"
-            >
-              <span className="material-symbols-outlined text-lg">chevron_right</span>
-            </button>
-          </div>
-
-          {/* Bottom HUD: Pagination & Angle Counter */}
-          <div className="p-2.5 bg-gradient-to-t from-black/60 to-transparent absolute bottom-0 inset-x-0 z-20 flex items-center justify-between text-white/90">
-            <div className="jewellery-pagination flex gap-1.5 items-center"></div>
-            <p className="font-sans text-[9px] text-white/80 tracking-wider flex items-center gap-1 font-light">
-              <span>{activeSlideIndex + 1} of {galleryImages.length} VIEWS</span>
-            </p>
-          </div>
-
-        </div>
-      </div>
-
-      {/* Product Info */}
-      <div className="flex flex-col">
-        {product.badges && product.badges.length > 0 && (
-          <div className="flex flex-wrap gap-2 mb-2.5">
-            {product.badges.map(badge => (
-              <span key={badge} className="bg-[var(--bg-surface)] text-[var(--accent-gold)] border border-[var(--border-card)] font-sans text-[9px] px-2.5 py-0.5 font-semibold tracking-wider uppercase rounded-[2px]">
-                {badge}
-              </span>
-            ))}
-          </div>
-        )}
-        
-        <h1 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[var(--text-primary)] font-normal mb-2 leading-tight">
-          {product.name}
-        </h1>
-        
-        <div className="mb-5 pb-4 border-b border-[var(--border-subtle)]">
-          <div className="flex flex-wrap items-baseline gap-2.5">
-            <span className="font-serif text-2xl sm:text-3xl text-[var(--accent-gold)] font-medium tracking-wide">
-              {product.display_price}
-            </span>
-            <span className="text-[10px] text-[var(--accent-gold)] font-sans font-semibold tracking-wider bg-[var(--bg-surface)] border border-[var(--border-card)] px-2 py-0.5 rounded-[2px] uppercase">
-              Inclusive of all taxes
-            </span>
-          </div>
-          <p className="text-[11px] text-[var(--text-secondary)] mt-1 font-sans font-light">
-            Net retail price inclusive of 3% GST &amp; BIS Hallmarking • Fully insured delivery by BVC Logistics
-          </p>
-
-          {/* F4: Hide PDP Price Breakup behind feature flag until dynamic product pricing exists */}
-          {Boolean(siteConfig.features.showPdpPriceBreakup && (estimatedMetalValue + estimatedMakingCharge + hallmarkFee + gstRupees === totalRupees)) && (
-            <>
-              <button
-                type="button"
-                onClick={() => setShowPriceBreakup(!showPriceBreakup)}
-                aria-expanded={showPriceBreakup}
-                aria-controls="pdp-price-breakup-details"
-                className="mt-3 text-xs text-[var(--accent-gold)] hover:underline font-semibold flex items-center gap-1.5 cursor-pointer transition-colors focus-visible:ring-1 focus-visible:ring-[var(--accent-gold)] focus:outline-none"
-              >
-                <span className="material-symbols-outlined text-sm" aria-hidden="true">
-                  {showPriceBreakup ? 'expand_less' : 'price_change'}
-                </span>
-                <span>{showPriceBreakup ? 'Hide Price Breakup' : 'View Transparent Price Breakup (Metal + Making + GST)'}</span>
-              </button>
-
-              {showPriceBreakup && (
-                <div id="pdp-price-breakup-details" role="region" aria-label="Transparent price calculation breakup" className="mt-3 p-3.5 bg-[var(--bg-surface)] border border-[var(--border-card)] rounded-[2px] text-xs space-y-2">
-                  <div className="flex justify-between items-center text-[var(--text-secondary)]">
-                    <span>Precious Metal ({netWeight.toFixed(2)}g {product.purity || '22K'})</span>
-                    <span className="font-mono font-semibold text-[var(--text-primary)]">₹{estimatedMetalValue.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[var(--text-secondary)]">
-                    <span>Artisanal Making Charges</span>
-                    <span className="font-mono font-semibold text-[var(--text-primary)]">+₹{estimatedMakingCharge.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[var(--text-secondary)]">
-                    <span>BIS Hallmarking Fee</span>
-                    <span className="font-mono font-semibold text-[var(--text-primary)]">+₹{hallmarkFee.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[var(--text-secondary)] pt-1 border-t border-[var(--border-subtle)]">
-                    <span>Taxable Value (Pre-tax)</span>
-                    <span className="font-mono text-[var(--text-primary)]">₹{preTaxSubtotal.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-[var(--text-secondary)]">
-                    <span>GST (3% on HSN 7113)</span>
-                    <span className="font-mono font-semibold text-[var(--accent-gold)]">+₹{gstRupees.toLocaleString('en-IN')}</span>
-                  </div>
-                  <div className="flex justify-between items-center pt-1.5 border-t border-[var(--border-subtle)] font-bold text-sm text-[var(--accent-gold)]">
-                    <span>Final Payable Amount</span>
-                    <span className="font-mono">{product.display_price}</span>
-                  </div>
-                  <p className="text-[10px] text-[var(--text-secondary)]/70 italic pt-1">
-                    * Transparent pricing guarantee: No hidden surcharges. Subject to daily live Jammu bullion rates.
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-
-        <div className="mb-5">
-          <h3 className="font-sans text-xs text-[var(--accent-gold)] mb-2 tracking-[0.2em] font-semibold uppercase">THE CRAFTSMANSHIP STORY</h3>
-          <p className="font-sans text-xs sm:text-sm text-[var(--text-primary)]/90 whitespace-pre-line leading-relaxed font-light">
-            {product.description}
-          </p>
-          {product.craftsmanship_story && (
-            <p className="font-serif text-xs sm:text-sm text-[var(--accent-gold)] whitespace-pre-line mt-2.5 italic border-l-2 border-[var(--accent-gold)]/40 pl-3">
-              {product.craftsmanship_story}
-            </p>
-          )}
-        </div>
-
-        {/* Metal Finish */}
-        <div className="mb-5">
-          <div className="flex items-center justify-between mb-2.5">
-            <h3 className="font-sans text-xs text-[var(--text-secondary)] tracking-wider font-semibold uppercase">
-              METAL FINISH: <span className="text-[var(--accent-gold)]">{selectedFinish.toUpperCase()}</span>
-            </h3>
-            <span className="font-sans text-[9px] text-[var(--accent-gold)] tracking-widest uppercase font-semibold">
-              ATELIER HANDCRAFTED
-            </span>
-          </div>
-          <div className="flex flex-wrap gap-2.5" role="radiogroup" aria-label="Select metal finish">
-            {(product.metal_finishes && product.metal_finishes.length > 0 ? product.metal_finishes : ['Gold']).map(finish => (
-              <button
-                key={finish}
-                type="button"
-                onClick={() => setSelectedFinish(finish)}
-                aria-label={`Select ${finish} metal finish`}
-                aria-pressed={selectedFinish === finish}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-[2px] border transition-all cursor-pointer ${
-                  selectedFinish === finish 
-                    ? 'border-[var(--accent-gold)] bg-[var(--bg-surface)] ring-1 ring-[var(--accent-gold)] text-[var(--text-primary)] font-semibold shadow-xs' 
-                    : 'border-[var(--border-subtle)] bg-[var(--bg-card)] hover:border-[var(--accent-gold)]/50 text-[var(--text-secondary)]'
-                }`}
-                title={finish}
-              >
-                <span className={`w-3.5 h-3.5 rounded-full border border-black/15 shadow-xs shrink-0 ${
-                  finish === 'Gold' ? 'bg-[#FFD700]' : 
-                  finish === 'Silver' ? 'bg-[#C0C0C0]' : 
-                  'bg-[#B76E79]'
-                }`}></span>
-                <span className="font-sans text-xs uppercase tracking-wider">{finish}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-
-        {/* Ring / Bangle Size Selector */}
-        {(isRing || isBangle) && (
-          <div className="mb-5 p-3.5 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px]">
-            <div className="flex items-center justify-between mb-2">
-              <h3 className="font-sans text-xs text-[var(--text-secondary)] tracking-wider font-semibold flex items-center gap-1.5 uppercase">
-                <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]">straighten</span>
-                SELECT {isRing ? 'RING SIZE' : 'BANGLE SIZE'}:
-                <span className="text-[var(--accent-gold)] font-bold ml-1">{selectedSize}</span>
-              </h3>
-              
-              <button
-                type="button"
-                onClick={() => setShowSizeGuide(!showSizeGuide)}
-                className="text-[11px] text-[var(--accent-gold)] hover:underline font-semibold flex items-center gap-1 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-xs">help</span>
-                <span>Size Guide</span>
-              </button>
-            </div>
-
-            {/* Size Options Pills */}
-            <div className="flex flex-wrap gap-1.5 mt-2" role="radiogroup" aria-label={`Select ${isRing ? 'ring' : 'bangle'} size`}>
-              {(isRing ? ringSizes : bangleSizes).map((sz) => (
                 <button
-                  key={sz}
-                  type="button"
-                  onClick={() => setSelectedSize(sz)}
-                  aria-pressed={selectedSize === sz}
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-[2px] border transition-all cursor-pointer ${
-                    selectedSize === sz
-                      ? 'border-[var(--accent-gold)] bg-[var(--accent-gold)] text-white shadow-xs'
-                      : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)]/60 text-[var(--text-secondary)]'
+                  key={i}
+                  onClick={() => setActiveImageIdx(i)}
+                  aria-label={`View image ${i + 1} of ${product.name}`}
+                  aria-pressed={activeImage === img}
+                  className={`relative aspect-[4/5] w-20 sm:w-24 shrink-0 overflow-hidden bg-[var(--bg-surface)] transition-all cursor-pointer border ${
+                    activeImageIdx === i
+                      ? 'border-[var(--text-primary)] opacity-100'
+                      : 'border-transparent opacity-60 hover:opacity-100'
                   }`}
                 >
-                  {sz}
+                  <img src={img} alt="" className="w-full h-full object-cover" />
                 </button>
               ))}
             </div>
+          )}
 
-            {/* Size Guide Info Dropdown */}
-            {showSizeGuide && (
-              <div className="mt-3 p-3 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[2px] text-xs space-y-1.5 text-[var(--text-secondary)]">
-                <p className="font-bold text-[var(--accent-gold)] flex items-center gap-1">
-                  <span className="material-symbols-outlined text-sm">info</span>
-                  {isRing ? 'Indian Standard Ring Size Guide:' : 'Standard Indian Bangle Sizing:'}
-                </p>
-                {isRing ? (
-                  <p className="text-[11px] leading-relaxed font-light">
-                    Standard Indian women&apos;s ring sizes usually range from <strong>10 to 14</strong>. Standard men&apos;s ring sizes range from <strong>16 to 22</strong>. Need custom resizing? Our Jammu karigars offer complimentary sizing adjustments after order confirmation on WhatsApp.
-                  </p>
-                ) : (
-                  <p className="text-[11px] leading-relaxed font-light">
-                    Bangle sizes represent the inner diameter in inches: <strong>2.2</strong> (2&quot; 2/16 - Small), <strong>2.4</strong> (2&quot; 4/16 - Medium), <strong>2.6</strong> (2&quot; 6/16 - Standard/Most Popular), <strong>2.8</strong> (2&quot; 8/16 - Large).
-                  </p>
-                )}
-              </div>
-            )}
-          </div>
-        )}
-
-        {/* Specifications & Compliance Table */}
-        <div className="mb-5 border border-[var(--border-card)] bg-[var(--bg-card)] shadow-[var(--card-shadow)] p-4 rounded-[2px]">
-          <div className="flex items-center justify-between border-b border-[var(--border-subtle)] pb-2 mb-3">
-            <h3 className="font-sans text-[10.5px] text-[var(--accent-gold)] tracking-widest font-bold flex items-center gap-1.5 uppercase">
-              <span className="material-symbols-outlined text-sm">verified</span>
-              PRODUCT SPECIFICATIONS &amp; LEGAL METROLOGY
-            </h3>
-            <span className="text-[9px] font-sans text-emerald-700 dark:text-emerald-400 bg-emerald-100 dark:bg-emerald-950/40 px-2 py-0.5 rounded-[2px] border border-emerald-300 dark:border-emerald-800/40 font-semibold tracking-wider uppercase">
-              {product.stock_status === 'in_stock' ? 'READY TO DISPATCH' : 'MADE TO ORDER'}
-            </span>
-          </div>
-
-          <div className="grid grid-cols-2 gap-x-4 gap-y-2 text-xs font-sans">
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Material &amp; Composition</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.material || 'Solid Gold'}</span>
+          {/* Craftsmanship Narrative & Heritage Origin */}
+          {product.craftsmanship_story && (
+            <div className="mt-6 p-6 bg-[var(--bg-surface)] border border-[var(--border-subtle)]">
+              <span className="text-[9.5px] font-sans tracking-[0.26em] uppercase text-[var(--accent-gold)] font-medium block mb-2">
+                KARIGAR BENCHCRAFT
+              </span>
+              <p className="font-serif text-lg text-[var(--text-primary)] font-normal leading-relaxed mb-2">
+                &ldquo;{product.craftsmanship_story}&rdquo;
+              </p>
+              <span className="text-[10px] font-sans text-[var(--text-tertiary)] uppercase tracking-wider">
+                ORIGIN: JAMMU ATELIER &bull; PRESERVED DOGRA MOTIFS
+              </span>
             </div>
+          )}
 
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Purity / Karatage</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.purity || '22K (916)'}</span>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Hallmarking / HUID</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.bis_hallmark || 'BIS Assayed & Hallmarked'}</span>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Net Precious Weight</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.weight_grams} grams</span>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Gross Weight</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.gross_weight_grams || product.weight_grams} grams</span>
-            </div>
-
-            {product.dimensions && (
-              <div>
-                <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Dimensions (L × B × H)</span>
-                <span className="font-medium text-[var(--text-primary)] text-[11px]">
-                  {product.dimensions.length_cm} × {product.dimensions.breadth_cm} × {product.dimensions.height_cm} cm
-                </span>
-              </div>
-            )}
-
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">HSN Code</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.hsn_code} (Precious Jewellery)</span>
-            </div>
-
-            <div>
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Country of Origin</span>
-              <span className="font-medium text-[var(--text-primary)] text-[11px]">{product.country_of_origin}</span>
-            </div>
-
-            <div className="col-span-2 pt-1 border-t border-[var(--border-subtle)]">
-              <span className="text-[10px] text-[var(--text-secondary)]/80 block uppercase tracking-wider">Seller &amp; Manufacturing Details</span>
-              <span className="font-light text-[var(--text-primary)] text-[11px]">{product.seller_details}</span>
-            </div>
-          </div>
         </div>
 
-        {/* VIP Video Shopping Salon Card */}
-        <div className="mb-4 p-3 sm:p-3.5 bg-[var(--bg-surface)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px] flex items-center justify-between gap-3">
-          <div className="flex items-center gap-2.5">
-            <div className="w-8 h-8 rounded-full bg-[var(--bg-card)] border border-[var(--border-subtle)] flex items-center justify-center text-[var(--accent-gold)] shrink-0">
-              <span className="material-symbols-outlined text-base">videocam</span>
+        {/* Right Column: Sticky Purchase Atelier Column (5 Cols) */}
+        <div className="lg:col-span-5 lg:sticky lg:top-24 flex flex-col gap-6">
+          
+          {/* Header & Meta */}
+          <div>
+            <div className="text-[10px] font-sans tracking-[0.28em] uppercase text-[var(--text-tertiary)] mb-2 font-medium">
+              {product.category}
             </div>
-            <div>
-              <p className="font-serif text-xs sm:text-sm text-[var(--text-primary)] font-medium">VIP Video Shopping Salon</p>
-              <p className="font-sans text-[10px] text-[var(--text-secondary)] font-light">Inspect this heirloom live with our Jammu showroom karigars</p>
-            </div>
-          </div>
-          <a
-            href={`https://wa.me/919086098457?text=Namaste!%20I%20would%20like%20to%20schedule%20a%20private%20video%20appointment%20to%20view%20${encodeURIComponent(product.name)}.`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-[9.5px] font-sans font-semibold text-[var(--accent-gold)] hover:bg-[var(--accent-gold)] hover:text-white border border-[var(--accent-gold)]/60 px-2.5 py-1.5 rounded-[2px] transition-colors uppercase tracking-wider shrink-0"
-          >
-            Schedule
-          </a>
-        </div>
 
-        {/* Quantity & Action Buttons */}
-        <div className="mt-auto pt-3 border-t border-[var(--border-subtle)] flex flex-col gap-2.5">
-          <div className="flex flex-col sm:flex-row items-stretch gap-2.5">
-            <div className="flex items-center border border-[var(--border-card)] px-3.5 py-2.5 min-w-[120px] justify-between bg-[var(--bg-surface)] rounded-[2px]" role="group" aria-label="Item quantity selector">
-              <span className="font-sans text-[10px] text-[var(--text-secondary)] mr-2 uppercase tracking-wider" id="pdp-qty-label">QTY:</span>
-              <button 
-                type="button"
-                onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                aria-label="Decrease quantity"
-                className="text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors text-lg font-bold px-2 cursor-pointer"
-              >-</button>
-              <span className="font-sans text-sm mx-2 font-bold text-[var(--text-primary)]" aria-labelledby="pdp-qty-label" aria-live="polite" aria-atomic="true">{quantity}</span>
-              <button 
-                type="button"
-                onClick={() => setQuantity(quantity + 1)}
-                aria-label="Increase quantity"
-                className="text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors text-lg font-bold px-2 cursor-pointer"
-              >+</button>
+            <h1 className="font-serif text-3xl sm:text-4xl text-[var(--text-primary)] font-normal tracking-tight mb-3 leading-[1.14]">
+              {product.name}
+            </h1>
+
+            {/* Price Presentation */}
+            <div className="flex items-baseline gap-3 mb-2">
+              <span className="font-sans text-2xl font-medium text-[var(--text-primary)]">
+                {product.display_price || `₹${totalRupees.toLocaleString('en-IN')}`}
+              </span>
+              <span className="text-[10.5px] font-sans text-[var(--text-tertiary)] uppercase tracking-wider">
+                INCLUSIVE OF 3% GST
+              </span>
             </div>
-            
-            <button 
-              type="button"
-              onClick={handleAddToCart}
-              disabled={isAdding || product.stock_status === 'out_of_stock'}
-              aria-label={isAdding ? 'Item added to shopping bag' : `Add ${product.name} to shopping bag`}
-              className="flex-1 btn-gold-secondary bg-[var(--bg-surface)] text-[var(--accent-gold)] border-[var(--border-card)] text-xs py-3.5 tracking-wider cursor-pointer"
+
+            {/* Price Breakup Toggle */}
+            <button
+              onClick={() => setShowPriceBreakup(!showPriceBreakup)}
+              aria-expanded={showPriceBreakup}
+              aria-controls="pdp-price-breakup-details"
+              className="text-[10.5px] font-sans tracking-wider uppercase text-[var(--accent-gold)] hover:underline underline-offset-4 cursor-pointer mb-4 inline-flex items-center gap-1"
             >
-              {isAdding ? '✓ ADDED TO BAG' : product.stock_status === 'out_of_stock' ? 'OUT OF STOCK' : '+ ADD TO BAG'}
+              <span>{showPriceBreakup ? 'Hide transparent price breakup' : 'View transparent price breakup'}</span>
+              <span className="material-symbols-outlined text-xs">
+                {showPriceBreakup ? 'expand_less' : 'expand_more'}
+              </span>
+            </button>
+
+            {/* Transparent Indian Jewellery Price Breakdown */}
+            {showPriceBreakup && (
+              <div 
+                id="pdp-price-breakup-details"
+                role="region"
+                aria-label="Transparent Price Breakdown"
+                className="p-4 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs font-sans space-y-2 mb-4 animate-in fade-in duration-200"
+              >
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Precious Metal Base ({netWeight}g):</span>
+                  <span>₹{estimatedMetalValue.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Making Charges &amp; Artistry:</span>
+                  <span>₹{estimatedMakingCharge.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>Government BIS Hallmarking Fee:</span>
+                  <span>₹{hallmarkFee}</span>
+                </div>
+                <div className="flex justify-between text-[var(--text-secondary)]">
+                  <span>GST (3% on precious metals):</span>
+                  <span>₹{gstRupees.toLocaleString('en-IN')}</span>
+                </div>
+                <div className="pt-2 border-t border-[var(--border-subtle)] flex justify-between font-semibold text-[var(--text-primary)]">
+                  <span>Total Invoiced Price:</span>
+                  <span>₹{totalRupees.toLocaleString('en-IN')}</span>
+                </div>
+              </div>
+            )}
+
+            <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed mb-6">
+              {product.description}
+            </p>
+          </div>
+
+          {/* Metal Finish Option */}
+          {product.metal_finishes && product.metal_finishes.length > 0 && (
+            <div className="pt-4 border-t border-[var(--border-subtle)]">
+              <span className="text-[10px] font-sans tracking-widest uppercase text-[var(--text-tertiary)] block mb-2 font-medium">
+                PRECIOUS FINISH: {selectedFinish}
+              </span>
+              <div className="flex gap-2" role="radiogroup" aria-label="Select metal finish">
+                {product.metal_finishes.map((finish) => (
+                  <button
+                    key={finish}
+                    type="button"
+                    onClick={() => setSelectedFinish(finish)}
+                    aria-label={`Select ${finish} metal finish`}
+                    aria-pressed={selectedFinish === finish}
+                    className={`px-4 py-2 text-[10.5px] font-sans tracking-wider uppercase transition-all cursor-pointer rounded-[1px] ${
+                      selectedFinish === finish
+                        ? 'bg-[var(--text-primary)] text-[var(--bg-main)] font-semibold'
+                        : 'bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] border border-[var(--border-subtle)]'
+                    }`}
+                  >
+                    {finish}
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Ring / Bangle Sizing Selector */}
+          {(isRing || isBangle) && (
+            <div className="pt-4 border-t border-[var(--border-subtle)]">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-sans tracking-widest uppercase text-[var(--text-tertiary)] font-medium">
+                  SELECT SIZE ({isRing ? 'INDIAN RING SIZE' : 'BANGLE INNER DIAMETER'}):
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setShowSizeGuide(!showSizeGuide)}
+                  className="text-[10px] font-sans tracking-wider text-[var(--accent-gold)] underline underline-offset-4 cursor-pointer"
+                >
+                  Size Guide
+                </button>
+              </div>
+
+              <div className="flex flex-wrap gap-1.5" role="radiogroup">
+                {(isRing ? ringSizes : bangleSizes).map((sz) => (
+                  <button
+                    key={sz}
+                    type="button"
+                    onClick={() => setSelectedSize(sz)}
+                    className={`px-3 py-1.5 text-xs font-sans rounded-[1px] border transition-all cursor-pointer ${
+                      selectedSize === sz
+                        ? 'border-[var(--text-primary)] bg-[var(--text-primary)] text-[var(--bg-main)] font-semibold'
+                        : 'border-[var(--border-subtle)] bg-[var(--bg-surface)] text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
+                    }`}
+                  >
+                    {sz}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sizing Help Modal/Box */}
+              {showSizeGuide && (
+                <div className="mt-3 p-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs text-[var(--text-secondary)] space-y-1 font-light leading-relaxed">
+                  <p className="font-medium text-[var(--text-primary)]">Indian Sizing Standards:</p>
+                  {isRing ? (
+                    <p>Standard women&apos;s ring sizes range from 10 to 14. Men&apos;s sizes range from 16 to 22. Need bespoke sizing? Our Jammu karigars offer complimentary sizing adjustments upon WhatsApp consultation.</p>
+                  ) : (
+                    <p>Bangle sizes denote inner diameter in inches: 2.2 (Small), 2.4 (Medium), 2.6 (Standard / Most Popular), 2.8 (Large).</p>
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Quantity & Primary Action Buttons */}
+          <div className="pt-4 border-t border-[var(--border-subtle)] flex flex-col gap-3">
+            <div className="flex items-center gap-3">
+              {/* Quantity Stepper */}
+              <div className="flex items-center border border-[var(--border-subtle)] bg-[var(--bg-surface)] px-3 py-2.5 rounded-[1px] min-w-[110px] justify-between" role="group" aria-label="Item quantity selector">
+                <span className="text-[9.5px] font-sans text-[var(--text-tertiary)] uppercase tracking-wider" id="pdp-qty-label">QTY</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(Math.max(1, quantity - 1))}
+                  aria-label="Decrease quantity"
+                  className="px-2 text-base text-[var(--text-primary)] hover:text-[var(--accent-gold)] cursor-pointer"
+                >
+                  -
+                </button>
+                <span className="font-sans text-xs font-medium text-[var(--text-primary)]" aria-live="polite" aria-atomic="true">{quantity}</span>
+                <button
+                  type="button"
+                  onClick={() => setQuantity(quantity + 1)}
+                  aria-label="Increase quantity"
+                  className="px-2 text-base text-[var(--text-primary)] hover:text-[var(--accent-gold)] cursor-pointer"
+                >
+                  +
+                </button>
+              </div>
+
+              {/* Add to Bag CTA */}
+              <button
+                type="button"
+                onClick={handleAddToCart}
+                disabled={isAdding || product.stock_status === 'out_of_stock'}
+                className="flex-1 btn-gold-primary py-3.5 text-xs tracking-[0.2em]"
+              >
+                {isAdding ? '✓ ADDED TO SHOPPING BAG' : product.stock_status === 'out_of_stock' ? 'OUT OF STOCK' : 'ADD TO BAG'}
+              </button>
+            </div>
+
+            {/* Direct WhatsApp Concierge & Wishlist Buttons */}
+            <div className="grid grid-cols-2 gap-2.5">
+              <a
+                href={whatsappUrl}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn-gold-secondary py-3 text-[10.5px] tracking-wider flex items-center justify-center gap-2 hover:text-emerald-600 hover:border-emerald-600"
+              >
+                <span className="material-symbols-outlined text-sm text-emerald-600">chat</span>
+                INQUIRE ON WHATSAPP
+              </a>
+
+              <button
+                type="button"
+                onClick={() => toggleWishlist(product)}
+                className="btn-gold-secondary py-3 text-[10.5px] tracking-wider flex items-center justify-center gap-2"
+              >
+                <span className={`material-symbols-outlined text-sm ${isSaved ? 'text-[var(--accent-burgundy)] fill-1' : ''}`}>
+                  favorite
+                </span>
+                {isSaved ? 'SAVED TO WISHLIST' : 'SAVE TO WISHLIST'}
+              </button>
+            </div>
+
+            {/* Share action */}
+            <button
+              type="button"
+              onClick={() => {
+                if (typeof window !== 'undefined') {
+                  if (navigator.clipboard) {
+                    navigator.clipboard.writeText(window.location.href);
+                    setIsCopied(true);
+                    setTimeout(() => setIsCopied(false), 2000);
+                  }
+                }
+              }}
+              className="text-center text-[10px] font-sans tracking-widest uppercase text-[var(--text-tertiary)] hover:text-[var(--text-primary)] py-1.5 transition-colors cursor-pointer"
+            >
+              {isCopied ? '✓ LINK COPIED TO CLIPBOARD' : 'SHARE HEIRLOOM WITH FAMILY &rarr;'}
             </button>
           </div>
-          
-          <a 
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            aria-label="Inquire or purchase this piece directly on WhatsApp with our Jammu showroom concierge"
-            className="btn-gold-primary w-full py-3.5 text-xs font-semibold cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-base" aria-hidden="true">chat_bubble</span>
-            {product.stock_status === 'out_of_stock' ? 'OUT OF STOCK' : 'BUY NOW ON WHATSAPP'}
-          </a>
 
-          <button
-            type="button"
-            onClick={() => {
-              if (typeof window !== 'undefined') {
-                if (navigator.share) {
-                  navigator.share({
-                    title: `${product.name} | Ambika Jewels Jammu`,
-                    text: `Heirloom jewellery handcrafted in Jammu: ${product.name}`,
-                    url: window.location.href,
-                  }).catch(() => {});
-                } else if (navigator.clipboard) {
-                  navigator.clipboard.writeText(window.location.href);
-                  setIsCopied(true);
-                  setTimeout(() => setIsCopied(false), 2500);
-                }
-              }
-            }}
-            aria-label="Share this heirloom creation"
-            className="w-full py-2.5 px-3 border border-[var(--border-subtle)] bg-[var(--bg-surface)] hover:border-[var(--accent-gold)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] text-xs font-sans font-medium rounded-[2px] flex items-center justify-center gap-1.5 transition-colors cursor-pointer"
-          >
-            <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]" aria-hidden="true">
-              {isCopied ? 'check' : 'share'}
-            </span>
-            <span>{isCopied ? 'Link Copied to Clipboard!' : 'Share Heirloom with Family'}</span>
-          </button>
-        </div>
+          {/* Editorial Detail Accordions */}
+          <div className="border-t border-[var(--border-subtle)] pt-4 space-y-2">
+            
+            {/* Specs Accordion */}
+            <div className="border-b border-[var(--border-subtle)] pb-2">
+              <button
+                onClick={() => setOpenTab(openTab === 'specs' ? null : 'specs')}
+                className="w-full flex items-center justify-between py-2 text-left text-xs font-sans font-semibold uppercase tracking-wider text-[var(--text-primary)] cursor-pointer"
+              >
+                <span>SPECIFICATIONS &amp; HALLMARKING</span>
+                <span className="material-symbols-outlined text-base">
+                  {openTab === 'specs' ? 'remove' : 'add'}
+                </span>
+              </button>
+              {openTab === 'specs' && (
+                <div className="py-3 text-xs font-sans space-y-2 text-[var(--text-secondary)]">
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <span className="text-[9.5px] text-[var(--text-tertiary)] uppercase block">PURITY</span>
+                      <span className="font-medium text-[var(--text-primary)]">{product.purity || '22K Solid Gold'}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9.5px] text-[var(--text-tertiary)] uppercase block">NET WEIGHT</span>
+                      <span className="font-medium text-[var(--text-primary)]">{product.weight_grams}g</span>
+                    </div>
+                    <div>
+                      <span className="text-[9.5px] text-[var(--text-tertiary)] uppercase block">HALLMARK LICENSE</span>
+                      <span className="font-medium text-[var(--text-primary)]">BIS HALLMARKED (BUREAU OF INDIAN STANDARDS) &bull; {siteConfig.bisHallmarkLicense}</span>
+                    </div>
+                    <div>
+                      <span className="text-[9.5px] text-[var(--text-tertiary)] uppercase block">SECURE LOGISTICS</span>
+                      <span className="font-medium text-[var(--text-primary)]">BVC ARMORED TRANSIT</span>
+                    </div>
+                    <div>
+                      <span className="text-[9.5px] text-[var(--text-tertiary)] uppercase block">HSN CODE</span>
+                      <span className="font-medium text-[var(--text-primary)]">{product.hsn_code || '7113'}</span>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-[var(--text-tertiary)] pt-2 border-t border-[var(--border-subtle)]">
+                    In compliance with Bureau of Indian Standards (Hallmarking) Regulations.
+                  </p>
+                </div>
+              )}
+            </div>
 
-        {/* Trust Badges Bar */}
-        <div className="mt-4 flex items-center justify-around border border-[var(--border-subtle)] p-2.5 bg-[var(--bg-surface)] rounded-[2px]">
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[var(--accent-gold)] text-base" aria-hidden="true">verified</span>
-            <span className="font-sans text-[8.5px] sm:text-[9.5px] text-[var(--text-secondary)] font-medium uppercase tracking-wider">{bottomBadgeText}</span>
+            {/* Armored Delivery Accordion */}
+            <div className="border-b border-[var(--border-subtle)] pb-2">
+              <button
+                onClick={() => setOpenTab(openTab === 'shipping' ? null : 'shipping')}
+                className="w-full flex items-center justify-between py-2 text-left text-xs font-sans font-semibold uppercase tracking-wider text-[var(--text-primary)] cursor-pointer"
+              >
+                <span>ARMORED DELIVERY &amp; TRANSIT</span>
+                <span className="material-symbols-outlined text-base">
+                  {openTab === 'shipping' ? 'remove' : 'add'}
+                </span>
+              </button>
+              {openTab === 'shipping' && (
+                <div className="py-3 text-xs font-sans space-y-2 text-[var(--text-secondary)] font-light leading-relaxed">
+                  <p>All fine jewellery is transported via <strong>BVC Logistics Armored Express</strong> in tamper-evident security satchels. 100% transit insurance covered by Ambika Jewels.</p>
+                  <p>Dispatch within 24–48 hours from our Jammu showroom. Delivered in 2–5 business days pan-India with OTP verification on delivery.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Care Guide Accordion */}
+            <div className="border-b border-[var(--border-subtle)] pb-2">
+              <button
+                onClick={() => setOpenTab(openTab === 'care' ? null : 'care')}
+                className="w-full flex items-center justify-between py-2 text-left text-xs font-sans font-semibold uppercase tracking-wider text-[var(--text-primary)] cursor-pointer"
+              >
+                <span>HEIRLOOM CARE &amp; STORAGE</span>
+                <span className="material-symbols-outlined text-base">
+                  {openTab === 'care' ? 'remove' : 'add'}
+                </span>
+              </button>
+              {openTab === 'care' && (
+                <div className="py-3 text-xs font-sans space-y-2 text-[var(--text-secondary)] font-light leading-relaxed">
+                  <p>{product.care_instructions || 'Store individually in the provided velvet pouch away from moisture, perfumes, and sanitizers.'}</p>
+                  <p>Complimentary annual ultrasonic cleaning and prong inspection available at our Jammu flagship showroom.</p>
+                </div>
+              )}
+            </div>
+
           </div>
-          <div className="w-[1px] h-5 bg-[var(--border-subtle)]" aria-hidden="true"></div>
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[var(--accent-gold)] text-base" aria-hidden="true">local_shipping</span>
-            <span className="font-sans text-[8.5px] sm:text-[9.5px] text-[var(--text-secondary)] font-medium uppercase tracking-wider">BVC ARMORED TRANSIT</span>
-          </div>
-          <div className="w-[1px] h-5 bg-[var(--border-subtle)]" aria-hidden="true"></div>
-          <div className="flex items-center gap-1.5">
-            <span className="material-symbols-outlined text-[var(--accent-gold)] text-base" aria-hidden="true">assignment_return</span>
-            <span className="font-sans text-[8.5px] sm:text-[9.5px] text-[var(--text-secondary)] font-medium uppercase tracking-wider">7-DAY RETURNS</span>
-          </div>
+
         </div>
 
       </div>

@@ -3,6 +3,7 @@ import "./globals.css";
 import { siteConfig } from "@/config/siteConfig";
 
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import ChatWidget from "@/components/chat/ChatWidget";
 import ConsentBanner from "@/components/compliance/ConsentBanner";
 import ToastNotification from "@/components/ui/ToastNotification";
@@ -120,10 +121,12 @@ export default function RootLayout({
       </head>
       <body>
         <CartProvider>
-          {children}
-          <ToastNotification />
-          <ChatWidget />
-          <ConsentBanner />
+          <WishlistProvider>
+            {children}
+            <ToastNotification />
+            <ChatWidget />
+            <ConsentBanner />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

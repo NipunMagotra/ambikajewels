@@ -1,136 +1,154 @@
+import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
-import MandalaDivider from '@/components/ui/MandalaDivider';
-import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
-import Link from 'next/link';
+import { siteConfig } from '@/config/siteConfig';
 
 export const metadata = {
-  title: 'About Us | Ambika Jewels Jammu',
-  description: 'Learn about Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Specializing in authentic Dogra heritage jewellery, Gold Exchange, 22K to 9K gold, 925 silver, and custom jewellery.',
+  title: 'About the Maison | Ambika Jewels Jammu',
+  description: 'The story of Ambika Jewels in Jammu, founded by Shivani Anand and representative Lakesh Kumar. Discover our Dogra heritage craftsmanship, 22K hallmarked gold, certified diamonds, and bespoke atelier.',
 };
 
 export default function AboutPage() {
   const pillars = [
     {
-      icon: 'verified',
-      title: 'Hallmarked Gold & Certified Diamonds',
-      description: 'Available in 22K (916), 18K (750), 14K (585), and 9K (375) Gold, with official GIA/IGI certified real diamonds and 925 hallmarked silver.'
+      num: '01',
+      title: '100% BIS Hallmarked Purity',
+      description: 'Every creation in 22K (916), 18K (750), 14K (585), and 9K gold carries a unique 6-character laser HUID code verified under Bureau of Indian Standards statutory regulations.',
     },
     {
-      icon: 'auto_awesome',
-      title: 'Signature Dogra Heritage Collection',
-      description: 'Specialists in authentic Dogra traditional jewellery, including Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets reflecting Jammu cultural heritage.'
+      num: '02',
+      title: 'The Dogra Dynasty Heritage',
+      description: 'Preserving traditional northern Indian jewellery forms including authentic Dogri Jhumkis, Dogri Naman sets, and regional bridal haars crafted by master Jammu karigars.',
     },
     {
-      icon: 'currency_exchange',
-      title: 'Gold Exchange & Custom Melting',
-      description: 'Transparent gold exchange as per stated store terms. Bring old gold to be melted and redesigned into modern bespoke heirloom jewellery.'
+      num: '03',
+      title: 'Certified Natural Solitaires',
+      description: 'Ethically sourced natural diamonds accompanied by authentic IGI and GIA certificates, precision-set into solid 18K and 14K gold.',
     },
     {
-      icon: 'storefront',
-      title: 'Showroom & Private Boutique',
-      description: 'Operated under the leadership of owner Shivani Anand and representative Lakesh Kumar for personal, attentive customer service.'
-    }
-  ];
-
-  const milestones = [
-    { year: '01', title: 'Establishment in Jammu', detail: 'Our jewellery showroom and boutique were founded in Lower Roop Nagar, Jammu, by Shivani Anand.' },
-    { year: '02', title: 'Signature Dogra Collection', detail: 'Introduced authentic Dogri Jhumki, Dogri Naman, and Long Sets crafted by master Jammu karigars.' },
-    { year: '03', title: 'Gold Exchange & 3D CAD', detail: 'Pioneered full gold exchange and 3D CAD custom design services for custom jewellery orders.' },
-    { year: '04', title: 'Expanded Multi-Purity Collections', detail: 'Offering 22K, 18K, 14K, 9K gold, 18K/14K diamond, 925 silver, and nationwide express delivery.' }
+      num: '04',
+      title: 'Heirloom Melting & 3D CAD',
+      description: 'Transparent gold exchange as per stated store terms. Bring old gold to our Jammu showroom for transparent melting valuation, ultrasonic karat assaying, and custom 3D CAD preview fabrication within 48 hours.',
+    },
   ];
 
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-28 sm:pt-32 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+      <main className="min-h-screen pt-24 sm:pt-28 pb-20 lg:pb-28 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         
-        {/* About Hero */}
-        <section className="relative py-12 sm:py-16 bg-[var(--bg-surface)] border-b border-[var(--border-subtle)] overflow-hidden">
-          <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop text-center relative z-10 max-w-3xl">
-            <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.35em] uppercase block mb-2 font-semibold">
-              JAMMU &bull; FINE JEWELLERY
+        {/* Editorial Hero */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-5xl mb-16 lg:mb-24">
+          <div className="text-center max-w-3xl mx-auto">
+            <span className="font-sans text-[9.5px] text-[var(--accent-gold)] tracking-[0.32em] uppercase block mb-3 font-medium">
+              THE HOUSE OF AMBIKA JEWELS &bull; ESTD. 1998
             </span>
-            <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-[var(--text-primary)] font-normal mb-4 leading-tight">
-              Authentic Dogra Heritage &amp; <br />
-              <span className="italic font-normal gold-text-gradient">Modern Fine Jewellery</span>
+            <h1 className="font-serif text-3xl sm:text-5xl lg:text-6xl text-[var(--text-primary)] font-normal tracking-tight mb-6 leading-[1.12]">
+              The Soul of Jammu Goldsmithing
             </h1>
-            <p className="font-sans text-xs sm:text-base text-[var(--text-secondary)] leading-relaxed font-light max-w-2xl mx-auto">
-              Based in Jammu, Ambika Jewels is owned by Shivani Anand and managed alongside business representative Lakesh Kumar, offering premium-quality jewellery, traditional Dogra collections, and customized gold services.
+            <p className="font-sans text-xs sm:text-base text-[var(--text-secondary)] font-light leading-relaxed max-w-2xl mx-auto">
+              Ambika Jewels was founded with a singular conviction: that regional royal heritage and contemporary fine jewellery belong in harmony.
             </p>
           </div>
         </section>
 
-        <MandalaDivider />
-
-        {/* Story Section */}
-        <section className="py-8 sm:py-12 px-4 sm:px-margin-mobile lg:px-margin-desktop container mx-auto">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 lg:gap-12 items-center">
-            <div className="relative">
-              <div className="aspect-[4/3] sm:aspect-square bg-[var(--bg-surface)] border border-[var(--border-card)] shadow-[var(--card-shadow)] overflow-hidden rounded-[2px]">
-                <div 
-                  className="w-full h-full bg-cover bg-center transition-transform duration-700 hover:scale-105" 
-                  style={{ backgroundImage: "url('https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=1000&q=80')" }}
-                />
-              </div>
-              <div className="absolute -bottom-5 -right-5 bg-[var(--bg-card)] border border-[var(--border-card)] p-4 sm:p-5 hidden sm:block max-w-xs shadow-xl rounded-[2px]">
-                <p className="font-serif text-lg text-[var(--accent-gold)] font-medium mb-1">JAMMU SHOWROOM</p>
-                <p className="font-sans text-[9px] text-[var(--text-secondary)] tracking-wider uppercase">PREMIUM QUALITY &amp; TRUSTED CRAFTSMANSHIP</p>
-              </div>
-            </div>
-
-            <div className="lg:pl-6">
-              <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.25em] uppercase block mb-1 font-semibold">OUR STORY</span>
-              <h2 className="font-serif text-2xl sm:text-4xl text-[var(--text-primary)] font-normal mb-3 leading-tight">
-                Preserving Heritage, <span className="italic font-normal gold-text-gradient">Crafting Perfection</span>
-              </h2>
-              <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-3 leading-relaxed font-light">
-                Ambika Jewels was established with a clear mission: to offer unique, exclusive jewellery designs with uncompromised quality and personal customer service. Alongside our flagship showroom in Jammu, we operate a personalized boutique managed directly by owner Shivani Anand.
+        {/* Large Editorial Visual Feature */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-6xl mb-20 lg:mb-28">
+          <div className="relative aspect-[16/9] sm:aspect-[21/9] overflow-hidden bg-[var(--bg-surface)] rounded-[1px]">
+            <img
+              src="/hero-clean.png"
+              alt="Ambika Jewels Atelier and Showroom"
+              className="w-full h-full object-cover"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+            <div className="absolute bottom-6 left-6 text-white max-w-md">
+              <span className="font-sans text-[9px] uppercase tracking-widest text-[#E8DCCF] block mb-1">
+                LOWER ROOP NAGAR &bull; JAMMU
+              </span>
+              <p className="font-serif text-lg sm:text-xl font-normal">
+                Where ancestral Dogra techniques meet contemporary fine gold craftsmanship.
               </p>
-              <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] mb-6 leading-relaxed font-light">
-                We take immense pride in preserving Jammu&apos;s cultural legacy through our Signature Dogra Collection, including authentic Dogri Jhumkis, Dogri Naman Sets, and Dogri Long Sets. In addition, our Gold Exchange program allows customers to melt old gold and transform it into brand-new modern heritage pieces.
-              </p>
-
-              <div className="flex flex-col sm:flex-row gap-3 pt-1">
-                <Link 
-                  href="/collections"
-                  className="btn-gold-primary text-center"
-                >
-                  EXPLORE COLLECTIONS
-                </Link>
-                <Link 
-                  href="/services"
-                  className="btn-gold-secondary text-center"
-                >
-                  OUR SERVICES
-                </Link>
-              </div>
             </div>
           </div>
         </section>
 
-        {/* Pillars / Values Grid */}
-        <section className="py-10 sm:py-14 bg-[var(--bg-surface)] border-y border-[var(--border-subtle)] px-4 sm:px-margin-mobile lg:px-margin-desktop">
-          <div className="container mx-auto">
-            <div className="text-center max-w-lg mx-auto mb-8 sm:mb-10">
-              <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold block mb-1">
-                WHY CUSTOMERS CHOOSE US
+        {/* Chapter 1: The Founders & Atelier */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-5xl mb-20 lg:mb-28">
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-center">
+            
+            <div className="lg:col-span-6 space-y-4 font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+              <span className="text-[9.5px] uppercase tracking-[0.28em] text-[var(--accent-gold)] font-medium block mb-2">
+                FOUNDER VISION
               </span>
-              <h2 className="font-serif text-2xl sm:text-4xl text-[var(--text-primary)] font-normal">
-                Our Quality &amp; Service Promise
+              <h2 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[var(--text-primary)] font-normal tracking-tight">
+                Shivani Anand &amp; Lakesh Kumar
+              </h2>
+              <p>
+                Under the creative leadership of owner Shivani Anand, our boutique operates as a personal sanctuary for bridal trousseau planning, bespoke styling, and fine jewellery consultation.
+              </p>
+              <p>
+                Counter operations and precious metals procurement are managed by business representative Lakesh Kumar, overseeing daily bullion rate alignment, strict Bureau of Indian Standards (BIS) hallmarking compliance, and insured armored logistics with BVC Logistics.
+              </p>
+              <p>
+                Together, they have created a private jewellery salon where patrons know the exact karatage, net precious weight, and provenance of every single gram.
+              </p>
+
+              <div className="pt-4">
+                <Link
+                  href="/showroom"
+                  className="btn-gold-primary py-3 px-6 text-xs tracking-wider"
+                >
+                  VISIT THE JAMMU SALON &rarr;
+                </Link>
+              </div>
+            </div>
+
+            <div className="lg:col-span-6 grid grid-cols-2 gap-4">
+              <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-surface)]">
+                <img
+                  src="/products/kundan-chandbali.png"
+                  alt="Dogra Royal Jhumki Craft"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-surface)] pt-8">
+                <img
+                  src="/products/heritage-ruby-haar.png"
+                  alt="Fine Ruby and Gold Haar"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        {/* Chapter 2: Four Core Pillars */}
+        <section className="py-20 lg:py-28 bg-[var(--bg-surface)] border-y border-[var(--border-subtle)]">
+          <div className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-5xl">
+            <div className="text-center max-w-xl mx-auto mb-14">
+              <span className="text-[9.5px] font-sans tracking-[0.28em] uppercase text-[var(--accent-gold)] font-medium block mb-2">
+                OUR CODE OF PERMANENCE
+              </span>
+              <h2 className="font-serif text-3xl sm:text-4xl text-[var(--text-primary)] font-normal tracking-tight">
+                The Four Pillars of Ambika
               </h2>
             </div>
 
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-              {pillars.map((p, idx) => (
-                <div key={idx} className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 sm:p-6 rounded-[2px] flex flex-col justify-between hover:border-[var(--accent-gold)]/50 transition-colors">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+              {pillars.map((item) => (
+                <div key={item.num} className="p-6 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[1px] flex flex-col justify-between">
                   <div>
-                    <div className="w-10 h-10 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-full flex items-center justify-center text-[var(--accent-gold)] mb-3.5">
-                      <span className="material-symbols-outlined text-xl">{p.icon}</span>
-                    </div>
-                    <h3 className="font-serif text-base sm:text-lg text-[var(--text-primary)] mb-2 font-normal">{p.title}</h3>
-                    <p className="font-sans text-xs text-[var(--text-secondary)] leading-relaxed font-light">{p.description}</p>
+                    <span className="font-mono text-xs text-[var(--accent-gold)] font-semibold block mb-3">
+                      {item.num}
+                    </span>
+                    <h3 className="font-serif text-lg text-[var(--text-primary)] mb-2 font-normal">
+                      {item.title}
+                    </h3>
+                    <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
+                      {item.description}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -138,51 +156,32 @@ export default function AboutPage() {
           </div>
         </section>
 
-        {/* Journey Timeline */}
-        <section className="py-10 sm:py-14 px-4 sm:px-margin-mobile lg:px-margin-desktop container mx-auto">
-          <div className="text-center max-w-lg mx-auto mb-8 sm:mb-10">
-            <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold block mb-1">
-              OUR JOURNEY
-            </span>
-            <h2 className="font-serif text-2xl sm:text-4xl text-[var(--text-primary)] font-normal">
-              Milestones &amp; Growth
-            </h2>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4">
-            {milestones.map((item, idx) => (
-              <div key={idx} className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/40 transition-colors">
-                <span className="font-serif text-2xl text-[var(--accent-gold)] font-normal block mb-1.5">{item.year}</span>
-                <h4 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1">{item.title}</h4>
-                <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">{item.detail}</p>
-              </div>
-            ))}
-          </div>
-        </section>
-
-        {/* Visit Showroom & Concierge */}
-        <section className="py-8 sm:py-12 px-4 sm:px-margin-mobile lg:px-margin-desktop container mx-auto">
-          <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-6 sm:p-8 lg:p-10 rounded-[2px] flex flex-col lg:flex-row items-center justify-between gap-6">
-            <div className="max-w-xl text-center lg:text-left">
-              <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase font-semibold block mb-1.5">
-                BOUTIQUE &amp; SHOWROOM VISITS
-              </span>
-              <h3 className="font-serif text-2xl sm:text-3xl text-[var(--text-primary)] font-normal mb-2">
-                Visit Ambika Jewels Showroom
-              </h3>
-              <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] leading-relaxed font-light mb-3">
-                Visit our showroom in Roop Nagar, Jammu, managed by Shivani Anand &amp; Lakesh Kumar. We offer private consultations for bridal trousseaus, custom gold melting, and traditional Dogra collections.
-              </p>
-              <div className="font-sans text-xs text-[var(--accent-gold)] font-medium leading-relaxed">
-                📍 Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&amp;K 180013 <br />
-                🕒 Mon–Sat: 10:00 AM – 8:00 PM | Sunday: Open
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-2.5 w-full lg:w-auto shrink-0">
-              <WhatsAppButton />
-              <CallButton />
-            </div>
+        {/* Showroom Invitation */}
+        <section className="container mx-auto px-4 sm:px-6 lg:px-12 max-w-4xl text-center py-20 lg:py-28">
+          <span className="text-[9.5px] font-sans tracking-[0.28em] uppercase text-[var(--accent-gold)] font-medium block mb-2">
+            PRIVATE CONSULTATIONS
+          </span>
+          <h2 className="font-serif text-3xl sm:text-4xl text-[var(--text-primary)] font-normal tracking-tight mb-4">
+            Experience the Salon in Person
+          </h2>
+          <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed max-w-xl mx-auto mb-8">
+            Our flagship showroom in Lower Roop Nagar, Jammu, is open Monday through Saturday from 10:00 AM to 8:00 PM. We invite you to schedule a private viewing.
+          </p>
+          <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+            <Link
+              href="/showroom"
+              className="btn-gold-primary py-3.5 px-8 text-xs tracking-wider"
+            >
+              SHOWROOM DIRECTIONS &amp; HOURS
+            </Link>
+            <a
+              href="https://wa.me/919086098457?text=Namaste!%20I%20would%20like%20to%20schedule%20a%20private%20styling%20session."
+              target="_blank"
+              rel="noopener noreferrer"
+              className="btn-gold-secondary py-3.5 px-8 text-xs tracking-wider"
+            >
+              WHATSAPP CONCIERGE
+            </a>
           </div>
         </section>
 

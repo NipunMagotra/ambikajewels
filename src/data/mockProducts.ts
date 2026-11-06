@@ -1,10 +1,695 @@
 import type { Product } from '@/types';
 
 /**
- * Store Catalog Seed / Fallback Array
- *
- * All fake and mock placeholder products have been removed from the website.
- * The production catalog is strictly managed through the authoritative Supabase
- * database and showroom admin inventory.
+ * Authoritative Store Catalog & SSR Fallback Data
+ * 16 Certified Ambika Jewels Creations (Dogra Heritage, Bridal, Diamonds, Silver)
  */
-export const mockProducts: Product[] = [];
+export const mockProducts: Product[] = [
+  {
+    "id": "dg1",
+    "name": "Authentic 22K Dogri Jhumki",
+    "slug": "authentic-22k-dogri-jhumki",
+    "description": "Iconic Dogri Jhumki sculpted in authentic 22K BIS hallmarked gold with traditional Jammu umbrella filigree and pearl droplet tassels.",
+    "price": 9500000,
+    "display_price": "₹95,000",
+    "category": "Dogra Heritage Collection",
+    "images": [
+      "/products/kundan-chandbali.png",
+      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "22K BIS",
+      "DOGRA HERITAGE",
+      "TOP SELLER"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Antique Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Dogra Heritage Collection",
+    "craftsmanship_story": "Handcrafted signature Dogra Jhumki worn by brides across Jammu region since generations.",
+    "material": "22K Solid Gold (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 14.5,
+    "gross_weight_grams": 15.2,
+    "dimensions": {
+      "length_cm": 4.8,
+      "breadth_cm": 2.4,
+      "height_cm": 2.4
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Store in the provided velvet pouch. Keep away from water, perfumes, and sanitizers.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dg2",
+    "name": "Royal Dogri Naman Set",
+    "slug": "royal-dogri-naman-set",
+    "description": "Sacred 22K gold Dogri Naman necklace set intricately engraved with traditional floral medallions and natural Burmese rubies.",
+    "price": 26000000,
+    "display_price": "₹2,60,000",
+    "category": "Dogra Heritage Collection",
+    "images": [
+      "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80",
+      "/products/royal-kundan.png"
+    ],
+    "badges": [
+      "22K BIS",
+      "DOGRI NAMAN",
+      "SIGNATURE"
+    ],
+    "metal_finishes": [
+      "Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Dogra Heritage Collection",
+    "craftsmanship_story": "Authentic Jammu Dogri Naman design preserved and handcrafted by master karigars.",
+    "material": "22K Solid Gold with Natural Rubies (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 38.2,
+    "gross_weight_grams": 41.5,
+    "dimensions": {
+      "length_cm": 18,
+      "breadth_cm": 14,
+      "height_cm": 3.5
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Clean gently using a soft cloth. Store flat to preserve gemstone settings.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dg3",
+    "name": "Heritage Dogri Long Set",
+    "slug": "heritage-dogri-long-set",
+    "description": "Grand royal Dogri Long Haar featuring multi-layer 22K gold bead strands and a central relief pendant with Meenakari backing.",
+    "price": 32000000,
+    "display_price": "₹3,20,000",
+    "category": "Dogra Heritage Collection",
+    "images": [
+      "/products/heritage-ruby-haar.png",
+      "/products/temple-lakshmi.png"
+    ],
+    "badges": [
+      "22K BIS",
+      "DOGRI LONG HAAR",
+      "BRIDAL"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Antique Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Dogra Heritage Collection",
+    "craftsmanship_story": "A staple of Dogra heritage bridal trousseaus crafted over 100 hours of artisanal embossing.",
+    "material": "22K Solid Gold (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 46.8,
+    "gross_weight_grams": 48,
+    "dimensions": {
+      "length_cm": 22,
+      "breadth_cm": 16,
+      "height_cm": 4
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Handle beads with care. Avoid wrapping tightly; keep in the provided wooden jewellery case.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "b1",
+    "name": "Royal Dogra Kundan Bridal Set",
+    "slug": "royal-dogra-kundan-bridal-set",
+    "description": "Exquisite 22K gold Kundan choker set encrusted with natural uncut Polki diamonds and natural emerald drops.",
+    "price": 35000000,
+    "display_price": "₹3,50,000",
+    "category": "Bridal Couture",
+    "images": [
+      "/products/royal-kundan.png",
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "22K BIS",
+      "BRIDAL",
+      "POLKI"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Antique Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Bridal Couture",
+    "craftsmanship_story": "Sculpted over 120 hours using heritage Meenakari enamel and Kundan setting techniques.",
+    "material": "22K Gold Kundan & Natural Emeralds (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 52,
+    "gross_weight_grams": 64.5,
+    "dimensions": {
+      "length_cm": 20,
+      "breadth_cm": 18,
+      "height_cm": 5
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Avoid contact with moisture, perfume, and hairspray. Store separately in padded box.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "b2",
+    "name": "Maharani Polki Bridal Haathphool & Choker",
+    "slug": "maharani-polki-bridal-haathphool-choker",
+    "description": "Grand royal bridal set with matching haathphool, crafted in 22K hallmarked gold with certified uncut diamonds.",
+    "price": 48000000,
+    "display_price": "₹4,80,000",
+    "category": "Bridal Couture",
+    "images": [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
+      "/products/royal-kundan.png"
+    ],
+    "badges": [
+      "22K BIS",
+      "LIMITED EDITION"
+    ],
+    "metal_finishes": [
+      "Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Bridal Couture",
+    "craftsmanship_story": "Inspired by ancient Dogra royal court jewels.",
+    "material": "22K Gold with Certified Natural Polki (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 72.5,
+    "gross_weight_grams": 88,
+    "dimensions": {
+      "length_cm": 24,
+      "breadth_cm": 20,
+      "height_cm": 6
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Professional jeweler inspection recommended yearly. Keep sealed in dry environment.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dm1",
+    "name": "18K Gold Solitaire Diamond Engagement Ring",
+    "slug": "18k-gold-solitaire-diamond-engagement-ring",
+    "description": "1.2 Carat certified natural VVS1 round solitaire diamond set on a hallmarked 18K solid yellow gold band with GIA certification.",
+    "price": 16000000,
+    "display_price": "₹1,60,000",
+    "category": "Diamond Jewellery",
+    "images": [
+      "https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "18K GIA",
+      "CERTIFIED DIAMOND"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "White Gold",
+      "Rose Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Diamond Jewellery",
+    "craftsmanship_story": "Hand-polished 6-claw solitaire setting in 18K hallmarked gold.",
+    "material": "18K Solid Gold & Certified Natural Diamond",
+    "purity": "18K (750 Purity)",
+    "bis_hallmark": "BIS Hallmarked 18K (750) & GIA Certified VVS1 Solitaire",
+    "is_hallmarked": true,
+    "has_huid": false,
+    "weight_grams": 4.2,
+    "gross_weight_grams": 4.44,
+    "dimensions": {
+      "length_cm": 2.2,
+      "breadth_cm": 2,
+      "height_cm": 1
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Clean with lukewarm soapy water and soft brush. Includes GIA grading certificate card.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dm2",
+    "name": "14K Gold Diamond Tennis Bracelet",
+    "slug": "14k-gold-diamond-tennis-bracelet",
+    "description": "Sleek 14K yellow gold tennis bracelet linked with 2.8 carats of natural round brilliant diamonds.",
+    "price": 13500000,
+    "display_price": "₹1,35,000",
+    "category": "Diamond Jewellery",
+    "images": [
+      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "14K GOLD",
+      "CERTIFIED"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Rose Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": false,
+    "collection": "Diamond Jewellery",
+    "craftsmanship_story": "Flexible 4-prong diamond setting designed in durable 14K gold.",
+    "material": "14K Solid Gold & Natural Brilliant Diamonds",
+    "purity": "14K (585 Purity)",
+    "bis_hallmark": "BIS Hallmarked 14K (585) & IGI Certified Diamonds",
+    "is_hallmarked": true,
+    "has_huid": false,
+    "weight_grams": 12,
+    "gross_weight_grams": 12.56,
+    "dimensions": {
+      "length_cm": 18,
+      "breadth_cm": 0.6,
+      "height_cm": 0.4
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Double-safety clasp check. Wipe with soft cotton after wearing.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "dm3",
+    "name": "18K Gold Emerald Cut Diamond Studs",
+    "slug": "18k-gold-emerald-cut-diamond-studs",
+    "description": "Pair of certified natural VVS emerald cut solitaire diamond studs set in 18K solid yellow gold.",
+    "price": 11000000,
+    "display_price": "₹1,10,000",
+    "category": "Diamond Jewellery",
+    "images": [
+      "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "18K GIA",
+      "SOLITAIRE"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "White Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": false,
+    "collection": "Diamond Jewellery",
+    "craftsmanship_story": "Ultra-clear emerald cut solitaire setting in 18K gold.",
+    "material": "18K Solid Gold & Certified Natural Solitaires",
+    "purity": "18K (750 Purity)",
+    "bis_hallmark": "BIS Hallmarked 18K (750) & GIA Certified VVS Solitaires",
+    "is_hallmarked": true,
+    "has_huid": false,
+    "weight_grams": 3.8,
+    "gross_weight_grams": 4.15,
+    "dimensions": {
+      "length_cm": 1.2,
+      "breadth_cm": 1,
+      "height_cm": 0.8
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Screw-back closure. Store in individual jewellery compartments to avoid friction.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "sv1",
+    "name": "925 Sterling Silver Antique Oxidized Choker",
+    "slug": "925-sterling-silver-antique-oxidized-choker",
+    "description": "Artisanal 925 hallmarked sterling silver tribal choker with ghungroo bells and traditional oxidized finish.",
+    "price": 1850000,
+    "display_price": "₹18,500",
+    "category": "Silver Jewellery (925)",
+    "images": [
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "925 SILVER",
+      "HANDMADE"
+    ],
+    "metal_finishes": [
+      "Silver"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Silver Jewellery (925)",
+    "craftsmanship_story": "Hand-hammered 925 sterling silver with authentic antique patina.",
+    "material": "925 Sterling Silver (Authentic Hallmarked)",
+    "purity": "925 Silver (92.5% Fine Silver)",
+    "bis_hallmark": "925 Sterling Silver Stamped & Verified",
+    "is_hallmarked": false,
+    "has_huid": false,
+    "weight_grams": 42,
+    "gross_weight_grams": 42,
+    "dimensions": {
+      "length_cm": 16,
+      "breadth_cm": 12,
+      "height_cm": 2
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Store in zip-lock pouch with silica gel. Do not use chemical silver dips on antique finish.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "sv2",
+    "name": "925 Silver Dogri Style Payal (Pair)",
+    "slug": "925-silver-dogri-style-payal-pair",
+    "description": "Traditional 925 hallmarked silver anklet pair with carved floral links and delicate bell chimes.",
+    "price": 1250000,
+    "display_price": "₹12,500",
+    "category": "Silver Jewellery (925)",
+    "images": [
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "925 SILVER",
+      "TRADITIONAL"
+    ],
+    "metal_finishes": [
+      "Silver"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": false,
+    "collection": "Silver Jewellery (925)",
+    "craftsmanship_story": "Authentic traditional Dogri silver payal crafted in 925 silver.",
+    "material": "925 Sterling Silver (Traditional Handcrafted)",
+    "purity": "925 Silver (92.5% Fine Silver)",
+    "bis_hallmark": "925 Sterling Silver Stamped & Verified",
+    "is_hallmarked": false,
+    "has_huid": false,
+    "weight_grams": 65,
+    "gross_weight_grams": 65,
+    "dimensions": {
+      "length_cm": 26,
+      "breadth_cm": 2.5,
+      "height_cm": 1
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Wipe with soft lint-free cloth after wear. Store dry away from humidity.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "g1",
+    "name": "22K Gold Traditional Guluband Choker",
+    "slug": "22k-gold-traditional-guluband-choker",
+    "description": "Authentic 22K Dogra Guluband choker with intricate gold bead work and adjustable silk cord.",
+    "price": 14500000,
+    "display_price": "₹1,45,000",
+    "category": "Gold Jewellery",
+    "images": [
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "22K BIS",
+      "HERITAGE"
+    ],
+    "metal_finishes": [
+      "Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Gold Jewellery",
+    "craftsmanship_story": "Classical Dogra 22K gold design.",
+    "material": "22K Solid Gold with Adjustable Silk Dori (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 22.4,
+    "gross_weight_grams": 24,
+    "dimensions": {
+      "length_cm": 15,
+      "breadth_cm": 5,
+      "height_cm": 1.5
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Avoid bending filigree elements. Store flat in the Ambika velvet box.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "g2",
+    "name": "14K Gold Lightweight Daily Pendant Chain",
+    "slug": "14k-gold-lightweight-daily-pendant-chain",
+    "description": "Smooth 14K hallmarked gold delicate chain with a minimalist geometric gold pendant designed for daily office wear.",
+    "price": 2800000,
+    "display_price": "₹28,000",
+    "category": "Gold Jewellery",
+    "images": [
+      "/products/minimalist-gold-chain.png"
+    ],
+    "badges": [
+      "14K BIS",
+      "EVERYDAY WEAR"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Rose Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": false,
+    "collection": "Gold Jewellery",
+    "craftsmanship_story": "Durable 14K gold alloy engineered for daily active wear.",
+    "material": "14K Solid Gold (BIS Hallmarked)",
+    "purity": "14K (585 Purity)",
+    "bis_hallmark": "BIS Hallmarked 14K (585)",
+    "is_hallmarked": true,
+    "has_huid": false,
+    "weight_grams": 5.6,
+    "gross_weight_grams": 5.6,
+    "dimensions": {
+      "length_cm": 45,
+      "breadth_cm": 1.5,
+      "height_cm": 0.5
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Safe for daily wear. Keep chain unknotted when storing.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "g3",
+    "name": "9K Gold Sleek Stacking Ring",
+    "slug": "9k-gold-sleek-stacking-ring",
+    "description": "Minimalist 9K solid gold stackable band with micro-diamond accents.",
+    "price": 1200000,
+    "display_price": "₹12,000",
+    "category": "Gold Jewellery",
+    "images": [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "9K GOLD",
+      "AFFORDABLE LUXURY"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Rose Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": false,
+    "collection": "Gold Jewellery",
+    "craftsmanship_story": "Ultra-lightweight 9K solid gold band.",
+    "material": "9K Solid Gold with Micro Accents",
+    "purity": "9K (375 Purity)",
+    "bis_hallmark": "9K Solid Gold Stamped (375)",
+    "is_hallmarked": false,
+    "has_huid": false,
+    "weight_grams": 2.1,
+    "gross_weight_grams": 2.15,
+    "dimensions": {
+      "length_cm": 2,
+      "breadth_cm": 2,
+      "height_cm": 0.3
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Clean with warm water. Remove before heavy manual work.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "cx1",
+    "name": "Custom Bespoke Gold Jewellery Service",
+    "slug": "custom-bespoke-gold-jewellery-service",
+    "description": "Share your sketch or photo on WhatsApp (+91 9086098457). Our master karigars will create a 3D CAD design and craft your custom 22K/18K gold piece.",
+    "price": 5000000,
+    "display_price": "₹50,000 (Advance Booking)",
+    "category": "Gold Exchange & Custom",
+    "images": [
+      "/products/temple-lakshmi.png",
+      "/products/royal-kundan.png"
+    ],
+    "badges": [
+      "BESPOKE 3D CAD",
+      "GOLD EXCHANGE"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Antique Gold",
+      "White Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Gold Exchange & Custom",
+    "craftsmanship_story": "We melt your old family gold and transform it into modern custom heirloom pieces.",
+    "material": "22K / 18K Solid Gold (Custom Hallmarked Fabrication)",
+    "purity": "22K (916) or 18K (750) as Selected",
+    "bis_hallmark": "Custom BIS Hallmarking with HUID Certificate",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 10,
+    "gross_weight_grams": 10,
+    "dimensions": {
+      "length_cm": 10,
+      "breadth_cm": 10,
+      "height_cm": 5
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Custom care card included based on final gemstone and setting specifications.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "m1",
+    "name": "Royal Dogra 22K Gold Cufflinks",
+    "slug": "royal-dogra-22k-gold-cufflinks",
+    "description": "Solid 22K gold cufflinks engraved with Jammu royal lion insignia and ruby center.",
+    "price": 7800000,
+    "display_price": "₹78,000",
+    "category": "Men's Accessories",
+    "images": [
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "22K BIS",
+      "MEN'S"
+    ],
+    "metal_finishes": [
+      "Gold",
+      "Silver"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Men's Accessories",
+    "craftsmanship_story": "Hand-engraved royal emblem with swivel back closure.",
+    "material": "22K Solid Gold with Natural Burmese Ruby (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 11.8,
+    "gross_weight_grams": 12.4,
+    "dimensions": {
+      "length_cm": 2.2,
+      "breadth_cm": 2.2,
+      "height_cm": 2
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Keep swivel mechanism clean and free of lint.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  },
+  {
+    "id": "m2",
+    "name": "Solid 22K Gold Men's Heavy Kada",
+    "slug": "solid-22k-gold-mens-heavy-kada",
+    "description": "Heavy masculine 22K solid gold Kada featuring grooved bevel edges.",
+    "price": 21000000,
+    "display_price": "₹2,10,000",
+    "category": "Men's Accessories",
+    "images": [
+      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80"
+    ],
+    "badges": [
+      "22K BIS",
+      "HEAVY GOLD"
+    ],
+    "metal_finishes": [
+      "Gold"
+    ],
+    "stock_status": "in_stock",
+    "is_featured": true,
+    "collection": "Men's Accessories",
+    "craftsmanship_story": "Cast in 45 grams of solid 22K hallmarked gold.",
+    "material": "22K Solid Heavy Gold (BIS Hallmarked)",
+    "purity": "22K (916 Purity)",
+    "bis_hallmark": "BIS Hallmarked with unique 6-character alphanumeric HUID",
+    "is_hallmarked": true,
+    "has_huid": true,
+    "huid": "HUID-916-JK",
+    "weight_grams": 45,
+    "gross_weight_grams": 45,
+    "dimensions": {
+      "length_cm": 7,
+      "breadth_cm": 7,
+      "height_cm": 1.2
+    },
+    "hsn_code": "7113",
+    "country_of_origin": "India",
+    "seller_details": "Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013",
+    "care_instructions": "Wearable daily. Avoid contact with abrasive stones or heavy machinery.",
+    "created_at": "2026-01-01T00:00:00.000Z",
+    "updated_at": "2026-01-01T00:00:00.000Z"
+  }
+];

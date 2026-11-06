@@ -3,17 +3,26 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import type { Product } from '@/types';
+import { useWishlist } from '@/context/WishlistContext';
 import { useCart } from '@/context/CartContext';
-import { getProductWhatsAppUrl } from '@/lib/whatsapp';
+import QuickViewModal from './QuickViewModal';
 
 export default function ProductCard({ product }: { product: Product }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
-  const [addedAnimation, setAddedAnimation] = useState(false);
+  const { isInWishlist, toggleWishlist } = useWishlist();
   const { dispatch } = useCart();
-  const mainImage = product.images?.[0] || '/hero-clean.png';
-  const whatsappUrl = getProductWhatsAppUrl(product);
+  const [quickViewOpen, setQuickViewOpen] = useState(false);
+  const [isHovered, setIsHovered] = useState(false);
+  const [addedToast, setAddedToast] = useState(false);
 
-  const handleAddToCart = (e: React.MouseEvent) => {
+  const images = (product.images && product.images.length > 0)
+    ? product.images
+    : ['/hero-clean.png'];
+
+  const primaryImage = images[0];
+  const secondaryImage = images.length > 1 ? images[1] : images[0];
+  const isSaved = isInWishlist(product.id);
+
+  const handleQuickAdd = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     dispatch({
@@ -23,131 +32,152 @@ export default function ProductCard({ product }: { product: Product }) {
         name: product.name,
         price: product.price,
         quantity: 1,
-        image: mainImage,
+        image: primaryImage,
         metal_finish: product.metal_finishes?.[0] || 'Gold',
         slug: product.slug,
-        weight_grams: product.weight_grams
-      }
+        weight_grams: product.weight_grams,
+      },
     });
-    setAddedAnimation(true);
-    setTimeout(() => setAddedAnimation(false), 1400);
+    setAddedToast(true);
+    setTimeout(() => setAddedToast(false), 1400);
   };
 
-  const handleWhatsAppBuy = (e: React.MouseEvent) => {
+  const handleOpenQuickView = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    window.open(whatsappUrl, '_blank', 'noopener,noreferrer');
+    setQuickViewOpen(true);
   };
 
-  // Purity badge text
-  const badgeText = product.purity 
-    ? product.purity 
-    : product.badges?.[0] || (product.is_featured ? '22K BIS' : null);
+  const badgeText = product.purity || product.badges?.[0] || (product.is_featured ? '22K BIS' : null);
 
   return (
-    <div className="group relative bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[var(--accent-gold)]/70 shadow-[var(--card-shadow)] hover:shadow-lg transition-all duration-300 flex flex-col justify-between rounded-[2px] overflow-hidden">
-      {/* Image Presentation */}
-      <div className="relative aspect-[3/4] block overflow-hidden bg-[var(--bg-surface)]">
-        <Link href={`/collections/${product.slug || product.id}`} className="block w-full h-full">
-          <img 
-            src={mainImage} 
-            alt={product.name}
-            loading="lazy"
-            decoding="async"
-            referrerPolicy="no-referrer"
-            onError={(e) => {
-              (e.currentTarget as HTMLImageElement).src = '/hero-clean.png';
-            }}
-            className="w-full h-full object-cover transition-transform duration-700 ease-out group-hover:scale-106"
-          />
-        </Link>
+    <>
+      <div
+        className="group relative flex flex-col justify-between transition-all duration-300 select-none"
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+      >
+        {/* Photography Canvas */}
+        <div className="relative aspect-[4/5] w-full overflow-hidden bg-[var(--bg-surface)]">
+          <Link href={`/collections/${product.slug || product.id}`} className="block w-full h-full relative">
+            {/* Primary Image */}
+            <img
+              src={primaryImage}
+              alt={product.name}
+              loading="lazy"
+              decoding="async"
+              referrerPolicy="no-referrer"
+              onError={(e) => {
+                (e.currentTarget as HTMLImageElement).src = '/hero-clean.png';
+              }}
+              className={`w-full h-full object-cover transition-all duration-700 ease-out ${
+                isHovered && secondaryImage !== primaryImage
+                  ? 'opacity-0 scale-102'
+                  : 'opacity-100 scale-100 group-hover:scale-104'
+              }`}
+            />
 
-        {/* Subtle Purity Stamp */}
-        {badgeText && (
-          <span className="absolute top-2.5 left-2.5 bg-[var(--bg-main)]/95 text-[var(--accent-gold)] font-sans text-[8px] sm:text-[9px] px-2 py-0.5 font-semibold tracking-[0.2em] uppercase backdrop-blur-xs border border-[var(--border-card)] rounded-[1px] shadow-xs">
-            {badgeText}
-          </span>
-        )}
+            {/* Secondary Angle Image (Smooth cross-fade on hover) */}
+            {secondaryImage !== primaryImage && (
+              <img
+                src={secondaryImage}
+                alt={`${product.name} alternative perspective`}
+                loading="lazy"
+                decoding="async"
+                referrerPolicy="no-referrer"
+                onError={(e) => {
+                  (e.currentTarget as HTMLImageElement).src = primaryImage;
+                }}
+                className={`absolute inset-0 w-full h-full object-cover transition-all duration-700 ease-out ${
+                  isHovered ? 'opacity-100 scale-104' : 'opacity-0 scale-100'
+                }`}
+              />
+            )}
+          </Link>
 
-        {/* Wishlist Button with 44px tap target */}
-        <button
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            setIsWishlisted(!isWishlisted);
-          }}
-          className="absolute top-2.5 right-2.5 w-8 h-8 sm:w-9 sm:h-9 bg-[var(--bg-card)]/90 text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors flex items-center justify-center backdrop-blur-xs border border-[var(--border-subtle)] rounded-full cursor-pointer shadow-xs"
-          aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
-        >
-          <span className={`material-symbols-outlined text-base sm:text-lg ${isWishlisted ? 'text-[var(--accent-burgundy)] fill-1' : ''}`}>
-            favorite
-          </span>
-        </button>
-
-        {/* Desktop Quick Actions (Slide up on hover) */}
-        <div className="hidden lg:flex absolute inset-x-0 bottom-0 p-3 bg-gradient-to-t from-[var(--bg-card)]/98 via-[var(--bg-card)]/85 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex-col gap-1.5 z-10">
-          <button
-            onClick={handleWhatsAppBuy}
-            className="btn-gold-primary py-2.5 text-[10px] w-full shadow-xs"
-          >
-            <span className="material-symbols-outlined text-sm">chat</span> INQUIRE ON WHATSAPP
-          </button>
-          <button
-            onClick={handleAddToCart}
-            className="btn-gold-secondary py-2 text-[10px] w-full bg-[var(--bg-surface)]/95 text-[var(--accent-gold)] border-[var(--border-card)] hover:border-[var(--accent-gold)]"
-          >
-            {addedAnimation ? '✓ ADDED TO BAG' : '+ ADD TO BAG'}
-          </button>
-        </div>
-      </div>
-
-      {/* Product Details & Mobile Actions */}
-      <div className="p-3 sm:p-4 text-center flex flex-col flex-1 justify-between gap-2 bg-[var(--bg-card)]">
-        <div>
-          {/* Subtle Karat / Net Weight Spec Line */}
-          {product.weight_grams && (
-            <span className="font-sans text-[9px] text-[var(--text-secondary)]/80 tracking-widest uppercase block mb-0.5">
-              Net: {product.weight_grams}g &bull; {product.purity || '22K Gold'}
+          {/* Minimalist Purity / Hallmark Badge */}
+          {badgeText && (
+            <span className="absolute top-3 left-3 bg-[var(--bg-card)]/90 backdrop-blur-xs text-[var(--accent-gold)] font-sans text-[8.5px] px-2 py-0.5 tracking-[0.18em] uppercase font-medium border border-[var(--border-subtle)] rounded-[1px] pointer-events-none">
+              {badgeText}
             </span>
           )}
 
-          <Link href={`/collections/${product.slug || product.id}`} className="block group-hover:text-[var(--accent-gold)] transition-colors">
-            <h4 className="font-serif text-sm sm:text-base text-[var(--text-primary)] font-normal leading-snug line-clamp-1 mb-1 tracking-tight">
-              {product.name}
-            </h4>
-          </Link>
-
-          <p className="font-serif text-sm sm:text-base lg:text-lg text-[var(--accent-gold)] font-medium tracking-wide">
-            {product.display_price}
-          </p>
-          <span className="text-[9.5px] text-[var(--text-secondary)]/80 block font-sans tracking-tight mt-0.5">
-            Inclusive of 3% GST &bull; BIS Certified
-          </span>
-        </div>
-
-        {/* Mobile Action Controls */}
-        <div className="flex lg:hidden items-center gap-1.5 pt-2 border-t border-[var(--border-subtle)] mt-1">
+          {/* Wishlist Heart Button */}
           <button
-            onClick={handleWhatsAppBuy}
-            className="flex-1 btn-gold-primary py-2.5 text-[9.5px] px-2"
-            title="Inquire via WhatsApp"
+            type="button"
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              toggleWishlist(product);
+            }}
+            className="absolute top-3 right-3 w-8 h-8 rounded-full bg-[var(--bg-card)]/90 hover:bg-[var(--bg-card)] text-[var(--text-secondary)] hover:text-[var(--text-primary)] backdrop-blur-xs border border-[var(--border-subtle)] flex items-center justify-center transition-all cursor-pointer shadow-xs"
+            aria-label={isSaved ? 'Remove from wishlist' : 'Save to wishlist'}
+            title={isSaved ? 'Saved to Wishlist' : 'Save to Wishlist'}
           >
-            <span className="material-symbols-outlined text-[13px]">chat</span>
-            <span>WHATSAPP</span>
-          </button>
-
-          <button
-            onClick={handleAddToCart}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center btn-gold-secondary bg-[var(--bg-surface)] text-[var(--accent-gold)] border-[var(--border-card)] shrink-0 p-2"
-            title="Add to Bag"
-            aria-label="Add to Bag"
-          >
-            <span className="material-symbols-outlined text-base">
-              {addedAnimation ? 'check' : 'shopping_bag'}
+            <span
+              className={`material-symbols-outlined text-[16px] transition-colors ${
+                isSaved ? 'text-[var(--accent-burgundy)] fill-1' : ''
+              }`}
+            >
+              favorite
             </span>
           </button>
+
+          {/* Quick View & Quick Add Action Bar (Slide in gracefully from bottom) */}
+          <div className="absolute inset-x-0 bottom-0 p-2.5 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center gap-2 z-10">
+            <button
+              onClick={handleOpenQuickView}
+              className="flex-1 py-2 bg-[var(--bg-card)]/95 text-[var(--text-primary)] hover:text-[var(--accent-gold)] font-sans text-[10px] tracking-[0.16em] uppercase font-medium rounded-[1px] transition-colors shadow-xs cursor-pointer"
+            >
+              QUICK VIEW
+            </button>
+            <button
+              onClick={handleQuickAdd}
+              className="px-3 py-2 bg-[var(--text-primary)] text-[var(--bg-main)] hover:bg-[var(--accent-gold)] font-sans text-[10px] tracking-[0.14em] uppercase font-medium rounded-[1px] transition-colors shadow-xs cursor-pointer"
+              title="Add to shopping bag"
+            >
+              {addedToast ? '✓' : '+ BAG'}
+            </button>
+          </div>
+        </div>
+
+        {/* Product Meta Narrative */}
+        <div className="pt-3 pb-1 flex flex-col justify-between">
+          <div>
+            <div className="text-[9px] font-sans tracking-[0.2em] uppercase text-[var(--text-tertiary)] mb-1 truncate font-medium">
+              {product.category}
+            </div>
+
+            <h3 className="font-serif text-sm sm:text-base text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors line-clamp-1 font-normal tracking-tight">
+              <Link href={`/collections/${product.slug || product.id}`}>
+                {product.name}
+              </Link>
+            </h3>
+
+            {product.weight_grams && (
+              <div className="text-[10px] font-sans text-[var(--text-tertiary)] mt-0.5 tracking-wider font-light">
+                {product.purity ? `${product.purity} • ` : ''}{product.weight_grams}g
+              </div>
+            )}
+          </div>
+
+          <div className="mt-2 flex items-baseline justify-between pt-1.5 border-t border-[var(--border-subtle)]">
+            <span className="font-sans text-xs sm:text-sm font-medium text-[var(--text-primary)]">
+              {product.display_price || `₹${Math.round(product.price / 100).toLocaleString('en-IN')}`}
+            </span>
+            <span className="font-sans text-[9px] text-[var(--text-tertiary)] uppercase tracking-wider">
+              BIS INCL.
+            </span>
+          </div>
         </div>
       </div>
-    </div>
+
+      {/* Quick View Modal */}
+      <QuickViewModal
+        product={product}
+        isOpen={quickViewOpen}
+        onClose={() => setQuickViewOpen(false)}
+      />
+    </>
   );
 }

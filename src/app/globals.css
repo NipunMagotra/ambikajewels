@@ -1,37 +1,39 @@
 @import "tailwindcss";
 
 :root {
-  --bg-main: #FAF7F2;
-  --bg-surface: #F5EFEB;
+  --bg-main: #FAF9F5;
+  --bg-surface: #F3EFEA;
   --bg-card: #FFFFFF;
-  --text-primary: #1A1110;
-  --text-secondary: #685953;
-  --accent-gold: #9E7A23;
-  --accent-gold-highlight: #B8860B;
-  --accent-burgundy: #4A121A;
-  --accent-burgundy-light: #6E1B27;
-  --border-subtle: rgba(158, 122, 35, 0.18);
-  --border-card: rgba(158, 122, 35, 0.16);
-  --card-shadow: 0 4px 24px rgba(30, 20, 18, 0.06);
-  --header-bg: rgba(250, 247, 242, 0.96);
-  --footer-bg: #F4EEE8;
+  --text-primary: #1C1917;
+  --text-secondary: #665E57;
+  --text-tertiary: #9E968D;
+  --accent-gold: #9C7A3C;
+  --accent-gold-highlight: #B08D46;
+  --accent-burgundy: #581C24;
+  --accent-burgundy-light: #7A2834;
+  --border-subtle: rgba(28, 25, 23, 0.08);
+  --border-card: rgba(28, 25, 23, 0.09);
+  --card-shadow: 0 2px 14px rgba(28, 25, 23, 0.04);
+  --header-bg: rgba(250, 249, 245, 0.92);
+  --footer-bg: #F0EBE4;
 }
 
 .dark {
-  --bg-main: #100707;
-  --bg-surface: #190D0D;
-  --bg-card: #211313;
-  --text-primary: #F3E9DD;
-  --text-secondary: #BEB2AC;
-  --accent-gold: #D8B75A;
-  --accent-gold-highlight: #E8CC70;
-  --accent-burgundy: #8C2232;
-  --accent-burgundy-light: #A82E40;
-  --border-subtle: rgba(216, 183, 90, 0.20);
-  --border-card: rgba(216, 183, 90, 0.20);
+  --bg-main: #121316;
+  --bg-surface: #181A1E;
+  --bg-card: #1E2026;
+  --text-primary: #F4F2EE;
+  --text-secondary: #A09C94;
+  --text-tertiary: #6E6A62;
+  --accent-gold: #D4B36A;
+  --accent-gold-highlight: #E5C984;
+  --accent-burgundy: #8C2B38;
+  --accent-burgundy-light: #AA3848;
+  --border-subtle: rgba(244, 242, 238, 0.08);
+  --border-card: rgba(244, 242, 238, 0.09);
   --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.45);
-  --header-bg: rgba(16, 7, 7, 0.96);
-  --footer-bg: #0c0505;
+  --header-bg: rgba(18, 19, 22, 0.92);
+  --footer-bg: #0D0E10;
 }
 
 @theme inline {
@@ -65,10 +67,10 @@
   --color-on-secondary-fixed: #FFFFFF;
   --color-on-secondary-fixed-variant: var(--accent-gold);
 
-  --color-tertiary: #c4a482;
+  --color-tertiary: #a8947f;
   --color-tertiary-container: var(--bg-surface);
-  --color-tertiary-fixed: #f4e8dc;
-  --color-tertiary-fixed-dim: #c4a482;
+  --color-tertiary-fixed: #ede3d7;
+  --color-tertiary-fixed-dim: #a8947f;
   --color-on-tertiary: var(--text-primary);
   --color-on-tertiary-container: var(--text-primary);
   --color-on-tertiary-fixed: var(--text-primary);
@@ -89,14 +91,14 @@
   --color-on-error: #ffffff;
   --color-on-error-container: #410002;
 
-  --spacing-container-max: 1280px;
+  --spacing-container-max: 1360px;
   --spacing-stack-sm: 8px;
   --spacing-stack-md: 16px;
   --spacing-stack-lg: 24px;
   --spacing-gutter: 20px;
   --spacing-margin-desktop: 48px;
   --spacing-margin-mobile: 16px;
-  --spacing-section-gap: 52px;
+  --spacing-section-gap: 56px;
 
   --font-serif: "Cormorant Garamond", "Playfair Display", Georgia, serif;
   --font-sans: "Inter", "Manrope", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
@@ -141,6 +143,7 @@
   .bg-theme-burgundy { background-color: var(--accent-burgundy); }
   .text-theme-primary { color: var(--text-primary); }
   .text-theme-secondary { color: var(--text-secondary); }
+  .text-theme-tertiary { color: var(--text-tertiary); }
   .text-theme-gold { color: var(--accent-gold); }
   .text-theme-burgundy { color: var(--accent-burgundy); }
   .border-theme { border-color: var(--border-subtle); }
@@ -148,21 +151,21 @@
   .border-theme-burgundy { border-color: var(--accent-burgundy); }
   .shadow-theme-card { box-shadow: var(--card-shadow); }
 
-  /* Luxury Gold Foil & Velvet Badges */
+  /* Refined Hallmarked & Atelier Badges */
   .badge-hallmark {
     display: inline-flex;
     align-items: center;
     gap: 4px;
     font-family: var(--font-sans);
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     padding: 3px 8px;
     background: var(--bg-surface);
     color: var(--accent-gold);
     border: 1px solid var(--border-subtle);
-    border-radius: 2px;
+    border-radius: 1px;
   }
 
   .badge-burgundy {
@@ -170,47 +173,47 @@
     align-items: center;
     gap: 4px;
     font-family: var(--font-sans);
-    font-size: 9.5px;
-    font-weight: 600;
-    letter-spacing: 0.18em;
+    font-size: 9px;
+    font-weight: 500;
+    letter-spacing: 0.16em;
     text-transform: uppercase;
     padding: 3px 8px;
     background: var(--accent-burgundy);
     color: #FFFFFF;
-    border-radius: 2px;
+    border-radius: 1px;
   }
 
   .text-headline-sm {
     font-family: var(--font-serif);
     font-size: 22px;
     line-height: 1.25;
-    font-weight: 500;
+    font-weight: 400;
   }
   .text-display-lg-mobile {
     font-family: var(--font-serif);
     font-size: 32px;
     line-height: 1.15;
-    font-weight: 500;
+    font-weight: 400;
   }
   .text-headline-md {
     font-family: var(--font-serif);
     font-size: 32px;
     line-height: 1.2;
-    font-weight: 500;
+    font-weight: 400;
   }
   .text-label-caps {
     font-family: var(--font-sans);
     font-size: 10px;
     line-height: 1.2;
     letter-spacing: 0.22em;
-    font-weight: 600;
+    font-weight: 500;
     text-transform: uppercase;
   }
   .text-display-lg {
     font-family: var(--font-serif);
     font-size: 52px;
     line-height: 1.08;
-    font-weight: 500;
+    font-weight: 400;
   }
   .text-body-lg {
     font-family: var(--font-sans);
@@ -239,40 +242,38 @@
     border: 1px solid var(--accent-gold);
   }
   
+  /* Restrained Metallic Brand Tone (No garish yellow gradient) */
   .gold-text-gradient {
-    background: linear-gradient(135deg, var(--accent-gold-highlight) 0%, var(--accent-gold) 60%, #7E6119 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-gold);
   }
 
   .dark .gold-text-gradient {
-    background: linear-gradient(135deg, #E8CC70 0%, #D8B75A 60%, #B8923B 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
+    color: var(--accent-gold);
   }
 
   .gold-bg-gradient {
-    background: linear-gradient(135deg, var(--accent-gold-highlight) 0%, var(--accent-gold) 100%);
+    background: var(--accent-gold);
     color: #FFFFFF;
   }
 
   .dark .gold-bg-gradient {
-    background: linear-gradient(135deg, #E8CC70 0%, #D8B75A 100%);
-    color: #100707;
+    background: var(--accent-gold);
+    color: #121316;
   }
 
-  /* Luxury Button System */
+  /* Architectural Button System */
   .btn-gold-primary {
-    background: var(--accent-gold);
-    color: #FFFFFF;
+    background: var(--text-primary);
+    color: var(--bg-main);
     font-family: var(--font-sans);
     font-size: 11px;
-    font-weight: 600;
+    font-weight: 500;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    padding: 12px 24px;
-    border-radius: 2px;
-    transition: all 0.25s ease;
+    padding: 13px 26px;
+    border-radius: 1px;
+    border: 1px solid var(--text-primary);
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -280,17 +281,21 @@
     cursor: pointer;
   }
   .dark .btn-gold-primary {
-    background: #D8B75A;
-    color: #100707;
+    background: var(--text-primary);
+    color: var(--bg-main);
+    border-color: var(--text-primary);
   }
   .btn-gold-primary:hover {
-    background: var(--accent-gold-highlight);
-    box-shadow: 0 4px 18px rgba(158, 122, 35, 0.25);
-    transform: translateY(-1px);
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    color: #FFFFFF;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
   }
   .dark .btn-gold-primary:hover {
-    background: #E8CC70;
-    box-shadow: 0 4px 18px rgba(216, 183, 90, 0.22);
+    background: var(--accent-gold);
+    border-color: var(--accent-gold);
+    color: #121316;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
   }
   .btn-gold-primary:active {
     transform: translateY(0);
@@ -305,9 +310,9 @@
     font-weight: 500;
     letter-spacing: 0.18em;
     text-transform: uppercase;
-    padding: 12px 24px;
-    border-radius: 2px;
-    transition: all 0.25s ease;
+    padding: 13px 26px;
+    border-radius: 1px;
+    transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -315,19 +320,18 @@
     cursor: pointer;
   }
   .dark .btn-gold-secondary {
-    border-color: rgba(216, 183, 90, 0.40);
-    color: #F3E9DD;
+    border-color: var(--border-subtle);
+    color: var(--text-primary);
   }
   .btn-gold-secondary:hover {
-    border-color: var(--accent-gold);
-    color: var(--accent-gold);
-    background: rgba(158, 122, 35, 0.08);
-    transform: translateY(-1px);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: var(--bg-surface);
   }
   .dark .btn-gold-secondary:hover {
-    border-color: #D8B75A;
-    color: #D8B75A;
-    background: rgba(216, 183, 90, 0.06);
+    border-color: var(--text-primary);
+    color: var(--text-primary);
+    background: var(--bg-surface);
   }
   .btn-gold-secondary:active {
     transform: translateY(0);
@@ -344,7 +348,6 @@
   }
   .hover-gold-wire:hover {
     border-color: var(--accent-gold);
-    box-shadow: 0 4px 20px rgba(158, 122, 35, 0.12);
   }
 
   .custom-scrollbar::-webkit-scrollbar {
@@ -367,16 +370,6 @@
     scrollbar-width: none;
   }
 
-  /* Subtle Heritage Star / Mandala watermark */
-  .mandala-bg-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 8 L44 32 L68 32 L49 46 L56 70 L40 54 L24 70 L31 46 L12 32 L36 32 Z' fill='%239E7A23' fill-opacity='0.035'/%3E%3C/svg%3E");
-    background-repeat: repeat;
-  }
-
-  .dark .mandala-bg-pattern {
-    background-image: url("data:image/svg+xml,%3Csvg width='80' height='80' viewBox='0 0 80 80' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M40 8 L44 32 L68 32 L49 46 L56 70 L40 54 L24 70 L31 46 L12 32 L36 32 Z' fill='%23D8B75A' fill-opacity='0.035'/%3E%3C/svg%3E");
-  }
-
   /* Swiper Jewelry Gallery Custom Styles */
   .jewellery-gallery-swiper {
     width: 100%;
@@ -385,17 +378,16 @@
   .jewellery-pagination .swiper-pagination-bullet {
     background: #FFFFFF;
     opacity: 0.5;
-    width: 6px;
-    height: 6px;
+    width: 5px;
+    height: 5px;
     transition: all 0.3s ease;
   }
   .jewellery-pagination .swiper-pagination-bullet-active {
     background: var(--accent-gold);
     opacity: 1;
-    width: 16px;
-    border-radius: 4px;
+    width: 14px;
+    border-radius: 2px;
   }
-
 }
 
 html {

@@ -1,110 +1,112 @@
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
-import ProductCard from '@/components/catalog/ProductCard';
-import FilterBar from '@/components/catalog/FilterBar';
+import CollectionsGridClient from '@/components/catalog/CollectionsGridClient';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { mockProducts } from '@/data/mockProducts';
 import type { Product } from '@/types';
-import { siteConfig } from '@/config/siteConfig';
 
 export const revalidate = 60; // Revalidate every minute
 
 export default async function CollectionsPage({
   searchParams,
 }: {
-  searchParams: Promise<{ [key: string]: string | string[] | undefined }>
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
   const params = await searchParams;
   const category = params.category as string | undefined;
   const sort = params.sort as string | undefined;
+  const purity = params.purity as string | undefined;
 
-  let displayProducts: Product[] = [];
+  let displayProducts: Product[] = mockProducts;
 
   if (isSupabaseConfigured) {
-    let query = supabase.from('products').select('*');
-    if (category && category !== 'All') {
-      const variants = [category];
-      if (category.includes('Jewelry')) variants.push(category.replace(/Jewelry/g, 'Jewellery'));
-      if (category.includes('Jewellery')) variants.push(category.replace(/Jewellery/g, 'Jewelry'));
-      query = query.in('category', variants);
+    try {
+      let query = supabase.from('products').select('*');
+      if (category && category !== 'All') {
+        const variants = [category];
+        if (category.includes('Jewelry')) variants.push(category.replace(/Jewelry/g, 'Jewellery'));
+        if (category.includes('Jewellery')) variants.push(category.replace(/Jewellery/g, 'Jewelry'));
+        query = query.in('category', variants);
+      }
+      if (sort === 'price_asc') {
+        query = query.order('price', { ascending: true });
+      } else if (sort === 'price_desc') {
+        query = query.order('price', { ascending: false });
+      } else {
+        query = query.order('created_at', { ascending: false });
+      }
+      const { data: dbProducts } = await query;
+      if (dbProducts && dbProducts.length > 0) {
+        displayProducts = dbProducts as Product[];
+      }
+    } catch (e) {
+      console.error('Error fetching collection from database, falling back:', e);
     }
-    if (sort === 'price_asc') {
-      query = query.order('price', { ascending: true });
-    } else if (sort === 'price_desc') {
-      query = query.order('price', { ascending: false });
-    } else {
-      query = query.order('created_at', { ascending: false });
-    }
-    const { data: dbProducts } = await query;
-    if (dbProducts && dbProducts.length > 0) {
-      displayProducts = dbProducts as Product[];
-    }
+  }
+
+  // Filter in-memory if using mockProducts or when purity query is active
+  if (category && category !== 'All') {
+    displayProducts = displayProducts.filter((p) => {
+      const cat = p.category.toLowerCase();
+      const target = category.toLowerCase();
+      return cat === target || cat.includes(target) || (target.includes('ring') && cat.includes('ring'));
+    });
+  }
+
+  if (purity && purity !== 'all') {
+    displayProducts = displayProducts.filter((p) => {
+      const pur = (p.purity || p.material || '').toLowerCase();
+      return pur.includes(purity.toLowerCase());
+    });
+  }
+
+  if (sort === 'price_asc') {
+    displayProducts = [...displayProducts].sort((a, b) => a.price - b.price);
+  } else if (sort === 'price_desc') {
+    displayProducts = [...displayProducts].sort((a, b) => b.price - a.price);
   }
 
   return (
     <>
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
-        <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">
-          {/* Collection Heading */}
-          <div className="text-center mb-6 sm:mb-8">
-            <span className="font-sans text-[10px] sm:text-xs text-[var(--accent-gold)] tracking-[0.3em] uppercase block mb-1.5 font-semibold">
-              COUTURE COLLECTION
+      <main className="min-h-screen pt-24 sm:pt-28 pb-20 lg:pb-24 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12">
+          
+          {/* Editorial Collection Header */}
+          <div className="text-center max-w-2xl mx-auto mb-10 sm:mb-14">
+            <span className="font-sans text-[9.5px] text-[var(--accent-gold)] tracking-[0.32em] uppercase block mb-2 font-medium">
+              THE SHOWROOM ATELIER ARCHIVE
             </span>
-            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal mb-2.5">
-              {category || 'Timeless Heritage'}
+            <h1 className="font-serif text-3xl sm:text-4xl lg:text-5xl text-[var(--text-primary)] font-normal tracking-tight mb-3">
+              {category || 'All Fine Jewellery'}
             </h1>
-            <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] max-w-xl mx-auto font-light leading-relaxed">
-              {category === 'Necklaces'
-                ? 'Bridal Haars, traditional Dogra Naman chokers, and everyday chains handcrafted in 22K hallmarked gold and certified diamonds.'
-                : category === 'Earrings'
-                ? 'Signature Dogri Jhumkis, Polki chandbalis, and solitaire studs reflecting Jammu royal craft and modern elegance.'
-                : category === 'Bangles'
-                ? 'Hand-embossed Dogra Kadas, antique bridal bangles, and lightweight daily bracelets with secure screw clasps.'
-                : category === 'Rings'
-                ? 'Statement cocktail rings, classic engagement solitaires, and Dogra filigree bands cast in 22K and 18K solid gold.'
-                : category === 'Pendants'
-                ? 'Sacred mandalas, diamond solitaires, and heritage motifs designed for auspicious daily wear.'
-                : category === 'Bridal Sets'
-                ? 'Complete trousseau ensembles featuring choker, long haar, matching earrings, and maang tikka for timeless ceremonies.'
-                : 'Explore authentic Dogra heritage heirlooms, bridal couture, and modern fine jewellery handcrafted by master karigars in Jammu.'}
+            <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed">
+              {category === 'Dogra Heritage Collection'
+                ? 'Ancestral Dogra dynasty heirlooms, traditional Dogri Jhumkis, and royal Naman sets cast in 22K hallmarked gold.'
+                : category === 'Bridal Couture'
+                ? 'Complete bridal ensembles and Polki sets designed for grand celebrations and eternal preservation.'
+                : category === 'Diamond Jewellery'
+                ? 'Certified natural diamond solitaires, tennis bracelets, and diamond studs with official IGI/GIA credentials.'
+                : category === 'Gold Jewellery'
+                ? 'Multi-purity solid gold jewellery (22K, 18K, 14K) verified by Bureau of Indian Standards with unique 6-digit laser HUID.'
+                : category === 'Silver Jewellery (925)'
+                ? 'Artisanal 925 sterling silver payals, antique oxidized chokers, and royal Jammu silver ornaments.'
+                : 'Explore authentic Dogra heritage heirlooms, bridal couture, certified natural diamonds, and multi-purity hallmarked gold handcrafted in Jammu.'}
             </p>
-            <div className="mt-3 flex items-center justify-center gap-2">
-              <span className="font-sans text-[9.5px] text-[var(--accent-gold)] tracking-widest uppercase bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-1 rounded-full font-medium">
-                {displayProducts.length} HEIRLOOM CREATIONS AVAILABLE
+            <div className="mt-4 flex items-center justify-center gap-2">
+              <span className="font-mono text-[10px] text-[var(--text-tertiary)] tracking-widest uppercase">
+                {displayProducts.length} CREATIONS IN ATELIER
               </span>
             </div>
           </div>
 
-          <FilterBar />
+          {/* Interactive Filter & Product Grid */}
+          <CollectionsGridClient
+            products={displayProducts}
+            categoryTitle={category || 'All Collections'}
+          />
 
-          {/* Products appear naturally below filter section with controlled spacing */}
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-            {displayProducts.length > 0 ? (
-              displayProducts.map((product) => (
-                <ProductCard key={product.id} product={product} />
-              ))
-            ) : (
-              <div className="col-span-full py-10 sm:py-16 text-center px-4 max-w-lg mx-auto bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px] my-4">
-                <span className="material-symbols-outlined text-3xl text-[var(--accent-gold)] mb-2 block">diamond</span>
-                <h3 className="font-serif text-lg sm:text-xl text-[var(--text-primary)] mb-2 font-normal">
-                  Bespoke Jewellery on Order
-                </h3>
-                <p className="font-sans text-xs text-[var(--text-secondary)] mb-6 leading-relaxed font-light">
-                  Looking for a custom design in this collection? Our master Dogra karigars craft bespoke pieces in 22K/18K/14K gold and 925 silver at our Jammu showroom.
-                </p>
-                <a
-                  href="https://wa.me/919086098457?text=Namaste!%20I%20am%20interested%20in%20a%20custom%20piece%20from%20Ambika%20Jewels."
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn-gold-primary"
-                >
-                  <span className="material-symbols-outlined text-sm">chat_bubble</span>
-                  ENQUIRE ON WHATSAPP
-                </a>
-              </div>
-            )}
-          </div>
         </div>
       </main>
       <Footer />

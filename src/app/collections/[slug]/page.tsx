@@ -5,6 +5,7 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import ProductDetailClient from '@/components/catalog/ProductDetailClient';
 import ProductCard from '@/components/catalog/ProductCard';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
+import { mockProducts } from '@/data/mockProducts';
 import type { Product } from '@/types';
 import Link from 'next/link';
 import { siteConfig } from '@/config/siteConfig';
@@ -14,17 +15,24 @@ export const revalidate = 60;
 export async function generateMetadata({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   let prod: any = null;
+
   if (isSupabaseConfigured) {
-    const { data } = await supabase.from('products').select('name, description, images, price').eq('slug', slug).single();
-    if (data) prod = data;
-    if (!prod) {
-      const { data: dataById } = await supabase.from('products').select('name, description, images, price').eq('id', slug).single();
-      if (dataById) prod = dataById;
-    }
+    try {
+      const { data } = await supabase.from('products').select('name, description, images, price').eq('slug', slug).single();
+      if (data) prod = data;
+      if (!prod) {
+        const { data: dataById } = await supabase.from('products').select('name, description, images, price').eq('id', slug).single();
+        if (dataById) prod = dataById;
+      }
+    } catch (e) {}
+  }
+
+  if (!prod) {
+    prod = mockProducts.find((p) => p.slug === slug || p.id === slug);
   }
   
   if (!prod) return { title: 'Product Not Found | Ambika Jewels' };
@@ -65,26 +73,32 @@ export async function generateMetadata({
 export default async function ProductPage({
   params,
 }: {
-  params: Promise<{ slug: string }>
+  params: Promise<{ slug: string }>;
 }) {
   const { slug } = await params;
   let product: Product | undefined = undefined;
 
   if (isSupabaseConfigured) {
-    const { data: dbProduct } = await supabase
-      .from('products')
-      .select('*')
-      .eq('slug', slug)
-      .single();
-    if (dbProduct) product = dbProduct as Product;
-    if (!product) {
-      const { data: dbById } = await supabase
+    try {
+      const { data: dbProduct } = await supabase
         .from('products')
         .select('*')
-        .eq('id', slug)
+        .eq('slug', slug)
         .single();
-      if (dbById) product = dbById as Product;
-    }
+      if (dbProduct) product = dbProduct as Product;
+      if (!product) {
+        const { data: dbById } = await supabase
+          .from('products')
+          .select('*')
+          .eq('id', slug)
+          .single();
+        if (dbById) product = dbById as Product;
+      }
+    } catch (e) {}
+  }
+
+  if (!product) {
+    product = mockProducts.find((p) => p.slug === slug || p.id === slug);
   }
 
   if (!product) {
@@ -93,127 +107,75 @@ export default async function ProductPage({
 
   let relatedProducts: Product[] = [];
   if (isSupabaseConfigured) {
-    const { data: dbRelated } = await supabase
-      .from('products')
-      .select('*')
-      .eq('category', product.category)
-      .neq('id', product.id)
-      .limit(4);
-    if (dbRelated && dbRelated.length > 0) relatedProducts = dbRelated as Product[];
+    try {
+      const { data: dbRelated } = await supabase
+        .from('products')
+        .select('*')
+        .eq('category', product.category)
+        .neq('id', product.id)
+        .limit(4);
+      if (dbRelated && dbRelated.length > 0) relatedProducts = dbRelated as Product[];
+    } catch (e) {}
   }
 
-  const baseUrl = siteConfig.websiteUrl || 'https://ambikajewelsonline.com';
-  const productImageUrl = (product.images && product.images.length > 0)
-    ? (product.images[0].startsWith('http') ? product.images[0] : `${baseUrl}${product.images[0]}`)
-    : `${baseUrl}/hero-clean.png`;
-
-  const productSchema = {
-    "@context": "https://schema.org",
-    "@type": "Product",
-    "name": product.name,
-    "description": product.description,
-    "image": (product.images && product.images.length > 0)
-      ? product.images.map(img => img.startsWith('http') ? img : `${baseUrl}${img}`)
-      : [productImageUrl],
-    "sku": product.id,
-    "brand": {
-      "@type": "Brand",
-      "name": "Ambika Jewels"
-    },
-    "material": product.material || "22K Solid Gold",
-    "offers": {
-      "@type": "Offer",
-      "url": `${baseUrl}/collections/${product.slug || product.id}`,
-      "priceCurrency": "INR",
-      "price": Math.round((product.price || 0) / 100),
-      "priceValidUntil": new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-      "itemCondition": "https://schema.org/NewCondition",
-      "availability": product.stock_status === 'out_of_stock'
-        ? "https://schema.org/OutOfStock"
-        : "https://schema.org/InStock",
-      "seller": {
-        "@type": "Organization",
-        "name": siteConfig.name
-      }
+  if (relatedProducts.length === 0) {
+    relatedProducts = mockProducts
+      .filter((p) => p.id !== product!.id && (p.category === product!.category || p.collection === product!.collection))
+      .slice(0, 4);
+    if (relatedProducts.length === 0) {
+      relatedProducts = mockProducts.filter((p) => p.id !== product!.id).slice(0, 4);
     }
-  };
-
-  const breadcrumbSchema = {
-    "@context": "https://schema.org",
-    "@type": "BreadcrumbList",
-    "itemListElement": [
-      {
-        "@type": "ListItem",
-        "position": 1,
-        "name": "Home",
-        "item": baseUrl
-      },
-      {
-        "@type": "ListItem",
-        "position": 2,
-        "name": "Collections",
-        "item": `${baseUrl}/collections`
-      },
-      {
-        "@type": "ListItem",
-        "position": 3,
-        "name": product.category,
-        "item": `${baseUrl}/collections?category=${encodeURIComponent(product.category)}`
-      },
-      {
-        "@type": "ListItem",
-        "position": 4,
-        "name": product.name,
-        "item": `${baseUrl}/collections/${product.slug || product.id}`
-      }
-    ]
-  };
+  }
 
   return (
     <>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(productSchema) }}
-      />
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
-      />
       <Header />
-      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
-        <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">
-          {/* Breadcrumb */}
-          <div className="flex flex-wrap items-center gap-1.5 font-sans text-[9px] sm:text-[10px] text-[var(--text-secondary)] mb-4 uppercase tracking-wider font-medium">
-            <Link href="/" className="hover:text-[var(--accent-gold)] transition-colors">HOME</Link>
-            <span>/</span>
-            <Link href="/collections" className="hover:text-[var(--accent-gold)] transition-colors">COLLECTIONS</Link>
-            <span>/</span>
-            <Link href={`/collections?category=${encodeURIComponent(product.category)}`} className="hover:text-[var(--accent-gold)] transition-colors">{product.category.toUpperCase()}</Link>
-            <span>/</span>
-            <span className="text-[var(--accent-gold)] truncate max-w-[150px] sm:max-w-none">{product.name.toUpperCase()}</span>
-          </div>
-
-          <ProductDetailClient product={product as Product} />
-
-          {/* Related Products: You May Also Desire */}
-          {relatedProducts && relatedProducts.length > 0 && (
-            <div className="mt-10 sm:mt-14 border-t border-[var(--border-subtle)] pt-8 sm:pt-10">
-              <div className="text-center mb-6 sm:mb-8">
-                <span className="font-sans text-[9px] sm:text-[10px] text-[var(--accent-gold)] tracking-[0.3em] uppercase block mb-1 font-semibold">
-                  COMPLETE THE ENSEMBLE
-                </span>
-                <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl text-[var(--text-primary)] font-normal">
-                  You May Also Desire
-                </h3>
-              </div>
-              <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-5">
-                {relatedProducts.map(p => (
-                  <ProductCard key={p.id} product={p as Product} />
-                ))}
-              </div>
-            </div>
-          )}
+      <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-28 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
+        
+        {/* Breadcrumb Navigation */}
+        <div className="container mx-auto px-4 sm:px-6 lg:px-12 py-3 border-b border-[var(--border-subtle)] text-[10px] sm:text-[11px] font-sans text-[var(--text-tertiary)] flex items-center gap-2 uppercase tracking-wider">
+          <Link href="/" className="hover:text-[var(--text-primary)]">HOME</Link>
+          <span>/</span>
+          <Link href="/collections" className="hover:text-[var(--text-primary)]">COLLECTIONS</Link>
+          <span>/</span>
+          <Link href={`/collections?category=${encodeURIComponent(product.category)}`} className="hover:text-[var(--text-primary)] truncate">
+            {product.category}
+          </Link>
+          <span>/</span>
+          <span className="text-[var(--text-primary)] truncate font-medium">{product.name}</span>
         </div>
+
+        {/* Private Showroom Product Experience */}
+        <ProductDetailClient product={product} />
+
+        {/* Curated Companions / Complete the Ensemble */}
+        {relatedProducts.length > 0 && (
+          <section className="container mx-auto px-4 sm:px-6 lg:px-12 mt-20 pt-16 border-t border-[var(--border-subtle)]">
+            <div className="flex flex-col sm:flex-row items-baseline justify-between mb-8 sm:mb-12 gap-2">
+              <div>
+                <span className="text-[9.5px] font-sans tracking-[0.28em] uppercase text-[var(--accent-gold)] font-medium block mb-1.5">
+                  ATELIER RECOMMENDATIONS
+                </span>
+                <h2 className="font-serif text-2xl sm:text-3xl text-[var(--text-primary)] font-normal tracking-tight">
+                  Complete the Heirloom Ensemble
+                </h2>
+              </div>
+              <Link
+                href="/collections"
+                className="text-[10.5px] font-sans tracking-[0.18em] uppercase text-[var(--text-primary)] hover:text-[var(--accent-gold)] font-medium underline underline-offset-4"
+              >
+                VIEW FULL ATELIER &rarr;
+              </Link>
+            </div>
+
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
+              {relatedProducts.map((relProduct) => (
+                <ProductCard key={relProduct.id} product={relProduct} />
+              ))}
+            </div>
+          </section>
+        )}
+
       </main>
       <Footer />
       <MobileBottomNav />
