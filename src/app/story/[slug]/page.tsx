@@ -75,7 +75,7 @@ export default async function CollectionStoryPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-surface)]">
               <img
-                src="/products/kundan-chandbali.png"
+                src="/products/dogri-jhumki-hd.jpg"
                 alt="Dogra Royal Jhumki Setting"
                 className="w-full h-full object-cover"
               />
@@ -86,7 +86,7 @@ export default async function CollectionStoryPage() {
 
             <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-surface)]">
               <img
-                src="/products/royal-kundan.png"
+                src="/products/royal-kundan-bridal-suite-hd.jpg"
                 alt="Royal Kundan Choker Setting"
                 className="w-full h-full object-cover"
               />

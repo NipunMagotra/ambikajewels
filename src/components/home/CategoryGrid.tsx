@@ -6,31 +6,31 @@ export default function CategoryGrid() {
       title: 'RINGS',
       subtitle: 'Solitaires & Filigree Bands',
       href: '/collections?category=Rings',
-      image: 'https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=800&q=80',
+      image: '/products/diamond-solitaire-ring-hd.jpg',
     },
     {
       title: 'EARRINGS',
       subtitle: 'Dogri Jhumkis & Chandbalis',
       href: '/collections?category=Earrings',
-      image: '/products/kundan-chandbali.png',
+      image: '/products/dogri-jhumki-hd.jpg',
     },
     {
       title: 'NECKLACES',
       subtitle: 'Haars, Chokers & Chains',
       href: '/collections?category=Necklaces',
-      image: '/products/heritage-ruby-haar.png',
+      image: '/products/royal-dogri-naman-hd.jpg',
     },
     {
       title: 'BRACELETS & KADAS',
       subtitle: 'Dogra Bangles & Solid Kadas',
       href: '/collections?category=Bangles',
-      image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80',
+      image: 'https://images.unsplash.com/photo-1602173574767-37ac01994b2a?auto=format&fit=crop&w=2000&q=95',
     },
     {
       title: 'BRIDAL SETS',
       subtitle: 'Complete Trousseau Ensembles',
       href: '/collections?category=Bridal%20Sets',
-      image: '/products/royal-kundan.png',
+      image: '/products/royal-kundan-bridal-suite-hd.jpg',
     },
   ];
 

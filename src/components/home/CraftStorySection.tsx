@@ -6,25 +6,25 @@ export default function CraftStorySection() {
       num: '01',
       title: '22K Hallmarked Gold & 6-Digit HUID',
       detail: 'Every creation is strictly 916 hallmarked by the Bureau of Indian Standards with an individual laser-inscribed HUID code ensuring pure provenance.',
-      image: '/products/kundan-chandbali.png',
+      image: '/products/dogri-jhumki-hd.jpg',
     },
     {
       num: '02',
       title: 'Centuries-Old Dogra Karigar Craft',
       detail: 'Intricate umbrella filigree, hand-engraved motifs, and ancestral stone-setting techniques practiced by master goldsmiths across Jammu.',
-      image: '/products/heritage-ruby-haar.png',
+      image: '/craft-karigar-macro-hd.jpg',
     },
     {
       num: '03',
       title: 'Certified Natural Solitaires & Polki',
       detail: 'All diamonds are hand-selected, conflict-free, and accompanied by authentic IGI/GIA laboratories certification.',
-      image: 'https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=800&q=80',
+      image: '/products/diamond-solitaire-ring-hd.jpg',
     },
     {
       num: '04',
       title: 'Bespoke 3D CAD & Vault Packaging',
       detail: 'Every piece is delivered in our signature velvet presentation case with armored transit insurance by BVC Logistics.',
-      image: '/products/royal-kundan.png',
+      image: '/products/royal-kundan-bridal-suite-hd.jpg',
     },
   ];
 

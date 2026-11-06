@@ -15,7 +15,7 @@ export const ARTICLES = [
     title: 'The Art of the Dogri Jhumki: Centuries of Royal Jammu Craft',
     date: 'OCTOBER 2026',
     readTime: '4 MIN READ',
-    image: '/products/kundan-chandbali.png',
+    image: '/products/dogri-jhumki-hd.jpg',
     author: 'Ambika Jewels Editorial Atelier',
     excerpt: 'Tracing the architectural umbrella silhouette and delicate seed pearl droplets worn by brides across the Jammu dynasty since the 18th century.',
     content: `The Dogri Jhumki is not simply an ornament; it is an architectural monument in miniature. Distinct from the bell-shaped jhumkas of Rajasthan or the conical silhouettes of Bengal, the authentic Dogri Jhumki sculpted in the Jammu region features a wide, fluted umbrella dome (chhatri) flanked by micro-filigree and suspended seed pearl droplets.
@@ -30,7 +30,7 @@ At Ambika Jewels in Lower Roop Nagar, Jammu, our artisans continue to shape auth
     title: '22K vs 18K Gold: Choosing Metal Purity for Bridal & Everyday Wear',
     date: 'SEPTEMBER 2026',
     readTime: '3 MIN READ',
-    image: '/products/minimalist-gold-chain.png',
+    image: '/craft-karigar-macro-hd.jpg',
     author: 'Lakesh Kumar, Counter Operations',
     excerpt: 'A clear patron guide to understanding karat purities, alloy structural strengths, BIS hallmarking standards, and 6-digit laser HUID verification.',
     content: `When investing in fine gold jewellery in India, understanding karatage is both an aesthetic and a financial decision.
@@ -52,7 +52,7 @@ At Ambika Jewels, every gold creation—from 22K to 14K—is assayed and hallmar
     title: 'The Modern Dogra Trousseau: Harmonizing Antique Polki & Natural Diamonds',
     date: 'AUGUST 2026',
     readTime: '5 MIN READ',
-    image: '/products/royal-kundan.png',
+    image: '/products/royal-kundan-bridal-suite-hd.jpg',
     author: 'Shivani Anand, Founder & Creative Director',
     excerpt: 'How contemporary brides are pairing heirloom haars with delicate modern diamond solitaires for multifaceted ceremonies.',
     content: `The modern Indian wedding is rarely a single monolithic ritual. It is a multi-day ceremony spanning intimate mehendi soirées, auspicious sangeet celebrations, royal pheras, and contemporary receptions.

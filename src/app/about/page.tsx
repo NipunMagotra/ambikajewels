@@ -107,15 +107,15 @@ export default function AboutPage() {
             <div className="lg:col-span-6 grid grid-cols-2 gap-4">
               <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-surface)]">
                 <img
-                  src="/products/kundan-chandbali.png"
+                  src="/products/dogri-jhumki-hd.jpg"
                   alt="Dogra Royal Jhumki Craft"
                   className="w-full h-full object-cover"
                 />
               </div>
               <div className="relative aspect-[4/5] overflow-hidden bg-[var(--bg-surface)] pt-8">
                 <img
-                  src="/products/heritage-ruby-haar.png"
-                  alt="Fine Ruby and Gold Haar"
+                  src="/craft-karigar-macro-hd.jpg"
+                  alt="Fine Gold Karigar Benchcraft"
                   className="w-full h-full object-cover"
                 />
               </div>

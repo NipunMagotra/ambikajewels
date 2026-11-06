@@ -14,8 +14,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹95,000",
     "category": "Dogra Heritage Collection",
     "images": [
-      "/products/kundan-chandbali.png",
-      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=800&q=80"
+      "/products/dogri-jhumki-hd.jpg",
+      "https://images.unsplash.com/photo-1635767798638-3e25273a8236?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "22K BIS",
@@ -59,8 +59,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹2,60,000",
     "category": "Dogra Heritage Collection",
     "images": [
-      "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=800&q=80",
-      "/products/royal-kundan.png"
+      "/products/royal-dogri-naman-hd.jpg",
+      "https://images.unsplash.com/photo-1599643477877-530eb83abc8e?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "22K BIS",
@@ -103,8 +103,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹3,20,000",
     "category": "Dogra Heritage Collection",
     "images": [
-      "/products/heritage-ruby-haar.png",
-      "/products/temple-lakshmi.png"
+      "/products/royal-kundan-bridal-suite-hd.jpg",
+      "/products/royal-dogri-naman-hd.jpg"
     ],
     "badges": [
       "22K BIS",
@@ -148,8 +148,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹3,50,000",
     "category": "Bridal Couture",
     "images": [
-      "/products/royal-kundan.png",
-      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+      "/products/royal-kundan-bridal-suite-hd.jpg",
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "22K BIS",
@@ -193,8 +193,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹4,80,000",
     "category": "Bridal Couture",
     "images": [
-      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80",
-      "/products/royal-kundan.png"
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=2000&q=95",
+      "/products/royal-kundan-bridal-suite-hd.jpg"
     ],
     "badges": [
       "22K BIS",
@@ -236,7 +236,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹1,60,000",
     "category": "Diamond Jewellery",
     "images": [
-      "https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=800&q=80"
+      "/products/diamond-solitaire-ring-hd.jpg",
+      "https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "18K GIA",
@@ -279,7 +280,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹1,35,000",
     "category": "Diamond Jewellery",
     "images": [
-      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=2000&q=95",
+      "https://images.unsplash.com/photo-1602173574767-37ac01994b2a?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "14K GOLD",
@@ -321,7 +323,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹1,10,000",
     "category": "Diamond Jewellery",
     "images": [
-      "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1603561591411-07134e71a2a9?auto=format&fit=crop&w=2000&q=95",
+      "/products/diamond-solitaire-ring-hd.jpg"
     ],
     "badges": [
       "18K GIA",
@@ -363,7 +366,7 @@ export const mockProducts: Product[] = [
     "display_price": "₹18,500",
     "category": "Silver Jewellery (925)",
     "images": [
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "925 SILVER",
@@ -404,7 +407,7 @@ export const mockProducts: Product[] = [
     "display_price": "₹12,500",
     "category": "Silver Jewellery (925)",
     "images": [
-      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "925 SILVER",
@@ -445,7 +448,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹1,45,000",
     "category": "Gold Jewellery",
     "images": [
-      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1599643478518-a784e5dc4c8f?auto=format&fit=crop&w=2000&q=95",
+      "/products/royal-dogri-naman-hd.jpg"
     ],
     "badges": [
       "22K BIS",
@@ -487,7 +491,7 @@ export const mockProducts: Product[] = [
     "display_price": "₹28,000",
     "category": "Gold Jewellery",
     "images": [
-      "/products/minimalist-gold-chain.png"
+      "https://images.unsplash.com/photo-1617038260897-41a1f14a8ca0?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "14K BIS",
@@ -529,7 +533,7 @@ export const mockProducts: Product[] = [
     "display_price": "₹12,000",
     "category": "Gold Jewellery",
     "images": [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "9K GOLD",
@@ -571,8 +575,8 @@ export const mockProducts: Product[] = [
     "display_price": "₹50,000 (Advance Booking)",
     "category": "Gold Exchange & Custom",
     "images": [
-      "/products/temple-lakshmi.png",
-      "/products/royal-kundan.png"
+      "/craft-karigar-macro-hd.jpg",
+      "/products/royal-dogri-naman-hd.jpg"
     ],
     "badges": [
       "BESPOKE 3D CAD",
@@ -616,7 +620,7 @@ export const mockProducts: Product[] = [
     "display_price": "₹78,000",
     "category": "Men's Accessories",
     "images": [
-      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1605100804763-247f67b3557e?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "22K BIS",
@@ -659,7 +663,7 @@ export const mockProducts: Product[] = [
     "display_price": "₹2,10,000",
     "category": "Men's Accessories",
     "images": [
-      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=800&q=80"
+      "https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=2000&q=95"
     ],
     "badges": [
       "22K BIS",

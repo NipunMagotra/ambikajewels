@@ -54,7 +54,7 @@ export default function HeritageSection() {
             <div className="space-y-4">
               <div className="relative aspect-[3/4] overflow-hidden bg-[var(--bg-main)]">
                 <img
-                  src="/products/royal-kundan.png"
+                  src="/products/royal-kundan-bridal-suite-hd.jpg"
                   alt="Dogra Royal Kundan Jewelry Craft"
                   loading="lazy"
                   className="w-full h-full object-cover"
@@ -81,7 +81,7 @@ export default function HeritageSection() {
               </div>
               <div className="relative aspect-[3/4] overflow-hidden bg-[var(--bg-main)]">
                 <img
-                  src="/products/kundan-chandbali.png"
+                  src="/craft-karigar-macro-hd.jpg"
                   alt="Fine Gold Karigar Atelier"
                   loading="lazy"
                   className="w-full h-full object-cover"

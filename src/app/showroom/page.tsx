@@ -45,7 +45,7 @@ export default function ShowroomPage() {
             <div className="md:col-span-4 flex flex-col gap-6">
               <div className="relative aspect-[4/3] overflow-hidden bg-[var(--bg-surface)] rounded-[1px]">
                 <img
-                  src="/products/royal-kundan.png"
+                  src="/products/royal-kundan-bridal-suite-hd.jpg"
                   alt="Jewellery Display Case"
                   className="w-full h-full object-cover"
                 />

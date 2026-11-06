@@ -8,7 +8,7 @@ export default function JournalSection() {
       title: 'The Art of the Dogri Jhumki: Centuries of Royal Jammu Craft',
       date: 'EDITORIAL',
       readTime: '4 MIN READ',
-      image: '/products/kundan-chandbali.png',
+      image: '/products/dogri-jhumki-hd.jpg',
       excerpt: 'Tracing the architectural umbrella silhouette and delicate seed pearl droplets worn by brides across the Jammu dynasty.',
     },
     {
@@ -17,7 +17,7 @@ export default function JournalSection() {
       title: '22K vs 18K Gold: Choosing Metal Purity for Bridal & Everyday Wear',
       date: 'GUIDE',
       readTime: '3 MIN READ',
-      image: '/products/minimalist-gold-chain.png',
+      image: '/craft-karigar-macro-hd.jpg',
       excerpt: 'A clear patron guide to understanding karat purities, alloy structural strengths, and 6-digit laser HUID verification.',
     },
     {
@@ -26,7 +26,7 @@ export default function JournalSection() {
       title: 'The Modern Dogra Trousseau: Harmonizing Antique Polki & Natural Diamonds',
       date: 'STYLING',
       readTime: '5 MIN READ',
-      image: '/products/royal-kundan.png',
+      image: '/products/royal-kundan-bridal-suite-hd.jpg',
       excerpt: 'How contemporary brides are pairing heirloom haars with delicate modern diamond solitaires for multifaceted ceremonies.',
     },
   ];

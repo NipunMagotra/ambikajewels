@@ -6,14 +6,10 @@ interface SignatureCollectionProps {
 }
 
 export default function SignatureCollection({ products }: SignatureCollectionProps) {
-  // Find flagship Dogra pieces or pick top featured heirlooms
-  const dograPieces = products.filter(
-    (p) => p.category === 'Dogra Heritage Collection' || p.category === 'Bridal Couture'
-  );
-
-  const heroPiece = dograPieces[0] || products[0];
-  const companionPiece1 = dograPieces[1] || products[1];
-  const companionPiece2 = dograPieces[2] || products[2];
+  // Curate flagship Dogra pieces: Naman necklace as main hero, Jhumki & Kundan Suite as companions
+  const heroPiece = products.find((p) => p.id === 'dg2') || products[0];
+  const companionPiece1 = products.find((p) => p.id === 'dg1') || products[1];
+  const companionPiece2 = products.find((p) => p.id === 'bri1' || p.id === 'dg3') || products[2];
 
   if (!heroPiece) return null;
 
