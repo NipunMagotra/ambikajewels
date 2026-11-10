@@ -86,7 +86,7 @@ export default function ShippingPolicyPage() {
                 </div>
                 <div className="bg-surface-container-high p-3.5 border border-outline-variant/20 rounded-xs text-xs space-y-1">
                   <p><strong>Dispatch Window:</strong> In-stock catalog jewellery is dispatched within <strong>24 to 48 business hours</strong> of payment confirmation.</p>
-                  <p><strong>Custom & Bespoke Orders:</strong> Customized ring resizing or 3D CAD bespoke creations require an additional <strong>3 to 5 crafting days</strong> before courier handover.</p>
+                  <p><strong>Custom & Bespoke Orders:</strong> Customized ring resizing or handcrafted bespoke creations require an additional <strong>3 to 5 crafting days</strong> before courier handover.</p>
                 </div>
               </section>
 

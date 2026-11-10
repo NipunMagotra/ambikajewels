@@ -39,12 +39,17 @@
 
 ```
 ├── handover/                                # Business & Owner Handover Package
-│   ├── A_OWNER_MANUAL.md                   # Non-technical step-by-step operating manual
-│   ├── B_SHOPKEEPER_QUICK_START.md         # 1-page printable daily counter sheet
-│   ├── C_DAILY_OPERATING_CHECKLIST.md      # Morning & evening routine
-│   ├── D_ACCOUNT_AND_SERVICE_HANDOVER.md   # Service credentials & ownership transfer
-│   ├── E_BACKUP_AND_EMERGENCY_GUIDE.md     # Emergency procedures & troubleshooting
-│   └── F_DEVELOPER_HANDOVER.md             # Technical architecture & deployment runbook
+│   ├── README.md                            # Handover master table of contents
+│   ├── owner/                               # Shopkeeper operating guides
+│   │   ├── OWNER_MANUAL.md                  # Non-technical step-by-step operating manual
+│   │   ├── SHOPKEEPER_QUICK_START.md        # 1-page printable daily counter sheet
+│   │   └── DAILY_OPERATING_CHECKLIST.md     # Morning & evening routine
+│   └── technical/                           # Infrastructure & developer runbooks
+│       ├── ACCOUNT_AND_SERVICE_HANDOVER.md  # Service credentials & ownership transfer
+│       ├── BACKUP_AND_EMERGENCY_GUIDE.md    # Emergency procedures & troubleshooting
+│       ├── DEVELOPER_HANDOVER.md            # Technical architecture & deployment runbook
+│       ├── SECURITY_OPERATIONS_GUIDE.md     # Operational security & key rotation
+│       └── SECURITY_INCIDENT_RESPONSE.md    # Security incident response playbook
 ├── src/
 │   ├── app/
 │   │   ├── admin/                          # Owner Admin Console (/admin)
