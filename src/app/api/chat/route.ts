@@ -163,7 +163,7 @@ async function callGroqLlama3(
     const messages: any[] = [
       {
         role: 'system',
-        content: `You are Aanya, the official AI Jewellery Concierge for Ambika Jewels located in Lower Roop Nagar, Jammu. 
+        content: `You are Ambika AI, the official AI Jewellery Concierge for Ambika Jewels located in Lower Roop Nagar, Jammu. 
 
 Your role is to assist customers with showroom collections, Dogra heritage jewellery, gold exchange enquiries, and showroom visit scheduling.
 
@@ -253,7 +253,7 @@ export async function POST(request: Request) {
     // 3. Prompt Injection Defense (Phase 3 Item 4)
     if (detectPromptInjection(trimmedMessage)) {
       return NextResponse.json({
-        text: 'Namaste! I am Aanya, the jewellery concierge for Ambika Jewels in Jammu. I am here to assist you with our handcrafted Dogra jewellery, bridal collections, and showroom policies. How may I help you with our jewellery today?',
+        text: 'Namaste! I am Ambika AI, the jewellery concierge for Ambika Jewels in Jammu. I am here to assist you with our handcrafted Dogra jewellery, bridal collections, and showroom policies. How may I help you with our jewellery today?',
         disclaimer: 'AI assistant — please confirm all details with the store.'
       });
     }

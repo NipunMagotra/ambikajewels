@@ -6,15 +6,14 @@ import { getDailyRates, DEFAULT_RATES } from '@/lib/counterStore';
 import { RateTickerHeader } from '@/components/counter/RateTickerHeader';
 import { DailyRateTracker } from '@/components/counter/DailyRateTracker';
 import { BillingCalculator } from '@/components/counter/BillingCalculator';
-import { SavingsGoalTracker } from '@/components/counter/SavingsGoalTracker';
 import { useRouter } from 'next/navigation';
-import { Flame, Calculator, PiggyBank, Sparkles, ShieldCheck } from 'lucide-react';
+import { Flame, Calculator, Sparkles, ShieldCheck } from 'lucide-react';
 
 export default function AdminCounterDashboardPage() {
   const router = useRouter();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(true);
   const [rates, setRates] = useState<DailyRates>(DEFAULT_RATES);
-  const [activeTab, setActiveTab] = useState<'rates' | 'calculator' | 'goals'>('calculator');
+  const [activeTab, setActiveTab] = useState<'rates' | 'calculator'>('calculator');
   const [isLoadingRates, setIsLoadingRates] = useState(true);
 
   useEffect(() => {
@@ -102,18 +101,6 @@ export default function AdminCounterDashboardPage() {
               <Flame className="w-4 h-4" />
               <span>Morning Rates</span>
             </button>
-
-            <button
-              onClick={() => setActiveTab('goals')}
-              className={`flex-1 flex items-center justify-center gap-2 py-3 px-3 sm:px-5 rounded-xl font-bold text-xs sm:text-sm transition-all cursor-pointer min-h-[46px] ${
-                activeTab === 'goals'
-                  ? 'gold-bg-gradient text-on-primary-fixed shadow-md'
-                  : 'text-on-surface-variant hover:text-on-surface hover:bg-surface/50'
-              }`}
-            >
-              <PiggyBank className="w-4 h-4" />
-              <span>Gold Savings Goals</span>
-            </button>
           </div>
         </div>
 
@@ -124,8 +111,6 @@ export default function AdminCounterDashboardPage() {
           )}
 
           {activeTab === 'calculator' && <BillingCalculator rates={rates} />}
-
-          {activeTab === 'goals' && <SavingsGoalTracker rates={rates} />}
         </div>
       </main>
     </div>

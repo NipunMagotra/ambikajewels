@@ -84,7 +84,7 @@ describe('Real Route Handlers Verification Suite (F7)', () => {
       const data = await res.json();
 
       assert.equal(res.status, 200);
-      assert.match(data.text, /Namaste! I am Aanya/);
+      assert.match(data.text, /Namaste! I am Ambika AI/);
       assert.match(data.disclaimer, /AI assistant/i);
     });
 

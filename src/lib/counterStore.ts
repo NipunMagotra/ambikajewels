@@ -1,5 +1,5 @@
 import { supabase, isSupabaseConfigured } from './supabase';
-import { DailyRates, SavingsGoal, GoalPayment } from '@/types/counter';
+import { DailyRates } from '@/types/counter';
 
 export const DEFAULT_RATES: DailyRates = {
   gold_24k: 7850,
@@ -13,7 +13,6 @@ export const DEFAULT_RATES: DailyRates = {
 };
 
 const LOCAL_RATES_KEY = 'ambika_daily_rates_v1';
-const LOCAL_GOALS_KEY = 'ambika_savings_goals_v1';
 
 /**
  * Derives standard purity rates based on 24K pure gold rate per gram.
@@ -125,119 +124,4 @@ export async function saveDailyRates(rates: DailyRates): Promise<DailyRates> {
   }
 
   return updatedRates;
-}
-
-/**
- * Fetch all customer savings goals via authenticated admin endpoint.
- */
-export async function getSavingsGoals(): Promise<SavingsGoal[]> {
-  let localGoals: SavingsGoal[] = [];
-  if (typeof window !== 'undefined') {
-    const cached = localStorage.getItem(LOCAL_GOALS_KEY);
-    if (cached) {
-      try {
-        localGoals = JSON.parse(cached);
-      } catch (e) {
-        console.error('Error parsing local savings goals:', e);
-      }
-    }
-
-    try {
-      const res = await fetch('/api/admin/savings-goals');
-      const data = await res.json();
-      if (res.ok && data.success && Array.isArray(data.goals)) {
-        const fetchedGoals: SavingsGoal[] = data.goals.map((item: any) => ({
-          id: item.id,
-          customerName: item.customer_name,
-          customerPhone: item.customer_phone,
-          eventName: item.event_name,
-          targetWeightGrams: Number(item.target_weight_grams || 0),
-          targetAmountRupees: Number(item.target_amount_rupees || 0),
-          targetPurity: item.target_purity || '22K',
-          targetDate: item.target_date || '',
-          payments: Array.isArray(item.payments) ? item.payments : [],
-          createdAt: item.created_at || new Date().toISOString(),
-          updatedAt: item.updated_at || new Date().toISOString(),
-        }));
-
-        localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(fetchedGoals));
-        return fetchedGoals;
-      }
-    } catch (err) {
-      console.warn('Savings goals server fetch error, using local:', err);
-    }
-  }
-
-  return localGoals;
-}
-
-/**
- * Save or update a customer savings goal via authenticated admin endpoint.
- */
-export async function saveSavingsGoal(goal: SavingsGoal): Promise<SavingsGoal[]> {
-  const currentGoals = await getSavingsGoals();
-  const index = currentGoals.findIndex((g) => g.id === goal.id);
-
-  let updatedGoals: SavingsGoal[];
-  if (index >= 0) {
-    updatedGoals = [...currentGoals];
-    updatedGoals[index] = { ...goal, updatedAt: new Date().toISOString() };
-  } else {
-    updatedGoals = [goal, ...currentGoals];
-  }
-
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(updatedGoals));
-
-    try {
-      await fetch('/api/admin/savings-goals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ goal })
-      });
-    } catch (err) {
-      console.warn('Error saving goal to server endpoint:', err);
-    }
-  }
-
-  return updatedGoals;
-}
-
-/**
- * Delete a customer savings goal via authenticated admin endpoint.
- */
-export async function deleteSavingsGoal(id: string): Promise<SavingsGoal[]> {
-  const currentGoals = await getSavingsGoals();
-  const updatedGoals = currentGoals.filter((g) => g.id !== id);
-
-  if (typeof window !== 'undefined') {
-    localStorage.setItem(LOCAL_GOALS_KEY, JSON.stringify(updatedGoals));
-
-    try {
-      await fetch(`/api/admin/savings-goals?id=${encodeURIComponent(id)}`, {
-        method: 'DELETE'
-      });
-    } catch (err) {
-      console.warn('Error deleting goal on server endpoint:', err);
-    }
-  }
-
-  return updatedGoals;
-}
-
-/**
- * Add a payment/purchase log to a specific goal.
- */
-export async function addGoalPayment(goalId: string, payment: GoalPayment): Promise<SavingsGoal[]> {
-  const goals = await getSavingsGoals();
-  const goal = goals.find((g) => g.id === goalId);
-  if (!goal) return goals;
-
-  const updatedGoal: SavingsGoal = {
-    ...goal,
-    payments: [...goal.payments, payment],
-    updatedAt: new Date().toISOString(),
-  };
-
-  return saveSavingsGoal(updatedGoal);
 }

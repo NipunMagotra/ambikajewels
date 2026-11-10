@@ -9,19 +9,9 @@ describe('Phase 3 Item 6: Savings Scheme Disabled, Wording Audit & Legal Checkli
     assert.strictEqual(siteConfig.features.savingsGoalsEnabled, false);
   });
 
-  it('verifies that SavingsGoalTracker UI does not use unapproved deposit/interest/return terminology in active labels', () => {
+  it('verifies that SavingsGoalTracker UI is completely removed from the counter codebase', () => {
     const filePath = path.join(process.cwd(), 'src/components/counter/SavingsGoalTracker.tsx');
-    const content = fs.readFileSync(filePath, 'utf-8');
-
-    // Should NOT have "Total Amount Deposited" or "Rupees Deposited"
-    assert.ok(!content.includes('Total Amount Deposited'));
-    assert.ok(!content.includes('Rupees Deposited'));
-    assert.ok(!content.includes('Log Purchase / Deposit'));
-    
-    // Should use advance booking / installment terminology
-    assert.ok(content.includes('Total Advance Paid'));
-    assert.ok(content.includes('Advance Paid:'));
-    assert.ok(content.includes('Log Advance Installment / Payment'));
+    assert.strictEqual(fs.existsSync(filePath), false, 'SavingsGoalTracker.tsx must be completely removed');
   });
 
   it('verifies that admin overview does not use deposit terminology', () => {

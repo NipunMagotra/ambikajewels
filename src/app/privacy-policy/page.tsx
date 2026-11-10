@@ -100,7 +100,7 @@ export default function PrivacyPolicyPage() {
                   </div>
                   <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
                     <p className="font-semibold text-on-surface">4. Groq Inc. (AI Concierge Cloud Inference)</p>
-                    <p className="text-xs mt-1">Role: Real-time language processing for our virtual jewellery concierge (Aanya). Strictly subject to automated client-side PII redaction prior to transmission.</p>
+                    <p className="text-xs mt-1">Role: Real-time language processing for our virtual jewellery concierge (Ambika AI). Strictly subject to automated client-side PII redaction prior to transmission.</p>
                   </div>
                   <div className="bg-background/80 p-3.5 border border-outline-variant/30 rounded-xs">
                     <p className="font-semibold text-on-surface">5. Cloud Hosting & Edge Delivery (Netlify / Vercel)</p>

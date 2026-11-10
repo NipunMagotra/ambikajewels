@@ -26,7 +26,7 @@ export default function ChatWidget() {
     { 
       id: 'initial', 
       sender: 'bot', 
-      text: "Namaste! I'm Aanya from Ambika Jewels. I'm here to assist you with authentic Dogra heritage jewellery, bridal collections, or gold exchange services. How may I help you today?" 
+      text: "Namaste! I'm Ambika AI from Ambika Jewels. I'm here to assist you with authentic Dogra heritage jewellery, bridal collections, or gold exchange services. How may I help you today?" 
     }
   ]);
   const [inputValue, setInputValue] = useState('');
@@ -127,7 +127,7 @@ export default function ChatWidget() {
               <h4 className="font-sans text-xs text-[var(--accent-gold)] font-bold tracking-[0.16em] uppercase">ASK AMBIKA</h4>
               <p className="text-[9px] text-[var(--text-secondary)] font-sans tracking-wider flex items-center gap-1">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 inline-block animate-pulse"></span>
-                Aanya • Personal Jewellery Guide
+                Ambika AI • Personal Jewellery Guide
               </p>
             </div>
           </div>
@@ -214,7 +214,7 @@ export default function ChatWidget() {
             type="text" 
             value={inputValue}
             onChange={e => setInputValue(e.target.value)}
-            placeholder="Ask Aanya in simple English..."
+            placeholder="Ask Ambika AI in simple English..."
             className="flex-1 bg-[var(--bg-card)] border border-[var(--border-subtle)] text-[var(--text-primary)] font-sans text-xs p-2.5 outline-none focus:border-[var(--accent-gold)] transition-colors rounded-[2px]"
           />
           <button 
