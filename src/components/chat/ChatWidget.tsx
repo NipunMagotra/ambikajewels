@@ -26,7 +26,7 @@ export default function ChatWidget() {
     { 
       id: 'initial', 
       sender: 'bot', 
-      text: "Namaste! I'm Aanya from Ambika Jewels. I'm here to assist you with authentic Dogra heritage jewellery, bridal collections, or custom 3D CAD designs. How may I help you today?" 
+      text: "Namaste! I'm Aanya from Ambika Jewels. I'm here to assist you with authentic Dogra heritage jewellery, bridal collections, or gold exchange services. How may I help you today?" 
     }
   ]);
   const [inputValue, setInputValue] = useState('');

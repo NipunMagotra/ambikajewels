@@ -4,13 +4,14 @@ const cspHeader = `
   default-src 'self';
   script-src 'self' 'unsafe-inline' 'unsafe-eval' https://checkout.razorpay.com https://api.razorpay.com;
   connect-src 'self' https://api.razorpay.com https://lumberjack.razorpay.com https://lumberjack-cx.razorpay.com https://*.upstash.io https://api.resend.com https://*.supabase.co https://api.bvclogistics.com https://*.bvclogistics.com https://apiv2.shiprocket.in https://api.goldapi.io;
-  frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com;
-  img-src 'self' data: blob: https://*.razorpay.com https://images.unsplash.com https://plus.unsplash.com https://lh3.googleusercontent.com;
+  frame-src 'self' https://api.razorpay.com https://checkout.razorpay.com https://www.google.com https://maps.google.com;
+  img-src 'self' data: blob: https://*.razorpay.com https://images.unsplash.com https://plus.unsplash.com https://lh3.googleusercontent.com https://*.supabase.co https://maps.gstatic.com https://*.googleapis.com;
   style-src 'self' 'unsafe-inline' https://fonts.googleapis.com;
   font-src 'self' https://fonts.gstatic.com data:;
   object-src 'none';
   base-uri 'self';
   form-action 'self' https://api.razorpay.com;
+  frame-ancestors 'none';
 `
   .replace(/\s{2,}/g, ' ')
   .trim();
@@ -30,6 +31,10 @@ const nextConfig: NextConfig = {
       {
         protocol: 'https',
         hostname: 'lh3.googleusercontent.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.supabase.co',
       },
       {
         protocol: 'https',

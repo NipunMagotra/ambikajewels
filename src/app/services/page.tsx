@@ -3,10 +3,11 @@ import Footer from '@/components/layout/Footer';
 import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import MandalaDivider from '@/components/ui/MandalaDivider';
 import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
+import type { Metadata } from 'next';
 
-export const metadata = {
-  title: 'Bespoke Services & Gold Exchange | Ambika Jewels Jammu',
-  description: 'Explore bespoke jewellery design, 3D CAD previews, old gold exchange, gold melting & redesigning, and private concierge services at Ambika Jewels in Jammu.',
+export const metadata: Metadata = {
+  title: 'Services & Gold Exchange | Ambika Jewels Jammu',
+  description: 'Explore old gold exchange, gold melting & redesigning, and private concierge services at Ambika Jewels in Jammu.',
 };
 
 export default function ServicesPage() {
@@ -21,18 +22,6 @@ export default function ServicesPage() {
         'Transparent valuation based on daily market bullion rate',
         'Digital purity testing and weight verification',
         'Full credit applied directly to your new design'
-      ]
-    },
-    {
-      id: 'custom-jewellery',
-      title: 'Jewellery Customisation & 3D CAD',
-      subtitle: 'Turn Any Sketch or Idea into Reality',
-      icon: 'palette',
-      description: 'Have a dream design or an Instagram photo? Send it to us on WhatsApp (+91 9086098457). Our master karigars will create a 3D CAD design preview for you within 2 days.',
-      highlights: [
-        '3D CAD digital preview before crafting',
-        'Available in 22K, 18K, 14K, or 9K Gold',
-        'Choice of certified diamonds & natural gemstones'
       ]
     },
     {
@@ -72,10 +61,10 @@ export default function ServicesPage() {
               EXPERT CRAFTSMANSHIP &amp; SERVICES
             </span>
             <h1 className="font-serif text-3xl sm:text-5xl text-[var(--text-primary)] font-normal mb-3">
-              Gold Exchange &amp; <span className="italic font-normal gold-text-gradient">Customisation</span>
+              Gold Exchange &amp; <span className="italic font-normal gold-text-gradient">Heirloom Services</span>
             </h1>
             <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] font-light leading-relaxed max-w-2xl mx-auto">
-              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting &amp; redesign, bespoke 3D CAD customisation, and private consultations.
+              At Ambika Jewels, we offer personalized services including transparent Gold Exchange (as per stated terms), old gold melting &amp; redesign, and private boutique consultations.
             </p>
           </div>
         </section>
@@ -98,23 +87,23 @@ export default function ServicesPage() {
               <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">01</span>
               <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Design Consultation</h3>
               <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
-                Share your inspiration photo, sketch, or heirloom idea with our Jammu master karigars via WhatsApp or in showroom.
+                Share your inspiration, heirloom vision, or requirements with our Jammu master karigars via WhatsApp or in showroom.
               </p>
             </div>
 
             <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/50 transition-colors">
               <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">02</span>
-              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">3D CAD Digital Render</h3>
+              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Purity &amp; Weight Verification</h3>
               <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
-                Receive photorealistic 3D computer-aided designs and precise gold gram weight estimates within 48 hours for your approval.
+                Receive transparent digital testing, precise karat analysis, and daily market bullion valuation for your gold.
               </p>
             </div>
 
             <div className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-5 rounded-[2px] relative hover:border-[var(--accent-gold)]/50 transition-colors">
               <span className="font-serif text-3xl text-[var(--accent-gold)] font-normal block mb-2">03</span>
-              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Gold Melting or Sourcing</h3>
+              <h3 className="font-serif text-base text-[var(--text-primary)] font-normal mb-1.5">Live Melting &amp; Sourcing</h3>
               <p className="font-sans text-xs text-[var(--text-secondary)] font-light leading-relaxed">
-                Exchange old gold or have family heirloom gold melted in front of you, or select pure 22K/18K gold and natural gemstones.
+                Exchange old gold or have family heirloom gold melted in front of you into handcrafted Dogra heritage designs.
               </p>
             </div>
 
@@ -130,7 +119,7 @@ export default function ServicesPage() {
 
         {/* Services List */}
         <section className="py-8 sm:py-12 container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
             {services.map((s) => (
               <div key={s.id} className="bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] p-6 sm:p-7 rounded-[2px] flex flex-col justify-between hover:border-[var(--accent-gold)]/50 transition-colors">
                 <div>
@@ -160,7 +149,7 @@ export default function ServicesPage() {
                     href={`https://wa.me/919086098457?text=Namaste!%20I%20am%20interested%20in%20${encodeURIComponent(s.title)}.`}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="btn-gold-primary w-full sm:w-auto inline-block"
+                    className="btn-gold-primary w-full inline-block text-center"
                   >
                     <span className="material-symbols-outlined text-sm">chat_bubble</span> ENQUIRE ON WHATSAPP
                   </a>

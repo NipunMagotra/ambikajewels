@@ -21,23 +21,48 @@ export async function generateMetadata({
   const { slug } = await params;
   let prod: any = null;
   if (isSupabaseConfigured) {
-    const { data } = await supabase.from('products').select('name, description').eq('slug', slug).single();
+    const { data } = await supabase.from('products').select('*').eq('slug', slug).single();
     if (data) prod = data;
     if (!prod) {
-      const { data: dataById } = await supabase.from('products').select('name, description').eq('id', slug).single();
+      const { data: dataById } = await supabase.from('products').select('*').eq('id', slug).single();
       if (dataById) prod = dataById;
     }
   }
-  // F5: Fallback to mockProducts only if enabled
-  if (!prod && siteConfig.features.useMockProductsFallback) {
+  // Fallback to mockProducts
+  if (!prod) {
     prod = mockProducts.find(p => p.slug === slug || p.id === slug);
   }
   
   if (!prod) return { title: 'Product Not Found' };
   
+  const productImageUrl = prod.images?.[0] || '/products/royal-kundan.png';
+
   return {
-    title: `${prod.name} | Ambika Jewels`,
+    title: `${prod.name} | Ambika Jewels Jammu`,
     description: prod.description,
+    alternates: {
+      canonical: `/collections/${prod.slug || prod.id}`,
+    },
+    openGraph: {
+      title: `${prod.name} | Ambika Jewels`,
+      description: prod.description,
+      url: `${siteConfig.websiteUrl}/collections/${prod.slug || prod.id}`,
+      type: 'article',
+      images: [
+        {
+          url: productImageUrl,
+          width: 800,
+          height: 800,
+          alt: prod.name,
+        },
+      ],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: `${prod.name} | Ambika Jewels`,
+      description: prod.description,
+      images: [productImageUrl],
+    },
   };
 }
 
@@ -91,8 +116,40 @@ export default async function ProductPage({
     relatedProducts = mockProducts.filter(p => p.category === product?.category && p.id !== product?.id).slice(0, 4);
   }
 
+  const productJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "Product",
+    name: product.name,
+    image: product.images && product.images.length > 0 ? product.images : [`${siteConfig.websiteUrl}/products/royal-kundan.png`],
+    description: product.description,
+    sku: product.id,
+    mpn: product.hsn_code || "7113",
+    brand: {
+      "@type": "Brand",
+      name: siteConfig.name,
+    },
+    offers: {
+      "@type": "Offer",
+      url: `${siteConfig.websiteUrl}/collections/${product.slug || product.id}`,
+      priceCurrency: "INR",
+      price: (product.price / 100).toFixed(2),
+      availability: product.stock_status === 'out_of_stock'
+        ? "https://schema.org/OutOfStock"
+        : "https://schema.org/InStock",
+      itemCondition: "https://schema.org/NewCondition",
+      seller: {
+        "@type": "Organization",
+        name: siteConfig.legalBusinessName,
+      },
+    },
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+      />
       <Header />
       <main className="min-h-screen pt-20 sm:pt-24 pb-20 lg:pb-16 bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
         <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop">

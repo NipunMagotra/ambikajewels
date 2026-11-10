@@ -37,7 +37,7 @@ export default function AboutPage() {
   const milestones = [
     { year: '01', title: 'Establishment in Jammu', detail: 'Our jewellery showroom and boutique were founded in Lower Roop Nagar, Jammu, by Shivani Anand.' },
     { year: '02', title: 'Signature Dogra Collection', detail: 'Introduced authentic Dogri Jhumki, Dogri Naman, and Long Sets crafted by master Jammu karigars.' },
-    { year: '03', title: 'Gold Exchange & 3D CAD', detail: 'Pioneered full gold exchange and 3D CAD custom design services for custom jewellery orders.' },
+    { year: '03', title: 'Gold Exchange & Melting Atelier', detail: 'Pioneered full gold exchange and live in-store heirloom gold melting services.' },
     { year: '04', title: 'Expanded Multi-Purity Collections', detail: 'Offering 22K, 18K, 14K, 9K gold, 18K/14K diamond, 925 silver, and nationwide express delivery.' }
   ];
 

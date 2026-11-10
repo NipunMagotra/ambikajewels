@@ -3,16 +3,34 @@
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { siteConfig } from '@/config/siteConfig';
 import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
 import SearchModal from '@/components/search/SearchModal';
 
 export default function Header() {
   const { cartCount } = useCart();
+  const { wishlistCount } = useWishlist();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
+  const [announcement, setAnnouncement] = useState<{ isEnabled: boolean; text: string; linkUrl?: string } | null>({
+    isEnabled: true,
+    text: 'Festive Privilege: Use code DOGRA5000 for ₹5,000 flat savings on orders above ₹50,000 | 100% Insured BVC Armed Delivery Across India',
+    linkUrl: '/collections'
+  });
+
+  useEffect(() => {
+    fetch('/api/content')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.content?.announcement) {
+          setAnnouncement(data.content.announcement);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     const isDarkMode = document.documentElement.classList.contains('dark');
@@ -64,6 +82,16 @@ export default function Header() {
   return (
     <>
       <header className="fixed top-0 left-0 w-full z-50 transition-all shadow-xs bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--border-subtle)]">
+        {announcement?.isEnabled && announcement?.text && (
+          <div className="bg-[var(--accent-gold)] text-black text-center py-1.5 px-3 text-[11px] font-sans font-semibold tracking-wide flex items-center justify-center gap-2 border-b border-black/10">
+            <span>{announcement.text}</span>
+            {announcement.linkUrl && (
+              <Link href={announcement.linkUrl} className="underline hover:opacity-80 text-[10px] uppercase font-bold ml-1">
+                Explore →
+              </Link>
+            )}
+          </div>
+        )}
         <div className="container mx-auto px-3 sm:px-margin-mobile lg:px-margin-desktop h-16 flex items-center justify-between">
           {/* Left: Mobile Menu Toggle / Desktop Navigation */}
           <div className="flex items-center gap-2 sm:gap-6">
@@ -168,6 +196,23 @@ export default function Header() {
               </span>
             </button>
 
+            {/* Wishlist Link */}
+            <Link
+              href="/wishlist"
+              className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center gap-1.5 text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors p-2"
+              aria-label="Wishlist"
+              title="Saved Items"
+            >
+              <div className="relative flex items-center justify-center">
+                <span className="material-symbols-outlined text-lg sm:text-xl">favorite</span>
+                {wishlistCount > 0 && (
+                  <span className="absolute -top-1.5 -right-2 bg-[var(--accent-gold)] text-white font-bold text-[9px] w-4 h-4 rounded-full flex items-center justify-center shadow-xs">
+                    {wishlistCount}
+                  </span>
+                )}
+              </div>
+            </Link>
+
             {/* Cart Bag */}
             <Link 
               href="/cart" 
@@ -264,6 +309,14 @@ export default function Header() {
               >
                 <span>ABOUT US &amp; LEGACY</span>
                 <span className="material-symbols-outlined text-sm">chevron_right</span>
+              </Link>
+              <Link
+                href="/wishlist"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-sans tracking-wider text-[var(--accent-gold)] py-3 border-b border-[var(--border-subtle)] flex justify-between items-center font-semibold"
+              >
+                <span>SAVED WISHLIST ({wishlistCount})</span>
+                <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]">favorite</span>
               </Link>
             </div>
 

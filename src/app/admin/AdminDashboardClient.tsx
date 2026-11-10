@@ -4,12 +4,22 @@ import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { siteConfig } from '@/config/siteConfig';
-import { mockProducts } from '@/data/mockProducts';
 import { BillingCalculator } from '@/components/counter/BillingCalculator';
 import type { DailyRates } from '@/types/counter';
 import { DEFAULT_RATES } from '@/lib/counterStore';
 
-interface ProductItem {
+// Admin Sub-components
+import { InvoiceModal } from '@/components/admin/InvoiceModal';
+import { PackingSlipModal } from '@/components/admin/PackingSlipModal';
+import { ProductModal, ProductFormData } from '@/components/admin/ProductModal';
+import { BulkActionModal } from '@/components/admin/BulkActionModal';
+import { CsvImportModal, exportProductsToCsv } from '@/components/admin/CsvModals';
+import { CouponModal } from '@/components/admin/CouponModal';
+import type { CouponRule } from '@/lib/couponEngine';
+import type { AuditLogEntry } from '@/lib/auditLog';
+import type { StoreContentConfig } from '@/lib/storeContent';
+
+export interface ProductItem {
   id: string;
   name: string;
   slug: string;
@@ -24,10 +34,30 @@ interface ProductItem {
   is_featured: boolean;
   collection: string;
   craftsmanship_story?: string;
+  material?: string;
+  purity?: string;
+  bis_hallmark?: string;
+  is_hallmarked?: boolean;
+  huid?: string;
+  weight_grams?: number;
+  gross_weight_grams?: number;
+  dimensions?: {
+    length_cm: number;
+    breadth_cm: number;
+    height_cm: number;
+  };
+  hsn_code?: string;
+  care_instructions?: string;
+  making_charge_type?: 'percent' | 'flat';
+  making_charge_rate?: number;
+  stone_weight_grams?: number;
+  stone_value_paise?: number;
+  pricing_mode?: 'live_bullion' | 'fixed';
+  size_variants?: string[];
   created_at: string;
 }
 
-interface OrderItem {
+export interface OrderItem {
   product_id?: string;
   name: string;
   price: number;
@@ -35,15 +65,17 @@ interface OrderItem {
   image?: string;
   metal_finish?: string;
   selected_size?: string;
+  weight_grams?: number;
 }
 
-interface OrderRecord {
+export interface OrderRecord {
   id: string;
   order_number: string;
   customer_name: string;
   customer_phone: string;
   customer_email?: string;
   shipping_address: string;
+  pincode?: string;
   items: OrderItem[];
   subtotal: number;
   tax: number;
@@ -52,13 +84,25 @@ interface OrderRecord {
   status: 'pending_confirmation' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
   payment_method: string;
   payment_status: 'unpaid' | 'paid' | 'refunded';
+  razorpay_payment_id?: string;
   bvc_docket_number?: string;
   pan_number?: string;
   notes?: string;
   created_at: string;
 }
 
-type TabType = 'overview' | 'products' | 'orders' | 'rates' | 'pos' | 'store';
+export type TabType =
+  | 'overview'
+  | 'products'
+  | 'pricing'
+  | 'inventory'
+  | 'orders'
+  | 'coupons'
+  | 'content'
+  | 'pos'
+  | 'audit'
+  | 'rates' // alias for pricing
+  | 'store'; // alias for content
 
 export default function AdminDashboardClient() {
   const router = useRouter();
@@ -70,25 +114,24 @@ export default function AdminDashboardClient() {
   const [productSearch, setProductSearch] = useState('');
   const [productCategoryFilter, setProductCategoryFilter] = useState('All');
   const [productStockFilter, setProductStockFilter] = useState('all');
+  const [selectedProductIds, setSelectedProductIds] = useState<string[]>([]);
 
-  // Product Modal State (Add / Edit)
+  // Modals
   const [isProductModalOpen, setIsProductModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState<ProductItem | null>(null);
-  const [modalForm, setModalForm] = useState({
-    name: '',
-    category: siteConfig.categories[0] || 'Necklaces',
-    price: '',
-    description: '',
-    images: '',
-    badges: '22K BIS, DOGRA HERITAGE',
-    metal_finishes: 'Gold',
-    stock_status: 'in_stock' as 'in_stock' | 'limited' | 'out_of_stock',
-    is_featured: false,
-    collection: 'Dogra Heritage Collection',
-    craftsmanship_story: ''
-  });
   const [isSavingProduct, setIsSavingProduct] = useState(false);
-  const [isSeedingPresets, setIsSeedingPresets] = useState(false);
+
+  const [isBulkModalOpen, setIsBulkModalOpen] = useState(false);
+  const [isProcessingBulk, setIsProcessingBulk] = useState(false);
+
+  const [isCsvImportOpen, setIsCsvImportOpen] = useState(false);
+  const [isImportingCsv, setIsImportingCsv] = useState(false);
+
+  const [isCouponModalOpen, setIsCouponModalOpen] = useState(false);
+  const [isSavingCoupon, setIsSavingCoupon] = useState(false);
+
+  const [invoiceOrder, setInvoiceOrder] = useState<OrderRecord | null>(null);
+  const [packingSlipOrder, setPackingSlipOrder] = useState<OrderRecord | null>(null);
 
   // Orders State
   const [orders, setOrders] = useState<OrderRecord[]>([]);
@@ -97,8 +140,7 @@ export default function AdminDashboardClient() {
   const [orderStatusFilter, setOrderStatusFilter] = useState('all');
   const [expandedOrderId, setExpandedOrderId] = useState<string | null>(null);
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
-  const [editDocketId, setEditDocketId] = useState<string | null>(null);
-  const [docketInput, setDocketInput] = useState('');
+  const [docketInputs, setDocketInputs] = useState<Record<string, string>>({});
 
   // Rates State
   const [rates, setRates] = useState<DailyRates>(DEFAULT_RATES);
@@ -113,6 +155,19 @@ export default function AdminDashboardClient() {
     silver_925: 85
   });
 
+  // Coupons State
+  const [coupons, setCoupons] = useState<CouponRule[]>([]);
+  const [isCouponsLoading, setIsCouponsLoading] = useState(false);
+
+  // Store Content State
+  const [storeContent, setStoreContent] = useState<StoreContentConfig | null>(null);
+  const [isContentLoading, setIsContentLoading] = useState(false);
+  const [isSavingContent, setIsSavingContent] = useState(false);
+
+  // Audit Logs State
+  const [auditLogs, setAuditLogs] = useState<AuditLogEntry[]>([]);
+  const [isAuditLoading, setIsAuditLoading] = useState(false);
+
   // Global Notification Banner
   const [bannerMessage, setBannerMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
 
@@ -121,7 +176,7 @@ export default function AdminDashboardClient() {
     setTimeout(() => setBannerMessage(null), 4000);
   };
 
-  // 1. Fetch Products
+  // ── Fetch Operations ──────────────────────────────────────────────
   const fetchProducts = async () => {
     try {
       setIsProductsLoading(true);
@@ -137,7 +192,6 @@ export default function AdminDashboardClient() {
     }
   };
 
-  // 2. Fetch Orders
   const fetchOrders = async () => {
     try {
       setIsOrdersLoading(true);
@@ -153,7 +207,6 @@ export default function AdminDashboardClient() {
     }
   };
 
-  // 3. Fetch Rates
   const fetchRates = async () => {
     try {
       setIsRatesLoading(true);
@@ -177,156 +230,179 @@ export default function AdminDashboardClient() {
     }
   };
 
+  const fetchCoupons = async () => {
+    try {
+      setIsCouponsLoading(true);
+      const res = await fetch('/api/admin/coupons');
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setCoupons(data.coupons || []);
+      }
+    } catch (err) {
+      console.error('Error fetching coupons:', err);
+    } finally {
+      setIsCouponsLoading(false);
+    }
+  };
+
+  const fetchContent = async () => {
+    try {
+      setIsContentLoading(true);
+      const res = await fetch('/api/admin/content');
+      const data = await res.json();
+      if (res.ok && data.success && data.content) {
+        setStoreContent(data.content);
+      }
+    } catch (err) {
+      console.error('Error fetching content:', err);
+    } finally {
+      setIsContentLoading(false);
+    }
+  };
+
+  const fetchAuditLogs = async () => {
+    try {
+      setIsAuditLoading(true);
+      const res = await fetch('/api/admin/audit?limit=100');
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setAuditLogs(data.logs || []);
+      }
+    } catch (err) {
+      console.error('Error fetching audit logs:', err);
+    } finally {
+      setIsAuditLoading(false);
+    }
+  };
+
   useEffect(() => {
     fetchProducts();
     fetchOrders();
     fetchRates();
+    fetchCoupons();
+    fetchContent();
+    fetchAuditLogs();
   }, []);
 
-  // Logout Handler
+  // ── Logout ────────────────────────────────────────────────────────
   const handleLogout = async () => {
     try {
       await fetch('/api/admin/logout', { method: 'POST' });
       router.push('/admin/login');
       router.refresh();
-    } catch (e) {
+    } catch {
       router.push('/admin/login');
     }
   };
 
-  // Save / Update Product
-  const handleOpenAddModal = () => {
+  // ── Product CRUD Handlers ─────────────────────────────────────────
+  const handleOpenAddProduct = () => {
     setEditingProduct(null);
-    setModalForm({
-      name: '',
-      category: siteConfig.categories[0] || 'Necklaces',
-      price: '',
-      description: '',
-      images: '',
-      badges: '22K BIS, DOGRA HERITAGE',
-      metal_finishes: 'Gold',
-      stock_status: 'in_stock',
-      is_featured: false,
-      collection: 'Dogra Heritage Collection',
-      craftsmanship_story: ''
-    });
     setIsProductModalOpen(true);
   };
 
-  const handleOpenEditModal = (p: ProductItem) => {
+  const handleOpenEditProduct = (p: ProductItem) => {
     setEditingProduct(p);
-    setModalForm({
-      name: p.name,
-      category: p.category,
-      price: (p.price / 100).toString(),
-      description: p.description || '',
-      images: (p.images || []).join('\n'),
-      badges: (p.badges || []).join(', '),
-      metal_finishes: (p.metal_finishes || []).join(', '),
-      stock_status: p.stock_status,
-      is_featured: p.is_featured,
-      collection: p.collection || 'Heritage',
-      craftsmanship_story: p.craftsmanship_story || ''
-    });
     setIsProductModalOpen(true);
   };
 
-  const handleSaveProductSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!modalForm.name.trim() || !modalForm.price || !modalForm.category) {
-      alert('Please fill in product name, category, and price.');
-      return;
-    }
-
+  const handleSaveProduct = async (data: ProductFormData) => {
     try {
       setIsSavingProduct(true);
-      const imageList = modalForm.images
-        .split(/[\n,]/)
-        .map(s => s.trim())
-        .filter(Boolean);
-
-      const badgeList = modalForm.badges
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
-
-      const finishList = modalForm.metal_finishes
-        .split(',')
-        .map(s => s.trim())
-        .filter(Boolean);
+      const isEdit = Boolean(editingProduct);
+      const url = '/api/admin/products';
+      const method = isEdit ? 'PATCH' : 'POST';
 
       const payload = {
-        name: modalForm.name.trim(),
-        category: modalForm.category,
-        price: parseFloat(modalForm.price),
+        ...(isEdit ? { id: editingProduct?.id } : {}),
+        name: data.name,
+        category: data.category,
+        price: parseFloat(data.price),
         isPaise: false,
-        description: modalForm.description.trim(),
-        images: imageList.length > 0 ? imageList : ['/hero-clean.png'],
-        badges: badgeList,
-        metal_finishes: finishList.length > 0 ? finishList : ['Gold'],
-        stock_status: modalForm.stock_status,
-        is_featured: modalForm.is_featured,
-        collection: modalForm.collection,
-        craftsmanship_story: modalForm.craftsmanship_story.trim()
+        description: data.description,
+        images: data.images.length > 0 ? data.images : ['/hero-clean.png'],
+        badges: data.badges,
+        metal_finishes: data.metal_finishes,
+        stock_status: data.stock_status,
+        is_featured: data.is_featured,
+        collection: data.collection,
+        craftsmanship_story: data.craftsmanship_story,
+        material: data.material,
+        purity: data.purity,
+        bis_hallmark: data.bis_hallmark,
+        is_hallmarked: data.is_hallmarked,
+        huid: data.huid,
+        weight_grams: data.weight_grams,
+        gross_weight_grams: data.gross_weight_grams,
+        dimensions: data.dimensions,
+        hsn_code: data.hsn_code,
+        care_instructions: data.care_instructions,
+        making_charge_type: data.making_charge_type,
+        making_charge_rate: data.making_charge_rate,
+        stone_weight_grams: data.stone_weight_grams,
+        stone_value_paise: Math.round(data.stone_value_rupees * 100),
+        pricing_mode: data.pricing_mode,
+        size_variants: data.size_variants
       };
 
-      if (editingProduct) {
-        // PATCH
-        const res = await fetch('/api/admin/products', {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ id: editingProduct.id, ...payload })
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showNotification('Product updated successfully!');
-          setIsProductModalOpen(false);
-          fetchProducts();
-        } else {
-          alert(data.message || 'Failed to update product');
-        }
+      const res = await fetch(url, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      const resJson = await res.json();
+      if (res.ok && resJson.success) {
+        showNotification(isEdit ? 'Jewellery piece updated!' : 'Jewellery piece published!');
+        setIsProductModalOpen(false);
+        fetchProducts();
+        fetchAuditLogs();
       } else {
-        // POST
-        const res = await fetch('/api/admin/products', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-        const data = await res.json();
-        if (res.ok && data.success) {
-          showNotification('Product created successfully!');
-          setIsProductModalOpen(false);
-          fetchProducts();
-        } else {
-          alert(data.message || 'Failed to create product');
-        }
+        alert(resJson.message || 'Failed to save product.');
       }
-    } catch (err) {
-      console.error(err);
-      alert('Error saving product');
+    } catch {
+      alert('Error communicating with server.');
     } finally {
       setIsSavingProduct(false);
     }
   };
 
-  // Delete Product
+  const handleDuplicateProduct = async (p: ProductItem) => {
+    try {
+      const res = await fetch('/api/admin/products', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'duplicate', id: p.id })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`Duplicated "${p.name}"`);
+        fetchProducts();
+        fetchAuditLogs();
+      } else {
+        alert(data.message || 'Failed to duplicate product.');
+      }
+    } catch {
+      alert('Error duplicating product.');
+    }
+  };
+
   const handleDeleteProduct = async (id: string, name: string) => {
-    if (!confirm(`Are you sure you want to delete "${name}"?`)) return;
+    if (!confirm(`Are you sure you want to delete "${name}"? This action cannot be undone.`)) return;
 
     try {
-      const res = await fetch(`/api/admin/products?id=${id}`, {
-        method: 'DELETE'
-      });
+      const res = await fetch(`/api/admin/products?id=${id}`, { method: 'DELETE' });
       const data = await res.json();
       if (res.ok && data.success) {
         showNotification(`Deleted "${name}"`);
         setProducts(prev => prev.filter(p => p.id !== id));
+        setSelectedProductIds(prev => prev.filter(x => x !== id));
+        fetchAuditLogs();
       } else {
-        alert(data.message || 'Failed to delete product');
+        alert(data.message || 'Failed to delete product.');
       }
-    } catch (err) {
-      console.error(err);
-      alert('Network error while deleting');
+    } catch {
+      alert('Error deleting product.');
     }
   };
 
@@ -340,69 +416,133 @@ export default function AdminDashboardClient() {
       });
       if (res.ok) {
         setProducts(prev => prev.map(item => item.id === p.id ? { ...item, stock_status: nextStatus } : item));
-        showNotification(`Updated ${p.name} stock to ${nextStatus}`);
+        showNotification(`Updated ${p.name} stock status`);
       }
     } catch (err) {
       console.error(err);
     }
   };
 
-  // Quick Featured Toggle
-  const handleQuickFeaturedToggle = async (p: ProductItem) => {
-    const nextFeatured = !p.is_featured;
+  // ── Bulk Actions ──────────────────────────────────────────────────
+  const handleSelectProduct = (id: string) => {
+    setSelectedProductIds(prev =>
+      prev.includes(id) ? prev.filter(x => x !== id) : [...prev, id]
+    );
+  };
+
+  const handleSelectAllFiltered = () => {
+    const visibleIds = filteredProducts.map(p => p.id);
+    if (selectedProductIds.length === visibleIds.length) {
+      setSelectedProductIds([]);
+    } else {
+      setSelectedProductIds(visibleIds);
+    }
+  };
+
+  const handleApplyBulkUpdates = async (updates: any) => {
     try {
+      setIsProcessingBulk(true);
       const res = await fetch('/api/admin/products', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: p.id, is_featured: nextFeatured })
+        body: JSON.stringify({
+          action: 'bulk_update',
+          product_ids: selectedProductIds,
+          updates
+        })
       });
-      if (res.ok) {
-        setProducts(prev => prev.map(item => item.id === p.id ? { ...item, is_featured: nextFeatured } : item));
-        showNotification(`${p.name} is now ${nextFeatured ? 'Featured' : 'Standard'}`);
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`Applied bulk updates to ${data.updatedCount} products!`);
+        setIsBulkModalOpen(false);
+        setSelectedProductIds([]);
+        fetchProducts();
+        fetchAuditLogs();
+      } else {
+        alert(data.message || 'Bulk update failed.');
       }
-    } catch (err) {
-      console.error(err);
+    } catch {
+      alert('Network error applying bulk update.');
+    } finally {
+      setIsProcessingBulk(false);
     }
   };
 
-  // 1-Click Curated Presets Import
-  const handleImportPresets = async () => {
-    if (!confirm('Import authentic Jammu Dogra heritage collection presets into your store catalog?')) return;
+  // ── CSV Import ────────────────────────────────────────────────────
+  const handleImportCsvItems = async (items: any[]) => {
     try {
-      setIsSeedingPresets(true);
+      setIsImportingCsv(true);
       let count = 0;
-      for (const mock of mockProducts.slice(0, 8)) {
-        await fetch('/api/admin/products', {
+      for (const item of items) {
+        const res = await fetch('/api/admin/products', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            name: mock.name,
-            category: mock.category,
-            price: mock.price,
-            isPaise: true,
-            description: mock.description,
-            images: mock.images,
-            badges: mock.badges,
-            metal_finishes: mock.metal_finishes,
-            stock_status: mock.stock_status,
-            is_featured: mock.is_featured,
-            collection: mock.collection,
-            craftsmanship_story: mock.craftsmanship_story
-          })
+          body: JSON.stringify(item)
         });
-        count++;
+        if (res.ok) count++;
       }
-      showNotification(`Imported ${count} heirloom creations to your catalog!`);
+      showNotification(`Imported ${count} of ${items.length} products successfully!`);
+      setIsCsvImportOpen(false);
       fetchProducts();
-    } catch (e) {
-      console.error(e);
-      alert('Error importing presets');
+      fetchAuditLogs();
+    } catch {
+      alert('Error importing products.');
     } finally {
-      setIsSeedingPresets(false);
+      setIsImportingCsv(false);
     }
   };
 
-  // Order Status Update
+  // ── Rates Submit ──────────────────────────────────────────────────
+  const handleSaveRatesSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    const prev22k = rates.gold_22k;
+    const prev24k = rates.gold_24k;
+    
+    // Extreme deviation guard (e.g. typing 82500 instead of 8250)
+    const deviation22k = prev22k > 0 ? Math.abs((rateForm.gold_22k - prev22k) / prev22k) * 100 : 0;
+    const deviation24k = prev24k > 0 ? Math.abs((rateForm.gold_24k - prev24k) / prev24k) * 100 : 0;
+    const maxDev = Math.max(deviation22k, deviation24k);
+
+    if (maxDev > 15) {
+      const proceed = confirm(
+        `⚠️ EXTREME RATE CHANGE WARNING:\n\nYou entered ₹${rateForm.gold_22k}/g for 22K (was ₹${prev22k}/g) and ₹${rateForm.gold_24k}/g for 24K (was ₹${prev24k}/g).\nThis is a ${maxDev.toFixed(1)}% deviation.\n\nDid you make a typing mistake (e.g., extra zero)? Click OK only if you are certain this rate is accurate.`
+      );
+      if (!proceed) return;
+    } else {
+      const confirmUpdate = confirm(
+        `Confirm Bullion Rate Update:\n\n22K Gold: ₹${prev22k}/g → ₹${rateForm.gold_22k}/g\n24K Gold: ₹${prev24k}/g → ₹${rateForm.gold_24k}/g\n\nImpact: This will immediately recalculate live pricing for all formula-priced jewellery and update the gold ticker in the header. Proceed?`
+      );
+      if (!confirmUpdate) return;
+    }
+
+    try {
+      setIsSavingRates(true);
+      const res = await fetch('/api/admin/rates', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...rateForm,
+          updated_by: 'Owner Desk',
+          confirm_large_change: maxDev > 15
+        })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Daily bullion rates updated and locked across the store!');
+        fetchRates();
+        fetchAuditLogs();
+      } else {
+        alert(data.error || 'Failed to update bullion rates.');
+      }
+    } catch {
+      alert('Network error saving bullion rates.');
+    } finally {
+      setIsSavingRates(false);
+    }
+  };
+
+  // ── Orders Operations ─────────────────────────────────────────────
   const handleOrderStatusUpdate = async (orderId: string, newStatus: string) => {
     try {
       setUpdatingOrderId(orderId);
@@ -413,339 +553,414 @@ export default function AdminDashboardClient() {
       });
       const data = await res.json();
       if (res.ok && data.success) {
+        showNotification(`Order status changed to ${newStatus}`);
         setOrders(prev => prev.map(o => o.id === orderId ? { ...o, status: newStatus as any } : o));
-        showNotification(`Order status updated to ${newStatus}`);
+        fetchAuditLogs();
       } else {
-        alert(data.message || 'Failed to update order status');
+        alert(data.message || 'Failed to update order status.');
       }
-    } catch (e) {
-      alert('Error updating order');
+    } catch {
+      alert('Error updating order status.');
     } finally {
       setUpdatingOrderId(null);
     }
   };
 
-  // Save BVC Docket
   const handleSaveDocket = async (orderId: string) => {
+    const docket = docketInputs[orderId];
+    if (docket === undefined) return;
+
     try {
       setUpdatingOrderId(orderId);
       const res = await fetch('/api/admin/orders', {
         method: 'PATCH',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ id: orderId, bvc_docket_number: docketInput.trim() })
+        body: JSON.stringify({ id: orderId, bvc_docket_number: docket.trim() })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, bvc_docket_number: docketInput.trim() } : o));
-        setEditDocketId(null);
-        showNotification('BVC Logistics docket updated!');
-      } else {
-        alert(data.message || 'Failed to save docket number');
+        showNotification('BVC Docket Number updated!');
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, bvc_docket_number: docket.trim() } : o));
+        fetchAuditLogs();
       }
-    } catch (e) {
-      alert('Error saving docket');
+    } catch {
+      alert('Error updating docket number.');
     } finally {
       setUpdatingOrderId(null);
     }
   };
 
-  // Rates Update
-  const handleSaveRates = async (e: React.FormEvent) => {
-    e.preventDefault();
+  // ── Coupons Operations ────────────────────────────────────────────
+  const handleSaveCoupon = async (c: CouponRule) => {
     try {
-      setIsSavingRates(true);
-      const res = await fetch('/api/admin/rates', {
+      setIsSavingCoupon(true);
+      const res = await fetch('/api/admin/coupons', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(rateForm)
+        body: JSON.stringify(c)
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        setRates(data.rates);
-        showNotification('Today\'s bullion rates updated and broadcast live!');
+        showNotification(`Coupon ${c.code} created!`);
+        setIsCouponModalOpen(false);
+        fetchCoupons();
+        fetchAuditLogs();
       } else {
-        alert(data.message || 'Failed to update bullion rates');
+        alert(data.message || 'Failed to save coupon.');
       }
-    } catch (e) {
-      alert('Error updating rates');
+    } catch {
+      alert('Error saving coupon.');
     } finally {
-      setIsSavingRates(false);
+      setIsSavingCoupon(false);
     }
   };
 
-  // Computed Metrics for Dashboard
-  const totalGrossRevenue = orders
-    .filter(o => o.status !== 'cancelled')
-    .reduce((acc, o) => acc + (o.total || 0), 0);
+  const handleToggleCouponActive = async (code: string, currentActive: boolean) => {
+    try {
+      const res = await fetch('/api/admin/coupons', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ code, isActive: !currentActive })
+      });
+      if (res.ok) {
+        setCoupons(prev => prev.map(c => c.code === code ? { ...c, isActive: !currentActive } : c));
+        showNotification(`Coupon ${code} ${!currentActive ? 'activated' : 'deactivated'}`);
+      }
+    } catch {
+      alert('Error toggling coupon.');
+    }
+  };
 
-  const pendingOrdersCount = orders.filter(
-    o => o.status === 'pending_confirmation' || o.status === 'confirmed' || o.status === 'processing'
-  ).length;
+  const handleDeleteCoupon = async (code: string) => {
+    if (!confirm(`Delete coupon "${code}"?`)) return;
+    try {
+      const res = await fetch(`/api/admin/coupons?code=${code}`, { method: 'DELETE' });
+      if (res.ok) {
+        showNotification(`Coupon ${code} deleted`);
+        setCoupons(prev => prev.filter(c => c.code !== code));
+      }
+    } catch {
+      alert('Error deleting coupon.');
+    }
+  };
 
-  const inStockProductsCount = products.filter(p => p.stock_status === 'in_stock').length;
+  // ── Store Content Save ────────────────────────────────────────────
+  const handleSaveContentSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!storeContent) return;
+    try {
+      setIsSavingContent(true);
+      const res = await fetch('/api/admin/content', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(storeContent)
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification('Website announcement & showroom content saved!');
+        fetchAuditLogs();
+      } else {
+        alert(data.message || 'Failed to save content.');
+      }
+    } catch {
+      alert('Error saving website content.');
+    } finally {
+      setIsSavingContent(false);
+    }
+  };
 
-  // Filtered Products
+  // ── Filtered Collections ──────────────────────────────────────────
   const filteredProducts = products.filter(p => {
-    const matchesSearch = !productSearch || 
+    const matchesSearch = productSearch.trim() === '' ||
       p.name.toLowerCase().includes(productSearch.toLowerCase()) ||
-      p.slug.toLowerCase().includes(productSearch.toLowerCase());
+      p.category.toLowerCase().includes(productSearch.toLowerCase()) ||
+      (p.huid && p.huid.toLowerCase().includes(productSearch.toLowerCase()));
+
     const matchesCategory = productCategoryFilter === 'All' || p.category === productCategoryFilter;
+
     const matchesStock = productStockFilter === 'all' || p.stock_status === productStockFilter;
+
     return matchesSearch && matchesCategory && matchesStock;
   });
 
-  // Filtered Orders
   const filteredOrders = orders.filter(o => {
-    const matchesSearch = !orderSearch ||
+    const matchesSearch = orderSearch.trim() === '' ||
       o.order_number.toLowerCase().includes(orderSearch.toLowerCase()) ||
       o.customer_name.toLowerCase().includes(orderSearch.toLowerCase()) ||
-      o.customer_phone.includes(orderSearch);
+      o.customer_phone.includes(orderSearch.trim()) ||
+      (o.bvc_docket_number && o.bvc_docket_number.toLowerCase().includes(orderSearch.toLowerCase()));
+
     const matchesStatus = orderStatusFilter === 'all' || o.status === orderStatusFilter;
+
     return matchesSearch && matchesStatus;
   });
 
+  // KPI Calculations
+  const totalSalesRupees = orders
+    .filter(o => o.payment_status === 'paid')
+    .reduce((sum, o) => sum + (o.total / 100), 0);
+
+  const pendingOrdersCount = orders.filter(o => o.status === 'pending_confirmation' || o.status === 'processing').length;
+  const inStockCount = products.filter(p => p.stock_status === 'in_stock').length;
+  const lowStockCount = products.filter(p => p.stock_status === 'limited').length;
+  const outOfStockCount = products.filter(p => p.stock_status === 'out_of_stock').length;
+
   return (
-    <div className="min-h-screen bg-[var(--bg-main)] text-[var(--text-primary)] transition-colors duration-200">
-      
-      {/* Top Admin Navigation Bar */}
-      <header className="sticky top-0 z-40 bg-[var(--header-bg)] backdrop-blur-md border-b border-[var(--border-subtle)] shadow-xs">
-        <div className="container mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+    <div className="min-h-screen bg-[var(--bg-primary)] text-[var(--text-primary)] flex flex-col font-sans">
+      {/* ── Top Bar / Header ────────────────────────────────────────────── */}
+      <header className="border-b border-[var(--border-color)] bg-[var(--bg-surface)] sticky top-0 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3.5 flex flex-wrap items-center justify-between gap-4">
           <div className="flex items-center gap-3">
-            <Link href="/admin" className="flex items-center gap-2">
-              <span className="w-2.5 h-2.5 rounded-full bg-[var(--accent-gold)] animate-pulse"></span>
-              <span className="font-serif text-lg sm:text-xl tracking-wider font-medium text-[var(--text-primary)]">
-                Ambika Jewels <span className="font-sans text-[10px] text-[var(--accent-gold)] font-bold tracking-[0.2em] uppercase ml-1 px-1.5 py-0.5 border border-[var(--border-subtle)] rounded-[2px]">ADMIN CONSOLE</span>
+            <Link href="/admin" className="flex items-center gap-2 group">
+              <span className="font-serif text-xl sm:text-2xl font-bold tracking-tight text-[var(--gold-primary)] group-hover:opacity-90">
+                AMBIKA JEWELS
+              </span>
+              <span className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 rounded bg-amber-500/10 text-amber-500 border border-amber-500/30">
+                Store Console
               </span>
             </Link>
+            <span className="hidden md:inline-block text-xs text-[var(--text-secondary)] border-l border-[var(--border-color)] pl-3">
+              Jammu Showroom Hub
+            </span>
           </div>
 
-          <div className="flex items-center gap-2 sm:gap-4">
+          {/* Bullion Ticker */}
+          <div className="hidden lg:flex items-center gap-3 text-xs bg-[var(--bg-primary)] px-3 py-1.5 rounded-full border border-[var(--border-color)]">
+            <span className="flex h-2 w-2 relative">
+              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+            </span>
+            <span className="font-medium text-[var(--text-secondary)]">Live Jammu Rates:</span>
+            <span className="font-mono font-semibold text-[var(--gold-primary)]">24K: ₹{rates.gold_24k}/g</span>
+            <span className="text-zinc-600">|</span>
+            <span className="font-mono font-semibold text-[var(--text-primary)]">22K: ₹{rates.gold_22k}/g</span>
+            <span className="text-zinc-600">|</span>
+            <span className="font-mono font-semibold text-zinc-300">Silver: ₹{rates.silver_925}/g</span>
+          </div>
+
+          {/* User profile & external links */}
+          <div className="flex items-center gap-3">
             <Link
               href="/"
               target="_blank"
-              className="text-xs font-sans text-[var(--text-secondary)] hover:text-[var(--accent-gold)] flex items-center gap-1 transition-colors px-2.5 py-1.5 rounded-[2px] border border-[var(--border-subtle)]"
+              className="text-xs text-[var(--text-secondary)] hover:text-[var(--gold-primary)] transition-colors flex items-center gap-1 px-2.5 py-1.5 rounded border border-[var(--border-color)]"
             >
               <span>View Storefront</span>
-              <span className="material-symbols-outlined text-xs">open_in_new</span>
+              <svg className="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+              </svg>
             </Link>
+
+            <div className="text-right hidden sm:block">
+              <p className="text-xs font-semibold text-[var(--text-primary)]">Shivani Anand</p>
+              <p className="text-[10px] text-amber-500 font-medium">Owner &amp; Founder</p>
+            </div>
 
             <button
               onClick={handleLogout}
-              className="text-xs font-sans text-rose-600 dark:text-rose-400 hover:bg-rose-500/10 px-3 py-1.5 rounded-[2px] border border-rose-500/30 flex items-center gap-1 transition-colors cursor-pointer"
+              className="px-3 py-1.5 bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-500/30 rounded text-xs font-medium transition-colors"
             >
-              <span className="material-symbols-outlined text-xs">logout</span>
-              <span className="hidden sm:inline">Sign Out</span>
+              Log Out
             </button>
           </div>
         </div>
-
-        {/* Tab Strip */}
-        <div className="container mx-auto px-4 sm:px-6 flex overflow-x-auto no-scrollbar gap-1 sm:gap-2 border-t border-[var(--border-subtle)]/60 text-xs font-sans uppercase tracking-wider font-semibold">
-          {[
-            { id: 'overview', label: 'Dashboard', icon: 'dashboard' },
-            { id: 'products', label: `Products (${products.length})`, icon: 'diamond' },
-            { id: 'orders', label: `Orders (${orders.length})`, icon: 'receipt_long' },
-            { id: 'rates', label: 'Bullion Rates', icon: 'currency_rupee' },
-            { id: 'pos', label: 'Counter POS', icon: 'point_of_sale' },
-            { id: 'store', label: 'Store Info', icon: 'storefront' },
-          ].map(tab => (
-            <button
-              key={tab.id}
-              onClick={() => setActiveTab(tab.id as TabType)}
-              className={`flex items-center gap-1.5 px-3.5 py-2.5 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
-                activeTab === tab.id
-                  ? 'border-[var(--accent-gold)] text-[var(--accent-gold)] bg-[var(--bg-surface)]'
-                  : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:border-[var(--border-subtle)]'
-              }`}
-            >
-              <span className="material-symbols-outlined text-sm">{tab.icon}</span>
-              <span>{tab.label}</span>
-            </button>
-          ))}
-        </div>
       </header>
 
-      {/* Global Notification Banner */}
+      {/* ── Notification Banner ────────────────────────────────────────── */}
       {bannerMessage && (
-        <div className={`py-2 px-4 text-center text-xs font-sans font-semibold sticky top-28 z-30 transition-all ${
-          bannerMessage.type === 'success'
-            ? 'bg-emerald-600 text-white shadow-md'
-            : 'bg-rose-600 text-white shadow-md'
-        }`}>
-          {bannerMessage.text}
+        <div
+          className={`fixed top-16 right-6 z-50 px-4 py-3 rounded-lg shadow-xl text-xs font-semibold border flex items-center gap-2 transition-all ${
+            bannerMessage.type === 'success'
+              ? 'bg-emerald-950 text-emerald-200 border-emerald-500'
+              : 'bg-red-950 text-red-200 border-red-500'
+          }`}
+        >
+          <span>{bannerMessage.type === 'success' ? '✓' : '⚠'}</span>
+          <span>{bannerMessage.text}</span>
         </div>
       )}
 
-      {/* Main Container */}
-      <main className="container mx-auto px-4 sm:px-6 py-6 sm:py-8">
+      {/* ── Navigation Tabs ────────────────────────────────────────────── */}
+      <nav className="border-b border-[var(--border-color)] bg-[var(--bg-surface)] px-4 sm:px-6 lg:px-8 overflow-x-auto">
+        <div className="max-w-7xl mx-auto flex gap-1 py-1">
+          {[
+            { id: 'overview', label: '📊 Dashboard' },
+            { id: 'products', label: `💎 Jewellery Pieces (${products.length})` },
+            { id: 'pricing', label: '📈 Bullion & Pricing' },
+            { id: 'inventory', label: `📦 Inventory (${inStockCount})` },
+            { id: 'orders', label: `🛍️ Orders (${orders.length})` },
+            { id: 'coupons', label: `🎟️ Coupons (${coupons.length})` },
+            { id: 'content', label: '🎨 Website Content' },
+            { id: 'pos', label: '⚖️ Counter POS' },
+            { id: 'audit', label: '📋 Audit Log' }
+          ].map(tab => {
+            const isTabActive = activeTab === tab.id || (tab.id === 'pricing' && activeTab === 'rates') || (tab.id === 'content' && activeTab === 'store');
+            return (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as TabType)}
+                className={`px-3.5 py-2.5 rounded-lg text-xs font-medium whitespace-nowrap transition-colors flex items-center gap-1.5 ${
+                  isTabActive
+                    ? 'bg-[var(--gold-primary)] text-black font-bold shadow-sm'
+                    : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)]'
+                }`}
+              >
+                {tab.label}
+              </button>
+            );
+          })}
+        </div>
+      </nav>
 
+      {/* ── Main Content Area ──────────────────────────────────────────── */}
+      <main className="flex-1 max-w-7xl mx-auto w-full px-4 sm:px-6 lg:px-8 py-6 space-y-6">
         {/* ========================================================================= */}
-        {/* TAB 1: OVERVIEW / DASHBOARD */}
+        {/* TAB 1: OVERVIEW DASHBOARD */}
         {/* ========================================================================= */}
         {activeTab === 'overview' && (
           <div className="space-y-6">
             {/* KPI Cards */}
-            <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5">
-              {/* Revenue */}
-              <div className="p-4 sm:p-5 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px]">
-                <span className="font-sans text-[10px] sm:text-xs text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                  Gross Sales (Confirmed)
-                </span>
-                <div className="font-serif text-xl sm:text-3xl text-[var(--accent-gold)] font-medium">
-                  ₹{(totalGrossRevenue / 100).toLocaleString('en-IN')}
-                </div>
-                <span className="font-sans text-[10px] text-[var(--text-secondary)] mt-1 block">
-                  {orders.length} total orders recorded
-                </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)]">
+                <p className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                  Verified Online Sales
+                </p>
+                <p className="font-serif text-2xl font-bold text-[var(--gold-primary)] mt-1 font-mono">
+                  ₹{Math.round(totalSalesRupees).toLocaleString('en-IN')}
+                </p>
+                <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
+                  <span>✓ 100% Razorpay Captured</span>
+                </p>
               </div>
 
-              {/* Pending Orders */}
-              <div className="p-4 sm:p-5 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px]">
-                <span className="font-sans text-[10px] sm:text-xs text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                  Fulfillment Queue
-                </span>
-                <div className="font-serif text-xl sm:text-3xl text-[var(--text-primary)] font-medium">
-                  {pendingOrdersCount}
-                </div>
-                <span className="font-sans text-[10px] text-amber-600 dark:text-amber-400 mt-1 block font-medium">
-                  Orders requiring packing / dispatch
-                </span>
+              <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)]">
+                <p className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                  Pending Dispatch
+                </p>
+                <p className="font-serif text-2xl font-bold text-amber-500 mt-1 font-mono">
+                  {pendingOrdersCount} <span className="text-sm font-sans font-normal text-[var(--text-secondary)]">Orders</span>
+                </p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">
+                  Require packaging or BVC airway bill
+                </p>
               </div>
 
-              {/* Inventory Items */}
-              <div className="p-4 sm:p-5 bg-[var(--bg-card)] border border-[var(--border-card)] shadow-[var(--card-shadow)] rounded-[2px]">
-                <span className="font-sans text-[10px] sm:text-xs text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                  Active Catalog Pieces
-                </span>
-                <div className="font-serif text-xl sm:text-3xl text-[var(--text-primary)] font-medium">
-                  {products.length}
-                </div>
-                <span className="font-sans text-[10px] text-emerald-600 dark:text-emerald-400 mt-1 block font-medium">
-                  {inStockProductsCount} items in stock
-                </span>
+              <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)]">
+                <p className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                  Catalog Inventory
+                </p>
+                <p className="font-serif text-2xl font-bold text-[var(--text-primary)] mt-1 font-mono">
+                  {products.length} <span className="text-sm font-sans font-normal text-[var(--text-secondary)]">Pieces</span>
+                </p>
+                <p className="text-[11px] text-emerald-400 mt-1">
+                  {inStockCount} Ready | {lowStockCount} Low | {outOfStockCount} Sold
+                </p>
               </div>
 
-              {/* Today's 22K Gold Rate */}
-              <div className="p-4 sm:p-5 bg-[var(--bg-card)] border border-[var(--accent-gold)]/40 shadow-[var(--card-shadow)] rounded-[2px]">
-                <span className="font-sans text-[10px] sm:text-xs text-[var(--accent-gold)] uppercase tracking-wider block mb-1 font-semibold">
-                  Today&apos;s 22K Gold Rate
-                </span>
-                <div className="font-serif text-xl sm:text-3xl text-[var(--accent-gold)] font-medium">
-                  ₹{rates.gold_22k.toLocaleString('en-IN')}<span className="text-xs font-sans text-[var(--text-secondary)]">/g</span>
-                </div>
-                <span className="font-sans text-[10px] text-[var(--text-secondary)] mt-1 block">
-                  24K: ₹{rates.gold_24k.toLocaleString('en-IN')}/g &bull; 925: ₹{rates.silver_925}/g
-                </span>
+              <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)]">
+                <p className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
+                  Active Bullion Rate
+                </p>
+                <p className="font-serif text-2xl font-bold text-[var(--gold-primary)] mt-1 font-mono">
+                  ₹{rates.gold_24k}/g
+                </p>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">
+                  22K: ₹{rates.gold_22k}/g | Silver: ₹{rates.silver_925}/g
+                </p>
               </div>
             </div>
 
             {/* Quick Actions Bar */}
-            <div className="p-4 bg-[var(--bg-surface)] border border-[var(--border-card)] rounded-[2px] flex flex-wrap items-center justify-between gap-3">
-              <div className="flex items-center gap-2">
-                <span className="material-symbols-outlined text-[var(--accent-gold)]">bolt</span>
-                <span className="font-sans text-xs uppercase tracking-wider font-semibold">Quick Actions:</span>
+            <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <h3 className="text-sm font-bold text-[var(--text-primary)]">Quick Store Operations</h3>
+                <p className="text-xs text-[var(--text-secondary)]">Common daily workflows for shopkeeper and staff.</p>
               </div>
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap items-center gap-2">
                 <button
-                  onClick={handleOpenAddModal}
-                  className="px-3.5 py-1.5 bg-[var(--accent-gold)] text-white text-xs font-sans font-semibold tracking-wider uppercase rounded-[2px] hover:opacity-90 transition-opacity flex items-center gap-1 cursor-pointer"
+                  onClick={handleOpenAddProduct}
+                  className="px-3.5 py-2 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1.5 shadow"
                 >
-                  <span className="material-symbols-outlined text-sm">add</span>
-                  <span>Add Product</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('rates')}
-                  className="px-3.5 py-1.5 bg-[var(--bg-main)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-sans font-medium tracking-wider uppercase rounded-[2px] hover:border-[var(--accent-gold)] transition-colors flex items-center gap-1 cursor-pointer"
-                >
-                  <span className="material-symbols-outlined text-sm">edit</span>
-                  <span>Update Bullion Rates</span>
+                  <span>+</span> Add New Jewellery Piece
                 </button>
                 <button
                   onClick={() => setActiveTab('orders')}
-                  className="px-3.5 py-1.5 bg-[var(--bg-main)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-sans font-medium tracking-wider uppercase rounded-[2px] hover:border-[var(--accent-gold)] transition-colors flex items-center gap-1 cursor-pointer"
+                  className="px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-lg text-xs font-medium hover:border-[var(--gold-primary)] transition-all"
                 >
-                  <span className="material-symbols-outlined text-sm">local_shipping</span>
-                  <span>Dispatch Orders</span>
+                  Check Pending Orders ({pendingOrdersCount})
                 </button>
                 <button
-                  onClick={() => setActiveTab('pos')}
-                  className="px-3.5 py-1.5 bg-[var(--bg-main)] border border-[var(--border-card)] text-[var(--text-primary)] text-xs font-sans font-medium tracking-wider uppercase rounded-[2px] hover:border-[var(--accent-gold)] transition-colors flex items-center gap-1 cursor-pointer"
+                  onClick={() => setActiveTab('pricing')}
+                  className="px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-lg text-xs font-medium hover:border-[var(--gold-primary)] transition-all"
                 >
-                  <span className="material-symbols-outlined text-sm">calculate</span>
-                  <span>Counter POS Billing</span>
+                  Update Gold Rates
+                </button>
+                <button
+                  onClick={() => {
+                    setActiveTab('coupons');
+                    setIsCouponModalOpen(true);
+                  }}
+                  className="px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-lg text-xs font-medium hover:border-[var(--gold-primary)] transition-all"
+                >
+                  Create Promo Coupon
                 </button>
               </div>
             </div>
 
-            {/* Recent Orders Preview */}
-            <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] p-5 shadow-[var(--card-shadow)]">
-              <div className="flex items-center justify-between mb-4 pb-3 border-b border-[var(--border-subtle)]">
-                <h3 className="font-serif text-lg font-normal text-[var(--text-primary)]">
+            {/* Recent Orders Overview */}
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] p-5 space-y-4">
+              <div className="flex justify-between items-center">
+                <h3 className="font-serif text-lg font-bold text-[var(--text-primary)]">
                   Recent Customer Orders
                 </h3>
                 <button
                   onClick={() => setActiveTab('orders')}
-                  className="text-xs font-sans text-[var(--accent-gold)] hover:underline font-semibold uppercase tracking-wider flex items-center gap-1 cursor-pointer"
+                  className="text-xs text-[var(--gold-primary)] hover:underline"
                 >
-                  <span>View All Orders</span>
-                  <span className="material-symbols-outlined text-xs">arrow_forward</span>
+                  View All Orders →
                 </button>
               </div>
 
               {orders.length === 0 ? (
-                <div className="py-8 text-center text-xs text-[var(--text-secondary)] font-sans">
-                  No orders placed yet. Live orders from the website will appear here in real time.
-                </div>
+                <p className="text-xs text-[var(--text-secondary)] italic py-4 text-center">
+                  No online orders placed yet. Orders will appear here in real-time as customers checkout.
+                </p>
               ) : (
-                <div className="overflow-x-auto no-scrollbar">
-                  <table className="w-full text-left font-sans text-xs">
-                    <thead>
-                      <tr className="border-b border-[var(--border-subtle)] text-[10px] text-[var(--text-secondary)] uppercase tracking-wider">
-                        <th className="pb-2">Order #</th>
-                        <th className="pb-2">Customer</th>
-                        <th className="pb-2">Items</th>
-                        <th className="pb-2">Total</th>
-                        <th className="pb-2">Payment</th>
-                        <th className="pb-2">Fulfillment</th>
-                        <th className="pb-2 text-right">Action</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--border-subtle)]">
-                      {orders.slice(0, 5).map(o => (
-                        <tr key={o.id} className="hover:bg-[var(--bg-surface)] transition-colors">
-                          <td className="py-3 font-mono font-medium text-[var(--accent-gold)]">{o.order_number}</td>
-                          <td className="py-3">
-                            <span className="font-medium text-[var(--text-primary)] block">{o.customer_name}</span>
-                            <span className="text-[10px] text-[var(--text-secondary)]">{o.customer_phone}</span>
-                          </td>
-                          <td className="py-3">{o.items?.length || 0} pieces</td>
-                          <td className="py-3 font-semibold text-[var(--text-primary)]">
-                            ₹{(o.total / 100).toLocaleString('en-IN')}
-                          </td>
-                          <td className="py-3">
-                            <span className={`px-2 py-0.5 rounded-[2px] text-[10px] uppercase font-semibold ${
-                              o.payment_status === 'paid' ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400' : 'bg-amber-500/10 text-amber-600'
-                            }`}>
-                              {o.payment_status}
-                            </span>
-                          </td>
-                          <td className="py-3">
-                            <span className="px-2 py-0.5 rounded-[2px] text-[10px] uppercase font-semibold bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--accent-gold)]">
-                              {o.status.replace(/_/g, ' ')}
-                            </span>
-                          </td>
-                          <td className="py-3 text-right">
-                            <button
-                              onClick={() => { setActiveTab('orders'); setExpandedOrderId(o.id); }}
-                              className="text-xs text-[var(--accent-gold)] hover:underline font-semibold"
-                            >
-                              Inspect
-                            </button>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="divide-y divide-[var(--border-color)] text-xs">
+                  {orders.slice(0, 5).map(o => (
+                    <div key={o.id} className="py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                      <div>
+                        <p className="font-bold text-[var(--text-primary)] flex items-center gap-2">
+                          <span>{o.order_number}</span>
+                          <span className="font-normal text-[var(--text-secondary)]">— {o.customer_name}</span>
+                        </p>
+                        <p className="text-[11px] text-[var(--text-secondary)] mt-0.5">
+                          {o.items.length} items | Placed on {new Date(o.created_at).toLocaleDateString('en-IN')}
+                        </p>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="font-mono font-bold text-[var(--gold-primary)] text-sm">
+                          ₹{Math.round(o.total / 100).toLocaleString('en-IN')}
+                        </span>
+                        <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                          o.status === 'delivered' ? 'bg-emerald-950 text-emerald-300' :
+                          o.status === 'shipped' ? 'bg-blue-950 text-blue-300' :
+                          'bg-amber-950 text-amber-300'
+                        }`}>
+                          {o.status.replace('_', ' ')}
+                        </span>
+                        <button
+                          onClick={() => {
+                            setActiveTab('orders');
+                            setExpandedOrderId(o.id);
+                          }}
+                          className="px-2.5 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px]"
+                        >
+                          Manage
+                        </button>
+                      </div>
+                    </div>
+                  ))}
                 </div>
               )}
             </div>
@@ -753,448 +968,669 @@ export default function AdminDashboardClient() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 2: PRODUCTS & INVENTORY */}
+        {/* TAB 2: PRODUCTS CATALOG */}
         {/* ========================================================================= */}
         {activeTab === 'products' && (
-          <div className="space-y-6">
-            {/* Header & Controls */}
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-              <div>
-                <h2 className="font-serif text-2xl text-[var(--text-primary)] font-normal">
-                  Jewellery Catalog &amp; Inventory
-                </h2>
-                <p className="font-sans text-xs text-[var(--text-secondary)]">
-                  Add new creations, update live prices, toggle in-stock availability, and curate featured heirlooms.
-                </p>
+          <div className="space-y-4">
+            {/* Search & Bulk Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
+              <div className="flex flex-1 items-center gap-3">
+                <input
+                  type="text"
+                  placeholder="Search by name, category, or BIS HUID..."
+                  value={productSearch}
+                  onChange={e => setProductSearch(e.target.value)}
+                  className="w-full sm:max-w-xs px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold-primary)]"
+                />
+                <select
+                  value={productCategoryFilter}
+                  onChange={e => setProductCategoryFilter(e.target.value)}
+                  className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)]"
+                >
+                  <option value="All">All Categories</option>
+                  {siteConfig.categories.map(c => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
+                  <option value="Dogra Heritage Collection">Dogra Heritage Collection</option>
+                </select>
+                <select
+                  value={productStockFilter}
+                  onChange={e => setProductStockFilter(e.target.value)}
+                  className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)]"
+                >
+                  <option value="all">All Stock Levels</option>
+                  <option value="in_stock">In Stock</option>
+                  <option value="limited">Limited</option>
+                  <option value="out_of_stock">Sold Out</option>
+                </select>
               </div>
 
-              <div className="flex flex-wrap items-center gap-2">
-                {products.length === 0 && (
-                  <button
-                    onClick={handleImportPresets}
-                    disabled={isSeedingPresets}
-                    className="px-3.5 py-2 bg-[var(--bg-surface)] border border-[var(--accent-gold)] text-[var(--accent-gold)] text-xs font-sans font-semibold tracking-wider uppercase rounded-[2px] hover:bg-[var(--accent-gold)] hover:text-white transition-colors flex items-center gap-1 cursor-pointer"
-                  >
-                    <span className="material-symbols-outlined text-sm">download</span>
-                    <span>{isSeedingPresets ? 'Importing...' : 'Load Curated Dogra Presets'}</span>
-                  </button>
-                )}
-
+              <div className="flex items-center gap-2">
                 <button
-                  onClick={handleOpenAddModal}
-                  className="px-4 py-2 bg-[var(--accent-gold)] text-white text-xs font-sans font-semibold tracking-wider uppercase rounded-[2px] hover:opacity-90 transition-opacity flex items-center gap-1.5 cursor-pointer shadow-sm"
+                  onClick={() => exportProductsToCsv(products)}
+                  className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
                 >
-                  <span className="material-symbols-outlined text-base">add</span>
-                  <span>Add New Product</span>
+                  <span>⬇</span> Export CSV
+                </button>
+                <button
+                  onClick={() => setIsCsvImportOpen(true)}
+                  className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
+                >
+                  <span>⬆</span> Import CSV
+                </button>
+                <button
+                  onClick={handleOpenAddProduct}
+                  className="px-4 py-2 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1 shadow"
+                >
+                  <span>+</span> Add Jewellery Piece
                 </button>
               </div>
             </div>
 
-            {/* Filter Bar */}
-            <div className="p-3 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] flex flex-col sm:flex-row items-center gap-3">
-              {/* Search input */}
-              <div className="relative flex-1 w-full">
-                <span className="material-symbols-outlined text-sm absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
-                  search
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search products by title or slug..."
-                  value={productSearch}
-                  onChange={(e) => setProductSearch(e.target.value)}
-                  className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs pl-9 pr-3 py-2 rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)] font-sans"
-                />
-              </div>
-
-              {/* Category Filter */}
-              <div className="w-full sm:w-auto">
-                <select
-                  value={productCategoryFilter}
-                  onChange={(e) => setProductCategoryFilter(e.target.value)}
-                  className="w-full sm:w-auto bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs px-3 py-2 rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)] font-sans"
-                >
-                  <option value="All">All Categories</option>
-                  {siteConfig.categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
-                  ))}
-                </select>
-              </div>
-
-              {/* Stock Filter */}
-              <div className="w-full sm:w-auto">
-                <select
-                  value={productStockFilter}
-                  onChange={(e) => setProductStockFilter(e.target.value)}
-                  className="w-full sm:w-auto bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs px-3 py-2 rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)] font-sans"
-                >
-                  <option value="all">All Stock Statuses</option>
-                  <option value="in_stock">In Stock</option>
-                  <option value="limited">Limited Edition</option>
-                  <option value="out_of_stock">Out of Stock</option>
-                </select>
-              </div>
-            </div>
-
-            {/* Products Table */}
-            {isProductsLoading ? (
-              <div className="p-12 text-center text-xs text-[var(--text-secondary)] font-sans">
-                Loading products catalog...
-              </div>
-            ) : filteredProducts.length === 0 ? (
-              <div className="p-12 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] text-center max-w-lg mx-auto">
-                <span className="material-symbols-outlined text-4xl text-[var(--accent-gold)] mb-2 block">diamond</span>
-                <h3 className="font-serif text-lg text-[var(--text-primary)] mb-1">No products found</h3>
-                <p className="font-sans text-xs text-[var(--text-secondary)] mb-4">
-                  {products.length === 0
-                    ? 'Your online store catalog is currently empty. Click "Add New Product" to create your first jewellery piece, or import curated Dogra heritage items.'
-                    : 'No products match your current search and filter criteria.'}
-                </p>
-                <div className="flex justify-center gap-3">
+            {/* Floating Bulk Action Bar */}
+            {selectedProductIds.length > 0 && (
+              <div className="bg-amber-950/40 border border-amber-500/50 p-3 rounded-lg flex items-center justify-between text-xs">
+                <div className="flex items-center gap-2">
+                  <span className="font-bold text-[var(--gold-primary)]">{selectedProductIds.length}</span>
+                  <span>pieces selected</span>
                   <button
-                    onClick={handleOpenAddModal}
-                    className="px-4 py-2 bg-[var(--accent-gold)] text-white text-xs font-sans font-semibold tracking-wider uppercase rounded-[2px]"
+                    onClick={() => setSelectedProductIds([])}
+                    className="underline text-[var(--text-secondary)] hover:text-[var(--text-primary)] ml-2"
                   >
-                    Add Product Now
+                    Clear selection
                   </button>
-                  {products.length === 0 && (
-                    <button
-                      onClick={handleImportPresets}
-                      className="px-4 py-2 bg-[var(--bg-surface)] border border-[var(--border-card)] text-xs font-sans font-medium uppercase rounded-[2px]"
-                    >
-                      Import Dogra Presets
-                    </button>
-                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => setIsBulkModalOpen(true)}
+                    className="px-3 py-1.5 bg-[var(--gold-primary)] text-black font-bold rounded text-xs hover:opacity-90"
+                  >
+                    ⚡ Bulk Update Prices / Stock
+                  </button>
                 </div>
               </div>
-            ) : (
-              <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] overflow-hidden shadow-[var(--card-shadow)]">
-                <div className="overflow-x-auto no-scrollbar">
-                  <table className="w-full text-left font-sans text-xs">
-                    <thead>
-                      <tr className="border-b border-[var(--border-subtle)] text-[10px] text-[var(--text-secondary)] uppercase tracking-wider bg-[var(--bg-surface)]">
-                        <th className="py-3 px-4">Item</th>
-                        <th className="py-3 px-3">Category</th>
-                        <th className="py-3 px-3">Price</th>
-                        <th className="py-3 px-3">Stock Status</th>
-                        <th className="py-3 px-3">Featured</th>
-                        <th className="py-3 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-[var(--border-subtle)]">
-                      {filteredProducts.map(p => (
-                        <tr key={p.id} className="hover:bg-[var(--bg-surface)] transition-colors">
-                          <td className="py-3 px-4">
+            )}
+
+            {/* Products Table */}
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] overflow-hidden">
+              {isProductsLoading ? (
+                <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+                  Loading jewellery catalog...
+                </div>
+              ) : (
+                <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs">
+                  <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)] text-[var(--text-secondary)] uppercase tracking-wider">
+                    <tr>
+                      <th className="py-3 px-3 w-10 text-center">
+                        <input
+                          type="checkbox"
+                          checked={selectedProductIds.length > 0 && selectedProductIds.length === filteredProducts.length}
+                          onChange={handleSelectAllFiltered}
+                          className="w-3.5 h-3.5 accent-amber-600 rounded"
+                        />
+                      </th>
+                      <th className="py-3 px-3">Jewellery Piece</th>
+                      <th className="py-3 px-3">Category</th>
+                      <th className="py-3 px-3">Purity &amp; Weight</th>
+                      <th className="py-3 px-3 text-right">Price</th>
+                      <th className="py-3 px-3 text-center">Stock</th>
+                      <th className="py-3 px-3 text-right">Actions</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-[var(--border-color)]">
+                    {filteredProducts.map(p => {
+                      const isSelected = selectedProductIds.includes(p.id);
+                      return (
+                        <tr key={p.id} className={`hover:bg-[var(--bg-primary)] transition-colors ${isSelected ? 'bg-amber-950/10' : ''}`}>
+                          <td className="py-3 px-3 text-center">
+                            <input
+                              type="checkbox"
+                              checked={isSelected}
+                              onChange={() => handleSelectProduct(p.id)}
+                              className="w-3.5 h-3.5 accent-amber-600 rounded"
+                            />
+                          </td>
+                          <td className="py-3 px-3">
                             <div className="flex items-center gap-3">
                               <img
-                                src={p.images?.[0] || '/hero-clean.png'}
+                                src={(p.images && p.images[0]) || '/hero-clean.png'}
                                 alt={p.name}
-                                className="w-12 h-12 object-cover rounded-[2px] border border-[var(--border-subtle)] shrink-0 bg-[var(--bg-surface)]"
-                                onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
+                                className="w-10 h-10 rounded object-cover border border-[var(--border-color)] bg-[var(--bg-primary)]"
                               />
                               <div>
-                                <Link
-                                  href={`/collections/${p.slug || p.id}`}
-                                  target="_blank"
-                                  className="font-medium text-[var(--text-primary)] hover:text-[var(--accent-gold)] line-clamp-1"
-                                >
-                                  {p.name}
-                                </Link>
-                                <span className="font-mono text-[10px] text-[var(--text-secondary)] block">
-                                  slug: {p.slug}
-                                </span>
+                                <p className="font-bold text-[var(--text-primary)]">{p.name}</p>
+                                <p className="text-[10px] text-[var(--text-secondary)] font-mono">
+                                  HUID: {p.huid || 'Standard BIS'}
+                                </p>
                               </div>
                             </div>
                           </td>
                           <td className="py-3 px-3 text-[var(--text-secondary)]">{p.category}</td>
-                          <td className="py-3 px-3 font-semibold text-[var(--text-primary)]">
-                            {p.display_price || `₹${(p.price / 100).toLocaleString('en-IN')}`}
-                          </td>
                           <td className="py-3 px-3">
+                            <p className="font-medium text-[var(--text-primary)]">{p.purity || '22K (916)'}</p>
+                            <p className="text-[10px] text-[var(--text-secondary)] font-mono">
+                              {p.weight_grams ? `${p.weight_grams}g Net` : '10g'}
+                            </p>
+                          </td>
+                          <td className="py-3 px-3 text-right font-mono font-bold text-[var(--gold-primary)] text-sm">
+                            ₹{Math.round(p.price / 100).toLocaleString('en-IN')}
+                          </td>
+                          <td className="py-3 px-3 text-center">
                             <select
                               value={p.stock_status}
-                              onChange={(e) => handleQuickStockToggle(p, e.target.value as any)}
-                              className={`text-[10.5px] font-semibold px-2 py-1 rounded-[2px] border focus:outline-none font-sans uppercase tracking-wider ${
-                                p.stock_status === 'in_stock'
-                                  ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30'
-                                  : p.stock_status === 'limited'
-                                  ? 'bg-amber-500/10 text-amber-600 border-amber-500/30'
-                                  : 'bg-rose-500/10 text-rose-600 border-rose-500/30'
+                              onChange={e => handleQuickStockToggle(p, e.target.value as any)}
+                              className={`px-2 py-1 rounded text-[11px] font-bold border ${
+                                p.stock_status === 'in_stock' ? 'bg-emerald-950/30 text-emerald-400 border-emerald-500/40' :
+                                p.stock_status === 'limited' ? 'bg-amber-950/30 text-amber-400 border-amber-500/40' :
+                                'bg-red-950/30 text-red-400 border-red-500/40'
                               }`}
                             >
-                              <option value="in_stock">IN STOCK</option>
-                              <option value="limited">LIMITED</option>
-                              <option value="out_of_stock">OUT OF STOCK</option>
+                              <option value="in_stock">In Stock</option>
+                              <option value="limited">Limited</option>
+                              <option value="out_of_stock">Sold Out</option>
                             </select>
                           </td>
-                          <td className="py-3 px-3">
-                            <button
-                              onClick={() => handleQuickFeaturedToggle(p)}
-                              className={`p-1 rounded-[2px] transition-colors cursor-pointer ${
-                                p.is_featured
-                                  ? 'text-[var(--accent-gold)]'
-                                  : 'text-[var(--text-secondary)]/40 hover:text-[var(--text-secondary)]'
-                              }`}
-                              title={p.is_featured ? 'Featured on storefront' : 'Not featured'}
-                            >
-                              <span className="material-symbols-outlined text-lg">
-                                {p.is_featured ? 'star' : 'star_border'}
-                              </span>
-                            </button>
-                          </td>
-                          <td className="py-3 px-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
+                          <td className="py-3 px-3 text-right">
+                            <div className="flex items-center justify-end gap-1.5">
                               <button
-                                onClick={() => handleOpenEditModal(p)}
-                                className="px-2.5 py-1 text-xs text-[var(--accent-gold)] hover:bg-[var(--accent-gold)]/10 rounded-[2px] font-medium transition-colors"
+                                onClick={() => handleOpenEditProduct(p)}
+                                className="px-2.5 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px]"
                               >
                                 Edit
                               </button>
                               <button
-                                onClick={() => handleDeleteProduct(p.id, p.name)}
-                                className="px-2.5 py-1 text-xs text-rose-600 hover:bg-rose-500/10 rounded-[2px] font-medium transition-colors"
+                                onClick={() => handleDuplicateProduct(p)}
+                                title="Duplicate this piece"
+                                className="px-2 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px]"
                               >
-                                Delete
+                                📋 Copy
+                              </button>
+                              <button
+                                onClick={() => handleDeleteProduct(p.id, p.name)}
+                                title="Delete"
+                                className="px-2 py-1 bg-red-950/20 text-red-400 border border-red-500/30 hover:bg-red-900/30 rounded text-[11px]"
+                              >
+                                🗑
                               </button>
                             </div>
                           </td>
                         </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+                      );
+                    })}
+                  </tbody>
+                </table>
               </div>
-            )}
+              )}
+            </div>
           </div>
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: ORDERS HUB */}
+        {/* TAB 3: BULLION & PRICING */}
         {/* ========================================================================= */}
-        {activeTab === 'orders' && (
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+        {(activeTab === 'pricing' || activeTab === 'rates') && (
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Daily Bullion Rates Editor */}
+            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-color)] space-y-4">
               <div>
-                <h2 className="font-serif text-2xl text-[var(--text-primary)] font-normal">
-                  Online Orders &amp; Logistics Hub
-                </h2>
-                <p className="font-sans text-xs text-[var(--text-secondary)]">
-                  Track website purchases, update BVC armored logistics docket numbers, and verify high-value PAN compliance.
+                <h3 className="font-serif text-lg font-bold text-[var(--gold-primary)]">
+                  Jammu Bullion Market Rates (₹/Gram)
+                </h3>
+                {isRatesLoading && <p className="text-[11px] text-amber-400 animate-pulse">Syncing market rates...</p>}
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Updating these rates automatically locks and recalculates real-time pricing for live formula products across the entire website.
                 </p>
               </div>
 
-              <button
-                onClick={fetchOrders}
-                className="px-3.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-card)] text-xs font-sans font-medium uppercase tracking-wider rounded-[2px] hover:border-[var(--accent-gold)] transition-colors flex items-center gap-1 cursor-pointer"
-              >
-                <span className="material-symbols-outlined text-sm">refresh</span>
-                <span>Refresh Orders</span>
-              </button>
+              <form onSubmit={handleSaveRatesSubmit} className="space-y-4 text-xs">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Gold 24K (999 Fineness) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={rateForm.gold_24k}
+                      onChange={e => setRateForm({ ...rateForm, gold_24k: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm text-[var(--gold-primary)] font-bold"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Gold 22K (916 Hallmarked) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={rateForm.gold_22k}
+                      onChange={e => setRateForm({ ...rateForm, gold_22k: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm text-[var(--text-primary)] font-bold"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Gold 18K (750 Hallmarked)
+                    </label>
+                    <input
+                      type="number"
+                      value={rateForm.gold_18k}
+                      onChange={e => setRateForm({ ...rateForm, gold_18k: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Gold 14K (585 Everyday)
+                    </label>
+                    <input
+                      type="number"
+                      value={rateForm.gold_14k}
+                      onChange={e => setRateForm({ ...rateForm, gold_14k: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Silver 999 Fine (Chandi) *
+                    </label>
+                    <input
+                      type="number"
+                      required
+                      value={rateForm.silver_999}
+                      onChange={e => setRateForm({ ...rateForm, silver_999: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
+                    />
+                  </div>
+                  <div>
+                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
+                      Silver 925 Sterling
+                    </label>
+                    <input
+                      type="number"
+                      value={rateForm.silver_925}
+                      onChange={e => setRateForm({ ...rateForm, silver_925: parseFloat(e.target.value) || 0 })}
+                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
+                    />
+                  </div>
+                </div>
+
+                <div className="p-3 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-color)] text-[11px] text-[var(--text-secondary)] space-y-1">
+                  <p><strong>Last Updated:</strong> {new Date(rates.updated_at || Date.now()).toLocaleString('en-IN')}</p>
+                  <p><strong>Updated By:</strong> {rates.updated_by || 'Store Manager'}</p>
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={isSavingRates}
+                  className="w-full py-2.5 bg-[var(--gold-primary)] text-black font-bold rounded-lg text-xs hover:opacity-90 transition-all shadow"
+                >
+                  {isSavingRates ? 'Saving Bullion Rates...' : 'Publish & Lock Daily Bullion Rates'}
+                </button>
+              </form>
             </div>
 
-            {/* Filter Controls */}
-            <div className="p-3 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] flex flex-col sm:flex-row items-center gap-3">
-              <div className="relative flex-1 w-full">
-                <span className="material-symbols-outlined text-sm absolute left-3 top-1/2 -translate-y-1/2 text-[var(--text-secondary)]">
-                  search
-                </span>
-                <input
-                  type="text"
-                  placeholder="Search by order number (AJ-...), customer name, or phone..."
-                  value={orderSearch}
-                  onChange={(e) => setOrderSearch(e.target.value)}
-                  className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs pl-9 pr-3 py-2 rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)] font-sans"
-                />
+            {/* Live Pricing Breakdown Calculator */}
+            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-color)] space-y-4">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[var(--text-primary)]">
+                  Live Price Breakup Simulator
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Formula used by customer cart and checkout: Metal Value + Making Charges + Stones + 3% GST.
+                </p>
               </div>
 
-              <div className="w-full sm:w-auto">
+              <div className="space-y-3 bg-[var(--bg-primary)] p-4 rounded-xl border border-[var(--border-color)] text-xs">
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                      Sample Net Weight (Grams)
+                    </label>
+                    <input
+                      type="number"
+                      defaultValue={15}
+                      id="calc-sample-weight"
+                      className="w-full px-2.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded font-mono"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                      Making Charge (%)
+                    </label>
+                    <input
+                      type="number"
+                      defaultValue={8}
+                      id="calc-sample-making"
+                      className="w-full px-2.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="pt-3 border-t border-[var(--border-color)] space-y-2">
+                  <p className="font-bold text-[var(--gold-primary)]">Formula Reference:</p>
+                  <p className="text-[11px] text-[var(--text-secondary)] font-mono">
+                    Gold Value = Weight (g) × Today&apos;s 22K Rate (₹{rates.gold_22k})<br />
+                    Making = Gold Value × Making%<br />
+                    GST = 3% on (Gold Value + Making + Stones)
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 4: INVENTORY MANAGEMENT */}
+        {/* ========================================================================= */}
+        {activeTab === 'inventory' && (
+          <div className="space-y-4">
+            {/* Inventory Status Bar */}
+            <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
+              <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
+                <p className="text-xs text-[var(--text-secondary)]">Total Catalog Items</p>
+                <p className="text-2xl font-bold font-mono text-[var(--text-primary)]">{products.length}</p>
+              </div>
+              <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-emerald-500/30">
+                <p className="text-xs text-emerald-400">Ready in Showroom</p>
+                <p className="text-2xl font-bold font-mono text-emerald-400">{inStockCount}</p>
+              </div>
+              <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-amber-500/30">
+                <p className="text-xs text-amber-400">Low Stock (≤2 units)</p>
+                <p className="text-2xl font-bold font-mono text-amber-400">{lowStockCount}</p>
+              </div>
+              <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-red-500/30">
+                <p className="text-xs text-red-400">Sold Out / Hidden</p>
+                <p className="text-2xl font-bold font-mono text-red-400">{outOfStockCount}</p>
+              </div>
+            </div>
+
+            {/* Inventory Items List */}
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] overflow-hidden">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)] text-[var(--text-secondary)] uppercase">
+                  <tr>
+                    <th className="py-3 px-4">Jewellery Item</th>
+                    <th className="py-3 px-4">Category</th>
+                    <th className="py-3 px-4">Current Status</th>
+                    <th className="py-3 px-4 text-right">Quick Stock Switch</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-color)]">
+                  {products.map(p => (
+                    <tr key={p.id} className="hover:bg-[var(--bg-primary)]">
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-3">
+                          <img
+                            src={(p.images && p.images[0]) || '/hero-clean.png'}
+                            alt={p.name}
+                            className="w-9 h-9 rounded object-cover border border-[var(--border-color)]"
+                          />
+                          <div>
+                            <p className="font-bold text-[var(--text-primary)]">{p.name}</p>
+                            <p className="text-[10px] text-[var(--text-secondary)] font-mono">
+                              Weight: {p.weight_grams ? `${p.weight_grams}g` : '10g'} | HUID: {p.huid || 'BIS 916'}
+                            </p>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4 text-[var(--text-secondary)]">{p.category}</td>
+                      <td className="py-3 px-4">
+                        <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
+                          p.stock_status === 'in_stock' ? 'bg-emerald-950 text-emerald-300' :
+                          p.stock_status === 'limited' ? 'bg-amber-950 text-amber-300' :
+                          'bg-red-950 text-red-300'
+                        }`}>
+                          {p.stock_status.replace('_', ' ')}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <div className="inline-flex rounded-lg border border-[var(--border-color)] p-0.5 bg-[var(--bg-primary)]">
+                          <button
+                            onClick={() => handleQuickStockToggle(p, 'in_stock')}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                              p.stock_status === 'in_stock' ? 'bg-emerald-600 text-white' : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            In Stock
+                          </button>
+                          <button
+                            onClick={() => handleQuickStockToggle(p, 'limited')}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                              p.stock_status === 'limited' ? 'bg-amber-600 text-white' : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            Low
+                          </button>
+                          <button
+                            onClick={() => handleQuickStockToggle(p, 'out_of_stock')}
+                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
+                              p.stock_status === 'out_of_stock' ? 'bg-red-600 text-white' : 'text-zinc-400 hover:text-white'
+                            }`}
+                          >
+                            Sold Out
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 5: ORDERS & SHIPMENTS */}
+        {/* ========================================================================= */}
+        {activeTab === 'orders' && (
+          <div className="space-y-4">
+            {/* Filter & Search Bar */}
+            <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
+              <input
+                type="text"
+                placeholder="Search by order number, customer name, phone, or BVC docket..."
+                value={orderSearch}
+                onChange={e => setOrderSearch(e.target.value)}
+                className="w-full sm:max-w-md px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--gold-primary)]"
+              />
+
+              <div className="flex items-center gap-2">
                 <select
                   value={orderStatusFilter}
-                  onChange={(e) => setOrderStatusFilter(e.target.value)}
-                  className="w-full sm:w-auto bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-xs px-3 py-2 rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)] font-sans uppercase"
+                  onChange={e => setOrderStatusFilter(e.target.value)}
+                  className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)]"
                 >
-                  <option value="all">All Statuses</option>
+                  <option value="all">All Order Statuses</option>
                   <option value="pending_confirmation">Pending Confirmation</option>
                   <option value="confirmed">Confirmed</option>
-                  <option value="processing">Processing (Atelier)</option>
-                  <option value="shipped">Shipped (BVC Armored)</option>
+                  <option value="processing">Processing (Making)</option>
+                  <option value="shipped">Shipped (In Transit)</option>
                   <option value="delivered">Delivered</option>
                   <option value="cancelled">Cancelled</option>
                 </select>
               </div>
             </div>
 
-            {/* Orders Table */}
+            {/* Orders List */}
             {isOrdersLoading ? (
-              <div className="p-12 text-center text-xs text-[var(--text-secondary)] font-sans">
-                Loading orders...
+              <div className="bg-[var(--bg-surface)] p-8 rounded-xl border border-[var(--border-color)] text-center text-xs text-[var(--text-secondary)]">
+                Loading customer orders...
               </div>
             ) : filteredOrders.length === 0 ? (
-              <div className="p-12 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] text-center max-w-lg mx-auto">
-                <span className="material-symbols-outlined text-4xl text-[var(--accent-gold)] mb-2 block">receipt_long</span>
-                <h3 className="font-serif text-lg text-[var(--text-primary)] mb-1">No orders found</h3>
-                <p className="font-sans text-xs text-[var(--text-secondary)]">
-                  {orders.length === 0 ? 'No online orders have been placed yet.' : 'No orders match your filter criteria.'}
-                </p>
+              <div className="bg-[var(--bg-surface)] p-8 rounded-xl border border-[var(--border-color)] text-center text-xs text-[var(--text-secondary)] italic">
+                No orders match your filter criteria.
               </div>
             ) : (
-              <div className="space-y-3">
+              <div className="space-y-4">
                 {filteredOrders.map(order => {
                   const isExpanded = expandedOrderId === order.id;
-                  const isHighValue = (order.total || 0) >= 20000000; // >= ₹2,00,000
+                  const isUpdating = updatingOrderId === order.id;
 
                   return (
                     <div
                       key={order.id}
-                      className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] overflow-hidden shadow-xs"
+                      className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] overflow-hidden transition-all shadow-sm"
                     >
                       {/* Summary Row */}
-                      <div className="p-4 flex flex-col lg:flex-row items-start lg:items-center justify-between gap-4">
-                        <div className="flex items-start sm:items-center gap-3">
-                          <button
-                            onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
-                            className="p-1 text-[var(--text-secondary)] hover:text-[var(--accent-gold)]"
-                          >
-                            <span className="material-symbols-outlined text-xl">
-                              {isExpanded ? 'expand_less' : 'expand_more'}
+                      <div className="p-4 flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-[var(--border-color)]">
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2">
+                            <span className="font-mono font-bold text-sm text-[var(--gold-primary)]">
+                              {order.order_number}
                             </span>
-                          </button>
-                          <div>
-                            <div className="flex items-center gap-2">
-                              <span className="font-mono font-bold text-sm text-[var(--accent-gold)]">
-                                {order.order_number}
-                              </span>
-                              {isHighValue && (
-                                <span className={`text-[9px] font-sans font-bold px-1.5 py-0.2 rounded-[1px] uppercase tracking-wider ${
-                                  order.pan_number ? 'bg-emerald-500/10 text-emerald-600 border border-emerald-500/30' : 'bg-rose-500/10 text-rose-600 border border-rose-500/30'
-                                }`}>
-                                  {order.pan_number ? `PAN: ${order.pan_number}` : 'CBDT PAN REQUIRED (>₹2L)'}
-                                </span>
-                              )}
-                            </div>
-                            <span className="text-[11px] text-[var(--text-secondary)] font-sans">
-                              {order.customer_name} &bull; {order.customer_phone} &bull; {new Date(order.created_at).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}
+                            <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                              order.payment_status === 'paid' ? 'bg-emerald-950 text-emerald-300' : 'bg-amber-950 text-amber-300'
+                            }`}>
+                              {order.payment_status.toUpperCase()}
                             </span>
                           </div>
+                          <p className="text-xs text-[var(--text-primary)] font-medium">
+                            {order.customer_name} • {order.customer_phone}
+                          </p>
+                          <p className="text-[11px] text-[var(--text-secondary)]">
+                            Placed on {new Date(order.created_at).toLocaleString('en-IN')}
+                          </p>
                         </div>
 
-                        {/* Amount & Status Dropdown */}
-                        <div className="flex flex-wrap items-center gap-3 self-end lg:self-center">
+                        <div className="flex flex-wrap items-center gap-3">
                           <div className="text-right">
-                            <span className="font-serif text-base font-semibold text-[var(--text-primary)]">
-                              ₹{(order.total / 100).toLocaleString('en-IN')}
-                            </span>
-                            <span className={`block text-[10px] uppercase font-bold tracking-wider ${
-                              order.payment_status === 'paid' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600'
-                            }`}>
-                              {order.payment_status} ({order.payment_method})
-                            </span>
+                            <p className="text-[10px] text-[var(--text-secondary)] uppercase">Grand Total</p>
+                            <p className="font-mono font-bold text-base text-[var(--gold-primary)]">
+                              ₹{Math.round(order.total / 100).toLocaleString('en-IN')}
+                            </p>
                           </div>
 
-                          <select
-                            value={order.status}
-                            disabled={updatingOrderId === order.id}
-                            onChange={(e) => handleOrderStatusUpdate(order.id, e.target.value)}
-                            className="text-xs font-sans font-semibold px-2.5 py-1.5 rounded-[2px] bg-[var(--bg-surface)] border border-[var(--border-subtle)] text-[var(--accent-gold)] focus:outline-none uppercase tracking-wider"
+                          {/* Quick Print Actions */}
+                          <button
+                            onClick={() => setInvoiceOrder(order)}
+                            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold shadow-sm transition-colors flex items-center gap-1"
                           >
-                            <option value="pending_confirmation">Pending</option>
-                            <option value="confirmed">Confirmed</option>
-                            <option value="processing">Processing</option>
-                            <option value="shipped">Shipped</option>
-                            <option value="delivered">Delivered</option>
-                            <option value="cancelled">Cancelled</option>
-                          </select>
+                            <span>🧾</span> Print GST Bill
+                          </button>
+                          <button
+                            onClick={() => setPackingSlipOrder(order)}
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition-colors flex items-center gap-1"
+                          >
+                            <span>📦</span> Packing Slip
+                          </button>
+
+                          <button
+                            onClick={() => setExpandedOrderId(isExpanded ? null : order.id)}
+                            className="px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-xs font-medium"
+                          >
+                            {isExpanded ? 'Collapse ▲' : 'Details ▼'}
+                          </button>
                         </div>
                       </div>
 
-                      {/* Expandable Order Details */}
+                      {/* Expanded Order Drawer */}
                       {isExpanded && (
-                        <div className="p-4 sm:p-5 bg-[var(--bg-surface)] border-t border-[var(--border-subtle)] space-y-4 text-xs font-sans">
-                          {/* Shipping Address & BVC Docket */}
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pb-4 border-b border-[var(--border-subtle)]">
+                        <div className="p-6 bg-[var(--bg-primary)] space-y-6 text-xs">
+                          {/* 1. Status & BVC Logistics Controls */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
                             <div>
-                              <span className="font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                                Delivery Address:
-                              </span>
-                              <p className="text-[var(--text-primary)] leading-relaxed font-light">
-                                {order.shipping_address}
-                              </p>
-                              {order.customer_email && (
-                                <span className="text-[11px] text-[var(--text-secondary)] block mt-1">
-                                  Email: {order.customer_email}
-                                </span>
-                              )}
+                              <label className="block text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+                                Update Order Lifecycle Status
+                              </label>
+                              <select
+                                value={order.status}
+                                disabled={isUpdating}
+                                onChange={e => handleOrderStatusUpdate(order.id, e.target.value)}
+                                className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-xs font-semibold"
+                              >
+                                <option value="pending_confirmation">Pending Confirmation</option>
+                                <option value="confirmed">Confirmed (Order Accepted)</option>
+                                <option value="processing">Processing (In Goldsmith Workshop)</option>
+                                <option value="shipped">Shipped (Dispatched with BVC)</option>
+                                <option value="delivered">Delivered</option>
+                                <option value="cancelled">Cancelled</option>
+                              </select>
                             </div>
 
                             <div>
-                              <span className="font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-1">
-                                Armored Shipping Logistics:
-                              </span>
-                              {editDocketId === order.id ? (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <input
-                                    type="text"
-                                    value={docketInput}
-                                    onChange={(e) => setDocketInput(e.target.value)}
-                                    placeholder="Enter BVC Docket Number"
-                                    className="bg-[var(--bg-card)] border border-[var(--border-subtle)] px-2.5 py-1 text-xs rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)] font-mono"
-                                  />
-                                  <button
-                                    onClick={() => handleSaveDocket(order.id)}
-                                    className="px-2.5 py-1 bg-[var(--accent-gold)] text-white text-xs font-semibold rounded-[2px]"
-                                  >
-                                    Save
-                                  </button>
-                                  <button
-                                    onClick={() => setEditDocketId(null)}
-                                    className="px-2 py-1 text-xs text-[var(--text-secondary)]"
-                                  >
-                                    Cancel
-                                  </button>
-                                </div>
-                              ) : (
-                                <div className="flex items-center gap-2 mt-1">
-                                  <span className="font-mono text-xs text-[var(--text-primary)]">
-                                    {order.bvc_docket_number ? `BVC Docket: ${order.bvc_docket_number}` : 'No docket number assigned'}
-                                  </span>
-                                  <button
-                                    onClick={() => { setEditDocketId(order.id); setDocketInput(order.bvc_docket_number || ''); }}
-                                    className="text-[11px] text-[var(--accent-gold)] hover:underline font-semibold"
-                                  >
-                                    {order.bvc_docket_number ? 'Edit' : '+ Add Docket'}
-                                  </button>
-                                </div>
+                              <label className="block text-[11px] font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+                                BVC Logistics Airway Bill / Docket Number
+                              </label>
+                              <div className="flex gap-2">
+                                <input
+                                  type="text"
+                                  placeholder="Enter BVC Docket..."
+                                  value={docketInputs[order.id] !== undefined ? docketInputs[order.id] : (order.bvc_docket_number || '')}
+                                  onChange={e => setDocketInputs({ ...docketInputs, [order.id]: e.target.value })}
+                                  className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-xs"
+                                />
+                                <button
+                                  type="button"
+                                  disabled={isUpdating}
+                                  onClick={() => handleSaveDocket(order.id)}
+                                  className="px-3 py-2 bg-[var(--gold-primary)] text-black font-bold rounded-lg text-xs hover:opacity-90"
+                                >
+                                  Save
+                                </button>
+                              </div>
+                            </div>
+                          </div>
+
+                          {/* 2. Customer & Shipping Destination */}
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
+                            <div className="space-y-1">
+                              <p className="font-bold text-[var(--text-secondary)] uppercase">Shipping Address:</p>
+                              <p className="text-[var(--text-primary)] leading-relaxed">{order.shipping_address}</p>
+                              {order.pincode && <p className="text-[var(--text-secondary)]">Pincode: {order.pincode}</p>}
+                              {order.pan_number && (
+                                <p className="font-mono text-amber-400 pt-1">
+                                  <strong>Rule 114B PAN:</strong> {order.pan_number}
+                                </p>
+                              )}
+                            </div>
+                            <div className="space-y-1">
+                              <p className="font-bold text-[var(--text-secondary)] uppercase">Payment Details:</p>
+                              <p>Method: {order.payment_method}</p>
+                              {order.razorpay_payment_id && (
+                                <p className="font-mono text-[var(--text-secondary)]">
+                                  Razorpay Txn: {order.razorpay_payment_id}
+                                </p>
                               )}
                             </div>
                           </div>
 
-                          {/* Line Items */}
+                          {/* 3. Items Table */}
                           <div>
-                            <span className="font-semibold text-[var(--text-secondary)] uppercase tracking-wider block mb-2">
-                              Ordered Pieces ({order.items?.length || 0}):
-                            </span>
-                            <div className="space-y-2">
-                              {(order.items || []).map((item, idx) => (
-                                <div key={idx} className="flex items-center justify-between p-2.5 bg-[var(--bg-card)] border border-[var(--border-subtle)] rounded-[2px]">
-                                  <div className="flex items-center gap-3">
-                                    <img
-                                      src={item.image || '/hero-clean.png'}
-                                      alt={item.name}
-                                      className="w-10 h-10 object-cover rounded-[2px] border border-[var(--border-subtle)]"
-                                      onError={(e) => { (e.currentTarget as HTMLImageElement).src = '/hero-clean.png'; }}
-                                    />
-                                    <div>
-                                      <span className="font-medium text-[var(--text-primary)] block">{item.name}</span>
-                                      <span className="text-[10px] text-[var(--text-secondary)]">
-                                        Qty: {item.quantity} {item.metal_finish ? `• Finish: ${item.metal_finish}` : ''} {item.selected_size ? `• Size: ${item.selected_size}` : ''}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <span className="font-semibold text-[var(--text-primary)]">
-                                    ₹{(item.price / 100 * item.quantity).toLocaleString('en-IN')}
-                                  </span>
-                                </div>
-                              ))}
-                            </div>
+                            <p className="font-bold text-[var(--text-secondary)] uppercase mb-2">Order Items:</p>
+                            <table className="w-full text-left border border-[var(--border-color)]">
+                              <thead className="bg-[var(--bg-surface)] text-[var(--text-secondary)]">
+                                <tr>
+                                  <th className="py-2 px-3">Item</th>
+                                  <th className="py-2 px-3 text-center">Finish / Size</th>
+                                  <th className="py-2 px-3 text-center">Qty</th>
+                                  <th className="py-2 px-3 text-right">Unit Price</th>
+                                  <th className="py-2 px-3 text-right">Total</th>
+                                </tr>
+                              </thead>
+                              <tbody className="divide-y divide-[var(--border-color)]">
+                                {order.items.map((item, idx) => (
+                                  <tr key={idx}>
+                                    <td className="py-2 px-3 font-semibold text-[var(--text-primary)]">{item.name}</td>
+                                    <td className="py-2 px-3 text-center text-[var(--text-secondary)]">
+                                      {item.metal_finish || 'Gold'} {item.selected_size ? `(${item.selected_size})` : ''}
+                                    </td>
+                                    <td className="py-2 px-3 text-center font-mono">{item.quantity}</td>
+                                    <td className="py-2 px-3 text-right font-mono">₹{Math.round(item.price / 100).toLocaleString('en-IN')}</td>
+                                    <td className="py-2 px-3 text-right font-mono font-bold text-[var(--gold-primary)]">
+                                      ₹{Math.round((item.price * item.quantity) / 100).toLocaleString('en-IN')}
+                                    </td>
+                                  </tr>
+                                ))}
+                              </tbody>
+                            </table>
                           </div>
                         </div>
                       )}
@@ -1207,134 +1643,302 @@ export default function AdminDashboardClient() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 4: DAILY BULLION RATES */}
+        {/* TAB 6: COUPONS & PROMOTIONAL OFFERS */}
         {/* ========================================================================= */}
-        {activeTab === 'rates' && (
-          <div className="max-w-2xl mx-auto space-y-6">
-            <div className="text-center">
-              <span className="font-sans text-[10px] text-[var(--accent-gold)] tracking-[0.25em] uppercase font-semibold block mb-1">
-                JAMMU MARKET RATES CONTROLLER
-              </span>
-              <h2 className="font-serif text-2xl sm:text-3xl text-[var(--text-primary)] font-normal mb-2">
-                Daily Bullion Market Rates
-              </h2>
-              <p className="font-sans text-xs text-[var(--text-secondary)] max-w-lg mx-auto">
-                Updating these rates automatically syncs with customer billing calculations, checkout price rate-locks, and store inquiries.
-              </p>
+        {activeTab === 'coupons' && (
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[var(--gold-primary)]">
+                  Promotional Coupons &amp; Discount Offers
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  All discount rules are validated server-side to guarantee secure payments.
+                </p>
+              </div>
+              <button
+                onClick={() => setIsCouponModalOpen(true)}
+                className="px-4 py-2 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 shadow"
+              >
+                + Create Promo Code
+              </button>
             </div>
 
-            <form onSubmit={handleSaveRates} className="p-6 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] shadow-[var(--card-shadow)] space-y-4">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* 24K Pure Gold */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                    24K Pure Gold (999) &bull; ₹ / gram
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={rateForm.gold_24k}
-                    onChange={(e) => setRateForm({ ...rateForm, gold_24k: Number(e.target.value) })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 text-sm rounded-[2px] font-mono focus:outline-none focus:border-[var(--accent-gold)]"
-                    required
-                  />
+            {/* Coupons Table */}
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] overflow-hidden">
+              {isCouponsLoading ? (
+                <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+                  Loading discount coupons...
                 </div>
-
-                {/* 22K Hallmarked Gold */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold text-[var(--accent-gold)] uppercase tracking-wider mb-1">
-                    22K Hallmarked Gold (916) &bull; ₹ / gram
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={rateForm.gold_22k}
-                    onChange={(e) => setRateForm({ ...rateForm, gold_22k: Number(e.target.value) })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--accent-gold)] px-3 py-2 text-sm rounded-[2px] font-mono focus:outline-none"
-                    required
-                  />
-                </div>
-
-                {/* 18K Diamond Gold */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                    18K Fine Gold (750) &bull; ₹ / gram
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={rateForm.gold_18k}
-                    onChange={(e) => setRateForm({ ...rateForm, gold_18k: Number(e.target.value) })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 text-sm rounded-[2px] font-mono focus:outline-none focus:border-[var(--accent-gold)]"
-                    required
-                  />
-                </div>
-
-                {/* 14K Gold */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                    14K Gold (585) &bull; ₹ / gram
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={rateForm.gold_14k}
-                    onChange={(e) => setRateForm({ ...rateForm, gold_14k: Number(e.target.value) })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 text-sm rounded-[2px] font-mono focus:outline-none focus:border-[var(--accent-gold)]"
-                    required
-                  />
-                </div>
-
-                {/* 999 Fine Silver */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                    Fine Silver (999) &bull; ₹ / gram
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={rateForm.silver_999}
-                    onChange={(e) => setRateForm({ ...rateForm, silver_999: Number(e.target.value) })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 text-sm rounded-[2px] font-mono focus:outline-none focus:border-[var(--accent-gold)]"
-                    required
-                  />
-                </div>
-
-                {/* 925 Sterling Silver */}
-                <div>
-                  <label className="block text-[11px] font-sans font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                    925 Sterling Silver &bull; ₹ / gram
-                  </label>
-                  <input
-                    type="number"
-                    step="1"
-                    value={rateForm.silver_925}
-                    onChange={(e) => setRateForm({ ...rateForm, silver_925: Number(e.target.value) })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 text-sm rounded-[2px] font-mono focus:outline-none focus:border-[var(--accent-gold)]"
-                    required
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-between">
-                <span className="text-[11px] text-[var(--text-secondary)]">
-                  Last updated: {rates.updated_at ? new Date(rates.updated_at).toLocaleString('en-IN') : 'Default Indicative'}
-                </span>
-
-                <button
-                  type="submit"
-                  disabled={isSavingRates}
-                  className="px-5 py-2.5 bg-[var(--accent-gold)] text-white text-xs font-sans font-semibold uppercase tracking-wider rounded-[2px] hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
-                >
-                  {isSavingRates ? 'Saving Rates...' : 'Save & Broadcast Live Rates'}
-                </button>
-              </div>
-            </form>
+              ) : (
+                <table className="w-full text-left text-xs">
+                <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)] text-[var(--text-secondary)] uppercase">
+                  <tr>
+                    <th className="py-3 px-4">Coupon Code</th>
+                    <th className="py-3 px-4">Discount</th>
+                    <th className="py-3 px-4">Min. Order</th>
+                    <th className="py-3 px-4">Valid Until</th>
+                    <th className="py-3 px-4 text-center">Status</th>
+                    <th className="py-3 px-4 text-center">Usage</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-color)]">
+                  {coupons.map(coupon => (
+                    <tr key={coupon.code} className="hover:bg-[var(--bg-primary)]">
+                      <td className="py-3 px-4 font-mono font-bold text-[var(--gold-primary)] text-sm">
+                        {coupon.code}
+                      </td>
+                      <td className="py-3 px-4 font-semibold text-[var(--text-primary)]">
+                        {coupon.type === 'flat'
+                          ? `₹${Math.round(coupon.value / 100).toLocaleString('en-IN')} Flat Off`
+                          : `${coupon.value}% Off`}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
+                        ₹{Math.round(coupon.minOrderPaise / 100).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
+                        {coupon.validUntil}
+                      </td>
+                      <td className="py-3 px-4 text-center">
+                        <button
+                          onClick={() => handleToggleCouponActive(coupon.code, coupon.isActive)}
+                          className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
+                            coupon.isActive
+                              ? 'bg-emerald-950 text-emerald-300 border border-emerald-500/40'
+                              : 'bg-zinc-800 text-zinc-400 border border-zinc-700'
+                          }`}
+                        >
+                          {coupon.isActive ? 'Active' : 'Disabled'}
+                        </button>
+                      </td>
+                      <td className="py-3 px-4 text-center font-mono">
+                        {coupon.usageCount || 0} times
+                      </td>
+                      <td className="py-3 px-4 text-right">
+                        <button
+                          onClick={() => handleDeleteCoupon(coupon.code)}
+                          className="px-2 py-1 bg-red-950/20 text-red-400 border border-red-500/30 rounded text-[11px] hover:bg-red-900/30"
+                        >
+                          Delete
+                        </button>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              )}
+            </div>
           </div>
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 5: COUNTER POS & BILLING */}
+        {/* TAB 7: WEBSITE CONTENT MANAGER */}
+        {/* ========================================================================= */}
+        {(activeTab === 'content' || activeTab === 'store') && (
+          <div className="space-y-6">
+            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-color)]">
+              <h3 className="font-serif text-xl font-bold text-[var(--gold-primary)] mb-1">
+                Visual Website Content Editor
+              </h3>
+              <p className="text-xs text-[var(--text-secondary)] mb-6">
+                Update the homepage banner, promotional announcement, and showroom hours without touching code.
+              </p>
+
+              {storeContent ? (
+                <form onSubmit={handleSaveContentSubmit} className="space-y-6 text-xs">
+                  {/* Announcement Bar */}
+                  <div className="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] space-y-3">
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                        1. Announcement Bar Banner
+                      </h4>
+                      <label className="flex items-center gap-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={storeContent.announcement?.isEnabled}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            announcement: { ...storeContent.announcement, isEnabled: e.target.checked }
+                          })}
+                          className="w-4 h-4 accent-amber-600 rounded"
+                        />
+                        <span className="text-xs font-semibold">Enable Announcement</span>
+                      </label>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                        Announcement Text
+                      </label>
+                      <input
+                        type="text"
+                        value={storeContent.announcement?.text || ''}
+                        onChange={e => setStoreContent({
+                          ...storeContent,
+                          announcement: { ...storeContent.announcement, text: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs text-[var(--text-primary)]"
+                      />
+                    </div>
+                  </div>
+
+                  {/* Hero Banner */}
+                  <div className="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] space-y-3">
+                    <h4 className="font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                      2. Homepage Hero Banner
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          Hero Heading Title
+                        </label>
+                        <input
+                          type="text"
+                          value={storeContent.hero?.title || ''}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            hero: { ...storeContent.hero, title: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          Hero Badge / Eyebrow
+                        </label>
+                        <input
+                          type="text"
+                          value={storeContent.hero?.badge || ''}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            hero: { ...storeContent.hero, badge: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                        Hero Subtitle
+                      </label>
+                      <textarea
+                        rows={2}
+                        value={storeContent.hero?.subtitle || ''}
+                        onChange={e => setStoreContent({
+                          ...storeContent,
+                          hero: { ...storeContent.hero, subtitle: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          Primary Button Text
+                        </label>
+                        <input
+                          type="text"
+                          value={storeContent.hero?.primaryButtonText || ''}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            hero: { ...storeContent.hero, primaryButtonText: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          Primary Button Link
+                        </label>
+                        <input
+                          type="text"
+                          value={storeContent.hero?.primaryButtonLink || ''}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            hero: { ...storeContent.hero, primaryButtonLink: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Showroom Contact & Timings */}
+                  <div className="p-4 bg-[var(--bg-primary)] rounded-xl border border-[var(--border-color)] space-y-3">
+                    <h4 className="font-bold text-[var(--text-primary)] uppercase tracking-wider">
+                      3. Jammu Showroom Timings &amp; Contact
+                    </h4>
+
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          Phone Number
+                        </label>
+                        <input
+                          type="text"
+                          value={storeContent.showroom?.phone || ''}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            showroom: { ...storeContent.showroom, phone: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                          WhatsApp Desk
+                        </label>
+                        <input
+                          type="text"
+                          value={storeContent.showroom?.whatsapp || ''}
+                          onChange={e => setStoreContent({
+                            ...storeContent,
+                            showroom: { ...storeContent.showroom, whatsapp: e.target.value }
+                          })}
+                          className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs font-mono"
+                        />
+                      </div>
+                    </div>
+
+                    <div>
+                      <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
+                        Showroom Operating Hours
+                      </label>
+                      <input
+                        type="text"
+                        value={storeContent.showroom?.openingHours || ''}
+                        onChange={e => setStoreContent({
+                          ...storeContent,
+                          showroom: { ...storeContent.showroom, openingHours: e.target.value }
+                        })}
+                        className="w-full px-3 py-2 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                      />
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end">
+                    <button
+                      type="submit"
+                      disabled={isSavingContent}
+                      className="px-6 py-2.5 bg-[var(--gold-primary)] text-black font-bold rounded-lg text-xs hover:opacity-90 shadow"
+                    >
+                      {isSavingContent ? 'Saving Website Settings...' : 'Save & Publish Store Settings'}
+                    </button>
+                  </div>
+                </form>
+              ) : (
+                <p className="text-xs text-[var(--text-secondary)]">{isContentLoading ? 'Loading website content...' : 'Loading website content...'}</p>
+              )}
+            </div>
+          </div>
+        )}
+
+        {/* ========================================================================= */}
+        {/* TAB 8: COUNTER POS & BILLING */}
         {/* ========================================================================= */}
         {activeTab === 'pos' && (
           <div className="space-y-6">
@@ -1343,262 +1947,132 @@ export default function AdminDashboardClient() {
                 <h2 className="font-serif text-2xl text-[var(--text-primary)] font-normal">
                   Showroom Goldsmith Billing &amp; Counter POS
                 </h2>
-                <p className="font-sans text-xs text-[var(--text-secondary)]">
-                  Instant calculation of gross weight, stone deductions, making charges, mandatory 3% GST, trade-in buyback, and thermal / WhatsApp slips.
+                <p className="text-xs text-[var(--text-secondary)] mt-0.5">
+                  Counter estimating and instant receipt generation calibrated to today&apos;s bullion rate.
                 </p>
               </div>
-
-              <Link
-                href="/admin/counter"
-                target="_blank"
-                className="px-3.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-card)] text-xs font-sans font-medium uppercase tracking-wider rounded-[2px] hover:border-[var(--accent-gold)] transition-colors flex items-center gap-1"
-              >
-                <span>Open Dedicated POS Screen</span>
-                <span className="material-symbols-outlined text-xs">open_in_new</span>
-              </Link>
             </div>
-
-            <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] p-4 sm:p-6 shadow-[var(--card-shadow)]">
-              <BillingCalculator rates={rates} />
-            </div>
+            <BillingCalculator rates={rates} />
           </div>
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 6: STORE PROFILE & STATUTORY */}
+        {/* TAB 9: AUDIT LOG */}
         {/* ========================================================================= */}
-        {activeTab === 'store' && (
-          <div className="max-w-3xl mx-auto space-y-6">
-            <div>
-              <h2 className="font-serif text-2xl text-[var(--text-primary)] font-normal">
-                Showroom Profile &amp; Statutory Compliance
-              </h2>
-              <p className="font-sans text-xs text-[var(--text-secondary)]">
-                Statutory registration data verified under Consumer Protection (E-Commerce) Rules, 2020 and Bureau of Indian Standards (BIS).
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
-                <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Legal Entity</span>
-                <h4 className="text-sm font-serif font-medium text-[var(--text-primary)]">{siteConfig.legalBusinessName}</h4>
-                <p className="text-xs text-[var(--text-secondary)] font-mono">{siteConfig.legalEntityType}</p>
+        {activeTab === 'audit' && (
+          <div className="space-y-4">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)]">
+              <div>
+                <h3 className="font-serif text-lg font-bold text-[var(--gold-primary)]">
+                  Store Management Audit Ledger
+                </h3>
+                <p className="text-xs text-[var(--text-secondary)]">
+                  Tamper-evident log of all catalog updates, bullion rate revisions, order status changes, and coupon modifications.
+                </p>
               </div>
-
-              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
-                <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Tax &amp; Hallmarking</span>
-                <p className="text-xs font-mono text-[var(--text-primary)]">GSTIN: {siteConfig.gstin}</p>
-                <p className="text-xs font-mono text-[var(--text-primary)]">PAN: {siteConfig.pan}</p>
-                <p className="text-xs font-mono text-[var(--accent-gold)] font-bold">BIS License: {siteConfig.bisHallmarkLicense}</p>
-              </div>
-
-              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
-                <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Grievance Officer</span>
-                <p className="text-xs text-[var(--text-primary)] font-medium">{siteConfig.grievanceOfficer.name}</p>
-                <p className="text-xs text-[var(--text-secondary)]">{siteConfig.grievanceOfficer.phone}</p>
-                <p className="text-xs text-[var(--text-secondary)]">{siteConfig.grievanceOfficer.email}</p>
-              </div>
-
-              <div className="p-4 bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] space-y-1.5">
-                <span className="text-[10px] text-[var(--text-secondary)] uppercase tracking-wider font-semibold">Showroom Address</span>
-                <p className="text-xs text-[var(--text-primary)] leading-relaxed">{siteConfig.address}</p>
-                <p className="text-[11px] text-[var(--accent-gold)] mt-1">{siteConfig.timings}</p>
-              </div>
-            </div>
-          </div>
-        )}
-
-      </main>
-
-      {/* ========================================================================= */}
-      {/* MODAL: ADD / EDIT PRODUCT */}
-      {/* ========================================================================= */}
-      {isProductModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-xs animate-fade-in">
-          <div className="bg-[var(--bg-card)] border border-[var(--border-card)] rounded-[2px] shadow-2xl max-w-2xl w-full max-h-[90vh] flex flex-col overflow-hidden">
-            <div className="p-4 border-b border-[var(--border-subtle)] flex items-center justify-between">
-              <h3 className="font-serif text-lg font-normal text-[var(--text-primary)]">
-                {editingProduct ? `Edit Piece: ${editingProduct.name}` : 'Add New Jewellery Creation'}
-              </h3>
               <button
-                onClick={() => setIsProductModalOpen(false)}
-                className="text-[var(--text-secondary)] hover:text-[var(--text-primary)]"
+                onClick={fetchAuditLogs}
+                className="px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded font-medium"
               >
-                <span className="material-symbols-outlined text-xl">close</span>
+                🔄 Refresh Logs
               </button>
             </div>
 
-            <form onSubmit={handleSaveProductSubmit} className="p-5 overflow-y-auto space-y-4 font-sans text-xs">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Title */}
-                <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Jewellery Piece Name *
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="e.g. Royal Dogri Naman Choker in 22K Gold"
-                    value={modalForm.name}
-                    onChange={(e) => setModalForm({ ...modalForm, name: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-gold)]"
-                  />
+            {/* Audit Table */}
+            <div className="bg-[var(--bg-surface)] rounded-xl border border-[var(--border-color)] overflow-hidden">
+              {isAuditLoading ? (
+                <div className="p-8 text-center text-xs text-[var(--text-secondary)]">
+                  Loading audit records...
                 </div>
-
-                {/* Category */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Category *
-                  </label>
-                  <select
-                    value={modalForm.category}
-                    onChange={(e) => setModalForm({ ...modalForm, category: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none focus:border-[var(--accent-gold)]"
-                  >
-                    {siteConfig.categories.map(cat => (
-                      <option key={cat} value={cat}>{cat}</option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Price */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Price in INR (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    step="any"
-                    required
-                    placeholder="e.g. 145000"
-                    value={modalForm.price}
-                    onChange={(e) => setModalForm({ ...modalForm, price: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] font-mono focus:outline-none focus:border-[var(--accent-gold)]"
-                  />
-                </div>
-
-                {/* Stock Status */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Stock Availability
-                  </label>
-                  <select
-                    value={modalForm.stock_status}
-                    onChange={(e) => setModalForm({ ...modalForm, stock_status: e.target.value as any })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none"
-                  >
-                    <option value="in_stock">In Stock (Ready to dispatch)</option>
-                    <option value="limited">Limited Edition (Few pieces left)</option>
-                    <option value="out_of_stock">Out of Stock</option>
-                  </select>
-                </div>
-
-                {/* Collection */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Collection Group
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="e.g. Dogra Heritage Collection"
-                    value={modalForm.collection}
-                    onChange={(e) => setModalForm({ ...modalForm, collection: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none"
-                  />
-                </div>
-
-                {/* Badges */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Badges (comma separated)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="22K BIS, DOGRA HERITAGE, BESTSELLER"
-                    value={modalForm.badges}
-                    onChange={(e) => setModalForm({ ...modalForm, badges: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none"
-                  />
-                </div>
-
-                {/* Metal Finishes */}
-                <div>
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Metal Finishes (comma separated)
-                  </label>
-                  <input
-                    type="text"
-                    placeholder="Gold, Antique Gold, Rose Gold"
-                    value={modalForm.metal_finishes}
-                    onChange={(e) => setModalForm({ ...modalForm, metal_finishes: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none"
-                  />
-                </div>
-
-                {/* Featured checkbox */}
-                <div className="sm:col-span-2 flex items-center gap-2 pt-1">
-                  <input
-                    type="checkbox"
-                    id="is_featured"
-                    checked={modalForm.is_featured}
-                    onChange={(e) => setModalForm({ ...modalForm, is_featured: e.target.checked })}
-                    className="rounded text-[var(--accent-gold)]"
-                  />
-                  <label htmlFor="is_featured" className="text-xs text-[var(--text-primary)] cursor-pointer">
-                    Feature this creation on the storefront homepage
-                  </label>
-                </div>
-
-                {/* Image URLs */}
-                <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Image URLs (one URL per line or comma separated)
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="https://... or /products/sample.png"
-                    value={modalForm.images}
-                    onChange={(e) => setModalForm({ ...modalForm, images: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs font-mono text-[var(--text-primary)] focus:outline-none"
-                  />
-                </div>
-
-                {/* Description */}
-                <div className="sm:col-span-2">
-                  <label className="block text-[11px] font-semibold uppercase tracking-wider text-[var(--text-secondary)] mb-1">
-                    Product Description
-                  </label>
-                  <textarea
-                    rows={3}
-                    placeholder="Crafted in 22K hallmarked gold with traditional Dogra filigree..."
-                    value={modalForm.description}
-                    onChange={(e) => setModalForm({ ...modalForm, description: e.target.value })}
-                    className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-3 py-2 rounded-[2px] text-xs text-[var(--text-primary)] focus:outline-none"
-                  />
-                </div>
-              </div>
-
-              <div className="pt-4 border-t border-[var(--border-subtle)] flex items-center justify-end gap-3">
-                <button
-                  type="button"
-                  onClick={() => setIsProductModalOpen(false)}
-                  className="px-4 py-2 border border-[var(--border-subtle)] rounded-[2px] text-xs font-sans text-[var(--text-secondary)] hover:bg-[var(--bg-surface)]"
-                >
-                  Cancel
-                </button>
-                <button
-                  type="submit"
-                  disabled={isSavingProduct}
-                  className="px-5 py-2 bg-[var(--accent-gold)] text-white text-xs font-sans font-semibold uppercase tracking-wider rounded-[2px] hover:opacity-90 transition-opacity cursor-pointer shadow-sm"
-                >
-                  {isSavingProduct ? 'Saving Piece...' : (editingProduct ? 'Update Piece' : 'Create Piece')}
-                </button>
-              </div>
-            </form>
+              ) : (
+                <table className="w-full text-left text-xs">
+                <thead className="bg-[var(--bg-primary)] border-b border-[var(--border-color)] text-[var(--text-secondary)] uppercase">
+                  <tr>
+                    <th className="py-3 px-4">Timestamp</th>
+                    <th className="py-3 px-4">Staff Actor</th>
+                    <th className="py-3 px-4">Action</th>
+                    <th className="py-3 px-4">Entity</th>
+                    <th className="py-3 px-4">IP Address</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[var(--border-color)]">
+                  {auditLogs.map(log => (
+                    <tr key={log.id} className="hover:bg-[var(--bg-primary)]">
+                      <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
+                        {new Date(log.created_at).toLocaleString('en-IN')}
+                      </td>
+                      <td className="py-3 px-4 font-medium text-[var(--text-primary)]">
+                        {log.staff_name} ({log.staff_email})
+                      </td>
+                      <td className="py-3 px-4">
+                        <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-950/40 text-amber-300 border border-amber-500/30">
+                          {log.action}
+                        </span>
+                      </td>
+                      <td className="py-3 px-4 text-[var(--text-secondary)]">
+                        {log.entity_type} {log.entity_id ? `(${log.entity_id})` : ''}
+                      </td>
+                      <td className="py-3 px-4 font-mono text-[var(--text-secondary)]">
+                        {log.ip_address || '127.0.0.1'}
+                      </td>
+                    </tr>
+                  ))}
+                  {auditLogs.length === 0 && (
+                    <tr>
+                      <td colSpan={5} className="py-8 text-center text-zinc-500 italic">
+                        No audit events recorded yet.
+                      </td>
+                    </tr>
+                  )}
+                </tbody>
+              </table>
+              )}
+            </div>
           </div>
-        </div>
-      )}
+        )}
+      </main>
 
+      {/* ── Sub-component Modals ────────────────────────────────────────── */}
+      <ProductModal
+        isOpen={isProductModalOpen}
+        onClose={() => setIsProductModalOpen(false)}
+        onSave={handleSaveProduct}
+        editingProduct={editingProduct}
+        rates={rates}
+        isSaving={isSavingProduct}
+      />
+
+      <BulkActionModal
+        isOpen={isBulkModalOpen}
+        selectedCount={selectedProductIds.length}
+        onClose={() => setIsBulkModalOpen(false)}
+        onApply={handleApplyBulkUpdates}
+        isProcessing={isProcessingBulk}
+      />
+
+      <CsvImportModal
+        isOpen={isCsvImportOpen}
+        onClose={() => setIsCsvImportOpen(false)}
+        onImport={handleImportCsvItems}
+        isImporting={isImportingCsv}
+      />
+
+      <CouponModal
+        isOpen={isCouponModalOpen}
+        onClose={() => setIsCouponModalOpen(false)}
+        onSave={handleSaveCoupon}
+        isSaving={isSavingCoupon}
+      />
+
+      <InvoiceModal
+        order={invoiceOrder}
+        onClose={() => setInvoiceOrder(null)}
+      />
+
+      <PackingSlipModal
+        order={packingSlipOrder}
+        onClose={() => setPackingSlipOrder(null)}
+      />
     </div>
   );
 }

@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyAdminAuth } from '@/lib/adminAuth';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
+import { recordAuditLog } from '@/lib/auditLog';
 
 export const dynamic = 'force-dynamic';
 
@@ -60,7 +61,7 @@ export async function PATCH(request: Request) {
     }
 
     const body = await request.json();
-    const { id, status, bvc_docket_number, shiprocket_awb, notes } = body;
+    const { id, status, bvc_docket_number, shiprocket_awb, notes, payment_status } = body;
 
     if (!id) {
       return NextResponse.json(
@@ -83,6 +84,15 @@ export async function PATCH(request: Request) {
       }
     }
 
+    if (payment_status !== undefined) {
+      if (!['unpaid', 'paid', 'refunded'].includes(payment_status)) {
+        return NextResponse.json(
+          { success: false, message: 'Invalid payment status. Allowed: unpaid, paid, refunded' },
+          { status: 400 }
+        );
+      }
+    }
+
     if (!isSupabaseAdminConfigured || !supabaseAdmin) {
       return NextResponse.json(
         { success: false, message: 'Supabase admin client is not available.' },
@@ -98,6 +108,7 @@ export async function PATCH(request: Request) {
     if (bvc_docket_number !== undefined) updates.bvc_docket_number = bvc_docket_number;
     if (shiprocket_awb !== undefined) updates.shiprocket_awb = shiprocket_awb;
     if (notes !== undefined) updates.notes = notes;
+    if (payment_status !== undefined) updates.payment_status = payment_status;
 
     const { data: updatedOrder, error } = await supabaseAdmin
       .from('orders')
@@ -113,6 +124,14 @@ export async function PATCH(request: Request) {
         { status: 500 }
       );
     }
+
+    await recordAuditLog({
+      action: 'ORDER_UPDATED',
+      entityType: 'order',
+      entityId: id,
+      newValues: updates,
+      request
+    });
 
     return NextResponse.json({
       success: true,

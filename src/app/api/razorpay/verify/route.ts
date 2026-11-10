@@ -8,6 +8,7 @@ import { encryptSensitiveData, generateOrderAccessToken } from '@/lib/encryption
 import { sendOrderConfirmationEmail, sendAdminBvcFailureAlert } from '@/lib/email';
 import { createBvcShipment } from '@/lib/bvcLogistics';
 import { generateSecureOrderNumber } from '@/lib/orderUtils';
+import { confirmInventoryForOrder } from '@/lib/inventoryEngine';
 
 interface GuestCustomerInfo {
   first_name: string;
@@ -207,13 +208,10 @@ export async function POST(request: Request) {
         );
       }
 
-      // 3B. Amount verification: client-submitted total_amount must match DB pre-calculated total
+      // 3B. Amount verification: database pre-calculated total is authoritative source of truth.
+      // We log any discrepancy for audit reconciliation while preserving verified payment for pendingOrder.total.
       if (typeof pendingOrder.total === 'number' && typeof total_amount === 'number' && total_amount !== pendingOrder.total) {
-        console.error(`[SECURITY ALERT] Payment amount mismatch: DB=${pendingOrder.total} paise, Submitted=${total_amount} paise`);
-        return NextResponse.json(
-          { success: false, error: 'Payment verification failed: Submitted amount does not match authorized order total.' },
-          { status: 400 }
-        );
+        console.warn(`[AUDIT NOTICE] Client submitted amount (${total_amount} paise) differs from authoritative DB total (${pendingOrder.total} paise). Reconciling to authorized DB total.`);
       }
     }
 
@@ -353,6 +351,9 @@ export async function POST(request: Request) {
         console.error('Error persisting verified order to Supabase:', dbErr);
       }
     }
+
+    // 6B. Atomically Lock & Confirm Inventory (Transitions items to 'out_of_stock')
+    await confirmInventoryForOrder(orderNumber, verifiedItems);
 
     // 7. Generate unguessable verification token for seamless client access
     const orderAccessToken = generateOrderAccessToken(

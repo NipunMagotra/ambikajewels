@@ -1,12 +1,16 @@
 import Link from 'next/link';
 import { siteConfig } from "@/config/siteConfig";
 import { WhatsAppButton, CallButton } from '@/components/ui/ContactButtons';
+import NewsletterSignup from './NewsletterSignup';
 
 export default function Footer() {
   return (
     <footer className="bg-[var(--footer-bg)] border-t border-[var(--border-subtle)] pt-12 sm:pt-14 pb-28 lg:pb-14 text-[var(--text-primary)] transition-colors duration-200">
       <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop">
         
+        {/* Ambika Privé Newsletter Subscription */}
+        <NewsletterSignup />
+
         {/* Main 5-Column Navigation Grid */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-8 mb-10">
           
@@ -61,7 +65,8 @@ export default function Footer() {
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors font-medium text-[var(--accent-gold)]" href="/track">Track Order (BVC Armored Express)</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/contact">Contact Showroom</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/cart">Shopping Bag</Link></li>
-              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/services">3D CAD Customization</Link></li>
+              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/wishlist">Saved Wishlist</Link></li>
+              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/services">Bespoke Concierge</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/services">Gold Exchange Program</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/services">Old Gold Melting Service</Link></li>
             </ul>
@@ -80,7 +85,7 @@ export default function Footer() {
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/refund-policy">Cancellation &amp; Refund</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/shipping-policy">Shipping &amp; Armored Delivery</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/exchange-policy">Exchange &amp; Buyback</Link></li>
-              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/custom-orders-policy">Custom Orders &amp; 3D CAD</Link></li>
+              <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/custom-orders-policy">Custom Orders Policy</Link></li>
               <li><Link className="hover:text-[var(--accent-gold)] transition-colors" href="/grievance-policy">Grievance Redressal</Link></li>
             </ul>
           </div>
@@ -91,7 +96,7 @@ export default function Footer() {
               JAMMU CONCIERGE
             </h3>
             <p className="font-sans text-xs text-[var(--text-secondary)] mb-3.5 leading-relaxed font-light">
-              Connect directly with our showroom team for custom 3D CAD designs, hallmarking verification, or order inquiries.
+              Connect directly with our showroom team for gold exchange, hallmarking verification, or order inquiries.
             </p>
             <div className="flex flex-col gap-2">
               <WhatsAppButton />
@@ -269,6 +274,10 @@ export default function Footer() {
               <span>BIS: HM/C-9990041009</span>
               <span>&bull;</span>
               <span>GSTIN: 01AHWPH9511N1ZX</span>
+              <span>&bull;</span>
+              <Link href="/admin" className="hover:text-[var(--accent-gold)] transition-colors underline">
+                Staff Portal
+              </Link>
             </div>
           </div>
         </div>

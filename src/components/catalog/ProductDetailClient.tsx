@@ -69,6 +69,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const whatsappUrl = getProductWhatsAppUrl(product, selectedFinish, quantity);
 
   const handleAddToCart = () => {
+    if (product.stock_status === 'out_of_stock') return;
     setIsAdding(true);
     dispatch({
       type: 'ADD_ITEM',

@@ -9,6 +9,7 @@ import { siteConfig } from '@/config/siteConfig';
 import { verifyRateLockToken } from '@/lib/rateLock';
 import { generateSecureOrderNumber } from '@/lib/orderUtils';
 import { encryptSensitiveData } from '@/lib/encryption';
+import { reserveInventoryForOrder } from '@/lib/inventoryEngine';
 
 interface CustomerInfo {
   first_name: string;
@@ -38,12 +39,13 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json().catch(() => ({}));
-    const { items, notes, rate_lock_token, customer_info, rate_timestamp } = body as {
+    const { items, notes, rate_lock_token, customer_info, rate_timestamp, coupon_code } = body as {
       items: Array<{ id?: string; product_id?: string; quantity?: unknown }>;
       notes?: Record<string, string>;
       rate_lock_token?: string;
       customer_info?: CustomerInfo;
       rate_timestamp?: string | number;
+      coupon_code?: string;
     };
 
     // 2. Server-Side Rate-Lock Verification (F3: Guarantees price against stale rates via signed token)
@@ -179,10 +181,10 @@ export async function POST(request: Request) {
       );
     }
 
-    // 7. Authoritative Server-Side Price Verification (Rejects Unknown Products, Enforces Integer Qty >= 1)
+    // 7. Authoritative Server-Side Price Verification (Rejects Unknown Products, Enforces Integer Qty >= 1, Validates Coupons)
     let validatedPricing;
     try {
-      validatedPricing = await calculateOrderPricingServer(items);
+      validatedPricing = await calculateOrderPricingServer(items, undefined, coupon_code);
     } catch (pricingErr: unknown) {
       const errMsg = pricingErr instanceof Error ? pricingErr.message : 'Price calculation failed.';
       console.warn(`[SECURITY ALERT] Invalid order rejected from IP ${ip}: ${errMsg}`);
@@ -233,6 +235,19 @@ export async function POST(request: Request) {
 
     // 10. Generate secure, unguessable order number (AMB-XXXXX-XXXXXXXX)
     const orderNumber = generateSecureOrderNumber();
+
+    // 10B. Atomic Inventory Reservation — Prevents simultaneous race-condition checkout on unique jewellery pieces
+    const reservationResult = await reserveInventoryForOrder(orderNumber, validatedPricing.items);
+    if (!reservationResult.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: reservationResult.message || 'One or more items in your cart are no longer available.',
+          code: 'INVENTORY_RESERVED'
+        },
+        { status: 409 }
+      );
+    }
 
     // 11. Encrypt PAN if provided (CBDT Rule 114B)
     const encryptedPan = customer_info.pan_number
@@ -309,7 +324,9 @@ export async function POST(request: Request) {
         key: key_id || 'rzp_test_mock_key',
         is_mock: true,
         order_number: orderNumber,
-        supabase_order_id: supabaseOrderId
+        supabase_order_id: supabaseOrderId,
+        discount: validatedPricing.discount_paise,
+        coupon_code: validatedPricing.coupon_code
       });
     }
 
@@ -369,7 +386,9 @@ export async function POST(request: Request) {
       currency: razorpayOrder.currency,
       key: key_id,
       order_number: orderNumber,
-      supabase_order_id: supabaseOrderId
+      supabase_order_id: supabaseOrderId,
+      discount: validatedPricing.discount_paise,
+      coupon_code: validatedPricing.coupon_code
     });
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Failed to create Razorpay order';

@@ -7,20 +7,22 @@ import { useCart } from '@/context/CartContext';
 export default function ToastNotification() {
   const { state, dispatch } = useCart();
   const lastItem = state.lastAddedItem;
-  const [visible, setVisible] = useState(false);
+  const [dismissedItem, setDismissedItem] = useState<any>(null);
 
   useEffect(() => {
-    if (lastItem) {
-      setVisible(true);
-      const timer = setTimeout(() => {
-        setVisible(false);
-        dispatch({ type: 'CLEAR_TOAST' });
-      }, 5000);
-      return () => clearTimeout(timer);
-    }
+    if (!lastItem) return;
+    const timer = setTimeout(() => {
+      dispatch({ type: 'CLEAR_TOAST' });
+    }, 5000);
+    return () => clearTimeout(timer);
   }, [lastItem, dispatch]);
 
-  if (!visible || !lastItem) return null;
+  if (!lastItem || lastItem === dismissedItem) return null;
+
+  const handleDismiss = () => {
+    setDismissedItem(lastItem);
+    dispatch({ type: 'CLEAR_TOAST' });
+  };
 
   const formatPrice = (paise: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -55,11 +57,8 @@ export default function ToastNotification() {
               ✓ Added to Shopping Bag
             </span>
             <button
-              onClick={() => {
-                setVisible(false);
-                dispatch({ type: 'CLEAR_TOAST' });
-              }}
-              className="text-on-surface-variant hover:text-white p-0.5 text-xs"
+              onClick={handleDismiss}
+              className="text-on-surface-variant hover:text-white p-0.5 text-xs cursor-pointer"
               aria-label="Dismiss notification"
             >
               ✕
@@ -87,14 +86,14 @@ export default function ToastNotification() {
       <div className="grid grid-cols-2 gap-2 mt-3 pt-2.5 border-t border-outline-variant/20">
         <Link
           href="/cart"
-          onClick={() => setVisible(false)}
+          onClick={handleDismiss}
           className="text-center py-2 px-3 bg-surface hover:bg-surface-variant text-[11px] font-label-caps font-bold text-on-surface rounded-xs border border-outline-variant/40 transition-colors"
         >
           VIEW BAG
         </Link>
         <Link
           href="/checkout"
-          onClick={() => setVisible(false)}
+          onClick={handleDismiss}
           className="text-center py-2 px-3 gold-bg-gradient text-[11px] font-label-caps font-bold text-black rounded-xs shadow hover:brightness-110 transition-all"
         >
           CHECKOUT &rarr;

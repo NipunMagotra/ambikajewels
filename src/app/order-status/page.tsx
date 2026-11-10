@@ -10,16 +10,22 @@ import { siteConfig } from '@/config/siteConfig';
 
 function OrderStatusContent() {
   const searchParams = useSearchParams();
-  const orderId = searchParams.get('orderId') || 'AMB-108249';
+  const paramOrderId = searchParams.get('orderId') || '';
   const token = searchParams.get('token') || '';
 
+  const [orderId, setOrderId] = useState(paramOrderId);
   const [order, setOrder] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [authNeeded, setAuthNeeded] = useState(false);
+  const [loading, setLoading] = useState(Boolean(paramOrderId && token));
+  const [authNeeded, setAuthNeeded] = useState(!token || !paramOrderId);
   const [verificationInput, setVerificationInput] = useState('');
+  const [orderInput, setOrderInput] = useState(paramOrderId);
   const [authError, setAuthError] = useState<string | null>(null);
 
   const loadOrder = async (ordId: string, tok?: string, contact?: string) => {
+    if (!ordId.trim()) {
+      setAuthError('Please enter an Order Reference Number.');
+      return;
+    }
     setLoading(true);
     setAuthError(null);
 
@@ -43,6 +49,7 @@ function OrderStatusContent() {
         setOrder(null);
       } else if (res.ok && data.success && data.order) {
         setOrder(data.order);
+        setOrderId(ordId.trim().toUpperCase());
         setAuthNeeded(false);
       } else {
         setAuthError(data.error || 'Unable to authenticate order credentials.');
@@ -56,18 +63,29 @@ function OrderStatusContent() {
   };
 
   useEffect(() => {
-    if (token) {
-      loadOrder(orderId, token);
+    if (paramOrderId && token) {
+      loadOrder(paramOrderId, token);
+    } else if (paramOrderId) {
+      setAuthNeeded(true);
+      setLoading(false);
     } else {
       setAuthNeeded(true);
       setLoading(false);
     }
-  }, [orderId, token]);
+  }, [paramOrderId, token]);
 
   const handleVerifySubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!verificationInput.trim()) return;
-    loadOrder(orderId, undefined, verificationInput);
+    const targetOrderId = orderId || orderInput;
+    if (!targetOrderId.trim()) {
+      setAuthError('Please provide an Order Reference Number.');
+      return;
+    }
+    if (!verificationInput.trim()) {
+      setAuthError('Please enter the phone number or email associated with this order.');
+      return;
+    }
+    loadOrder(targetOrderId, undefined, verificationInput);
   };
 
   const handlePrint = () => {
@@ -79,23 +97,43 @@ function OrderStatusContent() {
       <div className="container mx-auto px-4 sm:px-margin-mobile lg:px-margin-desktop max-w-lg py-12">
         <div className="bg-surface-container border border-outline-variant/30 p-6 sm:p-8 rounded-xs text-center shadow-xl">
           <div className="w-12 h-12 bg-primary/10 border border-primary/30 rounded-full flex items-center justify-center mx-auto mb-4 text-primary">
-            <span className="material-symbols-outlined text-2xl">lock</span>
+            <span className="material-symbols-outlined text-2xl">receipt_long</span>
           </div>
           <h2 className="font-headline-sm text-xl text-primary font-bold mb-2">
-            Order Security Verification
+            Tax Invoice Verification
           </h2>
           <p className="font-body-md text-xs sm:text-sm text-on-surface-variant mb-6">
-            To protect your customer privacy, please enter the phone number or email address associated with Order <strong className="text-primary font-mono">{orderId}</strong>.
+            To view or print your official GST tax invoice, please verify your order reference number and contact information.
           </p>
 
-          <form onSubmit={handleVerifySubmit} className="space-y-4">
+          <form onSubmit={handleVerifySubmit} className="space-y-4 text-left">
             <div>
+              <label className="font-label-caps text-[10px] text-on-surface-variant block mb-1 font-semibold">
+                ORDER REFERENCE NUMBER *
+              </label>
+              <input
+                type="text"
+                required
+                value={orderInput}
+                onChange={e => {
+                  setOrderInput(e.target.value.toUpperCase());
+                  setOrderId(e.target.value.toUpperCase());
+                }}
+                placeholder="e.g. AMB-20261001-001"
+                className="w-full bg-background border border-outline px-4 py-3 text-on-surface font-body-md text-sm outline-none focus:border-primary rounded-xs transition-colors uppercase font-mono"
+              />
+            </div>
+
+            <div>
+              <label className="font-label-caps text-[10px] text-on-surface-variant block mb-1 font-semibold">
+                PHONE NUMBER OR EMAIL *
+              </label>
               <input
                 type="text"
                 required
                 value={verificationInput}
                 onChange={e => setVerificationInput(e.target.value)}
-                placeholder="Phone (e.g. 9876543210) or Email"
+                placeholder="10-digit Phone or Email on order"
                 className="w-full bg-background border border-outline px-4 py-3 text-on-surface font-body-md text-sm outline-none focus:border-primary rounded-xs transition-colors"
               />
             </div>

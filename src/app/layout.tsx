@@ -3,13 +3,65 @@ import "./globals.css";
 import { siteConfig } from "@/config/siteConfig";
 
 import { CartProvider } from "@/context/CartContext";
+import { WishlistProvider } from "@/context/WishlistContext";
 import ChatWidget from "@/components/chat/ChatWidget";
 import ConsentBanner from "@/components/compliance/ConsentBanner";
 import ToastNotification from "@/components/ui/ToastNotification";
 
 export const metadata: Metadata = {
-  title: `${siteConfig.name} | Modern Heritage`,
+  metadataBase: new URL(siteConfig.websiteUrl),
+  title: {
+    default: `${siteConfig.name} | Dogra Heritage & Fine Jewellery in Jammu`,
+    template: `%s | ${siteConfig.name}`
+  },
   description: siteConfig.description,
+  keywords: [
+    "Ambika Jewels",
+    "Dogra Heritage Jewellery",
+    "Jammu Jewellery Showroom",
+    "Dogri Jhumki",
+    "Dogri Naman Choker",
+    "22K BIS Hallmarked Gold",
+    "Certified Diamond Jewellery",
+    "925 Sterling Silver Jammu",
+    "Lower Roop Nagar Jewellery"
+  ],
+  alternates: {
+    canonical: "/"
+  },
+  openGraph: {
+    title: `${siteConfig.name} | Authentic Dogra Heritage & Fine Jewellery`,
+    description: siteConfig.description,
+    url: siteConfig.websiteUrl,
+    siteName: siteConfig.name,
+    locale: "en_IN",
+    type: "website",
+    images: [
+      {
+        url: "/products/royal-kundan.png",
+        width: 1200,
+        height: 630,
+        alt: "Ambika Jewels Fine Jewellery Collection"
+      }
+    ]
+  },
+  twitter: {
+    card: "summary_large_image",
+    title: `${siteConfig.name} | Modern Heritage Fine Jewellery`,
+    description: siteConfig.description,
+    images: ["/products/royal-kundan.png"]
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      "max-video-preview": -1,
+      "max-image-preview": "large",
+      "max-snippet": -1
+    }
+  }
 };
 
 export const viewport: Viewport = {
@@ -24,9 +76,47 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const storeJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "JewelryStore",
+    name: siteConfig.name,
+    legalName: siteConfig.legalBusinessName,
+    url: siteConfig.websiteUrl,
+    telephone: siteConfig.contact.phone,
+    email: siteConfig.contact.email,
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar",
+      addressLocality: siteConfig.city,
+      addressRegion: siteConfig.state,
+      postalCode: siteConfig.pincode,
+      addressCountry: "IN"
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: "32.7715891",
+      longitude: "74.8304221"
+    },
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"],
+        opens: "10:00",
+        closes: "20:00"
+      }
+    ],
+    priceRange: "₹₹₹₹",
+    paymentAccepted: "UPI, Cards, NetBanking, Razorpay",
+    currenciesAccepted: "INR"
+  };
+
   return (
     <html lang="en" className="light scroll-smooth" suppressHydrationWarning>
       <head>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(storeJsonLd) }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `
@@ -52,10 +142,12 @@ export default function RootLayout({
       </head>
       <body>
         <CartProvider>
-          {children}
-          <ToastNotification />
-          <ChatWidget />
-          <ConsentBanner />
+          <WishlistProvider>
+            {children}
+            <ToastNotification />
+            <ChatWidget />
+            <ConsentBanner />
+          </WishlistProvider>
         </CartProvider>
       </body>
     </html>

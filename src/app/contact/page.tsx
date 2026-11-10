@@ -10,6 +10,8 @@ import { siteConfig } from '@/config/siteConfig';
 
 export default function ContactPage() {
   const [formSubmitted, setFormSubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -19,9 +21,32 @@ export default function ContactPage() {
   });
   const [marketingConsent, setMarketingConsent] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setFormSubmitted(true);
+    setIsSubmitting(true);
+    setErrorMessage(null);
+
+    try {
+      const res = await fetch('/api/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          marketingConsent,
+        }),
+      });
+
+      const data = await res.json();
+      if (res.ok && data.success) {
+        setFormSubmitted(true);
+      } else {
+        setErrorMessage(data.error || 'Failed to submit enquiry. Please call us directly.');
+      }
+    } catch {
+      setErrorMessage('Network error while submitting enquiry. Please connect via WhatsApp or phone.');
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -43,7 +68,7 @@ export default function ContactPage() {
             </span>
             <h1 className="font-serif text-3xl sm:text-5xl text-[var(--text-primary)] font-normal mb-2">Contact Ambika Jewels</h1>
             <p className="font-sans text-xs sm:text-sm text-[var(--text-secondary)] max-w-2xl mx-auto font-light leading-relaxed">
-              Have questions regarding custom 3D CAD design preview, gold exchange rates, bridal trousseaus, or online orders? Our boutique concierge in Jammu is delighted to assist you.
+              Have questions regarding gold exchange rates, heirloom redesign, bridal trousseaus, or online orders? Our boutique concierge in Jammu is delighted to assist you.
             </p>
           </div>
 
@@ -179,7 +204,7 @@ export default function ContactPage() {
                         className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] focus:border-[var(--accent-gold)] text-[var(--text-primary)] font-sans text-xs sm:text-sm p-2.5 rounded-[2px] outline-none transition-colors cursor-pointer"
                       >
                         <option value="General Enquiry" className="bg-[var(--bg-card)] text-[var(--text-primary)]">General Jewellery Enquiry</option>
-                        <option value="3D CAD Preview" className="bg-[var(--bg-card)] text-[var(--text-primary)]">3D CAD Bespoke Customisation</option>
+                        <option value="Heirloom Redesign" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Heirloom Redesign &amp; Melting</option>
                         <option value="Gold Exchange" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Gold Exchange &amp; Valuation</option>
                         <option value="Live Video Shopping" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Live Video Shopping Booking</option>
                         <option value="Order Tracking" className="bg-[var(--bg-card)] text-[var(--text-primary)]">Online Order Tracking</option>
@@ -210,11 +235,18 @@ export default function ContactPage() {
                       </span>
                     </label>
 
+                    {errorMessage && (
+                      <div className="p-3 bg-rose-100 dark:bg-rose-950/40 border border-rose-400 dark:border-rose-500/50 text-rose-700 dark:text-rose-300 rounded-[2px] text-xs">
+                        {errorMessage}
+                      </div>
+                    )}
+
                     <button 
                       type="submit" 
-                      className="btn-gold-primary w-full py-3.5"
+                      disabled={isSubmitting}
+                      className="btn-gold-primary w-full py-3.5 disabled:opacity-50"
                     >
-                      SEND INQUIRY TO CONCIERGE
+                      {isSubmitting ? 'TRANSMITTING ENQUIRY...' : 'SEND INQUIRY TO CONCIERGE'}
                     </button>
                   </form>
                 )}

@@ -3,6 +3,7 @@ import crypto from 'crypto';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { secureLogger } from '@/lib/logger';
+import { confirmInventoryForOrder } from '@/lib/inventoryEngine';
 
 /**
  * Razorpay Webhook Receiver — UPI & Network Drop-Off Safety Net
@@ -131,7 +132,7 @@ export async function POST(request: Request) {
       // ────────────────────────────────────────────────────────────────────
       let orderQuery = dbClient
         .from('orders')
-        .select('id, order_number, total, status, payment_status, razorpay_order_id, razorpay_payment_id');
+        .select('id, order_number, total, status, payment_status, razorpay_order_id, razorpay_payment_id, items');
 
       if (razorpayOrderId) {
         orderQuery = orderQuery.eq('razorpay_order_id', razorpayOrderId);
@@ -220,6 +221,9 @@ export async function POST(request: Request) {
           { status: 500 }
         );
       }
+
+      // Atomically Confirm Inventory & Transition Items to 'out_of_stock'
+      await confirmInventoryForOrder(existingOrder.order_number || existingOrder.id, existingOrder.items || []);
 
       // ────────────────────────────────────────────────────────────────────
       // 9. Audit Log: Record that this webhook RECOVERED an abandoned payment

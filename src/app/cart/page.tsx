@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Header from '@/components/layout/Header';
 import Footer from '@/components/layout/Footer';
@@ -8,9 +9,64 @@ import MandalaDivider from '@/components/ui/MandalaDivider';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
 import { getCartWhatsAppUrl } from '@/lib/whatsapp';
+import { validateCoupon } from '@/lib/couponEngine';
 
 export default function CartPage() {
   const { state, dispatch, cartTotal } = useCart();
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState<number>(0);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem('ambika_applied_coupon');
+      if (saved && cartTotal > 0) {
+        const res = validateCoupon(saved, cartTotal);
+        if (res.isValid) {
+          setAppliedCoupon(res.code);
+          setCouponDiscount(res.discountPaise);
+          setCouponSuccess(res.message);
+        } else {
+          sessionStorage.removeItem('ambika_applied_coupon');
+        }
+      }
+    } catch (e) {}
+  }, [cartTotal]);
+
+  const handleApplyCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCouponError(null);
+    setCouponSuccess(null);
+    const res = validateCoupon(couponCode, cartTotal);
+    if (res.isValid) {
+      setAppliedCoupon(res.code);
+      setCouponDiscount(res.discountPaise);
+      setCouponSuccess(res.message);
+      try {
+        sessionStorage.setItem('ambika_applied_coupon', res.code);
+      } catch (e) {}
+    } else {
+      setCouponError(res.message);
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+      try {
+        sessionStorage.removeItem('ambika_applied_coupon');
+      } catch (e) {}
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponCode('');
+    setCouponSuccess(null);
+    setCouponError(null);
+    try {
+      sessionStorage.removeItem('ambika_applied_coupon');
+    } catch (e) {}
+  };
 
   const formatPrice = (paise: number) => {
     return new Intl.NumberFormat('en-IN', {
@@ -20,10 +76,11 @@ export default function CartPage() {
     }).format(paise / 100);
   };
 
-  const tax = Math.round(cartTotal * siteConfig.tax.gstRate);
+  const discountedSubtotal = Math.max(0, cartTotal - couponDiscount);
+  const tax = Math.round(discountedSubtotal * siteConfig.tax.gstRate);
   const isFreeShipping = cartTotal >= siteConfig.shipping.freeThreshold;
   const shipping = isFreeShipping ? 0 : siteConfig.shipping.flatRate;
-  const finalTotal = cartTotal + tax + shipping;
+  const finalTotal = discountedSubtotal + tax + shipping;
 
   return (
     <>
@@ -137,6 +194,27 @@ export default function CartPage() {
                       <span>Subtotal</span>
                       <span className="font-medium text-[var(--text-primary)]">{formatPrice(cartTotal)}</span>
                     </div>
+
+                    {appliedCoupon && (
+                      <div className="flex justify-between items-center text-emerald-700 dark:text-emerald-400">
+                        <span className="flex items-center gap-1">
+                          <span className="material-symbols-outlined text-xs">local_offer</span>
+                          Privilege ({appliedCoupon})
+                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="font-semibold">-{formatPrice(couponDiscount)}</span>
+                          <button
+                            type="button"
+                            onClick={handleRemoveCoupon}
+                            className="text-red-500 hover:text-red-700 text-[10px] uppercase font-bold underline cursor-pointer"
+                            title="Remove coupon"
+                          >
+                            ✕
+                          </button>
+                        </div>
+                      </div>
+                    )}
+
                     <div className="flex justify-between items-center">
                       <span>Shipping</span>
                       <span className="text-emerald-700 dark:text-emerald-400 font-semibold tracking-wider uppercase text-[10.5px]">
@@ -147,6 +225,38 @@ export default function CartPage() {
                       <span>Tax (GST 3%)</span>
                       <span className="font-medium text-[var(--text-primary)]">{formatPrice(tax)}</span>
                     </div>
+                  </div>
+
+                  {/* Coupon Privilege Form */}
+                  <div className="mb-5 pt-3.5 border-t border-[var(--border-subtle)]">
+                    <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                      <input
+                        type="text"
+                        value={couponCode}
+                        onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                        placeholder="COUPON (e.g. DOGRA5000)"
+                        className="flex-1 bg-[var(--bg-surface)] border border-[var(--border-subtle)] px-2.5 py-1.5 text-xs text-[var(--text-primary)] font-mono uppercase tracking-wider rounded-[2px] focus:outline-none focus:border-[var(--accent-gold)]"
+                      />
+                      <button
+                        type="submit"
+                        disabled={!couponCode.trim()}
+                        className="px-3 py-1.5 bg-[var(--bg-surface)] hover:bg-[var(--accent-gold)] hover:text-white text-[var(--accent-gold)] border border-[var(--accent-gold)] font-mono text-[10px] tracking-widest font-semibold uppercase rounded-[2px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
+                      >
+                        APPLY
+                      </button>
+                    </form>
+                    {couponSuccess && (
+                      <p className="font-sans text-[11px] text-emerald-600 dark:text-emerald-400 mt-1.5 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">check_circle</span>
+                        {couponSuccess}
+                      </p>
+                    )}
+                    {couponError && (
+                      <p className="font-sans text-[11px] text-red-500 mt-1.5 flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">error</span>
+                        {couponError}
+                      </p>
+                    )}
                   </div>
                   
                   <div className="border-t border-dashed border-[var(--border-subtle)] pt-3.5 mb-5">

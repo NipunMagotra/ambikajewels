@@ -4,10 +4,13 @@ import { useState } from 'react';
 import Link from 'next/link';
 import type { Product } from '@/types';
 import { useCart } from '@/context/CartContext';
+import { useWishlist } from '@/context/WishlistContext';
 import { getProductWhatsAppUrl } from '@/lib/whatsapp';
 
 export default function ProductCard({ product }: { product: Product }) {
-  const [isWishlisted, setIsWishlisted] = useState(false);
+  const { toggleWishlist, isInWishlist } = useWishlist();
+  const isWishlisted = isInWishlist(product.id);
+  const isOutOfStock = product.stock_status === 'out_of_stock';
   const [addedAnimation, setAddedAnimation] = useState(false);
   const { dispatch } = useCart();
   const mainImage = product.images?.[0] || '/hero-clean.png';
@@ -16,6 +19,7 @@ export default function ProductCard({ product }: { product: Product }) {
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
+    if (isOutOfStock) return;
     dispatch({
       type: 'ADD_ITEM',
       payload: {
@@ -63,9 +67,16 @@ export default function ProductCard({ product }: { product: Product }) {
         </Link>
 
         {/* Subtle Purity Stamp */}
-        {badgeText && (
+        {badgeText && !isOutOfStock && (
           <span className="absolute top-2.5 left-2.5 bg-[var(--bg-main)]/95 text-[var(--accent-gold)] font-sans text-[8px] sm:text-[9px] px-2 py-0.5 font-semibold tracking-[0.2em] uppercase backdrop-blur-xs border border-[var(--border-card)] rounded-[1px] shadow-xs">
             {badgeText}
+          </span>
+        )}
+
+        {/* Out of Stock Badge */}
+        {isOutOfStock && (
+          <span className="absolute top-2.5 left-2.5 bg-rose-900/90 text-white font-sans text-[8px] sm:text-[9px] px-2 py-0.5 font-semibold tracking-[0.2em] uppercase backdrop-blur-xs rounded-[1px] shadow-xs">
+            OUT OF STOCK
           </span>
         )}
 
@@ -74,7 +85,7 @@ export default function ProductCard({ product }: { product: Product }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
-            setIsWishlisted(!isWishlisted);
+            toggleWishlist(product);
           }}
           className="absolute top-2.5 right-2.5 w-8 h-8 sm:w-9 sm:h-9 bg-[var(--bg-card)]/90 text-[var(--text-secondary)] hover:text-[var(--accent-gold)] transition-colors flex items-center justify-center backdrop-blur-xs border border-[var(--border-subtle)] rounded-full cursor-pointer shadow-xs"
           aria-label={isWishlisted ? "Remove from wishlist" : "Save to wishlist"}
@@ -94,9 +105,10 @@ export default function ProductCard({ product }: { product: Product }) {
           </button>
           <button
             onClick={handleAddToCart}
-            className="btn-gold-secondary py-2 text-[10px] w-full bg-[var(--bg-surface)]/95 text-[var(--accent-gold)] border-[var(--border-card)] hover:border-[var(--accent-gold)]"
+            disabled={isOutOfStock}
+            className="btn-gold-secondary py-2 text-[10px] w-full bg-[var(--bg-surface)]/95 text-[var(--accent-gold)] border-[var(--border-card)] hover:border-[var(--accent-gold)] disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {addedAnimation ? '✓ ADDED TO BAG' : '+ ADD TO BAG'}
+            {addedAnimation ? '✓ ADDED TO BAG' : isOutOfStock ? 'OUT OF STOCK' : '+ ADD TO BAG'}
           </button>
         </div>
       </div>
@@ -138,12 +150,13 @@ export default function ProductCard({ product }: { product: Product }) {
 
           <button
             onClick={handleAddToCart}
-            className="min-w-[44px] min-h-[44px] flex items-center justify-center btn-gold-secondary bg-[var(--bg-surface)] text-[var(--accent-gold)] border-[var(--border-card)] shrink-0 p-2"
-            title="Add to Bag"
-            aria-label="Add to Bag"
+            disabled={isOutOfStock}
+            className="min-w-[44px] min-h-[44px] flex items-center justify-center btn-gold-secondary bg-[var(--bg-surface)] text-[var(--accent-gold)] border-[var(--border-card)] shrink-0 p-2 disabled:opacity-50 disabled:cursor-not-allowed"
+            title={isOutOfStock ? "Out of Stock" : "Add to Bag"}
+            aria-label={isOutOfStock ? "Out of Stock" : "Add to Bag"}
           >
             <span className="material-symbols-outlined text-base">
-              {addedAnimation ? 'check' : 'shopping_bag'}
+              {addedAnimation ? 'check' : isOutOfStock ? 'block' : 'shopping_bag'}
             </span>
           </button>
         </div>

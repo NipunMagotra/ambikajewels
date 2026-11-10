@@ -1,6 +1,19 @@
 import { NextResponse } from 'next/server';
 import crypto from 'crypto';
-import { getAdminPasscode, getAdminCookieName, createAdminSessionToken, isPasscodeConfigured, ADMIN_SESSION_MAX_AGE_SECONDS } from '@/lib/adminAuth';
+import {
+  getAdminCookieName,
+  ADMIN_SESSION_MAX_AGE_SECONDS
+} from '@/lib/adminAuth';
+import {
+  memoryStaffAccounts,
+  verifyPassword,
+  verifyTotp,
+  consumeRecoveryCode,
+  needsPasswordRehash,
+  hashPassword,
+  createStaffSessionToken,
+  AdminSession
+} from '@/lib/staffAuth';
 import { checkRateLimit } from '@/lib/rateLimit';
 
 export async function POST(request: Request) {
@@ -8,7 +21,7 @@ export async function POST(request: Request) {
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
 
-    // 1. Shared Upstash Redis Rate Limiting (5 attempts per 15 minutes)
+    // 1. Sliding Window Rate Limiting (5 attempts per 15 minutes)
     const rateCheck = await checkRateLimit('adminLogin', ip);
     if (!rateCheck.success) {
       return NextResponse.json(
@@ -20,39 +33,131 @@ export async function POST(request: Request) {
       );
     }
 
-    const body = await request.json();
-    const { passcode } = body;
+    const body = await request.json().catch(() => ({}));
+    const { email, password, passcode, mfa_code, recovery_code } = body;
 
-    if (!passcode || typeof passcode !== 'string' || !isPasscodeConfigured()) {
+    // 2. Reject Legacy Shared PIN Bypasses
+    if (passcode && (!email || !password)) {
       return NextResponse.json(
-        { success: false, message: 'Invalid admin credentials or server configuration' },
+        {
+          success: false,
+          message:
+            'Shared legacy PIN authentication is permanently disabled. Please log in using your individual staff account credentials (email and password).'
+        },
         { status: 401 }
       );
     }
 
-    const validPasscode = getAdminPasscode();
-    const inputBuf = Buffer.from(passcode.trim());
-    const validBuf = Buffer.from(validPasscode.trim());
-
-    // 2. Constant-time comparison to prevent timing attacks
-    let isMatch = false;
-    if (inputBuf.length === validBuf.length) {
-      isMatch = crypto.timingSafeEqual(inputBuf, validBuf);
-    }
-
-    if (!isMatch) {
+    // 3. Enforce Individual Staff Account Credentials
+    if (!email || typeof email !== 'string' || !password || typeof password !== 'string') {
       return NextResponse.json(
-        { success: false, message: 'Invalid admin passcode' },
+        {
+          success: false,
+          message: 'Both individual staff email and password are required.'
+        },
         { status: 401 }
       );
     }
 
-    // 3. Generate Cryptographically Signed Session Token (12 Hours Max Lifetime)
-    const sessionToken = createAdminSessionToken(ADMIN_SESSION_MAX_AGE_SECONDS);
+    const cleanEmail = email.trim().toLowerCase();
+    const account = memoryStaffAccounts.get(cleanEmail);
+
+    if (!account || !account.isActive) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid credentials or staff account is deactivated.' },
+        { status: 401 }
+      );
+    }
+
+    const isValidPassword = verifyPassword(password, account.passwordHash, account.salt);
+    if (!isValidPassword) {
+      return NextResponse.json(
+        { success: false, message: 'Invalid credentials or staff account is deactivated.' },
+        { status: 401 }
+      );
+    }
+
+    // 4. Mandatory MFA Enforcement for Owner and MFA-enabled accounts
+    let mfaVerified = false;
+    const isMfaMandatory = account.role === 'owner' || account.mfaEnabled;
+
+    if (isMfaMandatory) {
+      if (!account.mfaSecret) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'MFA configuration missing for privileged account. Contact security administrator.'
+          },
+          { status: 500 }
+        );
+      }
+
+      // Check if neither MFA code nor recovery code was supplied
+      if (!mfa_code && !recovery_code) {
+        return NextResponse.json(
+          {
+            success: false,
+            requires_mfa: true,
+            message: 'Multi-Factor Authentication required. Enter the 6-digit code from your authenticator app.'
+          },
+          { status: 200 }
+        );
+      }
+
+      // Check single-use emergency recovery code if supplied
+      if (recovery_code && typeof recovery_code === 'string') {
+        const recoveryResult = consumeRecoveryCode(account, recovery_code);
+        if (!recoveryResult.valid) {
+          return NextResponse.json(
+            { success: false, message: recoveryResult.error || 'Invalid recovery code.' },
+            { status: 401 }
+          );
+        }
+        mfaVerified = true;
+      }
+      // Otherwise verify 6-digit RFC 6238 TOTP with anti-replay
+      else if (mfa_code && typeof mfa_code === 'string') {
+        const totpResult = verifyTotp(mfa_code, account.mfaSecret, account.id);
+        if (!totpResult.valid) {
+          return NextResponse.json(
+            { success: false, message: totpResult.error || 'Invalid 6-digit Multi-Factor Authentication code.' },
+            { status: 401 }
+          );
+        }
+        mfaVerified = true;
+      }
+    }
+
+    // 5. Transparent Password Hash Upgrade (OWASP 260,000 PBKDF2 iterations)
+    if (needsPasswordRehash(account.passwordHash)) {
+      const upgraded = hashPassword(password, account.salt);
+      account.passwordHash = upgraded.formatted;
+      account.updatedAt = new Date().toISOString();
+    }
+
+    // 6. Build Authenticated Session Attributable to Individual Staff Member
+    const authenticatedSession: AdminSession = {
+      sessionId: crypto.randomUUID(),
+      staffId: account.id,
+      email: account.email,
+      name: account.name,
+      role: account.role,
+      mfaVerified: isMfaMandatory ? mfaVerified : false,
+      issuedAt: Date.now(),
+      expiresAt: Date.now() + ADMIN_SESSION_MAX_AGE_SECONDS * 1000
+    };
+
+    // 7. Issue Cryptographically Signed Individual Session Token
+    const sessionToken = createStaffSessionToken(authenticatedSession);
 
     const response = NextResponse.json({
       success: true,
-      message: 'Admin authentication successful'
+      message: `Authentication successful. Welcome, ${authenticatedSession.name}.`,
+      user: {
+        email: authenticatedSession.email,
+        name: authenticatedSession.name,
+        role: authenticatedSession.role
+      }
     });
 
     response.cookies.set({
@@ -62,7 +167,7 @@ export async function POST(request: Request) {
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
       path: '/',
-      maxAge: ADMIN_SESSION_MAX_AGE_SECONDS // 12 hours
+      maxAge: ADMIN_SESSION_MAX_AGE_SECONDS
     });
 
     return response;

@@ -8,6 +8,7 @@ import MobileBottomNav from '@/components/layout/MobileBottomNav';
 import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
 import { getEmailSuggestion } from '@/lib/checkoutValidation';
+import { validateCoupon } from '@/lib/couponEngine';
 
 // Declare global Window interface for Razorpay SDK
 declare global {
@@ -46,6 +47,12 @@ export default function CheckoutPage() {
     token?: string;
   } | null>(null);
 
+  const [couponCode, setCouponCode] = useState('');
+  const [appliedCoupon, setAppliedCoupon] = useState<string | null>(null);
+  const [couponDiscount, setCouponDiscount] = useState<number>(0);
+  const [couponError, setCouponError] = useState<string | null>(null);
+  const [couponSuccess, setCouponSuccess] = useState<string | null>(null);
+
   const [formData, setFormData] = useState<FormState>({
     firstName: '',
     lastName: '',
@@ -59,10 +66,11 @@ export default function CheckoutPage() {
     notes: ''
   });
 
-  const tax = Math.round(cartTotal * siteConfig.tax.gstRate);
+  const discountedSubtotal = Math.max(0, cartTotal - couponDiscount);
+  const tax = Math.round(discountedSubtotal * siteConfig.tax.gstRate);
   const isFreeShipping = cartTotal >= siteConfig.shipping.freeThreshold;
   const shipping = isFreeShipping ? 0 : siteConfig.shipping.flatRate;
-  const finalTotal = cartTotal + tax + shipping;
+  const finalTotal = discountedSubtotal + tax + shipping;
 
   const [showPhoneConfirmModal, setShowPhoneConfirmModal] = useState(false);
   const [showOrderSummary, setShowOrderSummary] = useState(false);
@@ -96,7 +104,59 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     fetchServerRateLock();
-  }, []);
+    try {
+      const savedSummary = sessionStorage.getItem('ambika_last_order');
+      if (savedSummary) {
+        const parsed = JSON.parse(savedSummary);
+        if (parsed?.orderNumber) {
+          setOrderSummary(parsed);
+          setStep(3);
+        }
+      }
+      const savedCoupon = sessionStorage.getItem('ambika_applied_coupon');
+      if (savedCoupon && cartTotal > 0) {
+        const res = validateCoupon(savedCoupon, cartTotal);
+        if (res.isValid) {
+          setAppliedCoupon(res.code);
+          setCouponDiscount(res.discountPaise);
+          setCouponSuccess(res.message);
+        }
+      }
+    } catch (e) {}
+  }, [cartTotal]);
+
+  const handleApplyCoupon = (e: React.FormEvent) => {
+    e.preventDefault();
+    setCouponError(null);
+    setCouponSuccess(null);
+    const res = validateCoupon(couponCode, cartTotal);
+    if (res.isValid) {
+      setAppliedCoupon(res.code);
+      setCouponDiscount(res.discountPaise);
+      setCouponSuccess(res.message);
+      try {
+        sessionStorage.setItem('ambika_applied_coupon', res.code);
+      } catch (e) {}
+    } else {
+      setCouponError(res.message);
+      setAppliedCoupon(null);
+      setCouponDiscount(0);
+      try {
+        sessionStorage.removeItem('ambika_applied_coupon');
+      } catch (e) {}
+    }
+  };
+
+  const handleRemoveCoupon = () => {
+    setAppliedCoupon(null);
+    setCouponDiscount(0);
+    setCouponCode('');
+    setCouponSuccess(null);
+    setCouponError(null);
+    try {
+      sessionStorage.removeItem('ambika_applied_coupon');
+    } catch (e) {}
+  };
 
   useEffect(() => {
     if (secondsRemaining <= 0) {
@@ -225,6 +285,7 @@ export default function CheckoutPage() {
           items: state.items,
           rate_lock_token: rateLockToken,
           rate_timestamp: Date.now(),
+          coupon_code: appliedCoupon,
           customer_info: {
             first_name: formData.firstName,
             last_name: formData.lastName,
@@ -283,7 +344,7 @@ export default function CheckoutPage() {
 
         const verifyData = await verifyRes.json();
         if (verifyData.success) {
-          setOrderSummary({
+          const summary = {
             orderNumber: verifyData.order_number,
             paymentId: verifyData.payment_id,
             shiprocketStatus: verifyData.bvc_status || verifyData.shiprocket_status,
@@ -292,7 +353,12 @@ export default function CheckoutPage() {
             bvcDocketNumber: verifyData.bvc_docket_number,
             bvcSecurityBag: verifyData.bvc_security_bag_number,
             token: verifyData.token
-          });
+          };
+          setOrderSummary(summary);
+          try {
+            sessionStorage.setItem('ambika_last_order', JSON.stringify(summary));
+            sessionStorage.removeItem('ambika_applied_coupon');
+          } catch (e) {}
           dispatch({ type: 'CLEAR_CART' });
           setStep(3);
         } else {
@@ -354,7 +420,7 @@ export default function CheckoutPage() {
             const verifyData = await verifyRes.json();
 
             if (verifyRes.ok && verifyData.success) {
-              setOrderSummary({
+              const summary = {
                 orderNumber: verifyData.order_number,
                 paymentId: verifyData.payment_id,
                 shiprocketStatus: verifyData.bvc_status || verifyData.shiprocket_status,
@@ -363,7 +429,12 @@ export default function CheckoutPage() {
                 bvcDocketNumber: verifyData.bvc_docket_number,
                 bvcSecurityBag: verifyData.bvc_security_bag_number,
                 token: verifyData.token
-              });
+              };
+              setOrderSummary(summary);
+              try {
+                sessionStorage.setItem('ambika_last_order', JSON.stringify(summary));
+                sessionStorage.removeItem('ambika_applied_coupon');
+              } catch (e) {}
               dispatch({ type: 'CLEAR_CART' });
               setStep(3);
             } else {
@@ -396,7 +467,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (state.items.length === 0 && step !== 3) {
+  if (state.items.length === 0 && step !== 3 && !orderSummary) {
     return (
       <>
         <Header />
@@ -456,6 +527,12 @@ export default function CheckoutPage() {
                     </div>
                   ))}
                   <div className="pt-3 border-t border-[var(--border-subtle)] text-xs space-y-1.5">
+                    {appliedCoupon && (
+                      <div className="flex justify-between text-emerald-700 dark:text-emerald-400 font-medium">
+                        <span>Privilege Coupon ({appliedCoupon})</span>
+                        <span>-{formatPrice(couponDiscount)}</span>
+                      </div>
+                    )}
                     <div className="flex justify-between text-[var(--text-secondary)]">
                       <span>GST (3% Statutory Precious Metal Tax)</span>
                       <span>{formatPrice(tax)}</span>
@@ -526,7 +603,7 @@ export default function CheckoutPage() {
                   <span className="material-symbols-outlined text-red-500 text-xl">timer_off</span>
                   <div>
                     <strong className="block text-red-600 dark:text-red-300 font-bold uppercase tracking-wider text-[11px]">RATE LOCK WINDOW EXPIRED</strong>
-                    <span>Daily live bullion rates have timed out. Please refresh to lock today's active rate and continue.</span>
+                    <span>Daily live bullion rates have timed out. Please refresh to lock today&apos;s active rate and continue.</span>
                   </div>
                 </div>
                 <button
@@ -822,6 +899,15 @@ export default function CheckoutPage() {
                       <span className="text-[var(--text-primary)] font-medium">{formatPrice(item.price * item.quantity)}</span>
                     </div>
                   ))}
+                  {appliedCoupon && (
+                    <div className="flex justify-between items-center text-xs sm:text-sm text-emerald-700 dark:text-emerald-400 mb-1.5">
+                      <span className="flex items-center gap-1">
+                        <span className="material-symbols-outlined text-xs">local_offer</span>
+                        Privilege Coupon ({appliedCoupon})
+                      </span>
+                      <span className="font-semibold">-{formatPrice(couponDiscount)}</span>
+                    </div>
+                  )}
                   <div className="flex justify-between text-xs sm:text-sm text-[var(--text-secondary)] mb-1.5 pt-2 border-t border-[var(--border-subtle)]">
                     <span>GST (3% Statutory Precious Metal Tax)</span>
                     <span>{formatPrice(tax)}</span>
@@ -834,6 +920,58 @@ export default function CheckoutPage() {
                     <span>Total Payable Amount</span>
                     <span>{formatPrice(finalTotal)}</span>
                   </div>
+                </div>
+
+                {/* Privilege Coupon Section */}
+                <div className="bg-[var(--bg-surface)] border border-[var(--border-card)] p-4 sm:p-5 mb-6 rounded-xs">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-mono text-[10px] uppercase tracking-[0.25em] text-[var(--text-secondary)]">PRIVILEGE CODE</span>
+                    {appliedCoupon && (
+                      <button
+                        type="button"
+                        onClick={handleRemoveCoupon}
+                        className="text-red-500 hover:text-red-700 text-[10px] uppercase font-bold underline cursor-pointer"
+                      >
+                        REMOVE COUPON
+                      </button>
+                    )}
+                  </div>
+                  <form onSubmit={handleApplyCoupon} className="flex gap-2">
+                    <input
+                      type="text"
+                      value={couponCode}
+                      onChange={(e) => setCouponCode(e.target.value.toUpperCase())}
+                      placeholder="ENTER COUPON CODE"
+                      disabled={Boolean(appliedCoupon)}
+                      className="flex-1 bg-[var(--bg-main)] border border-[var(--border-subtle)] px-3 py-2 text-xs text-[var(--text-primary)] font-mono uppercase tracking-wider rounded-xs focus:outline-none focus:border-[var(--accent-gold)] disabled:opacity-60"
+                    />
+                    {!appliedCoupon ? (
+                      <button
+                        type="submit"
+                        disabled={!couponCode.trim()}
+                        className="px-4 py-2 bg-[var(--bg-card)] hover:bg-[var(--accent-gold)] hover:text-white text-[var(--accent-gold)] border border-[var(--accent-gold)] font-mono text-[10px] tracking-widest font-semibold uppercase rounded-xs transition-colors disabled:opacity-50 cursor-pointer"
+                      >
+                        APPLY
+                      </button>
+                    ) : (
+                      <div className="px-3 py-2 bg-emerald-500/10 border border-emerald-500/30 text-emerald-600 text-xs font-medium rounded-xs flex items-center gap-1">
+                        <span className="material-symbols-outlined text-sm">check</span>
+                        APPLIED
+                      </div>
+                    )}
+                  </form>
+                  {couponSuccess && (
+                    <p className="font-sans text-[11px] text-emerald-600 dark:text-emerald-400 mt-2 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">check_circle</span>
+                      {couponSuccess}
+                    </p>
+                  )}
+                  {couponError && (
+                    <p className="font-sans text-[11px] text-red-500 mt-2 flex items-center gap-1">
+                      <span className="material-symbols-outlined text-xs">error</span>
+                      {couponError}
+                    </p>
+                  )}
                 </div>
 
                 {/* Razorpay Compliance Checkbox */}

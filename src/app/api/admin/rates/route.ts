@@ -4,6 +4,7 @@ import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { DEFAULT_RATES } from '@/lib/counterStore';
 import { siteConfig } from '@/config/siteConfig';
+import { recordAuditLog } from '@/lib/auditLog';
 import type { DailyRates } from '@/types/counter';
 
 /**
@@ -55,8 +56,18 @@ export async function verifyBullionRateFreshness(maxHours = siteConfig.rates.max
   }
 }
 
-export async function GET() {
+export let memoryDailyRates: DailyRates = { ...DEFAULT_RATES };
+
+export async function GET(request?: Request) {
   try {
+    const isAuthed = await verifyAdminAuth(request);
+    if (!isAuthed) {
+      return NextResponse.json(
+        { success: false, error: 'Unauthorized: Admin session required to view admin rates ledger.' },
+        { status: 401 }
+      );
+    }
+
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
 
     if (dbClient) {
@@ -78,11 +89,12 @@ export async function GET() {
           updated_at: data.updated_at || new Date().toISOString(),
           updated_by: data.updated_by || 'Supabase Sync',
         };
+        memoryDailyRates = fetchedRates;
         return NextResponse.json({ success: true, rates: fetchedRates });
       }
     }
 
-    return NextResponse.json({ success: true, rates: DEFAULT_RATES });
+    return NextResponse.json({ success: true, rates: memoryDailyRates });
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Failed to fetch rates';
     return NextResponse.json({ success: false, error: errorMsg }, { status: 500 });
@@ -132,23 +144,21 @@ export async function POST(request: Request) {
 
     const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
 
-    if (!dbClient) {
-      return NextResponse.json(
-        { success: false, error: 'Database client unconfigured. Rates saved locally only.' },
-        { status: 500 }
-      );
+    // 3. Rate Sanity Bounds Check (Reject changes > maxDeviationPercent without confirmation)
+    let prev24k = memoryDailyRates.gold_24k;
+    if (dbClient) {
+      const { data: latestExisting } = await dbClient
+        .from('daily_rates')
+        .select('gold_24k')
+        .order('updated_at', { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (latestExisting && latestExisting.gold_24k) {
+        prev24k = Number(latestExisting.gold_24k);
+      }
     }
 
-    // 3. Rate Sanity Bounds Check (Reject changes > maxDeviationPercent without confirmation)
-    const { data: latestExisting } = await dbClient
-      .from('daily_rates')
-      .select('gold_24k')
-      .order('updated_at', { ascending: false })
-      .limit(1)
-      .maybeSingle();
-
-    if (latestExisting && latestExisting.gold_24k) {
-      const prev24k = Number(latestExisting.gold_24k);
+    if (prev24k > 0) {
       const deviationPercent = Math.abs((g24 - prev24k) / prev24k) * 100;
 
       if (deviationPercent > siteConfig.rates.maxDeviationPercent && !confirm_large_change) {
@@ -156,6 +166,7 @@ export async function POST(request: Request) {
           {
             success: false,
             error: `Rate change of ${deviationPercent.toFixed(1)}% exceeds the ${siteConfig.rates.maxDeviationPercent}% sanity threshold. Please set confirm_large_change: true to override.`,
+            requiresConfirmation: true,
             previous_rate_24k: prev24k,
             submitted_rate_24k: g24,
             deviation_percent: Math.round(deviationPercent * 10) / 10
@@ -180,6 +191,22 @@ export async function POST(request: Request) {
       updated_by: modifierLabel
     };
 
+    if (!dbClient) {
+      memoryDailyRates = payload;
+      await recordAuditLog({
+        action: 'RATES_UPDATED',
+        entityType: 'rates',
+        entityId: 'daily_rates',
+        newValues: payload,
+        request
+      });
+      return NextResponse.json({
+        success: true,
+        message: 'Daily bullion rates updated successfully.',
+        rates: memoryDailyRates
+      });
+    }
+
     const { data, error } = await dbClient
       .from('daily_rates')
       .insert(payload)
@@ -193,6 +220,13 @@ export async function POST(request: Request) {
         { status: 500 }
       );
     }
+
+    await recordAuditLog({
+      action: 'BULLION_RATES_UPDATED',
+      entityType: 'rates',
+      newValues: payload,
+      request
+    });
 
     return NextResponse.json({
       success: true,

@@ -58,28 +58,29 @@ export async function GET(request: Request) {
         : await query.eq('order_number', orderId).maybeSingle();
 
       if (!error && data) {
-        // Authenticate against database record
+        // Authenticate against database record (support both schema columns customer_email/customer_phone and legacy/mock email/phone)
         let isAuthenticated = false;
+        const dbEmail = (data.customer_email || data.email || '').toLowerCase().trim();
+        const dbPhone = (data.customer_phone || data.phone || '').replace(/\D/g, '').slice(-10);
 
         if (token) {
           if (
-            (data.email && verifyOrderAccessToken(orderId, data.email, token)) ||
-            (data.phone && verifyOrderAccessToken(orderId, data.phone, token))
+            (dbEmail && verifyOrderAccessToken(orderId, dbEmail, token)) ||
+            (dbPhone && verifyOrderAccessToken(orderId, dbPhone, token))
           ) {
             isAuthenticated = true;
           }
         }
 
-        if (!isAuthenticated && email && data.email) {
-          if (data.email.toLowerCase().trim() === email) {
+        if (!isAuthenticated && email && dbEmail) {
+          if (dbEmail === email.toLowerCase().trim()) {
             isAuthenticated = true;
           }
         }
 
-        if (!isAuthenticated && phone && data.phone) {
+        if (!isAuthenticated && phone && dbPhone) {
           const cleanInputPhone = phone.replace(/\D/g, '').slice(-10);
-          const cleanDbPhone = data.phone.replace(/\D/g, '').slice(-10);
-          if (cleanInputPhone.length === 10 && cleanInputPhone === cleanDbPhone) {
+          if (cleanInputPhone.length === 10 && cleanInputPhone === dbPhone) {
             isAuthenticated = true;
           }
         }
@@ -97,6 +98,13 @@ export async function GET(request: Request) {
 
     // 4. Fallback for demo / development orders
     if (!orderData) {
+      if (process.env.NODE_ENV === 'production' && dbClient) {
+        return NextResponse.json(
+          { success: false, error: 'No order found with the provided details. Please verify your Order Reference Number.' },
+          { status: 404 }
+        );
+      }
+
       if (orderId && orderId.startsWith('AMB-')) {
         // Validate input format for demo
         const cleanPhone = phone ? phone.replace(/\D/g, '').slice(-10) : '';
@@ -141,43 +149,66 @@ export async function GET(request: Request) {
     const docketNum = orderData.bvc_docket_number || orderData.shiprocket_awb || orderData.shiprocket_order_id || 'BVC-LIVE-PENDING';
     const securityBag = orderData.bvc_security_bag_number || 'AMB-SECBAG-SEALED';
 
-    const timeline = [
-      {
-        stage: 'Order Confirmed & Hallmark Verified',
-        description: 'Payment verified via Razorpay. BIS hallmark and HUID verified at Jammu showroom.',
-        timestamp: orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        completed: true,
-        current: false
-      },
-      {
-        stage: 'Tamper-Evident Security Bag Sealed',
-        description: `High-value gold cargo sealed in serialized tamper-evident security vault bag (${securityBag}).`,
-        timestamp: packDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        completed: true,
-        current: false
-      },
-      {
-        stage: 'Handed to BVC Logistics Armed Network',
-        description: 'Consignment handed over to BVC Logistics armored escort vehicle under insured transit protocol.',
-        timestamp: dispatchDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
-        completed: true,
-        current: true
-      },
-      {
-        stage: 'Strongroom Vault Deposit & Air Transit',
-        description: 'Secured inside biometric strongroom vault and routed via dedicated express transit.',
-        timestamp: 'In Progress',
-        completed: false,
-        current: false
-      },
-      {
-        stage: 'Out for Secure Armored Delivery',
-        description: 'Armed courier en route. Mandatory recipient photo-ID and OTP verification required upon handover.',
-        timestamp: `Estimated by ${estimatedDelivery.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`,
-        completed: false,
-        current: false
-      }
-    ];
+    const currentStatus = String(orderData.status || 'confirmed').toLowerCase();
+    const isCancelled = currentStatus === 'cancelled';
+    const isDelivered = currentStatus === 'delivered';
+    const isShipped = currentStatus === 'shipped' || isDelivered;
+    const isProcessing = currentStatus === 'processing' || isShipped;
+    const isConfirmed = currentStatus === 'confirmed' || isProcessing || isDelivered;
+
+    const timeline = isCancelled
+      ? [
+          {
+            stage: 'Order Cancelled',
+            description: orderData.notes || 'This order was cancelled. Please contact showroom concierge for assistance.',
+            timestamp: orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+            completed: true,
+            current: true
+          }
+        ]
+      : [
+          {
+            stage: 'Order Confirmed & Hallmark Verified',
+            description: 'Payment verified via Razorpay. BIS hallmark and HUID verified at Jammu showroom.',
+            timestamp: orderDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }),
+            completed: isConfirmed,
+            current: isConfirmed && !isProcessing
+          },
+          {
+            stage: 'Tamper-Evident Security Bag Sealed',
+            description: `High-value gold cargo sealed in serialized tamper-evident security vault bag (${securityBag}).`,
+            timestamp: isProcessing
+              ? packDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+              : (isConfirmed ? 'In Progress' : 'Pending'),
+            completed: isProcessing,
+            current: isProcessing && !isShipped
+          },
+          {
+            stage: 'Handed to BVC Logistics Armed Network',
+            description: `Consignment handed over to BVC Logistics armored escort vehicle under insured transit protocol (Docket: ${docketNum}).`,
+            timestamp: isShipped
+              ? dispatchDate.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })
+              : (isProcessing ? 'Scheduled for Dispatch' : 'Pending'),
+            completed: isShipped,
+            current: isShipped && !isDelivered
+          },
+          {
+            stage: 'Strongroom Vault Deposit & Air Transit',
+            description: 'Secured inside biometric strongroom vault and routed via dedicated express transit.',
+            timestamp: isDelivered ? 'Completed' : (isShipped ? 'In Transit' : 'Pending'),
+            completed: isDelivered,
+            current: false
+          },
+          {
+            stage: 'Delivered (OTP & Photo-ID Verified)',
+            description: 'Armed courier handover completed. Recipient verification confirmed.',
+            timestamp: isDelivered
+              ? 'Handover Completed'
+              : `Estimated by ${estimatedDelivery.toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}`,
+            completed: isDelivered,
+            current: isDelivered
+          }
+        ];
 
     // 6. Generate Dynamic Tax Invoice Details (GST Compliant, HSN 7113)
     const maskedAddress = maskAddress(orderData.shipping_address, orderData.pincode);
