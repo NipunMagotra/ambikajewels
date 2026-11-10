@@ -41,9 +41,9 @@ export const DEFAULT_STORE_CONTENT: StoreContentConfig = {
     imageUrl: '/hero-clean.png'
   },
   announcement: {
-    isEnabled: true,
-    text: 'Festive Privilege: Use code DOGRA5000 for ₹5,000 flat savings on orders above ₹50,000 | 100% Insured BVC Armed Delivery Across India',
-    linkUrl: '/collections/all'
+    isEnabled: false,
+    text: '',
+    linkUrl: ''
   },
   showroom: {
     address: siteConfig.address,

@@ -15,11 +15,7 @@ export default function Header() {
   const [categoriesDropdownOpen, setCategoriesDropdownOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [isDark, setIsDark] = useState(false);
-  const [announcement, setAnnouncement] = useState<{ isEnabled: boolean; text: string; linkUrl?: string } | null>({
-    isEnabled: true,
-    text: 'Festive Privilege: Use code DOGRA5000 for ₹5,000 flat savings on orders above ₹50,000 | 100% Insured BVC Armed Delivery Across India',
-    linkUrl: '/collections'
-  });
+  const [announcement, setAnnouncement] = useState<{ isEnabled: boolean; text: string; linkUrl?: string } | null>(null);
 
   useEffect(() => {
     fetch('/api/content')

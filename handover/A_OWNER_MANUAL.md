@@ -215,7 +215,7 @@ You can update store announcements and showroom timings anytime without develope
 1. Click the **🎨 Website Content** tab.
 2. **Announcement Bar:**
    - Check or uncheck **Enable Announcement**.
-   - Type your latest notice (e.g. *Festive Privilege: Use code DOGRA5000 for ₹5,000 savings | Showroom open 7 days*).
+   - Type your latest notice (e.g. *Special Wedding Season Savings | Jammu Showroom Open All 7 Days*).
 3. **Homepage Hero Banner:**
    - Update the headline, subtitle, or button text.
 4. **Jammu Showroom Timings & Contact:**
