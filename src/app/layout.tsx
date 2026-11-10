@@ -29,6 +29,15 @@ export const metadata: Metadata = {
   alternates: {
     canonical: "/"
   },
+  icons: {
+    icon: [
+      { url: '/icon.svg', type: 'image/svg+xml' },
+      { url: '/favicon.ico', sizes: 'any' }
+    ],
+    apple: [
+      { url: '/apple-icon.png', sizes: '180x180', type: 'image/png' }
+    ]
+  },
   openGraph: {
     title: `${siteConfig.name} | Authentic Dogra Heritage & Fine Jewellery`,
     description: siteConfig.description,
