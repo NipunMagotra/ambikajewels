@@ -23,7 +23,6 @@ import type { StoreContentConfig } from '@/lib/storeContent';
 import {
   LayoutDashboard,
   Gem,
-  TrendingUp,
   Package,
   ShoppingBag,
   Ticket,
@@ -170,18 +169,8 @@ export default function AdminDashboardClient() {
   const [updatingOrderId, setUpdatingOrderId] = useState<string | null>(null);
   const [docketInputs, setDocketInputs] = useState<Record<string, string>>({});
 
-  // Rates State
+  // Rates State (Showroom Counter)
   const [rates, setRates] = useState<DailyRates>(DEFAULT_RATES);
-  const [isRatesLoading, setIsRatesLoading] = useState(false);
-  const [isSavingRates, setIsSavingRates] = useState(false);
-  const [rateForm, setRateForm] = useState({
-    gold_24k: 7850,
-    gold_22k: 7190,
-    gold_18k: 5890,
-    gold_14k: 4580,
-    silver_999: 98,
-    silver_925: 85
-  });
 
   // Coupons State
   const [coupons, setCoupons] = useState<CouponRule[]>([]);
@@ -237,24 +226,13 @@ export default function AdminDashboardClient() {
 
   const fetchRates = async () => {
     try {
-      setIsRatesLoading(true);
       const res = await fetch('/api/admin/rates');
       const data = await res.json();
       if (res.ok && data.rates) {
         setRates(data.rates);
-        setRateForm({
-          gold_24k: data.rates.gold_24k || 7850,
-          gold_22k: data.rates.gold_22k || 7190,
-          gold_18k: data.rates.gold_18k || 5890,
-          gold_14k: data.rates.gold_14k || 4580,
-          silver_999: data.rates.silver_999 || 98,
-          silver_925: data.rates.silver_925 || 85
-        });
       }
     } catch (err) {
       console.error('Error fetching rates:', err);
-    } finally {
-      setIsRatesLoading(false);
     }
   };
 
@@ -589,52 +567,26 @@ export default function AdminDashboardClient() {
     }
   };
 
-  // ── Rates Submit ──────────────────────────────────────────────────
-  const handleSaveRatesSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    const prev22k = rates.gold_22k;
-    const prev24k = rates.gold_24k;
-    
-    // Extreme deviation guard (e.g. typing 82500 instead of 8250)
-    const deviation22k = prev22k > 0 ? Math.abs((rateForm.gold_22k - prev22k) / prev22k) * 100 : 0;
-    const deviation24k = prev24k > 0 ? Math.abs((rateForm.gold_24k - prev24k) / prev24k) * 100 : 0;
-    const maxDev = Math.max(deviation22k, deviation24k);
-
-    if (maxDev > 15) {
-      const proceed = confirm(
-        `[EXTREME RATE CHANGE WARNING]\n\nYou entered ₹${rateForm.gold_22k}/g for 22K (was ₹${prev22k}/g) and ₹${rateForm.gold_24k}/g for 24K (was ₹${prev24k}/g).\nThis is a ${maxDev.toFixed(1)}% deviation.\n\nDid you make a typing mistake (e.g., extra zero)? Click OK only if you are certain this rate is accurate.`
-      );
-      if (!proceed) return;
-    } else {
-      const confirmUpdate = confirm(
-        `Confirm Bullion Rate Update:\n\n22K Gold: ₹${prev22k}/g → ₹${rateForm.gold_22k}/g\n24K Gold: ₹${prev24k}/g → ₹${rateForm.gold_24k}/g\n\nImpact: This will immediately recalculate live pricing for all formula-priced jewellery and update the gold ticker in the header. Proceed?`
-      );
-      if (!confirmUpdate) return;
-    }
-
+  // ── Showroom Daily Rates ──────────────────────────────────────────
+  const handleSaveRatesSubmit = async (newRates: Partial<DailyRates>) => {
     try {
-      setIsSavingRates(true);
       const res = await fetch('/api/admin/rates', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          ...rateForm,
-          updated_by: 'Owner Desk',
-          confirm_large_change: maxDev > 15
+          ...rates,
+          ...newRates,
+          updated_by: 'Showroom Desk'
         })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showNotification('Daily bullion rates updated and locked across the store!');
+        showNotification('Showroom rates updated successfully!');
         fetchRates();
         fetchAuditLogs();
-      } else {
-        alert(data.error || 'Failed to update bullion rates.');
       }
     } catch {
-      alert('Network error saving bullion rates.');
-    } finally {
-      setIsSavingRates(false);
+      alert('Error updating showroom rates.');
     }
   };
 
@@ -820,20 +772,6 @@ export default function AdminDashboardClient() {
             </span>
           </div>
 
-          {/* Bullion Ticker */}
-          <div className="hidden lg:flex items-center gap-3 text-xs bg-[var(--bg-primary)] px-3 py-1.5 rounded-full border border-[var(--border-color)]">
-            <span className="flex h-2 w-2 relative">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="font-medium text-[var(--text-secondary)]">Live Jammu Rates:</span>
-            <span className="font-mono font-semibold text-[var(--gold-primary)]">24K: ₹{rates.gold_24k}/g</span>
-            <span className="text-zinc-600">|</span>
-            <span className="font-mono font-semibold text-[var(--text-primary)]">22K: ₹{rates.gold_22k}/g</span>
-            <span className="text-zinc-600">|</span>
-            <span className="font-mono font-semibold text-zinc-300">Silver: ₹{rates.silver_925}/g</span>
-          </div>
-
           {/* User profile & external links */}
           <div className="flex items-center gap-3">
             <Link
@@ -887,7 +825,6 @@ export default function AdminDashboardClient() {
           {[
             { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
             { id: 'products', label: `Jewellery Pieces (${products.length})`, icon: Gem },
-            { id: 'pricing', label: 'Bullion & Pricing', icon: TrendingUp },
             { id: 'inventory', label: `Inventory (${inStockCount})`, icon: Package },
             { id: 'orders', label: `Orders (${orders.length})`, icon: ShoppingBag },
             { id: 'coupons', label: `Coupons (${coupons.length})`, icon: Ticket },
@@ -896,7 +833,7 @@ export default function AdminDashboardClient() {
             { id: 'audit', label: 'Audit Log', icon: ClipboardList }
           ].map(tab => {
             const Icon = tab.icon;
-            const isTabActive = activeTab === tab.id || (tab.id === 'pricing' && activeTab === 'rates') || (tab.id === 'content' && activeTab === 'store');
+            const isTabActive = activeTab === tab.id || (tab.id === 'content' && activeTab === 'store');
             return (
               <button
                 key={tab.id}
@@ -963,13 +900,13 @@ export default function AdminDashboardClient() {
 
               <div className="bg-[var(--bg-surface)] p-5 rounded-xl border border-[var(--border-color)]">
                 <p className="text-xs uppercase tracking-wider text-[var(--text-secondary)] font-medium">
-                  Active Bullion Rate
+                  Store Orders
                 </p>
                 <p className="font-serif text-2xl font-bold text-[var(--gold-primary)] mt-1 font-mono">
-                  ₹{rates.gold_24k}/g
+                  {orders.length} <span className="text-sm font-sans font-normal text-[var(--text-secondary)]">Total</span>
                 </p>
                 <p className="text-[11px] text-[var(--text-secondary)] mt-1">
-                  22K: ₹{rates.gold_22k}/g | Silver: ₹{rates.silver_925}/g
+                  {pendingOrdersCount} Pending Fulfillment
                 </p>
               </div>
             </div>
@@ -994,10 +931,10 @@ export default function AdminDashboardClient() {
                   Check Pending Orders ({pendingOrdersCount})
                 </button>
                 <button
-                  onClick={() => setActiveTab('pricing')}
-                  className="px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-lg text-xs font-medium hover:border-[var(--gold-primary)] transition-all"
+                  onClick={() => setActiveTab('inventory')}
+                  className="px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-lg text-xs font-medium hover:border-[var(--gold-primary)] transition-all flex items-center gap-1.5"
                 >
-                  Update Gold Rates
+                  <Package className="w-3.5 h-3.5" /> Manage Inventory
                 </button>
                 <button
                   onClick={() => {
@@ -1337,168 +1274,7 @@ export default function AdminDashboardClient() {
         )}
 
         {/* ========================================================================= */}
-        {/* TAB 3: BULLION & PRICING */}
-        {/* ========================================================================= */}
-        {(activeTab === 'pricing' || activeTab === 'rates') && (
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Daily Bullion Rates Editor */}
-            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-color)] space-y-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[var(--gold-primary)]">
-                  Jammu Bullion Market Rates (₹/Gram)
-                </h3>
-                {isRatesLoading && <p className="text-[11px] text-amber-400 animate-pulse">Syncing market rates...</p>}
-                <p className="text-xs text-[var(--text-secondary)]">
-                  Updating these rates automatically locks and recalculates real-time pricing for live formula products across the entire website.
-                </p>
-              </div>
-
-              <form onSubmit={handleSaveRatesSubmit} className="space-y-4 text-xs">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                      Gold 24K (999 Fineness) *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={rateForm.gold_24k}
-                      onChange={e => setRateForm({ ...rateForm, gold_24k: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm text-[var(--gold-primary)] font-bold"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                      Gold 22K (916 Hallmarked) *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={rateForm.gold_22k}
-                      onChange={e => setRateForm({ ...rateForm, gold_22k: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm text-[var(--text-primary)] font-bold"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                      Gold 18K (750 Hallmarked)
-                    </label>
-                    <input
-                      type="number"
-                      value={rateForm.gold_18k}
-                      onChange={e => setRateForm({ ...rateForm, gold_18k: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                      Gold 14K (585 Everyday)
-                    </label>
-                    <input
-                      type="number"
-                      value={rateForm.gold_14k}
-                      onChange={e => setRateForm({ ...rateForm, gold_14k: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                      Silver 999 Fine (Chandi) *
-                    </label>
-                    <input
-                      type="number"
-                      required
-                      value={rateForm.silver_999}
-                      onChange={e => setRateForm({ ...rateForm, silver_999: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
-                    />
-                  </div>
-                  <div>
-                    <label className="block font-semibold text-[var(--text-secondary)] mb-1">
-                      Silver 925 Sterling
-                    </label>
-                    <input
-                      type="number"
-                      value={rateForm.silver_925}
-                      onChange={e => setRateForm({ ...rateForm, silver_925: parseFloat(e.target.value) || 0 })}
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-sm"
-                    />
-                  </div>
-                </div>
-
-                <div className="p-3 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-color)] text-[11px] text-[var(--text-secondary)] space-y-1">
-                  <p><strong>Last Updated:</strong> {new Date(rates.updated_at || Date.now()).toLocaleString('en-IN')}</p>
-                  <p><strong>Updated By:</strong> {rates.updated_by || 'Store Manager'}</p>
-                </div>
-
-                <button
-                  type="submit"
-                  disabled={isSavingRates}
-                  className="w-full py-2.5 bg-[var(--gold-primary)] text-black font-bold rounded-lg text-xs hover:opacity-90 transition-all shadow"
-                >
-                  {isSavingRates ? 'Saving Bullion Rates...' : 'Publish & Lock Daily Bullion Rates'}
-                </button>
-              </form>
-            </div>
-
-            {/* Live Pricing Breakdown Calculator */}
-            <div className="bg-[var(--bg-surface)] p-6 rounded-xl border border-[var(--border-color)] space-y-4">
-              <div>
-                <h3 className="font-serif text-lg font-bold text-[var(--text-primary)]">
-                  Live Price Breakup Simulator
-                </h3>
-                <p className="text-xs text-[var(--text-secondary)]">
-                  Formula used by customer cart and checkout: Metal Value + Making Charges + Stones + 3% GST.
-                </p>
-              </div>
-
-              <div className="space-y-3 bg-[var(--bg-primary)] p-4 rounded-xl border border-[var(--border-color)] text-xs">
-                <div className="grid grid-cols-2 gap-3">
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
-                      Sample Net Weight (Grams)
-                    </label>
-                    <input
-                      type="number"
-                      defaultValue={15}
-                      id="calc-sample-weight"
-                      className="w-full px-2.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded font-mono"
-                    />
-                  </div>
-                  <div>
-                    <label className="block text-[11px] font-semibold text-[var(--text-secondary)] mb-1">
-                      Making Charge (%)
-                    </label>
-                    <input
-                      type="number"
-                      defaultValue={8}
-                      id="calc-sample-making"
-                      className="w-full px-2.5 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded font-mono"
-                    />
-                  </div>
-                </div>
-
-                <div className="pt-3 border-t border-[var(--border-color)] space-y-2">
-                  <p className="font-bold text-[var(--gold-primary)]">Formula Reference:</p>
-                  <p className="text-[11px] text-[var(--text-secondary)] font-mono">
-                    Gold Value = Weight (g) × Today&apos;s 22K Rate (₹{rates.gold_22k})<br />
-                    Making = Gold Value × Making%<br />
-                    GST = 3% on (Gold Value + Making + Stones)
-                  </p>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* ========================================================================= */}
-        {/* TAB 4: INVENTORY MANAGEMENT */}
+        {/* TAB 3: INVENTORY MANAGEMENT */}
         {/* ========================================================================= */}
         {activeTab === 'inventory' && (
           <div className="space-y-4">

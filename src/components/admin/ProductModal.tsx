@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { siteConfig } from '@/config/siteConfig';
 import type { DailyRates } from '@/types/counter';
+import { Trash2 } from 'lucide-react';
 
 export interface ProductFormData {
   id?: string;
@@ -35,7 +36,7 @@ export interface ProductFormData {
   making_charge_rate: number;
   stone_weight_grams: number;
   stone_value_rupees: number;
-  pricing_mode: 'live_bullion' | 'fixed';
+  pricing_mode?: 'fixed' | 'live_bullion';
   size_variants: string[];
 }
 
@@ -88,7 +89,7 @@ export function ProductModal({
     making_charge_rate: 8,
     stone_weight_grams: 0.5,
     stone_value_rupees: 0,
-    pricing_mode: 'live_bullion',
+    pricing_mode: 'fixed',
     size_variants: ['Standard']
   });
 
@@ -157,7 +158,7 @@ export function ProductModal({
         making_charge_rate: 8,
         stone_weight_grams: 0.5,
         stone_value_rupees: 0,
-        pricing_mode: 'live_bullion',
+        pricing_mode: 'fixed',
         size_variants: ['Standard']
       });
     }
@@ -175,26 +176,6 @@ export function ProductModal({
     }
     onClose();
   };
-
-  // Bullion Live Formula Calculation
-  const activeRatePerGram = form.purity.includes('24K')
-    ? rates.gold_24k
-    : form.purity.includes('18K')
-    ? rates.gold_18k
-    : form.purity.includes('14K')
-    ? rates.gold_14k
-    : form.purity.includes('Silver')
-    ? rates.silver_925
-    : rates.gold_22k; // Default 22K
-
-  const metalValue = Math.round(form.weight_grams * activeRatePerGram);
-  const makingCharges = form.making_charge_type === 'percent'
-    ? Math.round((metalValue * form.making_charge_rate) / 100)
-    : Math.round(form.weight_grams * form.making_charge_rate);
-  const stoneCharges = form.stone_value_rupees || 0;
-  const preTaxTotal = metalValue + makingCharges + stoneCharges;
-  const gstAmount = Math.round(preTaxTotal * 0.03);
-  const calculatedGrandTotal = preTaxTotal + gstAmount;
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
@@ -268,9 +249,7 @@ export function ProductModal({
     }
 
     // Determine price
-    const finalPrice = form.pricing_mode === 'live_bullion'
-      ? calculatedGrandTotal.toString()
-      : form.price;
+    const finalPrice = form.price;
 
     if (!finalPrice || isNaN(Number(finalPrice)) || Number(finalPrice) <= 0) {
       alert('Please enter a valid price in rupees.');
@@ -313,7 +292,7 @@ export function ProductModal({
               {editingProduct ? 'Edit Jewellery Piece' : 'Add New Jewellery Piece'}
             </h2>
             <p className="text-xs text-[var(--text-secondary)]">
-              Manage product details, bullion purity specifications, images, and live pricing.
+              Manage product details, purity specifications, images, and pricing.
             </p>
           </div>
           <button
@@ -716,18 +695,18 @@ export function ProductModal({
                               type="button"
                               onClick={() => handleSetPrimary(idx)}
                               title="Make Primary Cover"
-                              className="p-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs"
+                              className="px-2 py-1 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-medium"
                             >
-                              ★ Set Cover
+                              Set Cover
                             </button>
                           )}
                           <button
                             type="button"
                             onClick={() => handleRemoveImage(idx)}
                             title="Remove Photo"
-                            className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs"
+                            className="p-1.5 bg-red-600 hover:bg-red-700 text-white rounded text-xs flex items-center justify-center"
                           >
-                            🗑
+                            <Trash2 className="w-3.5 h-3.5" />
                           </button>
                         </div>
                       </div>
@@ -741,40 +720,25 @@ export function ProductModal({
           {/* TAB 4: PRICING & STOCK */}
           {activeTab === 'pricing' && (
             <div className="space-y-4">
-              <div className="p-3 bg-[var(--bg-primary)] rounded-lg border border-[var(--border-color)]">
-                <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-2">
-                  Select Pricing Method
+              <div>
+                <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
+                  Product Price in Rupees (₹) *
                 </label>
-                <div className="grid grid-cols-2 gap-3">
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, pricing_mode: 'live_bullion' })}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      form.pricing_mode === 'live_bullion'
-                        ? 'border-[var(--gold-primary)] bg-[var(--gold-primary)]/10 text-[var(--gold-primary)] font-semibold'
-                        : 'border-[var(--border-color)] text-[var(--text-secondary)]'
-                    }`}
-                  >
-                    <p className="text-xs font-bold">✨ Live Bullion Formula</p>
-                    <p className="text-[11px] opacity-80 mt-0.5">
-                      Auto-syncs with Jammu gold &amp; silver rates daily.
-                    </p>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setForm({ ...form, pricing_mode: 'fixed' })}
-                    className={`p-3 rounded-lg border text-left transition-all ${
-                      form.pricing_mode === 'fixed'
-                        ? 'border-[var(--gold-primary)] bg-[var(--gold-primary)]/10 text-[var(--gold-primary)] font-semibold'
-                        : 'border-[var(--border-color)] text-[var(--text-secondary)]'
-                    }`}
-                  >
-                    <p className="text-xs font-bold">🏷️ Fixed Catalog Price</p>
-                    <p className="text-[11px] opacity-80 mt-0.5">
-                      Specify an exact fixed price in ₹ rupees.
-                    </p>
-                  </button>
+                <div className="relative">
+                  <span className="absolute left-3.5 top-2.5 text-base font-bold text-[var(--gold-primary)] font-mono">₹</span>
+                  <input
+                    type="number"
+                    min="1"
+                    required
+                    value={form.price}
+                    onChange={e => setForm({ ...form, price: e.target.value })}
+                    placeholder="e.g. 95000"
+                    className="w-full pl-9 pr-4 py-2.5 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] font-mono text-base font-bold focus:outline-none focus:border-[var(--gold-primary)]"
+                  />
                 </div>
+                <p className="text-[11px] text-[var(--text-secondary)] mt-1">
+                  Final retail customer price inclusive of all taxes.
+                </p>
               </div>
 
               {editingProduct && (
@@ -783,100 +747,6 @@ export function ProductModal({
                   <span className="font-mono font-bold text-sm text-[var(--gold-primary)]">
                     ₹{Math.round(editingProduct.price / 100).toLocaleString('en-IN')}
                   </span>
-                </div>
-              )}
-
-              {form.pricing_mode === 'live_bullion' ? (
-                <div className="space-y-4 bg-zinc-900/40 p-4 rounded-xl border border-amber-500/30">
-                  <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                        Making Charge Type
-                      </label>
-                      <select
-                        value={form.making_charge_type}
-                        onChange={e => setForm({ ...form, making_charge_type: e.target.value as any })}
-                        className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] text-sm"
-                      >
-                        <option value="percent">Percentage (%) of Gold Value</option>
-                        <option value="flat">Flat ₹ per Gram</option>
-                      </select>
-                    </div>
-                    <div>
-                      <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                        Making Charge Rate ({form.making_charge_type === 'percent' ? '%' : '₹/g'})
-                      </label>
-                      <input
-                        type="number"
-                        step="0.5"
-                        min="0"
-                        value={form.making_charge_rate}
-                        onChange={e => setForm({ ...form, making_charge_rate: parseFloat(e.target.value) || 0 })}
-                        className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-[var(--text-primary)] text-sm"
-                      />
-                    </div>
-                  </div>
-
-                  <div>
-                    <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                      Gemstone / Studded Pearl Value (₹)
-                    </label>
-                    <input
-                      type="number"
-                      min="0"
-                      value={form.stone_value_rupees}
-                      onChange={e => setForm({ ...form, stone_value_rupees: parseFloat(e.target.value) || 0 })}
-                      placeholder="0 for plain gold"
-                      className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg font-mono text-[var(--text-primary)] text-sm"
-                    />
-                  </div>
-
-                  {/* Live Formula Preview Breakdown */}
-                  <div className="p-3 bg-amber-950/20 border border-amber-600/30 rounded-lg text-xs space-y-1.5 font-sans">
-                    <p className="font-bold text-[var(--gold-primary)] uppercase tracking-wider">
-                      Live Customer Pricing Breakdown:
-                    </p>
-                    <div className="flex justify-between text-[var(--text-secondary)]">
-                      <span>Gold Value ({form.weight_grams}g @ ₹{activeRatePerGram.toLocaleString('en-IN')}/g):</span>
-                      <span className="font-mono text-[var(--text-primary)]">₹{metalValue.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between text-[var(--text-secondary)]">
-                      <span>Making Charges ({form.making_charge_type === 'percent' ? `${form.making_charge_rate}%` : `₹${form.making_charge_rate}/g`}):</span>
-                      <span className="font-mono text-[var(--text-primary)]">₹{makingCharges.toLocaleString('en-IN')}</span>
-                    </div>
-                    {stoneCharges > 0 && (
-                      <div className="flex justify-between text-[var(--text-secondary)]">
-                        <span>Stone Value:</span>
-                        <span className="font-mono text-[var(--text-primary)]">₹{stoneCharges.toLocaleString('en-IN')}</span>
-                      </div>
-                    )}
-                    <div className="flex justify-between text-[var(--text-secondary)]">
-                      <span>3% Statutory GST (HSN 7113):</span>
-                      <span className="font-mono text-[var(--text-primary)]">₹{gstAmount.toLocaleString('en-IN')}</span>
-                    </div>
-                    <div className="flex justify-between pt-2 border-t border-amber-500/30 font-bold text-sm text-[var(--gold-primary)]">
-                      <span>Computed Customer Payable:</span>
-                      <span className="font-mono text-base">₹{calculatedGrandTotal.toLocaleString('en-IN')}</span>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                <div>
-                  <label className="block text-xs font-semibold text-[var(--text-secondary)] uppercase tracking-wider mb-1">
-                    Fixed Price in Rupees (₹) *
-                  </label>
-                  <input
-                    type="number"
-                    min="100"
-                    required
-                    value={form.price}
-                    onChange={e => setForm({ ...form, price: e.target.value })}
-                    placeholder="e.g. 95000"
-                    className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] font-mono text-base"
-                  />
-                  <p className="text-[11px] text-[var(--text-secondary)] mt-1">
-                    Enter the total price inclusive of 3% GST.
-                  </p>
                 </div>
               )}
 
@@ -890,9 +760,9 @@ export function ProductModal({
                     onChange={e => setForm({ ...form, stock_status: e.target.value as any })}
                     className="w-full px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] rounded-lg text-[var(--text-primary)] text-sm"
                   >
-                    <option value="in_stock">🟢 In Stock (Ready to Dispatch)</option>
-                    <option value="limited">🟡 Limited Stock (1-2 pieces remaining)</option>
-                    <option value="out_of_stock">🔴 Sold Out / Out of Stock</option>
+                    <option value="in_stock">In Stock (Ready to Dispatch)</option>
+                    <option value="limited">Limited Stock (1-2 pieces remaining)</option>
+                    <option value="out_of_stock">Sold Out / Out of Stock</option>
                   </select>
                 </div>
                 <div className="flex items-center pt-6">

@@ -324,7 +324,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
                     <span className="font-mono">{product.display_price}</span>
                   </div>
                   <p className="text-[10px] text-[var(--text-secondary)]/70 italic pt-1">
-                    * Transparent pricing guarantee: No hidden surcharges. Subject to daily live Jammu bullion rates.
+                    * Transparent pricing guarantee: Inclusive of 3% GST. No hidden surcharges.
                   </p>
                 </div>
               )}

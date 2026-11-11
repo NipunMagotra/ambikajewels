@@ -4,7 +4,7 @@ import AdminDashboardClient from './AdminDashboardClient';
 
 export const metadata = {
   title: 'Admin Console | Ambika Jewels',
-  description: 'Manage store catalog, products, online orders, bullion market rates, and counter billing.'
+  description: 'Manage store catalog, products, online orders, and counter billing.'
 };
 
 export default async function AdminPage() {

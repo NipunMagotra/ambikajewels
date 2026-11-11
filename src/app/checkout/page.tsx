@@ -263,7 +263,7 @@ export default function CheckoutPage() {
   // Trigger Razorpay Payment Integration
   const handleRazorpayPayment = async () => {
     if (rateLockExpired) {
-      setErrorMessage(`The ${siteConfig.rates.rateLockMinutes || 15}-minute bullion rate lock has expired. Please click "REFRESH & RE-LOCK" above to confirm today's active price before proceeding.`);
+      setErrorMessage(`The ${siteConfig.rates.rateLockMinutes || 15}-minute checkout reservation has expired. Please click "REFRESH RESERVATION" above before proceeding.`);
       return;
     }
 
@@ -595,15 +595,15 @@ export default function CheckoutPage() {
             </div>
           </div>
 
-          {/* Live Bullion Rate-Lock Banner */}
+          {/* Checkout Reservation Banner */}
           {step < 3 && (
             rateLockExpired ? (
               <div className="mb-6 p-4 bg-[var(--bg-surface)] border border-red-500/50 rounded-xs flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-red-600 dark:text-red-200">
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-red-500 text-xl">timer_off</span>
                   <div>
-                    <strong className="block text-red-600 dark:text-red-300 font-bold uppercase tracking-wider text-[11px]">RATE LOCK WINDOW EXPIRED</strong>
-                    <span>Daily live bullion rates have timed out. Please refresh to lock today&apos;s active rate and continue.</span>
+                    <strong className="block text-red-600 dark:text-red-300 font-bold uppercase tracking-wider text-[11px]">CHECKOUT RESERVATION EXPIRED</strong>
+                    <span>Your checkout reservation has timed out. Please refresh to continue.</span>
                   </div>
                 </div>
                 <button
@@ -611,7 +611,7 @@ export default function CheckoutPage() {
                   onClick={handleRefreshRateLock}
                   className="btn-gold-primary text-xs py-2 px-4 shrink-0"
                 >
-                  REFRESH & RE-LOCK
+                  REFRESH RESERVATION
                 </button>
               </div>
             ) : (
@@ -620,10 +620,10 @@ export default function CheckoutPage() {
                   <span className="material-symbols-outlined text-[var(--accent-gold)] text-lg">lock_clock</span>
                   <div>
                     <span className="font-semibold text-[var(--accent-gold)] block text-[11px] tracking-wide">
-                      LIVE BULLION RATE LOCKED ({siteConfig.rates.rateLockMinutes || 15} MIN GUARANTEE)
+                      PRICE &amp; CART RESERVED ({siteConfig.rates.rateLockMinutes || 15} MIN GUARANTEE)
                     </span>
                     <span className="text-[var(--text-secondary)] text-[10px]">
-                      Your order price is protected against intraday bullion rate fluctuations.
+                      Your order price and stock are reserved for secure checkout.
                     </span>
                   </div>
                 </div>

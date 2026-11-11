@@ -509,9 +509,9 @@ describe('Phase 10: Final Owner Usability Test Suite — Ambika Jewels Store Man
       assert.ok(adminCode.includes('handleSaveProduct'));
       assert.ok(adminCode.includes('handleDeleteProduct'));
 
-      // Bullion rates
-      assert.ok(adminCode.includes('handleSaveRatesSubmit'));
-      assert.ok(adminCode.includes('rates.gold_22k'));
+      // Showroom Counter POS
+      assert.ok(adminCode.includes('BillingCalculator'));
+      assert.ok(adminCode.includes('rates'));
 
       // Coupons
       assert.ok(adminCode.includes('CouponModal'));

@@ -110,12 +110,12 @@ export default function CartPage() {
             </div>
           ) : (
             <>
-              {/* Bullion Rate Protection Ribbon */}
+              {/* Price Protection Ribbon */}
               <div className="mb-6 p-3 sm:p-3.5 bg-[var(--bg-surface)] border border-[var(--border-subtle)] rounded-[2px] flex items-center justify-between gap-3 text-xs">
                 <div className="flex items-center gap-2.5">
                   <span className="material-symbols-outlined text-[var(--accent-gold)] text-lg shrink-0">shield</span>
                   <span className="text-[var(--text-secondary)] text-[11px] font-light">
-                    <strong className="text-[var(--accent-gold)] font-medium">BULLION RATE PROTECTED:</strong> Your order total is secured against intraday gold rate fluctuations with fully insured armored transit by BVC Logistics.
+                    <strong className="text-[var(--accent-gold)] font-medium">PRICE PROTECTED:</strong> Fully insured armored transit by BVC Logistics with 100% tamper-evident packaging.
                   </span>
                 </div>
               </div>
