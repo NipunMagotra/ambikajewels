@@ -278,7 +278,8 @@ describe('Phase 5: Admin Security Hardening & Zero-Trust Access Regression Suite
       assert.strictEqual(verifyAdminSessionTokenString(tamperedTimeToken), false);
 
       // 2. Tamper with signature hex characters
-      const tamperedSigToken = `${expiry}.${sig.slice(0, -2)}00`;
+      const tamperedSigChar = sig.endsWith('00') ? 'ff' : '00';
+      const tamperedSigToken = `${expiry}.${sig.slice(0, -2)}${tamperedSigChar}`;
       assert.strictEqual(verifyAdminSessionTokenString(tamperedSigToken), false);
 
       // 3. Null / undefined / empty string tokens
