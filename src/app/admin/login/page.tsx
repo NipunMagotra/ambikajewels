@@ -7,29 +7,22 @@ import Link from 'next/link';
 export default function AdminLoginPage() {
   const router = useRouter();
 
+  const [mode, setMode] = useState<'passcode' | 'email'>('passcode');
+  const [passcode, setPasscode] = useState('');
+  const [showPasscode, setShowPasscode] = useState(false);
+
+  // Staff email fallback
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [mfaCode, setMfaCode] = useState('');
-  const [recoveryCode, setRecoveryCode] = useState('');
-  const [requiresMfa, setRequiresMfa] = useState(false);
-  const [useRecoveryCode, setUseRecoveryCode] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handlePasscodeSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.trim() || !password.trim()) {
-      setError('Please enter your staff email and password.');
-      return;
-    }
-
-    if (requiresMfa && !useRecoveryCode && !mfaCode.trim()) {
-      setError('Please enter the 6-digit Authenticator code.');
-      return;
-    }
-
-    if (requiresMfa && useRecoveryCode && !recoveryCode.trim()) {
-      setError('Please enter your emergency backup recovery code.');
+    if (!passcode.trim()) {
+      setError('Please enter the admin passcode.');
       return;
     }
 
@@ -37,23 +30,10 @@ export default function AdminLoginPage() {
     setError('');
 
     try {
-      const payload: Record<string, string> = {
-        email: email.trim(),
-        password: password.trim()
-      };
-
-      if (requiresMfa) {
-        if (useRecoveryCode) {
-          payload.recovery_code = recoveryCode.trim();
-        } else {
-          payload.mfa_code = mfaCode.trim();
-        }
-      }
-
       const res = await fetch('/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
+        body: JSON.stringify({ passcode: passcode.trim() })
       });
 
       const data = await res.json();
@@ -67,11 +47,46 @@ export default function AdminLoginPage() {
           rawTarget.startsWith('/') && !rawTarget.startsWith('//') ? rawTarget : '/admin';
         router.push(target);
         router.refresh();
-      } else if (data.requires_mfa) {
-        setRequiresMfa(true);
-        setError('');
       } else {
-        setError(data.message || 'Invalid credentials or login rejected.');
+        setError(data.message || 'Invalid admin passcode. Please try again.');
+      }
+    } catch {
+      setError('Connection error. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEmailSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim() || !password.trim()) {
+      setError('Please enter your staff email and password.');
+      return;
+    }
+
+    setLoading(true);
+    setError('');
+
+    try {
+      const res = await fetch('/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), password: password.trim() })
+      });
+
+      const data = await res.json();
+
+      if (res.ok && data.success) {
+        const rawTarget =
+          (typeof window !== 'undefined' &&
+            new URLSearchParams(window.location.search).get('redirect')) ||
+          '/admin';
+        const target =
+          rawTarget.startsWith('/') && !rawTarget.startsWith('//') ? rawTarget : '/admin';
+        router.push(target);
+        router.refresh();
+      } else {
+        setError(data.message || 'Invalid credentials or account deactivated.');
       }
     } catch {
       setError('Connection error. Please try again.');
@@ -93,10 +108,12 @@ export default function AdminLoginPage() {
             </span>
           </Link>
           <div className="font-label-caps text-xs tracking-[0.25em] text-primary font-bold">
-            STAFF & OWNER PORTAL
+            ADMIN PORTAL
           </div>
           <p className="text-xs text-on-surface-variant/80 mt-2">
-            Enter your individual staff credentials. Owner accounts require Multi-Factor Authentication.
+            {mode === 'passcode'
+              ? 'Enter the admin passcode to unlock the management dashboard.'
+              : 'Sign in using individual showroom staff credentials.'}
           </p>
         </div>
 
@@ -107,126 +124,136 @@ export default function AdminLoginPage() {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <label className="block text-[11px] font-label-caps tracking-widest text-on-surface-variant mb-1">
-              STAFF EMAIL ADDRESS
-            </label>
-            <div className="relative">
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="e.g. owner@ambikajewelsonline.com"
-                className="w-full bg-surface-container/80 border border-outline-variant/50 focus:border-primary px-4 py-3 text-sm text-on-surface rounded-xs focus:outline-none transition-colors pr-10"
-                autoFocus
-                disabled={loading || requiresMfa}
-              />
-              <span className="material-symbols-outlined absolute right-3 top-3 text-primary/60 text-lg">
-                mail
-              </span>
-            </div>
-          </div>
-
-          <div>
-            <label className="block text-[11px] font-label-caps tracking-widest text-on-surface-variant mb-1">
-              PASSWORD
-            </label>
-            <div className="relative">
-              <input
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password..."
-                className="w-full bg-surface-container/80 border border-outline-variant/50 focus:border-primary px-4 py-3 text-sm text-on-surface rounded-xs focus:outline-none transition-colors pr-10"
-                disabled={loading || requiresMfa}
-              />
-              <span className="material-symbols-outlined absolute right-3 top-3 text-primary/60 text-lg">
-                lock
-              </span>
-            </div>
-          </div>
-
-          {requiresMfa && !useRecoveryCode && (
-            <div className="pt-2 border-t border-primary/20">
-              <label className="block text-[11px] font-label-caps tracking-widest text-primary font-bold mb-1">
-                6-DIGIT AUTHENTICATOR CODE (MFA)
+        {mode === 'passcode' ? (
+          <form onSubmit={handlePasscodeSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-label-caps tracking-widest text-on-surface-variant mb-1">
+                ADMIN PASSCODE
               </label>
               <div className="relative">
                 <input
-                  type="text"
-                  maxLength={6}
-                  value={mfaCode}
-                  onChange={(e) => setMfaCode(e.target.value.replace(/\D/g, ''))}
-                  placeholder="000000"
-                  className="w-full bg-surface-container/80 border border-primary px-4 py-3 text-lg font-mono tracking-widest text-center text-on-surface rounded-xs focus:outline-none"
+                  type={showPasscode ? 'text' : 'password'}
+                  value={passcode}
+                  onChange={(e) => setPasscode(e.target.value)}
+                  placeholder="Enter admin passcode..."
+                  className="w-full bg-surface-container/80 border border-outline-variant/50 focus:border-primary px-4 py-3 text-sm text-on-surface rounded-xs focus:outline-none transition-colors pr-10"
                   autoFocus
+                  autoComplete="current-password"
+                  disabled={loading}
                 />
-              </div>
-              <div className="text-right mt-1">
                 <button
                   type="button"
-                  onClick={() => setUseRecoveryCode(true)}
-                  className="text-[10px] text-primary hover:underline font-label-caps"
+                  onClick={() => setShowPasscode(!showPasscode)}
+                  tabIndex={-1}
+                  className="absolute right-3 top-3 text-on-surface-variant/60 hover:text-primary transition-colors"
                 >
-                  Use emergency recovery code instead
+                  <span className="material-symbols-outlined text-lg">
+                    {showPasscode ? 'visibility_off' : 'visibility'}
+                  </span>
                 </button>
               </div>
             </div>
-          )}
 
-          {requiresMfa && useRecoveryCode && (
-            <div className="pt-2 border-t border-primary/20">
-              <label className="block text-[11px] font-label-caps tracking-widest text-primary font-bold mb-1">
-                EMERGENCY RECOVERY CODE
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full gold-bg-gradient py-3 text-xs font-label-caps tracking-[0.25em] font-bold rounded-xs hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+                  UNLOCKING...
+                </>
+              ) : (
+                <>
+                  <span>UNLOCK PORTAL</span>
+                  <span className="material-symbols-outlined text-sm">lock_open</span>
+                </>
+              )}
+            </button>
+          </form>
+        ) : (
+          <form onSubmit={handleEmailSubmit} className="space-y-4">
+            <div>
+              <label className="block text-[11px] font-label-caps tracking-widest text-on-surface-variant mb-1">
+                STAFF EMAIL ADDRESS
               </label>
               <div className="relative">
                 <input
-                  type="text"
-                  value={recoveryCode}
-                  onChange={(e) => setRecoveryCode(e.target.value)}
-                  placeholder="AMB-REC-XXXX-XXXX"
-                  className="w-full bg-surface-container/80 border border-primary px-4 py-3 text-sm font-mono tracking-wider text-center text-on-surface rounded-xs focus:outline-none"
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="e.g. manager@ambikajewelsonline.com"
+                  className="w-full bg-surface-container/80 border border-outline-variant/50 focus:border-primary px-4 py-3 text-sm text-on-surface rounded-xs focus:outline-none transition-colors pr-10"
                   autoFocus
+                  disabled={loading}
                 />
+                <span className="material-symbols-outlined absolute right-3 top-3 text-primary/60 text-lg">
+                  mail
+                </span>
               </div>
-              <div className="text-right mt-1">
+            </div>
+
+            <div>
+              <label className="block text-[11px] font-label-caps tracking-widest text-on-surface-variant mb-1">
+                PASSWORD
+              </label>
+              <div className="relative">
+                <input
+                  type={showPassword ? 'text' : 'password'}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password..."
+                  className="w-full bg-surface-container/80 border border-outline-variant/50 focus:border-primary px-4 py-3 text-sm text-on-surface rounded-xs focus:outline-none transition-colors pr-10"
+                  disabled={loading}
+                />
                 <button
                   type="button"
-                  onClick={() => setUseRecoveryCode(false)}
-                  className="text-[10px] text-primary hover:underline font-label-caps"
+                  onClick={() => setShowPassword(!showPassword)}
+                  tabIndex={-1}
+                  className="absolute right-3 top-3 text-on-surface-variant/60 hover:text-primary transition-colors"
                 >
-                  Use 6-digit Authenticator code instead
+                  <span className="material-symbols-outlined text-lg">
+                    {showPassword ? 'visibility_off' : 'visibility'}
+                  </span>
                 </button>
               </div>
             </div>
-          )}
 
+            <button
+              type="submit"
+              disabled={loading}
+              className="w-full gold-bg-gradient py-3 text-xs font-label-caps tracking-[0.25em] font-bold rounded-xs hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4 cursor-pointer"
+            >
+              {loading ? (
+                <>
+                  <span className="material-symbols-outlined animate-spin text-sm">sync</span>
+                  SIGNING IN...
+                </>
+              ) : (
+                <>
+                  <span>SIGN IN</span>
+                  <span className="material-symbols-outlined text-sm">arrow_forward</span>
+                </>
+              )}
+            </button>
+          </form>
+        )}
+
+        <div className="mt-6 pt-4 border-t border-outline-variant/20 flex flex-col items-center gap-3">
           <button
-            type="submit"
-            disabled={loading}
-            className="w-full gold-bg-gradient py-3 text-xs font-label-caps tracking-[0.25em] font-bold rounded-xs hover:opacity-90 transition-all flex items-center justify-center gap-2 disabled:opacity-50 mt-4"
+            type="button"
+            onClick={() => {
+              setError('');
+              setMode(mode === 'passcode' ? 'email' : 'passcode');
+            }}
+            className="text-[11px] font-label-caps text-primary hover:underline tracking-wider transition-colors"
           >
-            {loading ? (
-              <>
-                <span className="material-symbols-outlined animate-spin text-sm">sync</span>
-                VERIFYING...
-              </>
-            ) : requiresMfa ? (
-              <>
-                <span>VERIFY MFA & ENTER</span>
-                <span className="material-symbols-outlined text-sm">security</span>
-              </>
-            ) : (
-              <>
-                <span>SIGN IN TO PORTAL</span>
-                <span className="material-symbols-outlined text-sm">arrow_forward</span>
-              </>
-            )}
+            {mode === 'passcode'
+              ? 'Staff member? Sign in with email & password'
+              : '← Return to quick passcode login'}
           </button>
-        </form>
 
-        <div className="mt-8 pt-6 border-t border-outline-variant/20 text-center">
           <Link
             href="/"
             className="text-[11px] font-label-caps text-on-surface-variant hover:text-primary transition-colors flex items-center justify-center gap-1"

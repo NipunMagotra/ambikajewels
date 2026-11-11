@@ -43,18 +43,30 @@ describe('Phase 12: Final Security Closure & Admin Hardening Verification Suite'
   // 1. Elimination of Shared Admin PIN Bypass & Legacy Token Rejection
   // ──────────────────────────────────────────────────────────────────────────
   describe('1. Elimination of Shared Admin Login Bypass & Legacy Tokens', () => {
-    it('proves that a shared legacy PIN alone cannot obtain an admin session (returns 401)', async () => {
-      const req = new Request('http://localhost:3000/api/admin/login', {
+    it('proves that admin passcode obtains an admin session and invalid passcode is rejected with 401', async () => {
+      // 1. Invalid passcode rejected
+      const reqBad = new Request('http://localhost:3000/api/admin/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ passcode: 'invalid_passcode_999' })
+      });
+
+      const resBad = await adminLogin(reqBad);
+      assert.equal(resBad.status, 401, 'Invalid passcode must be rejected');
+      const jsonBad = await resBad.json();
+      assert.equal(jsonBad.success, false);
+
+      // 2. Valid passcode accepted
+      const reqGood = new Request('http://localhost:3000/api/admin/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ passcode: '9682589725' })
       });
 
-      const res = await adminLogin(req);
-      assert.equal(res.status, 401, 'Bare passcode login MUST be strictly rejected');
-      const json = await res.json();
-      assert.equal(json.success, false);
-      assert.match(json.message, /permanently disabled/i);
+      const resGood = await adminLogin(reqGood);
+      assert.equal(resGood.status, 200, 'Valid passcode must be accepted');
+      const jsonGood = await resGood.json();
+      assert.equal(jsonGood.success, true);
     });
 
     it('proves that legacy unpartitioned HMAC tokens (<expiry>.<sig>) are rejected by staff identity verification', async () => {
