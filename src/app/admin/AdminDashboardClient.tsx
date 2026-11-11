@@ -1227,15 +1227,23 @@ export default function AdminDashboardClient() {
                             <select
                               value={p.stock_status}
                               onChange={e => handleQuickStockToggle(p, e.target.value as any)}
-                              className={`px-2 py-1 rounded text-[11px] font-bold border ${
-                                p.stock_status === 'in_stock' ? 'bg-emerald-950/30 text-emerald-400 border-emerald-500/40' :
-                                p.stock_status === 'limited' ? 'bg-amber-950/30 text-amber-400 border-amber-500/40' :
-                                'bg-red-950/30 text-red-400 border-red-500/40'
+                              className={`px-3 py-1.5 rounded-md text-xs font-bold border transition-all cursor-pointer shadow-xs ${
+                                p.stock_status === 'in_stock'
+                                  ? 'bg-emerald-600 hover:bg-emerald-700 text-white border-emerald-700'
+                                  : p.stock_status === 'limited'
+                                  ? 'bg-amber-500 hover:bg-amber-600 text-zinc-950 border-amber-600 font-extrabold'
+                                  : 'bg-rose-600 hover:bg-rose-700 text-white border-rose-700'
                               }`}
                             >
-                              <option value="in_stock">In Stock</option>
-                              <option value="limited">Limited</option>
-                              <option value="out_of_stock">Sold Out</option>
+                              <option value="in_stock" className="bg-white text-emerald-800 font-bold dark:bg-zinc-900 dark:text-emerald-400">
+                                In Stock
+                              </option>
+                              <option value="limited" className="bg-white text-amber-800 font-bold dark:bg-zinc-900 dark:text-amber-400">
+                                Limited
+                              </option>
+                              <option value="out_of_stock" className="bg-white text-red-800 font-bold dark:bg-zinc-900 dark:text-red-400">
+                                Sold Out
+                              </option>
                             </select>
                           </td>
                           <td className="py-3 px-3 text-right">
@@ -1490,36 +1498,36 @@ export default function AdminDashboardClient() {
                       </td>
                       <td className="py-3 px-4 text-[var(--text-secondary)]">{p.category}</td>
                       <td className="py-3 px-4">
-                        <span className={`px-2.5 py-1 rounded text-[10px] font-bold uppercase ${
-                          p.stock_status === 'in_stock' ? 'bg-emerald-950 text-emerald-300' :
-                          p.stock_status === 'limited' ? 'bg-amber-950 text-amber-300' :
-                          'bg-red-950 text-red-300'
+                        <span className={`px-2.5 py-1 rounded text-[11px] font-bold uppercase shadow-xs ${
+                          p.stock_status === 'in_stock' ? 'bg-emerald-600 text-white' :
+                          p.stock_status === 'limited' ? 'bg-amber-500 text-zinc-950 font-extrabold' :
+                          'bg-rose-600 text-white'
                         }`}>
                           {p.stock_status.replace('_', ' ')}
                         </span>
                       </td>
                       <td className="py-3 px-4 text-right">
-                        <div className="inline-flex rounded-lg border border-[var(--border-color)] p-0.5 bg-[var(--bg-primary)]">
+                        <div className="inline-flex rounded-lg border border-[var(--border-color)] p-0.5 bg-[var(--bg-primary)] shadow-xs">
                           <button
                             onClick={() => handleQuickStockToggle(p, 'in_stock')}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
-                              p.stock_status === 'in_stock' ? 'bg-emerald-600 text-white' : 'text-zinc-400 hover:text-white'
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold transition-colors ${
+                              p.stock_status === 'in_stock' ? 'bg-emerald-600 text-white shadow-xs' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                             }`}
                           >
                             In Stock
                           </button>
                           <button
                             onClick={() => handleQuickStockToggle(p, 'limited')}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
-                              p.stock_status === 'limited' ? 'bg-amber-600 text-white' : 'text-zinc-400 hover:text-white'
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold transition-colors ${
+                              p.stock_status === 'limited' ? 'bg-amber-500 text-zinc-950 shadow-xs' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                             }`}
                           >
                             Low
                           </button>
                           <button
                             onClick={() => handleQuickStockToggle(p, 'out_of_stock')}
-                            className={`px-2 py-1 rounded text-[10px] font-semibold transition-colors ${
-                              p.stock_status === 'out_of_stock' ? 'bg-red-600 text-white' : 'text-zinc-400 hover:text-white'
+                            className={`px-2.5 py-1 rounded text-[11px] font-bold transition-colors ${
+                              p.stock_status === 'out_of_stock' ? 'bg-rose-600 text-white shadow-xs' : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
                             }`}
                           >
                             Sold Out
