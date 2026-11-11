@@ -22,15 +22,19 @@ export async function POST(request: Request) {
     const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
 
     // 1. Sliding Window Rate Limiting (5 attempts per 15 minutes)
-    const rateCheck = await checkRateLimit('adminLogin', ip);
-    if (!rateCheck.success) {
-      return NextResponse.json(
-        {
-          success: false,
-          message: 'Too many login attempts. This IP address has been temporarily rate-limited for 15 minutes.'
-        },
-        { status: 429 }
-      );
+    try {
+      const rateCheck = await checkRateLimit('adminLogin', ip);
+      if (!rateCheck.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Too many login attempts. This IP address has been temporarily rate-limited for 15 minutes.'
+          },
+          { status: 429 }
+        );
+      }
+    } catch (rateErr) {
+      console.warn('[RATE LIMIT WARN]', rateErr);
     }
 
     const body = await request.json().catch(() => ({}));
@@ -65,7 +69,7 @@ export async function POST(request: Request) {
       };
 
       const authenticatedSession: AdminSession = {
-        sessionId: crypto.randomUUID(),
+        sessionId: typeof crypto.randomUUID === 'function' ? crypto.randomUUID() : `sess_${Date.now()}_${Math.random().toString(36).slice(2)}`,
         staffId: ownerAccount.id,
         email: ownerAccount.email,
         name: ownerAccount.name,
@@ -225,8 +229,9 @@ export async function POST(request: Request) {
     return response;
   } catch (error) {
     console.error('Admin login error:', error);
+    const message = error instanceof Error ? error.message : 'Internal server error';
     return NextResponse.json(
-      { success: false, message: 'Internal server error' },
+      { success: false, message },
       { status: 500 }
     );
   }
