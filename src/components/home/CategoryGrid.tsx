@@ -9,27 +9,27 @@ export default function CategoryGrid() {
     {
       name: 'NAMAN & CHOKERS',
       image: '/products/royal-kundan.png',
-      link: '/collections?category=Dogra Heritage Collection'
+      link: '/collections?category=Dogra%20Heritage%20Collection'
     },
     {
       name: 'DOGRI JHUMKIS',
       image: '/products/kundan-chandbali.png',
-      link: '/collections?category=Dogra Heritage Collection'
+      link: '/collections?category=Dogra%20Heritage%20Collection'
     },
     {
       name: 'KADAS & BANGLES',
       image: 'https://images.unsplash.com/photo-1573408301185-9146fe634ad0?auto=format&fit=crop&w=400&q=80',
-      link: '/collections?category=Gold Jewellery'
+      link: '/collections?category=Gold%20Jewellery'
     },
     {
       name: 'SOLITAIRE RINGS',
       image: 'https://images.unsplash.com/photo-1603561596112-0a132b757442?auto=format&fit=crop&w=400&q=80',
-      link: '/collections?category=Diamond Jewellery'
+      link: '/collections?category=Diamond%20Jewellery'
     },
     {
       name: '925 STERLING PAYAL',
       image: 'https://images.unsplash.com/photo-1535632066927-ab7c9ab60908?auto=format&fit=crop&w=400&q=80',
-      link: '/collections?category=Silver Jewellery (925)'
+      link: '/collections?category=Silver%20Jewellery%20(925)'
     }
   ];
 
@@ -77,7 +77,7 @@ export default function CategoryGrid() {
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-6 mb-4 sm:gap-6">
         {/* Bridal Couture Grand Feature */}
         <Link
-          href="/collections?category=Bridal Couture"
+          href="/collections?category=Bridal%20Couture"
           className="lg:col-span-7 group relative overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-card)] hover:border-[var(--accent-gold)]/70 transition-all duration-500 rounded-[2px] shadow-[var(--card-shadow)] min-h-[300px] sm:min-h-[380px] flex flex-col justify-end p-6 sm:p-8"
         >
           <div 
@@ -105,7 +105,7 @@ export default function CategoryGrid() {
 
         {/* Dogra Heritage Collection Feature */}
         <Link
-          href="/collections?category=Dogra Heritage Collection"
+          href="/collections?category=Dogra%20Heritage%20Collection"
           className="lg:col-span-5 group relative overflow-hidden bg-[var(--bg-surface)] border border-[var(--border-card)] hover:border-[var(--accent-gold)]/70 transition-all duration-500 rounded-[2px] shadow-[var(--card-shadow)] min-h-[300px] sm:min-h-[380px] flex flex-col justify-end p-6 sm:p-8"
         >
           <div 
@@ -136,7 +136,7 @@ export default function CategoryGrid() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6 mt-4 sm:mt-6 mb-8 sm:mb-10">
         {/* Pillar 1: Certified Natural Diamonds */}
         <Link
-          href="/collections?category=Diamond Jewellery"
+          href="/collections?category=Diamond%20Jewellery"
           className="group relative overflow-hidden bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[var(--accent-gold)]/70 transition-all duration-300 rounded-[2px] shadow-[var(--card-shadow)] p-5 flex flex-col justify-between"
         >
           <div className="aspect-[4/3] w-full overflow-hidden bg-[var(--bg-surface)] mb-4 rounded-[1px] relative">
@@ -163,7 +163,7 @@ export default function CategoryGrid() {
 
         {/* Pillar 2: 22K Solid Gold Everyday Classics */}
         <Link
-          href="/collections?category=Gold Jewellery"
+          href="/collections?category=Gold%20Jewellery"
           className="group relative overflow-hidden bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[var(--accent-gold)]/70 transition-all duration-300 rounded-[2px] shadow-[var(--card-shadow)] p-5 flex flex-col justify-between"
         >
           <div className="aspect-[4/3] w-full overflow-hidden bg-[var(--bg-surface)] mb-4 rounded-[1px] relative">
@@ -190,7 +190,7 @@ export default function CategoryGrid() {
 
         {/* Pillar 3: 925 Sterling Silver */}
         <Link
-          href="/collections?category=Silver Jewellery (925)"
+          href="/collections?category=Silver%20Jewellery%20(925)"
           className="group relative overflow-hidden bg-[var(--bg-card)] border border-[var(--border-card)] hover:border-[var(--accent-gold)]/70 transition-all duration-300 rounded-[2px] shadow-[var(--card-shadow)] p-5 flex flex-col justify-between"
         >
           <div className="aspect-[4/3] w-full overflow-hidden bg-[var(--bg-surface)] mb-4 rounded-[1px] relative">

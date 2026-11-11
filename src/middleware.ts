@@ -3,6 +3,20 @@ import type { NextRequest } from 'next/server';
 
 const ADMIN_COOKIE_NAME = 'ambika_admin_session';
 
+// Edge WAF: Malicious path & payload inspection patterns
+const WAF_PATH_REGEX = /(\.env|\.git|\.aws|\.ssh|wp-admin|wp-login|xmlrpc|\.php$|\.\.[/\\])/i;
+const WAF_PAYLOAD_REGEX = /(<script|javascript:|data:text\/html|vbscript:|on(error|load|click|mouseover)\s*=|union\s+select|information_schema|drop\s+table|insert\s+into|benchmark\s*\(|sleep\s*\()/i;
+
+function isMaliciousRequest(urlStr: string): boolean {
+  let decoded = urlStr;
+  try {
+    decoded = decodeURIComponent(urlStr);
+  } catch {
+    // Fall back to inspecting raw string if URL-decoding throws
+  }
+  return WAF_PATH_REGEX.test(decoded) || WAF_PAYLOAD_REGEX.test(decoded);
+}
+
 /**
  * Validates admin session tokens using standard Web Crypto API supported natively in Next.js Edge Runtime.
  * Supports both individual staff session tokens and legacy HMAC tokens.
@@ -78,14 +92,30 @@ async function verifyEdgeToken(token: string | undefined): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
 
-  // 1. Allow public admin login endpoints
-  if (pathname === '/admin/login' || pathname === '/api/admin/login') {
-    return NextResponse.next();
+  // 1. Ambika Edge WAF: Block malicious payloads, path traversal, SQLi/XSS, and bot exploit probes
+  if (isMaliciousRequest(pathname + search)) {
+    return NextResponse.json(
+      { error: 'Forbidden: Request blocked by Ambika Web Application Firewall (WAF).' },
+      {
+        status: 403,
+        headers: {
+          'X-WAF-Protection': 'Ambika-Edge-Shield',
+          'X-WAF-Action': 'Blocked',
+        },
+      }
+    );
   }
 
-  // 2. Protect /admin and /api/admin paths
+  // 2. Allow public admin login endpoints
+  if (pathname === '/admin/login' || pathname === '/api/admin/login') {
+    const res = NextResponse.next();
+    res.headers.set('X-WAF-Protection', 'Ambika-Edge-Shield');
+    return res;
+  }
+
+  // 3. Protect /admin and /api/admin paths
   if (pathname.startsWith('/admin') || pathname.startsWith('/api/admin')) {
     const sessionToken =
       request.cookies.get(ADMIN_COOKIE_NAME)?.value ||
@@ -106,9 +136,19 @@ export async function middleware(request: NextRequest) {
     }
   }
 
-  return NextResponse.next();
+  const response = NextResponse.next();
+  response.headers.set('X-WAF-Protection', 'Ambika-Edge-Shield');
+  return response;
 }
 
 export const config = {
-  matcher: ['/admin/:path*', '/api/admin/:path*'],
+  matcher: [
+    /*
+     * Match all request paths except for static files:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico, icon.svg, apple-icon.png, manifest.webmanifest
+     */
+    '/((?!_next/static|_next/image|favicon.ico|icon.svg|apple-icon.png|manifest.webmanifest).*)',
+  ],
 };
