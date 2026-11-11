@@ -359,7 +359,11 @@ export default function AdminDashboardClient() {
 
       const resJson = await res.json();
       if (res.ok && resJson.success) {
-        showNotification(isEdit ? 'Jewellery piece updated!' : 'Jewellery piece published!');
+        showNotification(
+          isEdit
+            ? 'Jewellery piece updated & synced directly to Supabase!'
+            : 'New jewellery piece published & synced to Supabase!'
+        );
         setIsProductModalOpen(false);
         fetchProducts();
         fetchAuditLogs();
