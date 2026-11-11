@@ -548,6 +548,10 @@ export async function PATCH(request: Request) {
 
 /**
  * DELETE /api/admin/products
+ * Supports:
+ * - ?id=<id> or { id: "<id>" } -> Delete single product
+ * - { ids: ["id1", "id2", ...] } -> Bulk delete selected products
+ * - ?all=true or { all: true } -> Delete all products
  */
 export async function DELETE(request: Request) {
   try {
@@ -560,21 +564,85 @@ export async function DELETE(request: Request) {
     }
 
     let id: string | null = null;
+    let ids: string[] | null = null;
+    let deleteAll = false;
+
     const url = new URL(request.url);
     id = url.searchParams.get('id');
-
-    if (!id) {
-      try {
-        const body = await request.json();
-        id = body.id;
-      } catch {
-        // Query param fallback
-      }
+    if (url.searchParams.get('all') === 'true') {
+      deleteAll = true;
     }
 
+    try {
+      const body = await request.json();
+      if (body) {
+        if (body.id) id = body.id;
+        if (Array.isArray(body.ids)) ids = body.ids;
+        if (Array.isArray(body.product_ids)) ids = body.product_ids;
+        if (body.all === true || body.action === 'delete_all') deleteAll = true;
+      }
+    } catch {
+      // Query param fallback
+    }
+
+    // ── 1. Delete All Products ──
+    if (deleteAll) {
+      if (isSupabaseAdminConfigured && supabaseAdmin) {
+        await supabaseAdmin.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+      }
+
+      const totalDeleted = (globalThis.__ambika_memory_products || memoryProducts).length;
+      globalThis.__ambika_memory_products = [];
+      memoryProducts = [];
+
+      await recordAuditLog({
+        action: 'ALL_PRODUCTS_DELETED',
+        entityType: 'product',
+        newValues: { count: totalDeleted },
+        request
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: 'All jewellery pieces deleted successfully',
+        deletedCount: totalDeleted
+      });
+    }
+
+    // ── 2. Bulk Delete Selected Products ──
+    if (Array.isArray(ids) && ids.length > 0) {
+      if (isSupabaseAdminConfigured && supabaseAdmin) {
+        await supabaseAdmin.from('products').delete().in('id', ids);
+      }
+
+      if (globalThis.__ambika_memory_products) {
+        globalThis.__ambika_memory_products = globalThis.__ambika_memory_products.filter(
+          p => !ids!.includes(p.id)
+        );
+        memoryProducts = globalThis.__ambika_memory_products;
+      } else {
+        memoryProducts = memoryProducts.filter(p => !ids!.includes(p.id));
+      }
+
+      await recordAuditLog({
+        action: 'PRODUCTS_BULK_DELETED',
+        entityType: 'product',
+        newValues: { ids, count: ids.length },
+        request
+      });
+
+      return NextResponse.json({
+        success: true,
+        message: `Successfully deleted ${ids.length} selected pieces`,
+        deletedCount: ids.length,
+        ids
+      });
+    }
+
+    // ── 3. Single Product Delete ──
     if (!id) {
       return NextResponse.json(
-        { success: false, message: 'Product ID is required for deletion.' },
+        { success: false, message: 'Product ID or IDs array is required for deletion.' },
         { status: 400 }
       );
     }

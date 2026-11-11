@@ -406,6 +406,74 @@ export default function AdminDashboardClient() {
     }
   };
 
+  const handleDeleteSelected = async () => {
+    if (selectedProductIds.length === 0) return;
+    const count = selectedProductIds.length;
+    if (!confirm(`Are you sure you want to permanently delete the ${count} selected jewellery piece${count > 1 ? 's' : ''}? This action cannot be undone.`)) {
+      return;
+    }
+
+    try {
+      setIsProcessingBulk(true);
+      const res = await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ ids: selectedProductIds })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`Successfully deleted ${count} selected piece${count > 1 ? 's' : ''}!`);
+        setProducts(prev => prev.filter(p => !selectedProductIds.includes(p.id)));
+        setSelectedProductIds([]);
+        fetchAuditLogs();
+      } else {
+        alert(data.message || 'Failed to delete selected products.');
+      }
+    } catch {
+      alert('Error deleting selected products.');
+    } finally {
+      setIsProcessingBulk(false);
+    }
+  };
+
+  const handleDeleteAll = async () => {
+    if (products.length === 0) {
+      alert('No jewellery pieces available to delete.');
+      return;
+    }
+
+    const count = products.length;
+    const confirmation = prompt(`⚠️ CRITICAL WARNING: You are about to permanently delete ALL ${count} jewellery items from the entire catalog!\n\nThis cannot be undone.\n\nType DELETE to confirm:`);
+    if (confirmation !== 'DELETE') {
+      if (confirmation !== null) {
+        alert('Action cancelled: Confirmation phrase did not match.');
+      }
+      return;
+    }
+
+    try {
+      setIsProcessingBulk(true);
+      const res = await fetch('/api/admin/products', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ all: true })
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(`All ${count} jewellery items have been deleted!`);
+        setProducts([]);
+        setSelectedProductIds([]);
+        fetchAuditLogs();
+      } else {
+        alert(data.message || 'Failed to delete all products.');
+      }
+    } catch {
+      alert('Error deleting all products.');
+    } finally {
+      setIsProcessingBulk(false);
+    }
+  };
+
   // Quick Stock Status Toggle
   const handleQuickStockToggle = async (p: ProductItem, nextStatus: 'in_stock' | 'limited' | 'out_of_stock') => {
     try {
@@ -1005,7 +1073,33 @@ export default function AdminDashboardClient() {
                 </select>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center flex-wrap gap-2">
+                <button
+                  onClick={handleSelectAllFiltered}
+                  className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
+                  title="Toggle select all visible items"
+                >
+                  <span>{selectedProductIds.length > 0 && selectedProductIds.length === filteredProducts.length ? '☒ Deselect All' : `☑ Select All (${filteredProducts.length})`}</span>
+                </button>
+                {selectedProductIds.length > 0 && (
+                  <button
+                    onClick={handleDeleteSelected}
+                    disabled={isProcessingBulk}
+                    className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-bold transition-colors flex items-center gap-1.5 shadow disabled:opacity-50"
+                  >
+                    <span>🗑️</span> Delete Selected ({selectedProductIds.length})
+                  </button>
+                )}
+                {products.length > 0 && (
+                  <button
+                    onClick={handleDeleteAll}
+                    disabled={isProcessingBulk}
+                    className="px-3 py-2 bg-red-950/40 border border-red-800/60 hover:bg-red-900/60 text-red-300 text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50"
+                    title="Permanently remove all products from catalog"
+                  >
+                    <span>⚠️</span> Delete All Items
+                  </button>
+                )}
                 <button
                   onClick={() => exportProductsToCsv(products)}
                   className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
@@ -1029,9 +1123,9 @@ export default function AdminDashboardClient() {
 
             {/* Floating Bulk Action Bar */}
             {selectedProductIds.length > 0 && (
-              <div className="bg-amber-950/40 border border-amber-500/50 p-3 rounded-lg flex items-center justify-between text-xs">
+              <div className="bg-amber-950/60 border border-amber-500/50 p-3 rounded-lg flex items-center justify-between text-xs shadow-lg animate-fadeIn">
                 <div className="flex items-center gap-2">
-                  <span className="font-bold text-[var(--gold-primary)]">{selectedProductIds.length}</span>
+                  <span className="font-bold text-[var(--gold-primary)] text-sm">{selectedProductIds.length}</span>
                   <span>pieces selected</span>
                   <button
                     onClick={() => setSelectedProductIds([])}
@@ -1039,13 +1133,26 @@ export default function AdminDashboardClient() {
                   >
                     Clear selection
                   </button>
+                  <button
+                    onClick={handleSelectAllFiltered}
+                    className="text-[var(--gold-primary)] hover:underline ml-2"
+                  >
+                    {selectedProductIds.length === filteredProducts.length ? 'Deselect all' : `Select all ${filteredProducts.length}`}
+                  </button>
                 </div>
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsBulkModalOpen(true)}
-                    className="px-3 py-1.5 bg-[var(--gold-primary)] text-black font-bold rounded text-xs hover:opacity-90"
+                    className="px-3 py-1.5 bg-[var(--gold-primary)] text-black font-bold rounded text-xs hover:opacity-90 flex items-center gap-1"
                   >
                     ⚡ Bulk Update Prices / Stock
+                  </button>
+                  <button
+                    onClick={handleDeleteSelected}
+                    disabled={isProcessingBulk}
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
+                  >
+                    🗑️ Delete Selected ({selectedProductIds.length})
                   </button>
                 </div>
               </div>
