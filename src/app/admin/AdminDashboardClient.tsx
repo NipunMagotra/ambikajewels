@@ -19,6 +19,34 @@ import type { CouponRule } from '@/lib/couponEngine';
 import type { AuditLogEntry } from '@/lib/auditLog';
 import type { StoreContentConfig } from '@/lib/storeContent';
 
+// Vector Icons
+import {
+  LayoutDashboard,
+  Gem,
+  TrendingUp,
+  Package,
+  ShoppingBag,
+  Ticket,
+  Palette,
+  Scale,
+  ClipboardList,
+  CheckSquare,
+  Square,
+  Trash2,
+  AlertTriangle,
+  Download,
+  Upload,
+  Plus,
+  Zap,
+  Copy,
+  FileText,
+  Box,
+  RefreshCw,
+  Check,
+  LogOut,
+  Pencil
+} from 'lucide-react';
+
 export interface ProductItem {
   id: string;
   name: string;
@@ -443,7 +471,7 @@ export default function AdminDashboardClient() {
     }
 
     const count = products.length;
-    const confirmation = prompt(`⚠️ CRITICAL WARNING: You are about to permanently delete ALL ${count} jewellery items from the entire catalog!\n\nThis cannot be undone.\n\nType DELETE to confirm:`);
+    const confirmation = prompt(`[CRITICAL WARNING] You are about to permanently delete ALL ${count} jewellery items from the entire catalog!\n\nThis cannot be undone.\n\nType DELETE to confirm:`);
     if (confirmation !== 'DELETE') {
       if (confirmation !== null) {
         alert('Action cancelled: Confirmation phrase did not match.');
@@ -574,7 +602,7 @@ export default function AdminDashboardClient() {
 
     if (maxDev > 15) {
       const proceed = confirm(
-        `⚠️ EXTREME RATE CHANGE WARNING:\n\nYou entered ₹${rateForm.gold_22k}/g for 22K (was ₹${prev22k}/g) and ₹${rateForm.gold_24k}/g for 24K (was ₹${prev24k}/g).\nThis is a ${maxDev.toFixed(1)}% deviation.\n\nDid you make a typing mistake (e.g., extra zero)? Click OK only if you are certain this rate is accurate.`
+        `[EXTREME RATE CHANGE WARNING]\n\nYou entered ₹${rateForm.gold_22k}/g for 22K (was ₹${prev22k}/g) and ₹${rateForm.gold_24k}/g for 24K (was ₹${prev24k}/g).\nThis is a ${maxDev.toFixed(1)}% deviation.\n\nDid you make a typing mistake (e.g., extra zero)? Click OK only if you are certain this rate is accurate.`
       );
       if (!proceed) return;
     } else {
@@ -826,9 +854,10 @@ export default function AdminDashboardClient() {
 
             <button
               onClick={handleLogout}
-              className="px-3 py-1.5 bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-500/30 rounded text-xs font-medium transition-colors"
+              className="px-3 py-1.5 bg-red-950/20 hover:bg-red-900/30 text-red-400 border border-red-500/30 rounded text-xs font-medium transition-colors flex items-center gap-1.5"
             >
-              Log Out
+              <LogOut className="w-3.5 h-3.5" />
+              <span>Log Out</span>
             </button>
           </div>
         </div>
@@ -843,7 +872,11 @@ export default function AdminDashboardClient() {
               : 'bg-red-950 text-red-200 border-red-500'
           }`}
         >
-          <span>{bannerMessage.type === 'success' ? '✓' : '⚠'}</span>
+          {bannerMessage.type === 'success' ? (
+            <Check className="w-4 h-4 text-emerald-400" />
+          ) : (
+            <AlertTriangle className="w-4 h-4 text-red-400" />
+          )}
           <span>{bannerMessage.text}</span>
         </div>
       )}
@@ -852,16 +885,17 @@ export default function AdminDashboardClient() {
       <nav className="border-b border-[var(--border-color)] bg-[var(--bg-surface)] px-4 sm:px-6 lg:px-8 overflow-x-auto">
         <div className="max-w-7xl mx-auto flex gap-1 py-1">
           {[
-            { id: 'overview', label: '📊 Dashboard' },
-            { id: 'products', label: `💎 Jewellery Pieces (${products.length})` },
-            { id: 'pricing', label: '📈 Bullion & Pricing' },
-            { id: 'inventory', label: `📦 Inventory (${inStockCount})` },
-            { id: 'orders', label: `🛍️ Orders (${orders.length})` },
-            { id: 'coupons', label: `🎟️ Coupons (${coupons.length})` },
-            { id: 'content', label: '🎨 Website Content' },
-            { id: 'pos', label: '⚖️ Counter POS' },
-            { id: 'audit', label: '📋 Audit Log' }
+            { id: 'overview', label: 'Dashboard', icon: LayoutDashboard },
+            { id: 'products', label: `Jewellery Pieces (${products.length})`, icon: Gem },
+            { id: 'pricing', label: 'Bullion & Pricing', icon: TrendingUp },
+            { id: 'inventory', label: `Inventory (${inStockCount})`, icon: Package },
+            { id: 'orders', label: `Orders (${orders.length})`, icon: ShoppingBag },
+            { id: 'coupons', label: `Coupons (${coupons.length})`, icon: Ticket },
+            { id: 'content', label: 'Website Content', icon: Palette },
+            { id: 'pos', label: 'Counter POS', icon: Scale },
+            { id: 'audit', label: 'Audit Log', icon: ClipboardList }
           ].map(tab => {
+            const Icon = tab.icon;
             const isTabActive = activeTab === tab.id || (tab.id === 'pricing' && activeTab === 'rates') || (tab.id === 'content' && activeTab === 'store');
             return (
               <button
@@ -873,7 +907,8 @@ export default function AdminDashboardClient() {
                     : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)]'
                 }`}
               >
-                {tab.label}
+                <Icon className="w-3.5 h-3.5" />
+                <span>{tab.label}</span>
               </button>
             );
           })}
@@ -897,7 +932,8 @@ export default function AdminDashboardClient() {
                   ₹{Math.round(totalSalesRupees).toLocaleString('en-IN')}
                 </p>
                 <p className="text-[11px] text-emerald-400 mt-1 flex items-center gap-1">
-                  <span>✓ 100% Razorpay Captured</span>
+                  <Check className="w-3.5 h-3.5 text-emerald-400" />
+                  <span>100% Razorpay Captured</span>
                 </p>
               </div>
 
@@ -1079,7 +1115,17 @@ export default function AdminDashboardClient() {
                   className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
                   title="Toggle select all visible items"
                 >
-                  <span>{selectedProductIds.length > 0 && selectedProductIds.length === filteredProducts.length ? '☒ Deselect All' : `☑ Select All (${filteredProducts.length})`}</span>
+                  {selectedProductIds.length > 0 && selectedProductIds.length === filteredProducts.length ? (
+                    <>
+                      <CheckSquare className="w-3.5 h-3.5 text-[var(--gold-primary)]" />
+                      <span>Deselect All</span>
+                    </>
+                  ) : (
+                    <>
+                      <Square className="w-3.5 h-3.5" />
+                      <span>Select All ({filteredProducts.length})</span>
+                    </>
+                  )}
                 </button>
                 {selectedProductIds.length > 0 && (
                   <button
@@ -1087,7 +1133,8 @@ export default function AdminDashboardClient() {
                     disabled={isProcessingBulk}
                     className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white text-xs rounded-lg font-bold transition-colors flex items-center gap-1.5 shadow disabled:opacity-50"
                   >
-                    <span>🗑️</span> Delete Selected ({selectedProductIds.length})
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Selected ({selectedProductIds.length})</span>
                   </button>
                 )}
                 {products.length > 0 && (
@@ -1097,26 +1144,30 @@ export default function AdminDashboardClient() {
                     className="px-3 py-2 bg-red-950/40 border border-red-800/60 hover:bg-red-900/60 text-red-300 text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5 disabled:opacity-50"
                     title="Permanently remove all products from catalog"
                   >
-                    <span>⚠️</span> Delete All Items
+                    <AlertTriangle className="w-3.5 h-3.5 text-red-400" />
+                    <span>Delete All Items</span>
                   </button>
                 )}
                 <button
                   onClick={() => exportProductsToCsv(products)}
                   className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
                 >
-                  <span>⬇</span> Export CSV
+                  <Download className="w-3.5 h-3.5" />
+                  <span>Export CSV</span>
                 </button>
                 <button
                   onClick={() => setIsCsvImportOpen(true)}
                   className="px-3 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded-lg font-medium transition-colors flex items-center gap-1.5"
                 >
-                  <span>⬆</span> Import CSV
+                  <Upload className="w-3.5 h-3.5" />
+                  <span>Import CSV</span>
                 </button>
                 <button
                   onClick={handleOpenAddProduct}
                   className="px-4 py-2 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1 shadow"
                 >
-                  <span>+</span> Add Jewellery Piece
+                  <Plus className="w-3.5 h-3.5" />
+                  <span>Add Jewellery Piece</span>
                 </button>
               </div>
             </div>
@@ -1143,16 +1194,18 @@ export default function AdminDashboardClient() {
                 <div className="flex items-center gap-2">
                   <button
                     onClick={() => setIsBulkModalOpen(true)}
-                    className="px-3 py-1.5 bg-[var(--gold-primary)] text-black font-bold rounded text-xs hover:opacity-90 flex items-center gap-1"
+                    className="px-3 py-1.5 bg-[var(--gold-primary)] text-black font-bold rounded text-xs hover:opacity-90 flex items-center gap-1.5"
                   >
-                    ⚡ Bulk Update Prices / Stock
+                    <Zap className="w-3.5 h-3.5" />
+                    <span>Bulk Update Prices / Stock</span>
                   </button>
                   <button
                     onClick={handleDeleteSelected}
                     disabled={isProcessingBulk}
-                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded text-xs flex items-center gap-1 transition-colors disabled:opacity-50"
+                    className="px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white font-bold rounded text-xs flex items-center gap-1.5 transition-colors disabled:opacity-50"
                   >
-                    🗑️ Delete Selected ({selectedProductIds.length})
+                    <Trash2 className="w-3.5 h-3.5" />
+                    <span>Delete Selected ({selectedProductIds.length})</span>
                   </button>
                 </div>
               </div>
@@ -1250,23 +1303,25 @@ export default function AdminDashboardClient() {
                             <div className="flex items-center justify-end gap-1.5">
                               <button
                                 onClick={() => handleOpenEditProduct(p)}
-                                className="px-2.5 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px]"
+                                className="px-2.5 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px] font-medium transition-colors flex items-center gap-1"
                               >
-                                Edit
+                                <Pencil className="w-3 h-3" />
+                                <span>Edit</span>
                               </button>
                               <button
                                 onClick={() => handleDuplicateProduct(p)}
                                 title="Duplicate this piece"
-                                className="px-2 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px]"
+                                className="px-2.5 py-1 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] rounded text-[11px] font-medium transition-colors flex items-center gap-1"
                               >
-                                📋 Copy
+                                <Copy className="w-3 h-3" />
+                                <span>Copy</span>
                               </button>
                               <button
                                 onClick={() => handleDeleteProduct(p.id, p.name)}
-                                title="Delete"
-                                className="px-2 py-1 bg-red-950/20 text-red-400 border border-red-500/30 hover:bg-red-900/30 rounded text-[11px]"
+                                title="Delete piece"
+                                className="px-2 py-1 bg-red-950/20 text-red-400 border border-red-500/30 hover:bg-red-900/30 rounded text-[11px] transition-colors flex items-center justify-center"
                               >
-                                🗑
+                                <Trash2 className="w-3 h-3" />
                               </button>
                             </div>
                           </td>
@@ -1626,15 +1681,17 @@ export default function AdminDashboardClient() {
                           {/* Quick Print Actions */}
                           <button
                             onClick={() => setInvoiceOrder(order)}
-                            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold shadow-sm transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5"
                           >
-                            <span>🧾</span> Print GST Bill
+                            <FileText className="w-3.5 h-3.5" />
+                            <span>Print GST Bill</span>
                           </button>
                           <button
                             onClick={() => setPackingSlipOrder(order)}
-                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition-colors flex items-center gap-1"
+                            className="px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white rounded text-xs font-semibold shadow-sm transition-colors flex items-center gap-1.5"
                           >
-                            <span>📦</span> Packing Slip
+                            <Box className="w-3.5 h-3.5" />
+                            <span>Packing Slip</span>
                           </button>
 
                           <button
@@ -2087,9 +2144,10 @@ export default function AdminDashboardClient() {
               </div>
               <button
                 onClick={fetchAuditLogs}
-                className="px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded font-medium"
+                className="px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-xs rounded font-medium flex items-center gap-1.5 transition-colors"
               >
-                🔄 Refresh Logs
+                <RefreshCw className="w-3.5 h-3.5" />
+                <span>Refresh Logs</span>
               </button>
             </div>
 
