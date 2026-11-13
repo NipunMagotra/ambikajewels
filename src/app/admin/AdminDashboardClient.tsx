@@ -15,6 +15,7 @@ import { ProductModal, ProductFormData } from '@/components/admin/ProductModal';
 import { BulkActionModal } from '@/components/admin/BulkActionModal';
 import { CsvImportModal, exportProductsToCsv } from '@/components/admin/CsvModals';
 import { CouponModal } from '@/components/admin/CouponModal';
+import { RatesModal } from '@/components/admin/RatesModal';
 import type { CouponRule } from '@/lib/couponEngine';
 import type { AuditLogEntry } from '@/lib/auditLog';
 import type { StoreContentConfig } from '@/lib/storeContent';
@@ -43,7 +44,8 @@ import {
   RefreshCw,
   Check,
   LogOut,
-  Pencil
+  Pencil,
+  Coins
 } from 'lucide-react';
 
 export interface ProductItem {
@@ -171,6 +173,8 @@ export default function AdminDashboardClient() {
 
   // Rates State (Showroom Counter)
   const [rates, setRates] = useState<DailyRates>(DEFAULT_RATES);
+  const [isRatesModalOpen, setIsRatesModalOpen] = useState(false);
+  const [isRecalculatingRates, setIsRecalculatingRates] = useState(false);
 
   // Coupons State
   const [coupons, setCoupons] = useState<CouponRule[]>([]);
@@ -572,7 +576,7 @@ export default function AdminDashboardClient() {
   };
 
   // ── Showroom Daily Rates ──────────────────────────────────────────
-  const handleSaveRatesSubmit = async (newRates: Partial<DailyRates>) => {
+  const handleSaveRatesSubmit = async (newRates: Partial<DailyRates>, confirmLarge = false) => {
     try {
       const res = await fetch('/api/admin/rates', {
         method: 'POST',
@@ -580,17 +584,48 @@ export default function AdminDashboardClient() {
         body: JSON.stringify({
           ...rates,
           ...newRates,
+          confirm_large_change: confirmLarge,
           updated_by: 'Showroom Desk'
         })
       });
       const data = await res.json();
       if (res.ok && data.success) {
-        showNotification('Showroom rates updated successfully!');
-        fetchRates();
-        fetchAuditLogs();
+        showNotification('Showroom daily bullion rates updated successfully!');
+        await fetchRates();
+        await fetchAuditLogs();
+        return { success: true };
+      } else {
+        return {
+          success: false,
+          requiresConfirmation: data.requiresConfirmation,
+          error: data.error || 'Failed to update rates.'
+        };
       }
     } catch {
-      alert('Error updating showroom rates.');
+      return { success: false, error: 'Network error updating showroom rates.' };
+    }
+  };
+
+  const handleRecalculateRates = async () => {
+    try {
+      setIsRecalculatingRates(true);
+      const res = await fetch('/api/admin/rates/recalculate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+      if (res.ok && data.success) {
+        showNotification(data.message || `Recalculated prices for ${data.updatedCount} pieces.`);
+        await fetchProducts();
+        await fetchAuditLogs();
+      } else {
+        alert(data.message || 'Failed to recalculate bullion catalog prices.');
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Network error while recalculating rates.');
+    } finally {
+      setIsRecalculatingRates(false);
     }
   };
 
@@ -915,6 +950,64 @@ export default function AdminDashboardClient() {
               </div>
             </div>
 
+            {/* Daily Bullion Rates Benchmark Banner */}
+            <div className="bg-gradient-to-r from-[var(--bg-surface)] to-[var(--bg-primary)] p-5 rounded-xl border border-[var(--border-color)] flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+              <div className="flex items-center gap-3.5">
+                <div className="w-10 h-10 rounded-xl bg-[var(--gold-primary)]/15 border border-[var(--gold-primary)]/30 flex items-center justify-center text-[var(--gold-primary)] shrink-0">
+                  <Coins className="w-5 h-5" />
+                </div>
+                <div>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-serif text-base font-bold text-[var(--text-primary)]">
+                      Today&apos;s Live Bullion Benchmark (Jammu Showroom)
+                    </h3>
+                    <span className="text-[10px] bg-emerald-950 text-emerald-300 border border-emerald-600/40 px-2 py-0.5 rounded font-mono font-medium">
+                      Active
+                    </span>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 mt-1 text-xs text-[var(--text-secondary)] font-mono">
+                    <span>22K Gold: <strong className="text-[var(--gold-primary)] font-bold">₹{rates.gold_22k?.toLocaleString('en-IN')}/g</strong></span>
+                    <span>•</span>
+                    <span>24K Gold: <strong className="text-[var(--text-primary)]">₹{rates.gold_24k?.toLocaleString('en-IN')}/g</strong></span>
+                    <span>•</span>
+                    <span>925 Silver: <strong className="text-[var(--text-primary)]">₹{rates.silver_925?.toLocaleString('en-IN')}/g</strong></span>
+                    <span>•</span>
+                    <span className="text-[11px] font-sans text-[var(--text-secondary)]/80">
+                      {rates.updated_at ? `Updated: ${new Date(rates.updated_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}` : 'Morning Rate'}
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-2.5 w-full md:w-auto">
+                <button
+                  onClick={() => setIsRatesModalOpen(true)}
+                  className="flex-1 md:flex-initial px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-[var(--text-primary)] rounded-lg text-xs font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-[var(--gold-primary)]" />
+                  <span>Update Today&apos;s Rates</span>
+                </button>
+                <button
+                  onClick={handleRecalculateRates}
+                  disabled={isRecalculatingRates}
+                  className="flex-1 md:flex-initial px-4 py-2 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center justify-center gap-1.5 shadow cursor-pointer disabled:opacity-50"
+                  title="Recalculates all online product prices based on today's active 22K/24K bullion rates"
+                >
+                  {isRecalculatingRates ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Syncing Prices...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5 fill-black" />
+                      <span>1-Click Catalog Sync</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
+
             {/* Quick Actions Bar */}
             <div className="bg-[var(--bg-surface)] p-4 rounded-xl border border-[var(--border-color)] flex flex-wrap items-center justify-between gap-3">
               <div>
@@ -927,6 +1020,12 @@ export default function AdminDashboardClient() {
                   className="px-3.5 py-2 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 transition-all flex items-center gap-1.5 shadow"
                 >
                   <span>+</span> Add New Jewellery Piece
+                </button>
+                <button
+                  onClick={() => setIsRatesModalOpen(true)}
+                  className="px-3.5 py-2 bg-[var(--bg-primary)] border border-[var(--border-color)] text-[var(--text-primary)] rounded-lg text-xs font-medium hover:border-[var(--gold-primary)] transition-all flex items-center gap-1.5"
+                >
+                  <Coins className="w-3.5 h-3.5 text-[var(--gold-primary)]" /> Update Morning Rates
                 </button>
                 <button
                   onClick={() => setActiveTab('orders')}
@@ -1904,6 +2003,52 @@ export default function AdminDashboardClient() {
                 </p>
               </div>
             </div>
+
+            {/* POS Rates Bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 p-4 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-xl">
+              <div className="flex items-center gap-3">
+                <div className="w-8 h-8 rounded-lg bg-[var(--gold-primary)]/10 text-[var(--gold-primary)] flex items-center justify-center shrink-0">
+                  <Coins className="w-4 h-4" />
+                </div>
+                <div className="text-xs">
+                  <span className="text-[var(--text-secondary)]">Active Bullion Rates: </span>
+                  <span className="font-mono font-bold text-[var(--gold-primary)]">22K: ₹{rates.gold_22k?.toLocaleString('en-IN')}/g</span>
+                  <span className="text-[var(--text-secondary)]"> | </span>
+                  <span className="font-mono text-[var(--text-primary)]">24K: ₹{rates.gold_24k?.toLocaleString('en-IN')}/g</span>
+                  <span className="text-[var(--text-secondary)]"> | </span>
+                  <span className="font-mono text-[var(--text-primary)]">925 Silver: ₹{rates.silver_925?.toLocaleString('en-IN')}/g</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => setIsRatesModalOpen(true)}
+                  className="px-3 py-1.5 bg-[var(--bg-primary)] border border-[var(--border-color)] hover:border-[var(--gold-primary)] text-[var(--text-primary)] rounded-lg text-xs font-semibold flex items-center gap-1.5 transition-colors cursor-pointer"
+                >
+                  <Pencil className="w-3.5 h-3.5 text-[var(--gold-primary)]" />
+                  <span>Edit Daily Rates</span>
+                </button>
+                <button
+                  type="button"
+                  onClick={handleRecalculateRates}
+                  disabled={isRecalculatingRates}
+                  className="px-3 py-1.5 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-bold hover:opacity-90 flex items-center gap-1.5 transition-all shadow cursor-pointer disabled:opacity-50"
+                  title="Recalculate all web catalog prices using these rates"
+                >
+                  {isRecalculatingRates ? (
+                    <>
+                      <RefreshCw className="w-3.5 h-3.5 animate-spin" />
+                      <span>Syncing...</span>
+                    </>
+                  ) : (
+                    <>
+                      <Zap className="w-3.5 h-3.5 fill-black" />
+                      <span>1-Click Catalog Sync</span>
+                    </>
+                  )}
+                </button>
+              </div>
+            </div>
             <BillingCalculator rates={rates} />
           </div>
         )}
@@ -2025,6 +2170,15 @@ export default function AdminDashboardClient() {
       <PackingSlipModal
         order={packingSlipOrder}
         onClose={() => setPackingSlipOrder(null)}
+      />
+
+      <RatesModal
+        isOpen={isRatesModalOpen}
+        onClose={() => setIsRatesModalOpen(false)}
+        currentRates={rates}
+        onSaveRates={handleSaveRatesSubmit}
+        onRecalculateCatalog={handleRecalculateRates}
+        isRecalculating={isRecalculatingRates}
       />
     </div>
   );

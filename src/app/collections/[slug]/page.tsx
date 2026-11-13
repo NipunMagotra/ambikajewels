@@ -28,8 +28,8 @@ export async function generateMetadata({
       if (dataById) prod = dataById;
     }
   }
-  // Fallback to mockProducts
-  if (!prod) {
+  // Fallback to mockProducts only if enabled in siteConfig
+  if (!prod && siteConfig.features.useMockProductsFallback) {
     prod = mockProducts.find(p => p.slug === slug || p.id === slug);
   }
   

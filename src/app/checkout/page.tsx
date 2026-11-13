@@ -9,6 +9,7 @@ import { useCart } from '@/context/CartContext';
 import { siteConfig } from '@/config/siteConfig';
 import { getEmailSuggestion } from '@/lib/checkoutValidation';
 import { validateCoupon } from '@/lib/couponEngine';
+import { getCartWhatsAppUrl } from '@/lib/whatsapp';
 
 // Declare global Window interface for Razorpay SDK
 declare global {
@@ -104,6 +105,29 @@ export default function CheckoutPage() {
 
   useEffect(() => {
     fetchServerRateLock();
+
+    // Auto pre-fill customer details if logged in
+    fetch('/api/auth/me')
+      .then(res => res.json())
+      .then(data => {
+        if (data.success && data.profile) {
+          const prof = data.profile;
+          const defaultAddr = prof.addresses?.find((a: any) => a.isDefault) || prof.addresses?.[0];
+          setFormData(prev => ({
+            ...prev,
+            email: prev.email || prof.email || '',
+            phone: prev.phone || prof.phone || defaultAddr?.phone || '',
+            firstName: prev.firstName || (prof.fullName ? prof.fullName.split(' ')[0] : (defaultAddr?.fullName ? defaultAddr.fullName.split(' ')[0] : '')),
+            lastName: prev.lastName || (prof.fullName ? prof.fullName.split(' ').slice(1).join(' ') : (defaultAddr?.fullName ? defaultAddr.fullName.split(' ').slice(1).join(' ') : '')),
+            address: prev.address || defaultAddr?.addressLine || '',
+            city: prev.city || defaultAddr?.city || '',
+            state: prev.state || defaultAddr?.state || '',
+            pincode: prev.pincode || defaultAddr?.pincode || ''
+          }));
+        }
+      })
+      .catch(() => {});
+
     try {
       const savedSummary = sessionStorage.getItem('ambika_last_order');
       if (savedSummary) {
@@ -180,6 +204,7 @@ export default function CheckoutPage() {
   const handleRefreshRateLock = async () => {
     setErrorMessage(null);
     await fetchServerRateLock();
+    setRateLockExpired(false);
   };
 
   const formatLockTime = (secs: number) => {
@@ -637,9 +662,32 @@ export default function CheckoutPage() {
           )}
 
           {errorMessage && (
-            <div className="mb-6 p-4 bg-red-100 dark:bg-red-950/40 border border-red-400 dark:border-red-500/50 text-red-700 dark:text-red-300 rounded-xs flex items-center gap-3 text-xs sm:text-sm">
-              <span className="material-symbols-outlined text-red-500 dark:text-red-400">error</span>
-              <span>{errorMessage}</span>
+            <div className="mb-6 p-4 sm:p-5 bg-red-100 dark:bg-red-950/40 border border-red-400 dark:border-red-500/50 text-red-800 dark:text-red-200 rounded-xs space-y-3">
+              <div className="flex items-start gap-3 text-xs sm:text-sm">
+                <span className="material-symbols-outlined text-red-600 dark:text-red-400 shrink-0 mt-0.5">error</span>
+                <span className="leading-relaxed">{errorMessage}</span>
+              </div>
+              <div className="pt-2 border-t border-red-300 dark:border-red-500/30 flex flex-wrap items-center justify-between gap-2 text-xs">
+                <span className="text-[var(--text-secondary)]">Need assistance or bank gateway busy?</span>
+                <div className="flex items-center gap-2">
+                  <a
+                    href={getCartWhatsAppUrl(state.items, formatPrice(finalTotal))}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 text-white font-semibold rounded-[2px] text-[11px] flex items-center gap-1.5 transition-colors shadow-xs"
+                  >
+                    <span className="material-symbols-outlined text-xs">chat</span>
+                    <span>Order via WhatsApp Concierge</span>
+                  </a>
+                  <a
+                    href="tel:+919682589725"
+                    className="px-3 py-1.5 bg-[var(--bg-surface)] hover:bg-[var(--border-subtle)] border border-[var(--border-card)] text-[var(--text-primary)] font-semibold rounded-[2px] text-[11px] flex items-center gap-1.5 transition-colors"
+                  >
+                    <span className="material-symbols-outlined text-xs">call</span>
+                    <span>Call Showroom</span>
+                  </a>
+                </div>
+              </div>
             </div>
           )}
 

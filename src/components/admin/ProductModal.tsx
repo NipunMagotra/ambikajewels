@@ -49,6 +49,80 @@ interface ProductModalProps {
   isSaving: boolean;
 }
 
+/**
+ * Compresses phone/camera photos client-side to max 1600px width/height and WebP format
+ * before uploading to Supabase Storage, preventing bandwidth throttling and storage bloat.
+ */
+async function compressImageClient(file: File, maxDim = 1600, quality = 0.85): Promise<File> {
+  if (typeof window === 'undefined') return file;
+  if (!file.type.startsWith('image/') || file.type === 'image/gif') {
+    return file;
+  }
+
+  return new Promise((resolve) => {
+    const img = new Image();
+    const objectUrl = URL.createObjectURL(file);
+
+    img.onload = () => {
+      URL.revokeObjectURL(objectUrl);
+      let { width, height } = img;
+
+      // If already small (< 600KB) and within maxDim, skip compression
+      if (width <= maxDim && height <= maxDim && file.size < 600 * 1024) {
+        resolve(file);
+        return;
+      }
+
+      if (width > height) {
+        if (width > maxDim) {
+          height = Math.round((height * maxDim) / width);
+          width = maxDim;
+        }
+      } else {
+        if (height > maxDim) {
+          width = Math.round((width * maxDim) / height);
+          height = maxDim;
+        }
+      }
+
+      const canvas = document.createElement('canvas');
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext('2d');
+      if (!ctx) {
+        resolve(file);
+        return;
+      }
+
+      ctx.drawImage(img, 0, 0, width, height);
+
+      canvas.toBlob(
+        (blob) => {
+          if (!blob) {
+            resolve(file);
+            return;
+          }
+          const baseName = file.name.replace(/\.[^/.]+$/, '');
+          const compressed = new File([blob], `${baseName}.webp`, {
+            type: 'image/webp',
+            lastModified: Date.now()
+          });
+          resolve(compressed);
+        },
+        'image/webp',
+        quality
+      );
+    };
+
+    img.onerror = () => {
+      URL.revokeObjectURL(objectUrl);
+      resolve(file);
+    };
+
+    img.src = objectUrl;
+  });
+}
+
 export function ProductModal({
   isOpen,
   onClose,
@@ -118,9 +192,9 @@ export function ProductModal({
         purity: editingProduct.purity || '22K (916)',
         bis_hallmark: editingProduct.bis_hallmark || 'BIS Hallmarked with HUID',
         is_hallmarked: editingProduct.is_hallmarked !== false,
-        huid: editingProduct.huid || '',
-        weight_grams: editingProduct.weight_grams ? Number(editingProduct.weight_grams) : 10.0,
-        gross_weight_grams: editingProduct.gross_weight_grams ? Number(editingProduct.gross_weight_grams) : 10.5,
+        huid: editingProduct.huid || (editingProduct as any).huid_code || '',
+        weight_grams: editingProduct.weight_grams !== undefined ? Number(editingProduct.weight_grams) : ((editingProduct as any).net_weight_grams !== undefined ? Number((editingProduct as any).net_weight_grams) : 10.0),
+        gross_weight_grams: editingProduct.gross_weight_grams !== undefined ? Number(editingProduct.gross_weight_grams) : ((editingProduct as any).net_weight_grams !== undefined ? Number((editingProduct as any).net_weight_grams) : 10.5),
         dimensions: editingProduct.dimensions || { length_cm: 3, breadth_cm: 2, height_cm: 1 },
         hsn_code: editingProduct.hsn_code || '7113',
         care_instructions: editingProduct.care_instructions || 'Store in provided velvet box.',
@@ -189,7 +263,12 @@ export function ProductModal({
 
     try {
       for (let i = 0; i < files.length; i++) {
-        const file = files[i];
+        let file = files[i];
+        try {
+          file = await compressImageClient(file);
+        } catch (compressionErr) {
+          console.warn('Image auto-compression skipped, uploading original:', compressionErr);
+        }
         const data = new FormData();
         data.append('file', file);
 
@@ -217,10 +296,14 @@ export function ProductModal({
   };
 
   const handleAddUrlImage = () => {
-    if (!urlInput.trim()) return;
+    let url = urlInput.trim();
+    if (!url) return;
+    if (!url.startsWith('http://') && !url.startsWith('https://') && !url.startsWith('/')) {
+      url = `https://${url}`;
+    }
     setForm(prev => ({
       ...prev,
-      images: [...prev.images, urlInput.trim()]
+      images: [...prev.images, url]
     }));
     setUrlInput('');
     setShowUrlInput(false);
@@ -276,7 +359,7 @@ export function ProductModal({
   };
 
   return (
-    <div 
+    <div
       className="fixed inset-0 z-50 overflow-y-auto bg-black/70 backdrop-blur-sm flex items-center justify-center p-3 sm:p-4"
       onClick={(e) => {
         if (e.target === e.currentTarget) {
@@ -306,7 +389,7 @@ export function ProductModal({
 
         {/* Scrollable Form Body */}
         <form onSubmit={handleSubmit} className="flex-1 overflow-y-auto p-5 sm:p-6 space-y-5 text-xs">
-          
+
           {/* SECTION 1: ESSENTIAL DETAILS */}
           <div className="bg-[var(--bg-primary)] p-4 rounded-xl border border-[var(--border-color)] space-y-3.5">
             <h3 className="font-semibold text-xs text-[var(--gold-primary)] uppercase tracking-wider">
@@ -389,21 +472,41 @@ export function ProductModal({
 
             {/* URL input helper */}
             {showUrlInput && (
-              <div className="flex gap-2">
-                <input
-                  type="url"
-                  value={urlInput}
-                  onChange={e => setUrlInput(e.target.value)}
-                  placeholder="https://example.com/jewellery-photo.jpg"
-                  className="flex-1 px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
-                />
-                <button
-                  type="button"
-                  onClick={handleAddUrlImage}
-                  className="px-3 py-1.5 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-semibold hover:opacity-90"
-                >
-                  Add Link
-                </button>
+              <div className="space-y-2">
+                <div className="flex gap-2">
+                  <input
+                    type="url"
+                    value={urlInput}
+                    onChange={e => setUrlInput(e.target.value)}
+                    placeholder="https://images.unsplash.com/... or /products/royal-kundan.png"
+                    className="flex-1 px-3 py-1.5 bg-[var(--bg-surface)] border border-[var(--border-color)] rounded-lg text-xs"
+                  />
+                  <button
+                    type="button"
+                    onClick={handleAddUrlImage}
+                    className="px-3 py-1.5 bg-[var(--gold-primary)] text-black rounded-lg text-xs font-semibold hover:opacity-90"
+                  >
+                    Add Link
+                  </button>
+                </div>
+                <div className="flex items-center gap-1.5 text-[11px] text-[var(--text-secondary)]">
+                  <span>Sample photos:</span>
+                  <button
+                    type="button"
+                    onClick={() => setUrlInput('/products/royal-kundan.png')}
+                    className="text-[var(--accent-gold)] hover:underline"
+                  >
+                    Royal Kundan
+                  </button>
+                  <span>•</span>
+                  <button
+                    type="button"
+                    onClick={() => setUrlInput('/products/kundan-chandbali.png')}
+                    className="text-[var(--accent-gold)] hover:underline"
+                  >
+                    Chandbali
+                  </button>
+                </div>
               </div>
             )}
 
@@ -423,7 +526,7 @@ export function ProductModal({
                   {isUploading ? 'Uploading photo...' : 'Click or drop photos from phone / computer'}
                 </p>
                 <p className="text-[10px] text-[var(--text-secondary)]">
-                  Supports JPEG, PNG, WebP up to 10MB each. First photo will be the main display cover.
+                  Supports JPEG, PNG, WebP up to 10MB. High-res phone camera photos are auto-optimized to crisp WebP. First photo will be the main display cover.
                 </p>
               </div>
             </label>
@@ -444,6 +547,9 @@ export function ProductModal({
                       src={imgUrl}
                       alt={`Photo ${idx + 1}`}
                       className="w-full h-full object-cover"
+                      onError={e => {
+                        (e.target as HTMLImageElement).src = '/hero-clean.png';
+                      }}
                     />
                     {idx === 0 && (
                       <span className="absolute top-1 left-1 bg-[var(--gold-primary)] text-black text-[9px] font-bold px-1.5 py-0.5 rounded shadow">

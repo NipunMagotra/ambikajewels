@@ -35,6 +35,14 @@ export async function verifyBullionRateFreshness(maxHours = siteConfig.rates.max
     const updatedAt = new Date(data.updated_at).getTime();
     const ageHours = (Date.now() - updatedAt) / (1000 * 60 * 60);
 
+    // Weekend Market Closure Awareness:
+    // Bullion spot markets in India (IBJA & MCX) close Friday evening through Sunday.
+    // Rates stamped on Friday/Saturday remain authoritative throughout the weekend (up to 72h).
+    const dayOfWeek = new Date().getDay(); // 0 = Sunday, 6 = Saturday, 1 = Monday
+    const effectiveMaxHours = (dayOfWeek === 0 || dayOfWeek === 6 || dayOfWeek === 1)
+      ? Math.max(maxHours, 72)
+      : maxHours;
+
     const latestRate: DailyRates = {
       gold_24k: Number(data.gold_24k),
       gold_22k: Number(data.gold_22k),
@@ -47,7 +55,7 @@ export async function verifyBullionRateFreshness(maxHours = siteConfig.rates.max
     };
 
     return {
-      isFresh: ageHours <= maxHours,
+      isFresh: ageHours <= effectiveMaxHours,
       ageHours: Math.round(ageHours * 10) / 10,
       latestRate
     };

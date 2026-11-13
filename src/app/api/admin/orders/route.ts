@@ -105,8 +105,13 @@ export async function PATCH(request: Request) {
     };
 
     if (status !== undefined) updates.status = status;
-    if (bvc_docket_number !== undefined) updates.bvc_docket_number = bvc_docket_number;
-    if (shiprocket_awb !== undefined) updates.shiprocket_awb = shiprocket_awb;
+    if (bvc_docket_number !== undefined) {
+      const cleanDocket = typeof bvc_docket_number === 'string' ? bvc_docket_number.trim() : bvc_docket_number;
+      updates.bvc_docket_number = cleanDocket;
+      updates.tracking_awb = cleanDocket;
+      updates.shiprocket_awb = cleanDocket;
+    }
+    if (shiprocket_awb !== undefined && bvc_docket_number === undefined) updates.shiprocket_awb = shiprocket_awb;
     if (notes !== undefined) updates.notes = notes;
     if (payment_status !== undefined) updates.payment_status = payment_status;
 

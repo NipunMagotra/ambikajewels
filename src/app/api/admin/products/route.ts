@@ -45,6 +45,89 @@ function formatInr(paise: number): string {
   return `₹${rupees.toLocaleString('en-IN')}`;
 }
 
+export function normalizePurity(purity?: string): '24K' | '22K' | '18K' | '14K' | '925Silver' {
+  if (!purity) return '22K';
+  const str = String(purity).toUpperCase();
+  if (str.includes('24')) return '24K';
+  if (str.includes('22')) return '22K';
+  if (str.includes('18')) return '18K';
+  if (str.includes('14')) return '14K';
+  if (str.includes('925') || str.includes('SILVER')) return '925Silver';
+  return '22K';
+}
+
+export function normalizeHuid(huid?: string): string | null {
+  if (!huid || typeof huid !== 'string') return null;
+  const trimmed = huid.trim().toUpperCase();
+  return trimmed.length === 6 ? trimmed : null;
+}
+
+export function sanitizeProductForDb(item: any): Record<string, any> {
+  const row: Record<string, any> = {};
+
+  if (item.name !== undefined) row.name = String(item.name).trim();
+  if (item.slug !== undefined) row.slug = String(item.slug).trim();
+  if (item.description !== undefined) row.description = String(item.description ?? '').trim();
+  if (item.price !== undefined) row.price = Math.round(Number(item.price));
+  if (item.display_price !== undefined || item.price !== undefined) {
+    row.display_price = item.display_price || formatInr(item.price);
+  }
+  if (item.category !== undefined) row.category = String(item.category).trim();
+  if (item.images !== undefined) {
+    row.images = Array.isArray(item.images) && item.images.length > 0 ? item.images.filter(Boolean) : ['/hero-clean.png'];
+  }
+  if (item.badges !== undefined) {
+    row.badges = Array.isArray(item.badges) ? item.badges.filter(Boolean) : ['22K BIS'];
+  }
+  if (item.metal_finishes !== undefined) {
+    row.metal_finishes = Array.isArray(item.metal_finishes) && item.metal_finishes.length > 0 ? item.metal_finishes : ['Gold'];
+  }
+  if (item.stock_status !== undefined) {
+    row.stock_status = ['in_stock', 'limited', 'out_of_stock'].includes(item.stock_status) ? item.stock_status : 'in_stock';
+  }
+  if (item.is_featured !== undefined) row.is_featured = Boolean(item.is_featured);
+  if (item.collection !== undefined) row.collection = String(item.collection || 'Heritage').trim();
+  if (item.craftsmanship_story !== undefined) row.craftsmanship_story = String(item.craftsmanship_story || '').trim();
+
+  // Weight mappings
+  if (item.net_weight_grams !== undefined) {
+    row.net_weight_grams = Number(item.net_weight_grams);
+  } else if (item.weight_grams !== undefined) {
+    row.net_weight_grams = Number(item.weight_grams);
+  }
+
+  if (item.gross_weight_grams !== undefined) {
+    row.gross_weight_grams = Number(item.gross_weight_grams);
+  } else if (item.weight_grams !== undefined) {
+    row.gross_weight_grams = Number(item.weight_grams);
+  }
+
+  if (item.purity !== undefined) row.purity = normalizePurity(item.purity);
+  if (item.making_charge_type !== undefined) {
+    row.making_charge_type = item.making_charge_type === 'flat' ? 'flat' : 'percent';
+  }
+  if (item.making_charge_rate !== undefined) row.making_charge_rate = Number(item.making_charge_rate);
+  if (item.stone_weight_grams !== undefined) row.stone_weight_grams = Number(item.stone_weight_grams);
+  if (item.stone_value_paise !== undefined) row.stone_value_paise = Number(item.stone_value_paise);
+  if (item.hallmark_pieces !== undefined) row.hallmark_pieces = Number(item.hallmark_pieces);
+
+  // HUID check constraint: must be NULL or exactly 6 characters
+  if (item.huid_code !== undefined || item.huid !== undefined) {
+    row.huid_code = normalizeHuid(item.huid_code || item.huid);
+  }
+
+  if (item.hsn_code !== undefined) row.hsn_code = String(item.hsn_code);
+
+  if (item.id && typeof item.id === 'string' && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id)) {
+    row.id = item.id;
+  }
+
+  if (item.created_at) row.created_at = item.created_at;
+  row.updated_at = item.updated_at || new Date().toISOString();
+
+  return row;
+}
+
 /**
  * GET /api/admin/products
  * Fetch all products from catalog (supports ?category= and ?search=)
@@ -79,15 +162,27 @@ export async function GET(request?: Request) {
 
       const { data: products, error } = await query;
 
-      if (!error && products && products.length > 0) {
+      if (!error && products) {
+        const mappedProducts = products.map((p: any) => ({
+          ...p,
+          weight_grams: p.weight_grams ?? (p.net_weight_grams !== null && p.net_weight_grams !== undefined ? Number(p.net_weight_grams) : 0),
+          net_weight_grams: p.net_weight_grams !== null && p.net_weight_grams !== undefined ? Number(p.net_weight_grams) : (p.weight_grams ?? 0),
+          gross_weight_grams: p.gross_weight_grams !== null && p.gross_weight_grams !== undefined ? Number(p.gross_weight_grams) : (p.weight_grams ?? 0),
+          huid: p.huid || p.huid_code || '',
+          huid_code: p.huid_code || p.huid || ''
+        }));
         return NextResponse.json({
           success: true,
-          products
+          products: mappedProducts
         });
+      }
+
+      if (error) {
+        console.error('[ADMIN PRODUCTS GET DB ERROR]', error);
       }
     }
 
-    // Fallback to memory products
+    // Fallback to memory products only if database is not configured or throws error
     let filtered = [...memoryProducts];
     if (category && category !== 'All') {
       filtered = filtered.filter(p => p.category.toLowerCase() === category.toLowerCase());
@@ -147,9 +242,9 @@ export async function POST(request: Request) {
 
       const copyName = `${original.name} (Copy)`;
       const copySlug = `${slugify(copyName)}-${Math.random().toString(36).substring(2, 6)}`;
-      const duplicated = {
+      const duplicated: any = {
         ...original,
-        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `prod_${Date.now()}`,
+        id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined,
         name: copyName,
         slug: copySlug,
         created_at: new Date().toISOString(),
@@ -157,9 +252,21 @@ export async function POST(request: Request) {
       };
 
       if (isSupabaseAdminConfigured && supabaseAdmin) {
-        const { error } = await supabaseAdmin.from('products').insert(duplicated);
+        const dbRow = sanitizeProductForDb(duplicated);
+        const { data: inserted, error } = await supabaseAdmin.from('products').insert(dbRow).select('*').single();
         if (error) {
-          console.warn('[ADMIN PRODUCT DUPLICATE WARN]', error);
+          console.error('[ADMIN PRODUCT DUPLICATE DB ERROR]', error);
+          return NextResponse.json(
+            { success: false, message: `Failed to duplicate product in database: ${error.message}` },
+            { status: 500 }
+          );
+        }
+        if (inserted) {
+          duplicated.id = inserted.id;
+          duplicated.net_weight_grams = inserted.net_weight_grams;
+          duplicated.huid_code = inserted.huid_code;
+          duplicated.weight_grams = inserted.net_weight_grams ? Number(inserted.net_weight_grams) : 0;
+          duplicated.huid = inserted.huid_code || '';
         }
       }
 
@@ -241,7 +348,7 @@ export async function POST(request: Request) {
     const slug = `${baseSlug}-${uniqueSuffix}`;
 
     const newProduct: any = {
-      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : `prod_${Date.now()}`,
+      id: typeof crypto !== 'undefined' && crypto.randomUUID ? crypto.randomUUID() : undefined,
       name: name.trim(),
       slug,
       description: (description || '').trim(),
@@ -256,18 +363,20 @@ export async function POST(request: Request) {
       collection: (collection || 'Heritage').trim(),
       craftsmanship_story: (craftsmanship_story || '').trim(),
       material: material || `${purity || '22K'} Solid Gold (BIS Hallmarked)`,
-      purity: purity || '22K (916 Purity)',
+      purity: normalizePurity(purity),
       bis_hallmark: bis_hallmark || 'BIS Hallmarked with unique 6-character HUID',
       is_hallmarked: is_hallmarked !== undefined ? Boolean(is_hallmarked) : true,
-      huid: huid || '',
+      huid: normalizeHuid(huid) || '',
+      huid_code: normalizeHuid(huid),
       weight_grams: weight_grams ? Number(weight_grams) : 10.0,
+      net_weight_grams: weight_grams ? Number(weight_grams) : 10.0,
       gross_weight_grams: gross_weight_grams ? Number(gross_weight_grams) : (weight_grams ? Number(weight_grams) : 10.0),
       dimensions: dimensions || { length_cm: 3, breadth_cm: 2, height_cm: 1 },
       hsn_code: hsn_code || '7113',
       country_of_origin: 'India',
       seller_details: 'Ambika Jewels, Shop no.3, E.W.S colony, Sector 1, Lower Roop Nagar, Jammu, J&K 180013',
       care_instructions: care_instructions || 'Store in provided velvet box away from direct perfumes.',
-      making_charge_type,
+      making_charge_type: making_charge_type === 'flat' ? 'flat' : 'percent',
       making_charge_rate: Number(making_charge_rate || 8),
       stone_weight_grams: Number(stone_weight_grams || 0),
       stone_value_paise: Number(stone_value_paise || 0),
@@ -278,31 +387,21 @@ export async function POST(request: Request) {
     };
 
     if (isSupabaseAdminConfigured && supabaseAdmin) {
-      // First attempt full insert; if column error occurs, fallback to standard schema columns
-      let insertResult = await supabaseAdmin.from('products').insert(newProduct).select('*').single();
+      const dbRow = sanitizeProductForDb(newProduct);
+      const insertResult = await supabaseAdmin.from('products').insert(dbRow).select('*').single();
       if (insertResult.error) {
-        const standardProduct = {
-          name: newProduct.name,
-          slug: newProduct.slug,
-          description: newProduct.description,
-          price: newProduct.price,
-          display_price: newProduct.display_price,
-          category: newProduct.category,
-          images: newProduct.images,
-          badges: newProduct.badges,
-          metal_finishes: newProduct.metal_finishes,
-          stock_status: newProduct.stock_status,
-          is_featured: newProduct.is_featured,
-          collection: newProduct.collection,
-          craftsmanship_story: newProduct.craftsmanship_story,
-          created_at: newProduct.created_at,
-          updated_at: newProduct.updated_at
-        };
-        insertResult = await supabaseAdmin.from('products').insert(standardProduct).select('*').single();
+        console.error('[ADMIN PRODUCT POST DB ERROR]', insertResult.error);
+        return NextResponse.json(
+          { success: false, message: `Failed to save product in database: ${insertResult.error.message}` },
+          { status: 500 }
+        );
       }
-
       if (insertResult.data) {
         newProduct.id = insertResult.data.id;
+        newProduct.net_weight_grams = insertResult.data.net_weight_grams;
+        newProduct.huid_code = insertResult.data.huid_code;
+        newProduct.weight_grams = insertResult.data.net_weight_grams ? Number(insertResult.data.net_weight_grams) : 0;
+        newProduct.huid = insertResult.data.huid_code || '';
       }
     }
 
@@ -391,7 +490,12 @@ export async function PATCH(request: Request) {
           }
 
           if (isSupabaseAdminConfigured && supabaseAdmin) {
-            await supabaseAdmin.from('products').update(cleanUpdates).eq('id', id);
+            const dbUpdates = sanitizeProductForDb(cleanUpdates);
+            delete dbUpdates.id;
+            const { error: patchErr } = await supabaseAdmin.from('products').update(dbUpdates).eq('id', id);
+            if (patchErr) {
+              console.error('[ADMIN BULK PATCH DB ERROR]', patchErr);
+            }
           }
 
           // Update memory
@@ -455,15 +559,21 @@ export async function PATCH(request: Request) {
 
     // Jewelry details
     if (updates.material !== undefined) cleanUpdates.material = updates.material;
-    if (updates.purity !== undefined) cleanUpdates.purity = updates.purity;
+    if (updates.purity !== undefined) cleanUpdates.purity = normalizePurity(updates.purity);
     if (updates.bis_hallmark !== undefined) cleanUpdates.bis_hallmark = updates.bis_hallmark;
     if (updates.is_hallmarked !== undefined) cleanUpdates.is_hallmarked = Boolean(updates.is_hallmarked);
-    if (updates.huid !== undefined) cleanUpdates.huid = updates.huid;
-    if (updates.weight_grams !== undefined) cleanUpdates.weight_grams = Number(updates.weight_grams);
+    if (updates.huid !== undefined) {
+      cleanUpdates.huid = updates.huid;
+      cleanUpdates.huid_code = normalizeHuid(updates.huid);
+    }
+    if (updates.weight_grams !== undefined) {
+      cleanUpdates.weight_grams = Number(updates.weight_grams);
+      cleanUpdates.net_weight_grams = Number(updates.weight_grams);
+    }
     if (updates.gross_weight_grams !== undefined) cleanUpdates.gross_weight_grams = Number(updates.gross_weight_grams);
     if (updates.dimensions !== undefined) cleanUpdates.dimensions = updates.dimensions;
     if (updates.care_instructions !== undefined) cleanUpdates.care_instructions = updates.care_instructions;
-    if (updates.making_charge_type !== undefined) cleanUpdates.making_charge_type = updates.making_charge_type;
+    if (updates.making_charge_type !== undefined) cleanUpdates.making_charge_type = updates.making_charge_type === 'flat' ? 'flat' : 'percent';
     if (updates.making_charge_rate !== undefined) cleanUpdates.making_charge_rate = Number(updates.making_charge_rate);
     if (updates.stone_weight_grams !== undefined) cleanUpdates.stone_weight_grams = Number(updates.stone_weight_grams);
     if (updates.stone_value_paise !== undefined) cleanUpdates.stone_value_paise = Number(updates.stone_value_paise);
@@ -481,35 +591,31 @@ export async function PATCH(request: Request) {
     let updatedProduct: any = null;
 
     if (isSupabaseAdminConfigured && supabaseAdmin) {
+      const dbUpdates = sanitizeProductForDb(cleanUpdates);
+      delete dbUpdates.id;
+      if (!cleanUpdates.slug) delete dbUpdates.slug;
+
       const { data, error } = await supabaseAdmin
         .from('products')
-        .update(cleanUpdates)
+        .update(dbUpdates)
         .eq('id', id)
         .select('*')
         .maybeSingle();
 
-      if (!error && data) {
-        updatedProduct = data;
-      } else {
-        // Fallback retry with basic columns only if schema has not migrated extra columns
-        const basicColumns = {
-          name: cleanUpdates.name,
-          category: cleanUpdates.category,
-          description: cleanUpdates.description,
-          collection: cleanUpdates.collection,
-          craftsmanship_story: cleanUpdates.craftsmanship_story,
-          stock_status: cleanUpdates.stock_status,
-          is_featured: cleanUpdates.is_featured,
-          images: cleanUpdates.images,
-          badges: cleanUpdates.badges,
-          metal_finishes: cleanUpdates.metal_finishes,
-          price: cleanUpdates.price,
-          display_price: cleanUpdates.display_price,
-          updated_at: cleanUpdates.updated_at
+      if (error) {
+        console.error('[ADMIN PRODUCT PATCH DB ERROR]', error);
+        return NextResponse.json(
+          { success: false, message: `Failed to update product in database: ${error.message}` },
+          { status: 500 }
+        );
+      }
+
+      if (data) {
+        updatedProduct = {
+          ...data,
+          weight_grams: data.net_weight_grams !== null && data.net_weight_grams !== undefined ? Number(data.net_weight_grams) : 0,
+          huid: data.huid_code || ''
         };
-        const cleanedBasic = Object.fromEntries(Object.entries(basicColumns).filter(([_, v]) => v !== undefined));
-        const retry = await supabaseAdmin.from('products').update(cleanedBasic).eq('id', id).select('*').maybeSingle();
-        if (retry.data) updatedProduct = retry.data;
       }
     }
 
@@ -588,7 +694,11 @@ export async function DELETE(request: Request) {
     // ── 1. Delete All Products ──
     if (deleteAll) {
       if (isSupabaseAdminConfigured && supabaseAdmin) {
-        await supabaseAdmin.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        const { error } = await supabaseAdmin.from('products').delete().neq('id', '00000000-0000-0000-0000-000000000000');
+        if (error) {
+          console.error('[ADMIN DELETE ALL DB ERROR]', error);
+          return NextResponse.json({ success: false, message: `Database error: ${error.message}` }, { status: 500 });
+        }
       }
 
       const totalDeleted = (globalThis.__ambika_memory_products || memoryProducts).length;
@@ -612,7 +722,11 @@ export async function DELETE(request: Request) {
     // ── 2. Bulk Delete Selected Products ──
     if (Array.isArray(ids) && ids.length > 0) {
       if (isSupabaseAdminConfigured && supabaseAdmin) {
-        await supabaseAdmin.from('products').delete().in('id', ids);
+        const { error } = await supabaseAdmin.from('products').delete().in('id', ids);
+        if (error) {
+          console.error('[ADMIN BULK DELETE DB ERROR]', error);
+          return NextResponse.json({ success: false, message: `Database error: ${error.message}` }, { status: 500 });
+        }
       }
 
       if (globalThis.__ambika_memory_products) {
@@ -648,7 +762,11 @@ export async function DELETE(request: Request) {
     }
 
     if (isSupabaseAdminConfigured && supabaseAdmin) {
-      await supabaseAdmin.from('products').delete().eq('id', id);
+      const { error } = await supabaseAdmin.from('products').delete().eq('id', id);
+      if (error) {
+        console.error('[ADMIN PRODUCT DELETE DB ERROR]', error);
+        return NextResponse.json({ success: false, message: `Database error: ${error.message}` }, { status: 500 });
+      }
     }
 
     if (globalThis.__ambika_memory_products) {

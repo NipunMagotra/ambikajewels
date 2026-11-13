@@ -209,6 +209,16 @@ export default function Header() {
               </div>
             </Link>
 
+            {/* Account Link */}
+            <Link
+              href="/account"
+              className="min-w-[40px] min-h-[40px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center text-[var(--text-primary)] hover:text-[var(--accent-gold)] transition-colors p-2"
+              aria-label="Patron Account"
+              title="My Account & Orders"
+            >
+              <span className="material-symbols-outlined text-lg sm:text-xl">person</span>
+            </Link>
+
             {/* Cart Bag */}
             <Link 
               href="/cart" 
@@ -313,6 +323,14 @@ export default function Header() {
               >
                 <span>SAVED WISHLIST ({wishlistCount})</span>
                 <span className="material-symbols-outlined text-sm text-[var(--accent-gold)]">favorite</span>
+              </Link>
+              <Link
+                href="/account"
+                onClick={() => setMobileMenuOpen(false)}
+                className="text-sm font-sans tracking-wider text-[var(--accent-gold)] py-3 border-b border-[var(--border-subtle)] flex justify-between items-center font-semibold"
+              >
+                <span>MY ACCOUNT &amp; ORDERS</span>
+                <span className="material-symbols-outlined text-sm">person</span>
               </Link>
             </div>
 

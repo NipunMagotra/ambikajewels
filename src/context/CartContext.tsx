@@ -81,7 +81,14 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
     const savedCart = localStorage.getItem('ambika_cart');
     if (savedCart) {
       try {
-        dispatch({ type: 'LOAD_CART', payload: JSON.parse(savedCart) });
+        const parsed = JSON.parse(savedCart);
+        if (parsed && Array.isArray(parsed.items)) {
+          // Defensive sanitization: discard malformed items to prevent checkout NaN/crash
+          const validItems = parsed.items.filter(
+            (it: any) => it && it.product_id && typeof it.price === 'number' && !isNaN(it.price) && it.quantity > 0
+          );
+          dispatch({ type: 'LOAD_CART', payload: { ...parsed, items: validItems } });
+        }
       } catch (e) {
         console.error('Failed to parse cart', e);
       }

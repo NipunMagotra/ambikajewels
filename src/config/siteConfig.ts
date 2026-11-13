@@ -60,8 +60,8 @@ export const siteConfig = {
   features: {
     // HIGH LEGAL RISK: Must remain false until corporate structure and advance-booking terms are approved by CA/lawyer
     savingsGoalsEnabled: process.env.NEXT_PUBLIC_ENABLE_SAVINGS_GOALS === 'true',
-    // F4: Hide PDP price breakup until dynamic product pricing schema is applied to database
-    showPdpPriceBreakup: false,
+    // F4: Show PDP transparent price breakup (Metal + Making + GST)
+    showPdpPriceBreakup: true,
     // F5: Mock products fallback (default false; Supabase DB is single source of truth)
     useMockProductsFallback: false,
     // Production/KYC Scan Flag: Hides 'DRAFT FOR LAWYER REVIEW' banners for Razorpay website scan & live customers

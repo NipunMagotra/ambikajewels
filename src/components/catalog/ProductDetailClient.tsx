@@ -62,7 +62,7 @@ export default function ProductDetailClient({ product }: { product: Product }) {
   const preTaxSubtotal = Math.round(totalRupees / 1.03);
   const gstRupees = totalRupees - preTaxSubtotal;
   const hallmarkFee = 45;
-  const netWeight = product.weight_grams || 10;
+  const netWeight = (product as any).net_weight_grams ? Number((product as any).net_weight_grams) : (product.weight_grams || 10);
   const estimatedMetalValue = Math.min(preTaxSubtotal - hallmarkFee, Math.round(preTaxSubtotal * 0.88));
   const estimatedMakingCharge = Math.max(0, preTaxSubtotal - estimatedMetalValue - hallmarkFee);
 
@@ -281,8 +281,8 @@ export default function ProductDetailClient({ product }: { product: Product }) {
             Net retail price inclusive of 3% GST &amp; BIS Hallmarking • Fully insured delivery by BVC Logistics
           </p>
 
-          {/* F4: Hide PDP Price Breakup behind feature flag until dynamic product pricing exists */}
-          {Boolean(siteConfig.features.showPdpPriceBreakup && (estimatedMetalValue + estimatedMakingCharge + hallmarkFee + gstRupees === totalRupees)) && (
+          {/* Transparent PDP Price Breakup */}
+          {Boolean(siteConfig.features.showPdpPriceBreakup && totalRupees > 0) && (
             <>
               <button
                 type="button"
