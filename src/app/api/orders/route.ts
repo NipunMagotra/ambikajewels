@@ -71,8 +71,10 @@ export async function POST(request: Request) {
       error = res.error;
     }
 
-    if (error) {
-      console.warn('Supabase DB error (using fallback local order):', error);
+    if (error || !order) {
+      if (error) {
+        console.warn('Supabase DB error (using fallback local order):', error);
+      }
       return NextResponse.json({ 
         order: {
           order_number: orderNumber,

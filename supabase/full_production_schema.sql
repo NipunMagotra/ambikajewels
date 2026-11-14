@@ -110,6 +110,11 @@ CREATE TABLE public.orders (
   ),
   notes TEXT DEFAULT '',
   pan_number TEXT,
+  payment_method TEXT DEFAULT 'pending',
+  payment_id TEXT,
+  payment_status TEXT DEFAULT 'unpaid' CHECK (
+    payment_status IN ('unpaid', 'paid', 'refunded')
+  ),
   razorpay_order_id TEXT UNIQUE,
   razorpay_payment_id TEXT UNIQUE,
   shipping_provider TEXT DEFAULT 'bvc',
@@ -131,6 +136,8 @@ CREATE INDEX idx_orders_customer_phone ON public.orders(customer_phone);
 CREATE INDEX idx_orders_customer_email ON public.orders(customer_email) WHERE customer_email IS NOT NULL;
 CREATE INDEX idx_orders_order_number ON public.orders(order_number);
 CREATE INDEX idx_orders_status ON public.orders(status);
+CREATE INDEX idx_orders_payment_status ON public.orders(payment_status);
+CREATE UNIQUE INDEX idx_orders_payment_id ON public.orders(payment_id) WHERE payment_id IS NOT NULL;
 CREATE INDEX idx_orders_created_at ON public.orders(created_at DESC);
 CREATE INDEX idx_orders_bvc_docket_number ON public.orders(bvc_docket_number);
 CREATE INDEX idx_orders_shipping_provider ON public.orders(shipping_provider);
@@ -178,8 +185,9 @@ CREATE TABLE public.daily_rates (
   gold_22k NUMERIC NOT NULL,
   gold_18k NUMERIC NOT NULL,
   gold_14k NUMERIC NOT NULL,
-  silver_925 NUMERIC NOT NULL,
-  silver_fine NUMERIC NOT NULL,
+  silver_999 NUMERIC NOT NULL DEFAULT 92,
+  silver_925 NUMERIC NOT NULL DEFAULT 85,
+  silver_fine NUMERIC DEFAULT 98,
   effective_date DATE NOT NULL DEFAULT CURRENT_DATE,
   updated_by TEXT DEFAULT 'system',
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -204,8 +212,8 @@ CREATE POLICY "Daily rates are editable by service role and authenticated only"
   USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
   WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
 
-INSERT INTO public.daily_rates (id, gold_24k, gold_22k, gold_18k, gold_14k, silver_925, silver_fine, updated_by)
-VALUES (1, 8950, 8250, 6750, 5250, 98, 105, 'initial_setup');
+INSERT INTO public.daily_rates (id, gold_24k, gold_22k, gold_18k, gold_14k, silver_999, silver_925, silver_fine, updated_by)
+VALUES (1, 8950, 8250, 6750, 5250, 105, 98, 105, 'initial_setup');
 
 -- ==============================================================================
 -- 8. CUSTOMER SAVINGS GOALS TABLE
@@ -309,9 +317,15 @@ CREATE TABLE public.store_settings (
 
 ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Store settings readable by everyone"
+-- DPDP / PII lockdown: Public can only view non-sensitive public store configuration (e.g. hero, announcement).
+-- Customer profiles (customer_profile:*) are strictly restricted to service_role and authenticated staff.
+CREATE POLICY "Public store settings readable by everyone"
   ON public.store_settings FOR SELECT
-  USING (true);
+  USING (
+    auth.role() = 'service_role' 
+    OR auth.role() = 'authenticated'
+    OR (key NOT LIKE 'customer_profile:%' AND key NOT LIKE 'private:%')
+  );
 
 CREATE POLICY "Store settings editable by service role and authenticated only"
   ON public.store_settings FOR ALL
@@ -582,3 +596,46 @@ INSERT INTO public.faq_items (question, answer, keywords, category, sort_order) 
 ('Do you offer EMI or installment options?', 'Flexible advance payments and savings options are available. Please reach out via WhatsApp or visit our Jammu showroom to plan custom payment arrangements.', ARRAY['emi', 'installment', 'monthly', 'loan', 'finance', 'credit'], 'payment', 13),
 ('Do you offer custom jewelry?', 'Absolutely! Custom design is our specialty. Share your vision with us on WhatsApp — a sketch, a photo, or just an idea — and our master karigars will bring it to life. Custom pieces typically take 2-4 weeks.', ARRAY['custom', 'design', 'bespoke', 'personalize', 'make', 'order', 'special'], 'general', 14),
 ('Do you offer a virtual consultation?', 'Yes! We offer free virtual consultations via WhatsApp video call. Our jewelry experts can help you choose the perfect piece, show you products up close, and answer any questions. Book a slot by messaging us.', ARRAY['virtual', 'consultation', 'video', 'call', 'online', 'whatsapp', 'appointment', 'book'], 'general', 15);
+
+-- ==============================================================================
+-- 19. STORAGE BUCKET: PRODUCTS (High-Resolution Jewellery Catalog)
+-- ==============================================================================
+-- Automatically provisions the public 'products' storage bucket for catalogue images
+-- with 10MB maximum file size limit and strict image MIME type allowlist.
+INSERT INTO storage.buckets (id, name, public, file_size_limit, allowed_mime_types)
+VALUES (
+  'products',
+  'products',
+  true,
+  10485760, -- 10MB limit per image
+  ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif']
+)
+ON CONFLICT (id) DO UPDATE SET
+  public = true,
+  file_size_limit = 10485760,
+  allowed_mime_types = ARRAY['image/jpeg', 'image/png', 'image/webp', 'image/gif', 'image/avif'];
+
+-- Public read access: Anyone can view catalog images
+CREATE POLICY "Public Access to Product Images"
+  ON storage.objects FOR SELECT
+  USING (bucket_id = 'products');
+
+-- Admin write access: Service role and authenticated staff only
+CREATE POLICY "Admin Upload Product Images"
+  ON storage.objects FOR INSERT
+  WITH CHECK (
+    bucket_id = 'products' AND (auth.role() = 'service_role' OR auth.role() = 'authenticated')
+  );
+
+CREATE POLICY "Admin Update Product Images"
+  ON storage.objects FOR UPDATE
+  USING (
+    bucket_id = 'products' AND (auth.role() = 'service_role' OR auth.role() = 'authenticated')
+  );
+
+CREATE POLICY "Admin Delete Product Images"
+  ON storage.objects FOR DELETE
+  USING (
+    bucket_id = 'products' AND (auth.role() = 'service_role' OR auth.role() = 'authenticated')
+  );
+

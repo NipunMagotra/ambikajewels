@@ -45,6 +45,14 @@ const nextConfig: NextConfig = {
   },
   compress: true,
   poweredByHeader: false,
+  async rewrites() {
+    return [
+      {
+        source: '/api/webhooks/razorpay',
+        destination: '/api/razorpay/webhook',
+      },
+    ];
+  },
   async headers() {
     return [
       {

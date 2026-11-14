@@ -1,6 +1,7 @@
 import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import { calculateOrderPricingServer } from '../src/lib/serverPricing';
+import { POST as postOrderHandler } from '../src/app/api/orders/route';
 import {
   createAdminSessionToken,
   verifyAdminSessionTokenString,
@@ -121,6 +122,56 @@ describe('Phase 1 Security & Calculation Tests', () => {
       // Expired token
       const expiredToken = `${Date.now() - 5000}.${sig}`;
       assert.equal(verifyAdminSessionTokenString(expiredToken), false);
+    });
+  });
+
+  describe('3. Direct Orders API (/api/orders) Validation & Error Handling', () => {
+    it('rejects missing customer name or phone with 400', async () => {
+      const req = new Request('http://localhost:3000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: '',
+          customer_phone: '',
+          items: [{ product_id: 'dg1', quantity: 1 }]
+        })
+      });
+      const res = await postOrderHandler(req);
+      assert.equal(res.status, 400);
+      const data = await res.json();
+      assert.match(data.error, /Customer name and phone number are required/i);
+    });
+
+    it('rejects empty or missing items array with 400', async () => {
+      const req = new Request('http://localhost:3000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: 'Anil Dogra',
+          customer_phone: '9682589725',
+          items: []
+        })
+      });
+      const res = await postOrderHandler(req);
+      assert.equal(res.status, 400);
+      const data = await res.json();
+      assert.match(data.error, /Cart must contain between 1 and 50 items/i);
+    });
+
+    it('rejects unknown product IDs with 400', async () => {
+      const req = new Request('http://localhost:3000/api/orders', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          customer_name: 'Anil Dogra',
+          customer_phone: '9682589725',
+          items: [{ product_id: 'non_existent_fake_id_9999', quantity: 1 }]
+        })
+      });
+      const res = await postOrderHandler(req);
+      assert.equal(res.status, 400);
+      const data = await res.json();
+      assert.match(data.error, /not recognized/i);
     });
   });
 });

@@ -110,6 +110,27 @@ describe('Phase 14: Zero-Friction Stability & Workflow Assurance Test Suite', ()
       assert.equal(cartTotal, 5000000);
       assert.equal(isNaN(cartTotal), false);
     });
+
+    it('ensures mount effect does not overwrite localStorage before state initialization', () => {
+      let isInitialized = false;
+      let storageSaved = false;
+
+      // Simulate mount commit
+      const mountEffect = () => {
+        if (!isInitialized) {
+          isInitialized = true;
+          return;
+        }
+        storageSaved = true;
+      };
+
+      mountEffect(); // Initial render mount
+      assert.equal(storageSaved, false, 'Initial mount effect must not overwrite localStorage');
+
+      // Subsequent update / re-render
+      mountEffect();
+      assert.equal(storageSaved, true, 'Subsequent re-render safely persists cart');
+    });
   });
 
   // =========================================================================

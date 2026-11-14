@@ -1,6 +1,6 @@
 'use client';
 
-import React, { createContext, useContext, useEffect, useReducer } from 'react';
+import React, { createContext, useContext, useEffect, useReducer, useRef } from 'react';
 import type { CartItem } from '@/types';
 
 type CartState = {
@@ -76,6 +76,7 @@ const initialState: CartState = {
 
 export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   const [state, dispatch] = useReducer(cartReducer, initialState);
+  const isInitialized = useRef(false);
 
   useEffect(() => {
     const savedCart = localStorage.getItem('ambika_cart');
@@ -96,6 +97,10 @@ export const CartProvider = ({ children }: { children: React.ReactNode }) => {
   }, []);
 
   useEffect(() => {
+    if (!isInitialized.current) {
+      isInitialized.current = true;
+      return;
+    }
     localStorage.setItem('ambika_cart', JSON.stringify(state));
   }, [state]);
 

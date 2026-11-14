@@ -76,7 +76,7 @@ Currently, Razorpay keys in `.env.local` are pending live activation:
   RAZORPAY_KEY_SECRET=xxxxxxxxxxxxxxxxxxxxxxxx
   ```
 - [ ] Add Live Webhook in Razorpay Dashboard → **Settings** → **Webhooks**:
-  * **Webhook URL:** `https://yourdomain.com/api/webhooks/razorpay`
+  * **Webhook URL:** `https://yourdomain.com/api/razorpay/webhook`
   * **Secret:** Choose a secret and set `RAZORPAY_WEBHOOK_SECRET=your_webhook_secret`
   * **Active Events:**
     * `order.paid`
