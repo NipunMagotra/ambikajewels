@@ -69,7 +69,7 @@ export default function CheckoutPage() {
 
   const discountedSubtotal = Math.max(0, cartTotal - couponDiscount);
   const tax = Math.round(discountedSubtotal * siteConfig.tax.gstRate);
-  const isFreeShipping = cartTotal >= siteConfig.shipping.freeThreshold;
+  const isFreeShipping = discountedSubtotal >= siteConfig.shipping.freeThreshold;
   const shipping = isFreeShipping ? 0 : siteConfig.shipping.flatRate;
   const finalTotal = discountedSubtotal + tax + shipping;
 

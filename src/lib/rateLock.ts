@@ -16,12 +16,12 @@ export interface RateLockPayload {
 }
 
 function getRateLockSecret(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET || process.env.ENCRYPTION_SECRET || process.env.RAZORPAY_KEY_SECRET;
+  const secret = process.env.RATE_LOCK_SECRET || process.env.ADMIN_SESSION_SECRET;
   if (!secret) {
-    if (process.env.NODE_ENV === 'production') {
-      throw new Error('[SECURITY FATAL] Missing secret key for rate-lock cryptographic signatures.');
+    if (process.env.NODE_ENV === 'test') {
+      return 'test_rate_lock_secret_key_32_chars_123';
     }
-    return 'dev_fallback_rate_lock_secret_key_32_chars_123';
+    throw new Error('[SECURITY FATAL] Missing secret key for rate-lock cryptographic signatures.');
   }
   return secret;
 }

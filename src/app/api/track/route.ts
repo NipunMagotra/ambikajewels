@@ -255,7 +255,7 @@ export async function GET(request: Request) {
         customer_name: orderData.customer_name || 'Verified Customer',
         customer_phone: orderData.customer_phone || orderData.phone || '',
         customer_email: orderData.customer_email || orderData.email || '',
-        shipping_address: orderData.shipping_address || maskedAddress,
+        shipping_address: maskedAddress,
         masked_address: maskedAddress,
         status: orderData.status,
         courier_partner: 'BVC Logistics Secure Armed Network',

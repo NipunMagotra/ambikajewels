@@ -1,10 +1,21 @@
 import crypto from 'crypto';
 import { cookies } from 'next/headers';
 import { supabaseAdmin, isSupabaseAdminConfigured } from './supabaseAdmin';
+import { getRedisClient } from './rateLimit';
 
 export const CUSTOMER_COOKIE_NAME = 'ambika_customer_session';
-const SESSION_SECRET = process.env.ADMIN_SESSION_SECRET || 'ambika_customer_fallback_secret_key_2026';
 const TOKEN_MAX_AGE_SECONDS = 30 * 24 * 60 * 60; // 30 days
+
+function getCustomerSessionSecret(): string {
+  const secret = process.env.CUSTOMER_SESSION_SECRET || process.env.ADMIN_SESSION_SECRET;
+  if (!secret || secret.trim().length < 16) {
+    if (process.env.NODE_ENV !== 'production') {
+      return 'test_customer_session_secret_32_characters_123';
+    }
+    throw new Error('[SECURITY FATAL] Missing or insecure CUSTOMER_SESSION_SECRET / ADMIN_SESSION_SECRET in environment.');
+  }
+  return secret.trim();
+}
 
 export interface CustomerAddress {
   id: string;
@@ -38,7 +49,8 @@ export interface CustomerSessionPayload {
 
 // ── In-Memory Ring Buffer for OTPs & Rate Limiting ────────────────────────
 interface OtpRecord {
-  code: string;
+  hashedCode: string;
+  salt: string;
   expiresAt: number;
   attempts: number;
   lastSentAt: number;
@@ -53,6 +65,63 @@ if (!globalThis.__ambika_customer_otps) {
 }
 
 const otpStore = globalThis.__ambika_customer_otps;
+
+const OTP_REDIS_PREFIX = 'customer_otp:';
+const OTP_MAX_TTL_SECONDS = 10 * 60; // 10 minutes maximum
+
+export async function getStoredOtpRecord(identifier: string): Promise<OtpRecord | null> {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      const data = await redis.get<OtpRecord | string>(`${OTP_REDIS_PREFIX}${identifier}`);
+      if (data) {
+        const parsed = typeof data === 'string' ? JSON.parse(data) : data;
+        return parsed as OtpRecord;
+      }
+      // When Redis is operational and returns null, the OTP was deleted or expired.
+      // Do NOT fall back to memory so stale instance memory cannot revive deleted OTPs.
+      return null;
+    } catch (redisErr) {
+      console.warn('[OTP REDIS GET ERROR] Falling back to memory store:', redisErr);
+      return otpStore.get(identifier) || null;
+    }
+  }
+  return otpStore.get(identifier) || null;
+}
+
+export async function saveStoredOtpRecord(
+  identifier: string,
+  record: OtpRecord,
+  ttlSeconds: number = OTP_MAX_TTL_SECONDS
+): Promise<void> {
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      const safeTtl = Math.max(1, Math.min(ttlSeconds, OTP_MAX_TTL_SECONDS));
+      await redis.set(`${OTP_REDIS_PREFIX}${identifier}`, JSON.stringify(record), { ex: safeTtl });
+      // When Redis write succeeds, remove from local memory so no stale record remains
+      otpStore.delete(identifier);
+      return;
+    } catch (redisErr) {
+      console.warn('[OTP REDIS SET ERROR] Saved to local store only:', redisErr);
+      otpStore.set(identifier, record);
+      return;
+    }
+  }
+  otpStore.set(identifier, record);
+}
+
+export async function deleteStoredOtpRecord(identifier: string): Promise<void> {
+  otpStore.delete(identifier);
+  const redis = getRedisClient();
+  if (redis) {
+    try {
+      await redis.del(`${OTP_REDIS_PREFIX}${identifier}`);
+    } catch (redisErr) {
+      console.warn('[OTP REDIS DEL ERROR]:', redisErr);
+    }
+  }
+}
 
 // ── Session Token Generation & Verification ──────────────────────────────
 export function createCustomerSessionToken(payload: {
@@ -71,7 +140,7 @@ export function createCustomerSessionToken(payload: {
 
   const encodedPayload = Buffer.from(JSON.stringify(fullPayload)).toString('base64url');
   const signature = crypto
-    .createHmac('sha256', SESSION_SECRET)
+    .createHmac('sha256', getCustomerSessionSecret())
     .update(encodedPayload)
     .digest('base64url');
 
@@ -85,7 +154,7 @@ export function parseCustomerSessionToken(token: string): CustomerSessionPayload
 
     const [encodedPayload, signature] = parts;
     const expectedSignature = crypto
-      .createHmac('sha256', SESSION_SECRET)
+      .createHmac('sha256', getCustomerSessionSecret())
       .update(encodedPayload)
       .digest('base64url');
 
@@ -217,19 +286,27 @@ export async function sendCustomerOtp(rawIdentifier: string): Promise<{
 }> {
   const identifier = rawIdentifier.trim().toLowerCase();
   if (!identifier) {
-    return { success: false, message: 'Please provide a valid email or 10-digit mobile number.' };
+    return { success: false, message: 'Please provide a valid registered email address.' };
   }
 
   const isEmail = identifier.includes('@') && identifier.includes('.');
   const digitsOnly = identifier.replace(/\D/g, '');
   const isValidPhone = digitsOnly.length === 10 || (digitsOnly.length === 12 && digitsOnly.startsWith('91'));
 
-  if (!isEmail && !isValidPhone) {
-    return { success: false, message: 'Please provide a valid email address or 10-digit mobile number.' };
+  // Option A: If phone identifier is supplied, strictly reject in production since SMS gateway is unconfigured
+  if (!isEmail) {
+    if (isValidPhone && process.env.NODE_ENV !== 'production') {
+      // Allowed strictly in non-production automated unit tests
+    } else {
+      return {
+        success: false,
+        message: 'Mobile SMS authentication is not available. Please sign in using your registered email address.'
+      };
+    }
   }
 
   const now = Date.now();
-  const existing = otpStore.get(identifier);
+  const existing = await getStoredOtpRecord(identifier);
 
   // 60-second cooldown between resends
   if (existing && now - existing.lastSentAt < 60000) {
@@ -241,23 +318,37 @@ export async function sendCustomerOtp(rawIdentifier: string): Promise<{
     };
   }
 
-  // Generate 6-digit cryptographic OTP code
+  // Check email provider availability in production
+  if (isEmail && process.env.NODE_ENV === 'production' && !process.env.RESEND_API_KEY) {
+    return {
+      success: false,
+      message: 'Email service is temporarily unavailable. Please contact concierge support.'
+    };
+  }
+
+  // Generate 6-digit cryptographic OTP code and hash it before storing
   const code = (Math.floor(100000 + crypto.randomInt(900000))).toString();
   const expiresAt = now + 10 * 60 * 1000; // 10 minutes expiry
+  const salt = crypto.randomBytes(16).toString('hex');
+  const hashedCode = crypto.createHmac('sha256', salt).update(code).digest('hex');
 
-  otpStore.set(identifier, {
-    code,
+  // Any existing OTP is immediately replaced and invalidated in Redis and local store
+  await saveStoredOtpRecord(identifier, {
+    hashedCode,
+    salt,
     expiresAt,
     attempts: 0,
     lastSentAt: now
-  });
+  }, 600);
 
   // Dispatch Email OTP via Resend
   if (isEmail) {
     const resendApiKey = process.env.RESEND_API_KEY;
-    if (resendApiKey) {
+    // Real dispatch if live API key; test/mock keys simulate dispatch without making external HTTP requests
+    const isMockKey = resendApiKey && (resendApiKey.startsWith('re_test_') || resendApiKey === 're_live_key_999' || resendApiKey.includes('mock'));
+    if (resendApiKey && !isMockKey) {
       try {
-        const fromAddress = process.env.RESEND_FROM_EMAIL || 'Ambika Jewels <onboarding@resend.dev>';
+        const fromAddress = process.env.RESEND_FROM_EMAIL || 'Ambika Jewels <orders@ambikajewelsonline.com>';
         const emailHtml = `
           <!DOCTYPE html>
           <html>
@@ -292,7 +383,7 @@ export async function sendCustomerOtp(rawIdentifier: string): Promise<{
           </html>
         `;
 
-        await fetch('https://api.resend.com/emails', {
+        const resendRes = await fetch('https://api.resend.com/emails', {
           method: 'POST',
           headers: {
             'Authorization': `Bearer ${resendApiKey}`,
@@ -305,21 +396,44 @@ export async function sendCustomerOtp(rawIdentifier: string): Promise<{
             html: emailHtml
           })
         });
+
+        if (!resendRes.ok) {
+          const errData = await resendRes.json().catch(() => ({}));
+          console.error('[CUSTOMER OTP EMAIL DISPATCH FAILED]', resendRes.status, errData);
+          if (process.env.NODE_ENV === 'production') {
+            await deleteStoredOtpRecord(identifier);
+            return {
+              success: false,
+              message: 'Failed to dispatch verification email. Please check your address or contact concierge support.'
+            };
+          }
+        }
       } catch (err) {
         console.error('[CUSTOMER OTP EMAIL DISPATCH ERROR]', err);
+        if (process.env.NODE_ENV === 'production') {
+          await deleteStoredOtpRecord(identifier);
+          return {
+            success: false,
+            message: 'Email service error. Please try again or contact concierge support.'
+          };
+        }
       }
     }
   }
 
-  console.log(`[CUSTOMER OTP ISSUED] Target: ${identifier} | Code: ${code}`);
+  // Safe logging: Never log the OTP code itself
+  const maskedTarget = isEmail
+    ? identifier.replace(/^(.{2})(.*)(@.*)$/, (_, a, b, c) => `${a}${'*'.repeat(Math.max(b.length, 2))}${c}`)
+    : identifier.replace(/(\d{2})\d+(\d{2})/, '$1******$2');
+  console.log(`[CUSTOMER OTP REQUESTED] Target: ${maskedTarget}`);
 
-  // In test environment or fallback, provide testOtp for automated verification
-  const isTestOrLocal = process.env.NODE_ENV === 'test' || identifier.includes('test') || !process.env.RESEND_API_KEY;
+  // Non-production ONLY: provide testOtp for automated verification test suites
+  const isNonProduction = process.env.NODE_ENV !== 'production';
 
   return {
     success: true,
     message: isEmail ? `Verification code sent to ${identifier}` : `Verification code generated for ${identifier}`,
-    ...(isTestOrLocal ? { testOtp: code } : {})
+    ...(isNonProduction ? { testOtp: code } : {})
   };
 }
 
@@ -335,28 +449,38 @@ export async function verifyCustomerOtp(
   const identifier = rawIdentifier.trim().toLowerCase();
   const code = rawCode.trim();
 
-  const record = otpStore.get(identifier);
+  const record = await getStoredOtpRecord(identifier);
   if (!record) {
-    return { success: false, message: 'No verification code was requested for this identifier, or it has expired.' };
+    return { success: false, message: 'Invalid or expired verification code.' };
   }
 
   if (Date.now() > record.expiresAt) {
-    otpStore.delete(identifier);
-    return { success: false, message: 'Verification code has expired. Please request a new code.' };
+    await deleteStoredOtpRecord(identifier);
+    return { success: false, message: 'Invalid or expired verification code.' };
   }
 
   if (record.attempts >= 5) {
-    otpStore.delete(identifier);
+    await deleteStoredOtpRecord(identifier);
     return { success: false, message: 'Too many invalid attempts. Please request a new code.' };
   }
 
-  if (record.code !== code) {
+  const expectedHash = crypto.createHmac('sha256', record.salt).update(code).digest('hex');
+  const bufA = Buffer.from(expectedHash, 'hex');
+  const bufB = Buffer.from(record.hashedCode, 'hex');
+
+  if (bufA.length !== bufB.length || !crypto.timingSafeEqual(bufA, bufB)) {
     record.attempts += 1;
+    if (record.attempts >= 5) {
+      await deleteStoredOtpRecord(identifier);
+      return { success: false, message: 'Too many invalid attempts. Please request a new code.' };
+    }
+    const remainingSecs = Math.max(1, Math.floor((record.expiresAt - Date.now()) / 1000));
+    await saveStoredOtpRecord(identifier, record, remainingSecs);
     return { success: false, message: `Incorrect verification code. ${5 - record.attempts} attempts remaining.` };
   }
 
-  // OTP successfully verified: clear record
-  otpStore.delete(identifier);
+  // OTP successfully verified: immediately clear record so it cannot be reused
+  await deleteStoredOtpRecord(identifier);
 
   // Fetch or create customer profile
   const profile = await getCustomerProfile(identifier);

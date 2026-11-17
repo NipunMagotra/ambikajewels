@@ -9,7 +9,7 @@ import { siteConfig } from '@/config/siteConfig';
 import { verifyRateLockToken } from '@/lib/rateLock';
 import { generateSecureOrderNumber } from '@/lib/orderUtils';
 import { encryptSensitiveData } from '@/lib/encryption';
-import { reserveInventoryForOrder } from '@/lib/inventoryEngine';
+import { reserveInventoryForOrder, releaseInventoryForOrder } from '@/lib/inventoryEngine';
 
 interface CustomerInfo {
   first_name: string;
@@ -25,6 +25,9 @@ interface CustomerInfo {
 }
 
 export async function POST(request: Request) {
+  let orderNumber: string | null = null;
+  let inventoryReserved = false;
+
   try {
     const forwarded = request.headers.get('x-forwarded-for');
     const ip = forwarded ? forwarded.split(',')[0].trim() : '127.0.0.1';
@@ -234,11 +237,24 @@ export async function POST(request: Request) {
     delete sanitizedNotes.pan_number;
 
     // 10. Generate secure, unguessable order number (AMB-XXXXX-XXXXXXXX)
-    const orderNumber = generateSecureOrderNumber();
+    orderNumber = generateSecureOrderNumber();
+
+    const cleanupInventoryReservation = async () => {
+      if (inventoryReserved && orderNumber) {
+        try {
+          await releaseInventoryForOrder(orderNumber);
+          inventoryReserved = false;
+          console.log(`[INVENTORY RELEASED] Cleaned up reservation for failed order creation: ${orderNumber}`);
+        } catch (cleanupErr) {
+          console.error(`[INVENTORY RELEASE ERROR] Could not release inventory for ${orderNumber}:`, cleanupErr);
+        }
+      }
+    };
 
     // 10B. Atomic Inventory Reservation — Prevents simultaneous race-condition checkout on unique jewellery pieces
     const reservationResult = await reserveInventoryForOrder(orderNumber, validatedPricing.items);
     if (!reservationResult.success) {
+      await cleanupInventoryReservation();
       return NextResponse.json(
         {
           success: false,
@@ -248,6 +264,7 @@ export async function POST(request: Request) {
         { status: 409 }
       );
     }
+    inventoryReserved = true;
 
     // 11. Encrypt PAN if provided (CBDT Rule 114B)
     const encryptedPan = customer_info.pan_number
@@ -285,6 +302,7 @@ export async function POST(request: Request) {
           .single();
 
         if (insertError) {
+          await cleanupInventoryReservation();
           console.error('[ORDER PRE-INSERT FAILED] Supabase error:', insertError.message);
           return NextResponse.json(
             { success: false, error: 'Failed to initialize order record. Please try again.' },
@@ -295,6 +313,7 @@ export async function POST(request: Request) {
         supabaseOrderId = insertedOrder.id;
         console.log(`[ORDER PRE-INSERT] Pending order ${orderNumber} (${supabaseOrderId}) created before payment.`);
       } catch (dbErr) {
+        await cleanupInventoryReservation();
         console.error('[ORDER PRE-INSERT EXCEPTION]', dbErr);
         return NextResponse.json(
           { success: false, error: 'Failed to initialize order record. Please try again.' },
@@ -309,6 +328,7 @@ export async function POST(request: Request) {
     // Graceful fallback for local development testing only; fails loudly in production
     if (!key_id || !key_secret) {
       if (process.env.NODE_ENV === 'production') {
+        await cleanupInventoryReservation();
         console.error('[SECURITY FATAL] Razorpay API keys (NEXT_PUBLIC_RAZORPAY_KEY_ID or RAZORPAY_KEY_SECRET) missing in production.');
         return NextResponse.json(
           { success: false, error: 'Server misconfiguration: Payment gateway keys not configured.' },
@@ -345,9 +365,26 @@ export async function POST(request: Request) {
 
     let razorpayOrder;
     try {
-      razorpayOrder = await razorpay.orders.create(orderOptions);
+      // 10-second gateway timeout protection
+      let timeoutHandle: NodeJS.Timeout | null = null;
+      const timeoutPromise = new Promise<never>((_, reject) => {
+        timeoutHandle = setTimeout(() => {
+          reject(new Error('Razorpay order creation timed out after 10000ms'));
+        }, 10000);
+        if (typeof (timeoutHandle as any)?.unref === 'function') (timeoutHandle as any).unref();
+      });
+
+      try {
+        razorpayOrder = await Promise.race([
+          razorpay.orders.create(orderOptions),
+          timeoutPromise
+        ]);
+      } finally {
+        if (timeoutHandle) clearTimeout(timeoutHandle);
+      }
     } catch (rzpErr) {
-      // Razorpay API failed — roll back the Supabase pending order to avoid orphans
+      // Razorpay API failed — release inventory and roll back pending order
+      await cleanupInventoryReservation();
       console.error('[RAZORPAY CREATE FAILED]', rzpErr);
       if (isSupabaseAdminConfigured && supabaseAdmin && supabaseOrderId) {
         try {
@@ -391,6 +428,11 @@ export async function POST(request: Request) {
       coupon_code: validatedPricing.coupon_code
     });
   } catch (error: unknown) {
+    if (inventoryReserved && orderNumber) {
+      await releaseInventoryForOrder(orderNumber).catch((cleanupErr) => {
+        console.error('[INVENTORY RELEASE ERROR IN OUTER CATCH]', cleanupErr);
+      });
+    }
     const errorMsg = error instanceof Error ? error.message : 'Failed to create Razorpay order';
     console.error('Razorpay Create Order Error:', error);
     return NextResponse.json(

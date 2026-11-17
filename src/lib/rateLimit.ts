@@ -12,12 +12,24 @@ export const isUpstashConfigured = Boolean(
   !redisUrl.includes('placeholder')
 );
 
-const redis = isUpstashConfigured
+export const redis = isUpstashConfigured
   ? new Redis({
       url: redisUrl!,
       token: redisToken!,
     })
   : null;
+
+export function getRedisClient(): Redis | null {
+  if ((globalThis as any).__ambika_mock_redis) {
+    return (globalThis as any).__ambika_mock_redis;
+  }
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+  if (url && token && url.startsWith('https://') && !url.includes('placeholder')) {
+    return new Redis({ url, token });
+  }
+  return redis;
+}
 
 // Distributed shared rate limiters via Upstash
 const upstashLimiters = redis
@@ -88,6 +100,18 @@ const upstashLimiters = redis
         analytics: true,
         prefix: 'ratelimit:newsletter',
       }),
+      customerOtpSend: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(5, '10 m'),
+        analytics: true,
+        prefix: 'ratelimit:customer_otp_send',
+      }),
+      customerOtpVerify: new Ratelimit({
+        redis,
+        limiter: Ratelimit.slidingWindow(10, '10 m'),
+        analytics: true,
+        prefix: 'ratelimit:customer_otp_verify',
+      }),
     }
   : null;
 
@@ -115,7 +139,7 @@ function checkLocalFallback(key: string, max: number, windowMs: number): boolean
   return true;
 }
 
-export type RateLimiterType = 'adminLogin' | 'track' | 'chat' | 'orders' | 'createOrder' | 'verifyPayment' | 'serviceability' | 'silverPrice' | 'dataRequest' | 'contact' | 'newsletter';
+export type RateLimiterType = 'adminLogin' | 'track' | 'chat' | 'orders' | 'createOrder' | 'verifyPayment' | 'serviceability' | 'silverPrice' | 'dataRequest' | 'contact' | 'newsletter' | 'customerOtpSend' | 'customerOtpVerify';
 
 /**
  * Executes a distributed rate limit check using Upstash Redis.
@@ -149,6 +173,8 @@ export async function checkRateLimit(
   // serviceability: 30 per 1 min
   // silverPrice: 20 per 1 min
   // dataRequest: 5 per 15 min
+  // customerOtpSend: 5 per 10 min
+  // customerOtpVerify: 10 per 10 min
   const config = {
     adminLogin: { max: 5, ms: 15 * 60 * 1000 },
     track: { max: 15, ms: 60 * 1000 },
@@ -161,6 +187,8 @@ export async function checkRateLimit(
     dataRequest: { max: 5, ms: 15 * 60 * 1000 },
     contact: { max: 5, ms: 10 * 60 * 1000 },
     newsletter: { max: 5, ms: 10 * 60 * 1000 },
+    customerOtpSend: { max: 5, ms: 10 * 60 * 1000 },
+    customerOtpVerify: { max: 10, ms: 10 * 60 * 1000 },
   }[type];
 
   const allowed = checkLocalFallback(`${type}:${identifier}`, config.max, config.ms);

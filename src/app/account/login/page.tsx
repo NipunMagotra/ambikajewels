@@ -43,8 +43,8 @@ function LoginFormContent() {
 
   const handleSendOtp = async (e?: React.FormEvent) => {
     if (e) e.preventDefault();
-    if (!identifier.trim()) {
-      setError('Please enter your email or 10-digit mobile number.');
+    if (!identifier.trim() || !identifier.includes('@') || !identifier.includes('.')) {
+      setError('Please enter a valid email address.');
       return;
     }
 
@@ -64,7 +64,7 @@ function LoginFormContent() {
         setStep('otp');
         setMessage(data.message || 'Verification code sent!');
         setResendCooldown(60);
-        if (data.testOtp) {
+        if (data.testOtp && process.env.NODE_ENV !== 'production') {
           setOtp(data.testOtp);
         }
       } else {
@@ -146,14 +146,14 @@ function LoginFormContent() {
         <form onSubmit={handleSendOtp} className="space-y-5">
           <div>
             <label className="block text-[11px] font-sans uppercase tracking-wider text-[var(--text-secondary)] font-medium mb-1.5">
-              Email Address or Mobile Number
+              Email Address
             </label>
             <div className="relative">
               <input
-                type="text"
+                type="email"
                 value={identifier}
                 onChange={e => setIdentifier(e.target.value)}
-                placeholder="name@example.com or 9876543210"
+                placeholder="name@example.com"
                 required
                 autoFocus
                 className="w-full bg-[var(--bg-surface)] border border-[var(--border-subtle)] focus:border-[var(--accent-gold)] rounded px-4 py-3 text-sm text-[var(--text-primary)] focus:outline-none transition-colors"
@@ -163,7 +163,7 @@ function LoginFormContent() {
               </span>
             </div>
             <p className="text-[10px] text-[var(--text-secondary)] mt-1.5">
-              We will send a one-time 6-digit password-free security code.
+              We will send a one-time 6-digit password-free security code to your email.
             </p>
           </div>
 
@@ -191,7 +191,7 @@ function LoginFormContent() {
                 }}
                 className="text-[10px] text-[var(--accent-gold)] hover:underline cursor-pointer"
               >
-                Change identifier
+                Change email
               </button>
             </div>
 

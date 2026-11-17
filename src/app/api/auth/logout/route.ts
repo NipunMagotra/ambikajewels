@@ -3,7 +3,7 @@ import { CUSTOMER_COOKIE_NAME } from '@/lib/customerAuth';
 
 export const dynamic = 'force-dynamic';
 
-export async function POST() {
+export async function POST(_request?: Request) {
   const response = NextResponse.json({
     success: true,
     message: 'Logged out successfully'

@@ -3,7 +3,7 @@ import crypto from 'crypto';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { secureLogger } from '@/lib/logger';
-import { confirmInventoryForOrder } from '@/lib/inventoryEngine';
+import { executePaymentFulfillment } from '@/lib/orderFulfillment';
 
 /**
  * Razorpay Webhook Receiver — UPI & Network Drop-Off Safety Net
@@ -26,6 +26,11 @@ import { confirmInventoryForOrder } from '@/lib/inventoryEngine';
  * CRITICAL: Always return 200 for processed events so Razorpay stops retrying.
  *           Only return 500 for genuine transient failures (DB write errors).
  */
+
+// In-flight processing lock to prevent race conditions on simultaneous duplicate webhook deliveries
+const activeWebhookEvents = new Set<string>();
+const completedWebhookEvents = new Set<string>();
+
 export async function POST(request: Request) {
   // Grab the DB client early — used throughout
   const dbClient = isSupabaseAdminConfigured ? supabaseAdmin : (isSupabaseConfigured ? supabase : null);
@@ -80,26 +85,40 @@ export async function POST(request: Request) {
 
     secureLogger.info(`[WEBHOOK VERIFIED] Event: ${eventType}, ID: ${eventId}`);
 
-    // ──────────────────────────────────────────────────────────────────────
-    // 3. Persistent Idempotency Check — skip if already completed
-    // ──────────────────────────────────────────────────────────────────────
-    if (dbClient && eventId) {
-      try {
-        const { data: existingEvent } = await dbClient
-          .from('webhook_events')
-          .select('id, status')
-          .eq('id', eventId)
-          .maybeSingle();
-
-        if (existingEvent?.status === 'completed') {
-          secureLogger.info(`[WEBHOOK IDEMPOTENT] Event ${eventId} already processed — returning 200.`);
-          return NextResponse.json({ success: true, idempotent: true });
-        }
-      } catch (dedupeErr) {
-        // Non-fatal: proceed without dedup guard
-        secureLogger.warn(`[WEBHOOK] Dedupe lookup failed, proceeding: ${dedupeErr}`);
-      }
+    // In-flight concurrency guard against duplicate simultaneous webhook delivery
+    if (activeWebhookEvents.has(eventId)) {
+      secureLogger.info(`[WEBHOOK IDEMPOTENT] Event ${eventId} currently in processing pipeline — returning 200.`);
+      return NextResponse.json({ success: true, idempotent: true, in_flight: true });
     }
+    activeWebhookEvents.add(eventId);
+
+    try {
+      // ──────────────────────────────────────────────────────────────────────
+      // 3. Persistent Idempotency Check — skip if already completed
+      // ──────────────────────────────────────────────────────────────────────
+      if (completedWebhookEvents.has(eventId)) {
+        secureLogger.info(`[WEBHOOK IDEMPOTENT] Event ${eventId} already processed — returning 200.`);
+        return NextResponse.json({ success: true, idempotent: true });
+      }
+
+      if (dbClient && eventId) {
+        try {
+          const { data: existingEvent } = await dbClient
+            .from('webhook_events')
+            .select('id, status')
+            .eq('id', eventId)
+            .maybeSingle();
+
+          if (existingEvent?.status === 'completed') {
+            completedWebhookEvents.add(eventId);
+            secureLogger.info(`[WEBHOOK IDEMPOTENT] Event ${eventId} already processed — returning 200.`);
+            return NextResponse.json({ success: true, idempotent: true });
+          }
+        } catch (dedupeErr) {
+          // Non-fatal: proceed without dedup guard
+          secureLogger.warn(`[WEBHOOK] Dedupe lookup failed, proceeding: ${dedupeErr}`);
+        }
+      }
 
     // ──────────────────────────────────────────────────────────────────────
     // 4. Route by Event Type — only process payment.captured & order.paid
@@ -124,6 +143,7 @@ export async function POST(request: Request) {
 
       if (!dbClient) {
         secureLogger.warn('[WEBHOOK] Database client unavailable — cannot process payment event.');
+        await recordWebhookEvent(dbClient, eventId, eventType, 'completed');
         return NextResponse.json({ success: true, skipped: true, reason: 'Database not configured' });
       }
 
@@ -132,7 +152,7 @@ export async function POST(request: Request) {
       // ────────────────────────────────────────────────────────────────────
       let orderQuery = dbClient
         .from('orders')
-        .select('id, order_number, total, status, payment_status, razorpay_order_id, razorpay_payment_id, items');
+        .select('id, order_number, total, subtotal, tax, shipping, status, payment_status, razorpay_order_id, razorpay_payment_id, items, customer_name, customer_email, customer_phone, shipping_address, pincode, bvc_status, bvc_docket_number, bvc_shipment_id, bvc_security_bag_number, notes');
 
       if (razorpayOrderId) {
         orderQuery = orderQuery.eq('razorpay_order_id', razorpayOrderId);
@@ -159,12 +179,26 @@ export async function POST(request: Request) {
       }
 
       // ────────────────────────────────────────────────────────────────────
-      // 6. Idempotency: If already confirmed & paid, no-op
+      // 6. Idempotency Check — Skip already finalized, shipped, and emailed orders
       // ────────────────────────────────────────────────────────────────────
-      if (existingOrder.payment_status === 'paid' || existingOrder.status === 'confirmed') {
+      const isAlreadyPaid = existingOrder.payment_status === 'paid' || existingOrder.status === 'confirmed';
+      const hasBvcShipment = Boolean(
+        existingOrder.bvc_docket_number ||
+        existingOrder.bvc_shipment_id ||
+        existingOrder.bvc_status === 'shipment_created' ||
+        existingOrder.bvc_status === 'created' ||
+        existingOrder.bvc_status === 'success' ||
+        existingOrder.bvc_status === 'booked' ||
+        existingOrder.bvc_status === 'simulated'
+      );
+      const hasEmailSent = Boolean(
+        existingOrder.notes && existingOrder.notes.includes('[CONFIRMATION_EMAIL_SENT]')
+      );
+
+      if (isAlreadyPaid && hasBvcShipment && hasEmailSent) {
         secureLogger.info(
           `[WEBHOOK IDEMPOTENT] Order ${existingOrder.order_number || existingOrder.id} already ` +
-          `status=${existingOrder.status}, payment_status=${existingOrder.payment_status}. No update needed.`
+          `status=${existingOrder.status}, payment_status=${existingOrder.payment_status}, shipped & emailed. No update needed.`
         );
         await recordWebhookEvent(dbClient, eventId, eventType, 'completed');
         return NextResponse.json({ success: true, idempotent: true });
@@ -198,56 +232,63 @@ export async function POST(request: Request) {
       }
 
       // ────────────────────────────────────────────────────────────────────
-      // 8. Recovery Update: pending_confirmation → confirmed, unpaid → paid
+      // 8. Authoritative Atomic Post-Payment Fulfillment
       // ────────────────────────────────────────────────────────────────────
-      const { error: updateErr } = await dbClient
-        .from('orders')
-        .update({
-          status: 'confirmed',
-          payment_status: 'paid',
-          payment_method: 'razorpay',
-          payment_id: paymentId,
-          razorpay_payment_id: paymentId,
-        })
-        .eq('id', existingOrder.id);
-
-      // DB Failure Guard: If update fails, return 500 so Razorpay retries
-      if (updateErr) {
-        secureLogger.error(
-          `[WEBHOOK DB UPDATE FAILED] Could not confirm order ${existingOrder.order_number || existingOrder.id}: ${updateErr.message}`
-        );
-        return NextResponse.json(
-          { success: false, error: 'Database update failed. Requesting retry.' },
-          { status: 500 }
-        );
-      }
-
-      // Atomically Confirm Inventory & Transition Items to 'out_of_stock'
-      await confirmInventoryForOrder(existingOrder.order_number || existingOrder.id, existingOrder.items || []);
-
-      // ────────────────────────────────────────────────────────────────────
-      // 9. Audit Log: Record that this webhook RECOVERED an abandoned payment
-      // ────────────────────────────────────────────────────────────────────
+      const orderNumber = existingOrder.order_number || existingOrder.id;
       const wasRecovery = existingOrder.status === 'pending_confirmation' && existingOrder.payment_status === 'unpaid';
+
+      const fulfillment = await executePaymentFulfillment({
+        razorpayOrderId,
+        razorpayPaymentId: paymentId,
+        customerInfo: {
+          first_name: existingOrder.customer_name,
+          email: existingOrder.customer_email,
+          phone: existingOrder.customer_phone,
+          address: existingOrder.shipping_address,
+          pincode: existingOrder.pincode
+        },
+        items: existingOrder.items,
+        totalAmountPaise: existingOrder.total,
+        source: 'webhook',
+        supabaseOrderId: existingOrder.id
+      });
+
+      if (fulfillment.oversold) {
+        secureLogger.error(`[WEBHOOK OVERSOLD] Order ${orderNumber} flagged for oversold manual review.`);
+        await recordWebhookEvent(dbClient, eventId, eventType, 'oversold_manual_review');
+        return NextResponse.json({
+          success: true,
+          oversold: true,
+          order_number: orderNumber,
+          refund_id: fulfillment.refundId,
+          refund_status: fulfillment.refundStatus,
+          message: 'Order oversold. Inventory unavailable. Safe refund initiated.'
+        });
+      }
 
       if (wasRecovery) {
         secureLogger.info(
           `[WEBHOOK RECOVERY] 🔔 Abandoned payment recovered! ` +
-          `Order ${existingOrder.order_number || existingOrder.id} was pending_confirmation/unpaid — ` +
-          `now confirmed/paid via webhook ${eventType} (payment: ${paymentId}). ` +
-          `Customer likely closed browser after UPI/payment approval.`
+          `Order ${orderNumber} was pending_confirmation/unpaid — ` +
+          `now processed, shipment=${fulfillment.bvcStatus} via webhook ${eventType} (payment: ${paymentId}).`
         );
       } else {
         secureLogger.info(
-          `[WEBHOOK CONFIRMED] Order ${existingOrder.order_number || existingOrder.id} updated to confirmed/paid ` +
+          `[WEBHOOK CONFIRMED] Order ${orderNumber} processed ` +
           `via webhook ${eventType} (payment: ${paymentId}).`
         );
       }
 
-      // Mark event as completed ONLY after successful DB update
+      // Mark event as completed ONLY after successful processing
       await recordWebhookEvent(dbClient, eventId, eventType, 'completed');
 
-      return NextResponse.json({ success: true, recovered: wasRecovery });
+      return NextResponse.json({
+        success: true,
+        recovered: wasRecovery,
+        idempotent: fulfillment.idempotent || false,
+        shipment_status: fulfillment.bvcStatus,
+        bvc_docket: fulfillment.bvcDocketNumber
+      });
 
     } else if (eventType === 'payment.failed') {
       // ────────────────────────────────────────────────────────────────────
@@ -268,6 +309,9 @@ export async function POST(request: Request) {
     // Unhandled event type — acknowledge to prevent retries
     secureLogger.info(`[WEBHOOK] Unhandled event type: ${eventType} — acknowledged.`);
     return NextResponse.json({ success: true, skipped: true, event: eventType });
+    } finally {
+      activeWebhookEvents.delete(eventId);
+    }
 
   } catch (error: unknown) {
     const errorMsg = error instanceof Error ? error.message : 'Webhook processing failed';
@@ -290,6 +334,9 @@ async function recordWebhookEvent(
   eventType: string,
   status: string
 ): Promise<void> {
+  if (eventId) {
+    completedWebhookEvents.add(eventId);
+  }
   if (!dbClient || !eventId) return;
   try {
     await dbClient.from('webhook_events').upsert({

@@ -43,7 +43,17 @@ export async function POST(request: Request) {
     // 2. Handle Admin Passcode Authentication (Single-field showroom / owner access)
     if (passcode !== undefined && passcode !== null && String(passcode).trim() !== '') {
       const cleanPasscode = String(passcode).trim();
-      const expectedPasscode = (process.env.ADMIN_PASSCODE || 'ambika2026').trim();
+      const expectedPasscode = process.env.ADMIN_PASSCODE ? process.env.ADMIN_PASSCODE.trim() : '';
+
+      if (!expectedPasscode || expectedPasscode.length < 6) {
+        return NextResponse.json(
+          {
+            success: false,
+            message: 'Admin passcode authentication is not configured on this server.'
+          },
+          { status: 500 }
+        );
+      }
 
       const inputBuf = Buffer.from(cleanPasscode);
       const expectedBuf = Buffer.from(expectedPasscode);

@@ -320,18 +320,28 @@ export function consumeRecoveryCode(
 // ─────────────────────────────────────────────────────────────────────────────
 
 const initialSalt = 'a8f93e2b1c4d5e6f7a8b9c0d1e2f3a4b';
-const initialOwnerHash = hashPassword(
-  process.env.ADMIN_PASSCODE || '9682589725',
-  initialSalt
-).formatted;
+const isProd = process.env.NODE_ENV === 'production';
+const configuredPasscode = process.env.ADMIN_PASSCODE;
+const initialOwnerHash = configuredPasscode
+  ? hashPassword(configuredPasscode, initialSalt).formatted
+  : (isProd ? '' : hashPassword('9682589725', initialSalt).formatted);
 
-// Initial emergency recovery codes for Owner
+const managerPassword = process.env.MANAGER_PASSWORD || (isProd ? '' : 'AmbikaManager2026!');
+const staffPassword = process.env.STAFF_PASSWORD || (isProd ? '' : 'AmbikaStaff2026!');
+
+// Initial emergency recovery codes for Owner (Development / Testing Only)
 export const INITIAL_OWNER_RECOVERY_CODES = [
   'AMB-REC-8F92-4A1C',
   'AMB-REC-7B3D-9E2F',
   'AMB-REC-5C1A-3D8B',
   'AMB-REC-2E4F-6B0D'
 ];
+
+// Production enforces isolated environment secrets for Owner MFA & Recovery
+const ownerMfaSecret = process.env.OWNER_MFA_SECRET || (isProd ? '' : '3132333435363738393031323334353637383930');
+const ownerRecoveryCodes = process.env.OWNER_RECOVERY_CODES
+  ? process.env.OWNER_RECOVERY_CODES.split(',').map(s => s.trim()).filter(Boolean)
+  : (isProd ? [] : INITIAL_OWNER_RECOVERY_CODES);
 
 export const DEFAULT_STAFF_ACCOUNTS: Record<string, StaffAccount> = {
   'owner@ambikajewelsonline.com': {
@@ -342,9 +352,9 @@ export const DEFAULT_STAFF_ACCOUNTS: Record<string, StaffAccount> = {
     phone: '+919682589725',
     passwordHash: initialOwnerHash,
     salt: initialSalt,
-    mfaSecret: '3132333435363738393031323334353637383930', // RFC 6238 standard test secret
+    mfaSecret: ownerMfaSecret,
     mfaEnabled: true,
-    recoveryCodesHashed: INITIAL_OWNER_RECOVERY_CODES.map(hashRecoveryCode),
+    recoveryCodesHashed: ownerRecoveryCodes.map(hashRecoveryCode),
     isActive: true,
     revokedBefore: 0,
     createdAt: '2026-10-01T00:00:00.000Z',
@@ -356,7 +366,7 @@ export const DEFAULT_STAFF_ACCOUNTS: Record<string, StaffAccount> = {
     name: 'Sh. Lakesh Kumar (Showroom Manager)',
     role: 'manager',
     phone: '+919682589725',
-    passwordHash: hashPassword('AmbikaManager2026!', initialSalt).formatted,
+    passwordHash: managerPassword ? hashPassword(managerPassword, initialSalt).formatted : '',
     salt: initialSalt,
     mfaEnabled: false,
     isActive: true,
@@ -370,7 +380,7 @@ export const DEFAULT_STAFF_ACCOUNTS: Record<string, StaffAccount> = {
     name: 'Counter Desk (Jammu Showroom)',
     role: 'staff',
     phone: '+919682589725',
-    passwordHash: hashPassword('AmbikaStaff2026!', initialSalt).formatted,
+    passwordHash: staffPassword ? hashPassword(staffPassword, initialSalt).formatted : '',
     salt: initialSalt,
     mfaEnabled: false,
     isActive: true,
@@ -513,8 +523,11 @@ export async function revokeAllStaffSessions(staffId: string): Promise<void> {
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function getAdminSecret(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET || 'ambika_secure_admin_session_secret_2026_key_99';
+  const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret || secret.trim().length < 16) {
+    if (process.env.NODE_ENV !== 'production') {
+      return 'test_admin_session_secret_32_characters_long_123';
+    }
     throw new Error(
       '[SECURITY FATAL] Missing or insecure ADMIN_SESSION_SECRET in environment variables (minimum 16 characters required).'
     );

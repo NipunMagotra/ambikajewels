@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { verifyCustomerAuth } from '@/lib/customerAuth';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
+import { decryptSensitiveData, maskPanNumber } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -58,9 +59,19 @@ export async function GET(request: Request) {
       );
     }
 
+    // Mask sensitive PAN data to protect customer privacy
+    const sanitizedOrders = (orders || []).map((order: any) => {
+      const copy = { ...order };
+      if (copy.pan_number) {
+        const decrypted = decryptSensitiveData(copy.pan_number);
+        copy.pan_number = decrypted ? maskPanNumber(decrypted) : maskPanNumber(copy.pan_number);
+      }
+      return copy;
+    });
+
     return NextResponse.json({
       success: true,
-      orders: orders || []
+      orders: sanitizedOrders
     });
   } catch (err: unknown) {
     const msg = err instanceof Error ? err.message : 'Internal Server Error';

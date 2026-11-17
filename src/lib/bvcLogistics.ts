@@ -480,7 +480,7 @@ export async function createBvcShipment(
 // PHASE 4: WEBHOOK TRACKING & STATUS MAPPER
 // ============================================================================
 
-export type InternalOrderStatus = 'pending_confirmation' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+export type InternalOrderStatus = 'pending_confirmation' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'oversold_manual_review';
 
 export interface BvcTrackingStatusMap {
   internalStatus: InternalOrderStatus;
@@ -590,19 +590,11 @@ export function mapBvcTrackingStatus(statusCode: string): BvcTrackingStatusMap {
 
 /**
  * Validates the inbound webhook signature from BVC Logistics.
+ * Strictly verifies HMAC-SHA256 signature against BVC_WEBHOOK_SECRET.
  */
 export function verifyBvcWebhookSignature(rawBody: string, signatureHeader: string | null): boolean {
-  const secret = process.env.BVC_WEBHOOK_SECRET || process.env.BVC_API_SECRET;
-  if (!secret) {
-    // If no secret is configured in development, allow pass-through with warning
-    if (process.env.NODE_ENV !== 'production') {
-      console.warn('[BVC WEBHOOK WARN] BVC_WEBHOOK_SECRET not configured; permitting payload in development.');
-      return true;
-    }
-    return false;
-  }
-
-  if (!signatureHeader) {
+  const secret = process.env.BVC_WEBHOOK_SECRET;
+  if (!secret || !signatureHeader) {
     return false;
   }
 

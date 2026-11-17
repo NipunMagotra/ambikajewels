@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { verifyAdminAuth } from '@/lib/adminAuth';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { recordAuditLog } from '@/lib/auditLog';
+import { decryptSensitiveData, maskPanNumber } from '@/lib/encryption';
 
 export const dynamic = 'force-dynamic';
 
@@ -36,9 +37,19 @@ export async function GET(request?: Request) {
       );
     }
 
+    // Protect customer privacy: Mask PAN numbers in admin order listing
+    const sanitizedOrders = (orders || []).map((order: any) => {
+      const copy = { ...order };
+      if (copy.pan_number) {
+        const decrypted = decryptSensitiveData(copy.pan_number);
+        copy.pan_number = decrypted ? maskPanNumber(decrypted) : maskPanNumber(copy.pan_number);
+      }
+      return copy;
+    });
+
     return NextResponse.json({
       success: true,
-      orders: orders || []
+      orders: sanitizedOrders
     });
   } catch (err: unknown) {
     const errorMsg = err instanceof Error ? err.message : 'Internal Server Error';
@@ -70,7 +81,7 @@ export async function PATCH(request: Request) {
       );
     }
 
-    const ALLOWED_STATUSES = ['pending_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled'] as const;
+    const ALLOWED_STATUSES = ['pending_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'oversold_manual_review'] as const;
 
     if (status !== undefined) {
       if (!ALLOWED_STATUSES.includes(status as any)) {

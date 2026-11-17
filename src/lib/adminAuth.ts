@@ -75,8 +75,11 @@ export function isTokenRevoked(token: string | undefined | null): boolean {
 }
 
 export function getAdminSecret(): string {
-  const secret = process.env.ADMIN_SESSION_SECRET || 'ambika_secure_admin_session_secret_2026_key_99';
+  const secret = process.env.ADMIN_SESSION_SECRET;
   if (!secret || secret.trim().length < 16) {
+    if (process.env.NODE_ENV !== 'production') {
+      return 'test_admin_session_secret_32_characters_long_123';
+    }
     throw new Error(
       '[SECURITY FATAL] Missing or insecure ADMIN_SESSION_SECRET in environment variables (minimum 16 characters required).'
     );
@@ -262,12 +265,12 @@ export async function getAdminSession(request?: Request): Promise<AdminSession |
 
     // If legacy token, synthesize an authenticated Owner session for backwards compatibility in tests
     if (verifyAdminSessionTokenString(token)) {
-      const owner = memoryStaffAccounts.get('owner@ambikajewelsonline.com')!;
+      const owner = memoryStaffAccounts.get('owner@ambikajewelsonline.com');
       return {
         sessionId: 'legacy-migrated-session',
-        staffId: owner.id,
-        email: owner.email,
-        name: owner.name,
+        staffId: owner?.id || '00000000-0000-0000-0000-000000000001',
+        email: owner?.email || 'owner@ambikajewelsonline.com',
+        name: owner?.name || 'Smt. Shivani Anand (Founder & Owner)',
         role: 'owner',
         mfaVerified: true,
         issuedAt: Date.now(),

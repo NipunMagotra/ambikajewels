@@ -5,10 +5,8 @@ import { checkRateLimit } from '@/lib/rateLimit';
 import { supabase, isSupabaseConfigured } from '@/lib/supabase';
 import { supabaseAdmin, isSupabaseAdminConfigured } from '@/lib/supabaseAdmin';
 import { encryptSensitiveData, generateOrderAccessToken } from '@/lib/encryption';
-import { sendOrderConfirmationEmail, sendAdminBvcFailureAlert } from '@/lib/email';
-import { createBvcShipment } from '@/lib/bvcLogistics';
 import { generateSecureOrderNumber } from '@/lib/orderUtils';
-import { confirmInventoryForOrder } from '@/lib/inventoryEngine';
+import { executePaymentFulfillment } from '@/lib/orderFulfillment';
 
 interface GuestCustomerInfo {
   first_name: string;
@@ -215,190 +213,63 @@ export async function POST(request: Request) {
       }
     }
 
-    // F6: Non-guessable order identifiers
-    const orderNumber = pendingOrder?.order_number || generateSecureOrderNumber();
-    const verifiedTotalPaise = (pendingOrder && typeof pendingOrder.total === 'number') ? pendingOrder.total : total_amount;
-    const verifiedSubtotalPaise = (pendingOrder && typeof pendingOrder.subtotal === 'number')
-      ? pendingOrder.subtotal
-      : Math.round(verifiedTotalPaise * 100 / 103);
-    const verifiedTaxPaise = (pendingOrder && typeof pendingOrder.tax === 'number')
-      ? pendingOrder.tax
-      : verifiedTotalPaise - verifiedSubtotalPaise;
-    const verifiedItems = (pendingOrder && Array.isArray(pendingOrder.items) && pendingOrder.items.length > 0)
-      ? pendingOrder.items
-      : items;
-
     // 4. Encrypt PAN securely (CBDT Rule 114B) - Never log or disclose raw PAN
     const encryptedPan = customer_info?.pan_number
       ? encryptSensitiveData(customer_info.pan_number)
       : (pendingOrder?.pan_number || null);
 
-    // 5. Authenticate & Create Secured Shipment in BVC Logistics eSHIP API (Precious Cargo, HSN 7113)
-    let bvcStatus = 'pending';
-    let bvcDocketNumber: string | null = null;
-    let bvcShipmentId: string | null = null;
-    let bvcSecurityBag: string | null = null;
-    let bvcError: string | null = null;
-
-    try {
-      const bvcResult = await createBvcShipment({
-        orderNumber,
-        customer: customer_info,
-        items: (verifiedItems || []).map((it: any) => ({
-          name: it.name,
-          product_id: it.product_id,
-          sku: it.product_id || (it.name ? it.name.replace(/[^a-zA-Z0-9]/g, '-').toUpperCase() : 'AMB-ITEM'),
-          quantity: it.quantity,
-          price: it.price || it.unit_price_paise,
-          weight_grams: it.weight_grams,
-          dimensions: it.dimensions
-        })),
-        totalAmountPaise: verifiedTotalPaise,
-        razorpayPaymentId: razorpay_payment_id,
-        razorpayOrderId: razorpay_order_id
-      });
-
-      bvcStatus = bvcResult.status;
-      bvcDocketNumber = bvcResult.docketNumber;
-      bvcShipmentId = bvcResult.shipmentId;
-      bvcSecurityBag = bvcResult.securityBagNumber;
-      bvcError = bvcResult.errorMessage || null;
-
-      if (!bvcResult.success && bvcStatus === 'failed') {
-        console.error('[BVC SHIPMENT FAILED]', { orderNumber, error: bvcError });
-      }
-    } catch (bvcErr: unknown) {
-      console.error('[BVC LOGISTICS UNCAUGHT EXCEPTION]', bvcErr);
-      bvcStatus = 'exception';
-      bvcError = bvcErr instanceof Error ? bvcErr.message : 'Unexpected exception during BVC shipment dispatch';
+    if (encryptedPan && dbClient && pendingOrder?.id && !pendingOrder.pan_number) {
+      dbClient.from('orders').update({ pan_number: encryptedPan }).eq('id', pendingOrder.id).then();
     }
 
-    // Trigger Admin Email Alert if BVC Consignment Creation Failed
-    if (bvcStatus === 'failed' || bvcStatus === 'exception') {
-      sendAdminBvcFailureAlert({
-        orderNumber,
-        razorpayPaymentId: razorpay_payment_id,
-        razorpayOrderId: razorpay_order_id,
-        customerName: `${customer_info.first_name} ${customer_info.last_name || ''}`.trim(),
-        customerEmail: customer_info.email,
-        customerPhone: customer_info.phone,
-        amount: verifiedTotalPaise,
-        items: (verifiedItems || []).map((it: any) => ({
-          name: it.name,
-          quantity: it.quantity,
-          price: it.price || it.unit_price_paise
-        })),
-        errorMessage: bvcError || `BVC shipment booking was not completed (status: ${bvcStatus})`,
-        securityBagNumber: bvcSecurityBag || undefined
-      }).catch((alertErr) => {
-        console.error('Failed to dispatch BVC failure alert to admin:', alertErr);
-      });
-    }
+    // 5. Authoritative Atomic Payment Fulfillment (BVC Consignment, Email, Inventory Confirmation)
+    const verifiedTotalPaise = (pendingOrder && typeof pendingOrder.total === 'number') ? pendingOrder.total : total_amount;
+    const verifiedItems = (pendingOrder && Array.isArray(pendingOrder.items) && pendingOrder.items.length > 0)
+      ? pendingOrder.items
+      : items;
 
-    // 6. Persist / Update Order in Supabase Database
-    //    Guarantees authoritative server prices are never overwritten by client
-    const paymentUpdatePayload: Record<string, unknown> = {
-      customer_name: `${customer_info?.first_name || ''} ${customer_info?.last_name || ''}`.trim() || pendingOrder?.customer_name,
-      customer_phone: customer_info?.phone || pendingOrder?.customer_phone,
-      customer_email: customer_info?.email || pendingOrder?.customer_email,
-      shipping_address: customer_info?.address
-        ? `${customer_info.address}, ${customer_info.city}, ${customer_info.state} - ${customer_info.pincode}`
-        : pendingOrder?.shipping_address,
-      pincode: customer_info?.pincode || pendingOrder?.pincode,
-      pan_number: encryptedPan,
-      status: 'confirmed' as const,
-      payment_status: 'paid' as const,
-      payment_method: 'razorpay',
-      payment_id: razorpay_payment_id,
-      razorpay_payment_id: razorpay_payment_id,
-      razorpay_order_id: razorpay_order_id,
-      bvc_status: bvcStatus,
-      bvc_docket_number: bvcDocketNumber,
-      bvc_shipment_id: bvcShipmentId,
-      bvc_security_bag_number: bvcSecurityBag,
-      shiprocket_status: bvcStatus,
-      shiprocket_order_id: bvcDocketNumber ? String(bvcDocketNumber) : null,
-      shiprocket_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
-      shipping_provider: 'bvc',
-      tracking_awb: bvcDocketNumber ? String(bvcDocketNumber) : null,
-      notes: customer_info?.notes || pendingOrder?.notes || ''
-    };
-
-    if (dbClient) {
-      try {
-        if (pendingOrder?.id) {
-          await dbClient
-            .from('orders')
-            .update(paymentUpdatePayload)
-            .eq('id', pendingOrder.id);
-          console.log(`[ORDER CONFIRMED] Updated pending order ${pendingOrder.id} → confirmed/paid.`);
-        } else {
-          // Dev mock / legacy fallback
-          await dbClient.from('orders').upsert({
-            order_number: orderNumber,
-            total: verifiedTotalPaise,
-            subtotal: verifiedSubtotalPaise,
-            tax: verifiedTaxPaise,
-            shipping: 0,
-            items: verifiedItems,
-            ...paymentUpdatePayload
-          }, {
-            onConflict: 'razorpay_payment_id',
-            ignoreDuplicates: true
-          });
-        }
-      } catch (dbErr) {
-        console.error('Error persisting verified order to Supabase:', dbErr);
-      }
-    }
-
-    // 6B. Atomically Lock & Confirm Inventory (Transitions items to 'out_of_stock')
-    await confirmInventoryForOrder(orderNumber, verifiedItems);
-
-    // 7. Generate unguessable verification token for seamless client access
-    const orderAccessToken = generateOrderAccessToken(
-      orderNumber,
-      customer_info?.email || customer_info?.phone || ''
-    );
-
-    // 8. Send Real Transactional Confirmation Email via Resend
-    sendOrderConfirmationEmail({
-      orderNumber,
-      customerName: `${customer_info?.first_name || ''} ${customer_info?.last_name || ''}`.trim(),
-      customerEmail: customer_info?.email,
-      items: (verifiedItems || []).map((it: any) => ({
-        name: it.name,
-        quantity: it.quantity,
-        price: it.price || it.unit_price_paise,
-        metal_finish: it.metal_finish
-      })),
-      subtotal: verifiedSubtotalPaise,
-      tax: verifiedTaxPaise,
-      shipping: 0,
-      total: verifiedTotalPaise,
-      shippingAddress: `${customer_info?.address || ''}, ${customer_info?.city || ''}, ${customer_info?.state || ''} - ${customer_info?.pincode || ''}`,
-      paymentId: razorpay_payment_id,
-      bvcDocketNumber: bvcDocketNumber || undefined,
-      securityBagNumber: bvcSecurityBag || undefined,
-      shiprocketAwb: bvcDocketNumber || undefined
-    }).catch((emailErr) => {
-      console.error('Background order confirmation email dispatch error:', emailErr);
+    const fulfillment = await executePaymentFulfillment({
+      razorpayOrderId: razorpay_order_id,
+      razorpayPaymentId: razorpay_payment_id,
+      customerInfo: customer_info,
+      items: verifiedItems,
+      totalAmountPaise: verifiedTotalPaise,
+      source: 'verify',
+      supabaseOrderId: pendingOrder?.id || supabase_order_id
     });
+
+    if (fulfillment.oversold) {
+      return NextResponse.json(
+        {
+          success: false,
+          oversold: true,
+          error: fulfillment.errorMessage || 'Inventory was unavailable. Order flagged for review and safe refund initiated.',
+          order_number: fulfillment.orderNumber,
+          payment_id: razorpay_payment_id,
+          refund_id: fulfillment.refundId,
+          refund_status: fulfillment.refundStatus
+        },
+        { status: 409 }
+      );
+    }
 
     const successResponse = {
       success: true,
-      message: 'Payment verified and secured BVC shipment registered successfully',
-      order_number: orderNumber,
-      token: orderAccessToken,
+      message: fulfillment.idempotent
+        ? 'Payment already verified (Idempotent)'
+        : 'Payment verified and secured BVC shipment registered successfully',
+      order_number: fulfillment.orderNumber,
+      token: fulfillment.orderAccessToken,
       payment_id: razorpay_payment_id,
-      bvc_status: bvcStatus,
-      bvc_docket_number: bvcDocketNumber,
-      bvc_shipment_id: bvcShipmentId,
-      bvc_security_bag_number: bvcSecurityBag,
-      bvc_error: bvcError,
-      shiprocket_status: bvcStatus,
-      shiprocket_order_id: bvcDocketNumber,
-      shiprocket_error: bvcError
+      bvc_status: fulfillment.bvcStatus,
+      bvc_docket_number: fulfillment.bvcDocketNumber,
+      bvc_shipment_id: fulfillment.bvcShipmentId,
+      bvc_security_bag_number: fulfillment.bvcSecurityBag,
+      bvc_error: fulfillment.bvcError,
+      shiprocket_status: fulfillment.bvcStatus,
+      shiprocket_order_id: fulfillment.bvcDocketNumber,
+      shiprocket_error: fulfillment.bvcError,
+      idempotent: fulfillment.idempotent || false
     };
 
     // Store in idempotency cache

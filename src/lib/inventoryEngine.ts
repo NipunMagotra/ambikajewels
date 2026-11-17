@@ -78,7 +78,7 @@ async function acquireLocksForProducts(productIds: string[]): Promise<() => void
  */
 export async function reserveInventoryForOrder(
   orderId: string,
-  items: Array<{ product_id?: string; id?: string; name?: string }>
+  items: Array<{ product_id?: string; id?: string; [key: string]: any }>
 ): Promise<{ success: boolean; conflictItem?: string; message?: string }> {
   const productIds = items
     .map((item) => item.product_id || item.id)
@@ -138,6 +138,7 @@ export async function reserveInventoryForOrder(
     }
 
     // 2. Database-level atomic reservation if Supabase is connected
+    const reservedInDb: string[] = [];
     if (isSupabaseAdminConfigured && supabaseAdmin) {
       try {
         for (const pId of productIds) {
@@ -151,11 +152,23 @@ export async function reserveInventoryForOrder(
           );
 
           if (!error && dbReserved === false) {
+            // Roll back any items previously reserved in this batch (partial failure cleanup)
+            for (const rolledBackId of reservedInDb) {
+              await supabaseAdmin
+                .from('inventory_reservations')
+                .delete()
+                .eq('product_id', rolledBackId)
+                .eq('order_id', orderId);
+            }
             return {
               success: false,
               conflictItem: pId,
               message: 'Product reservation failed: item was concurrently reserved in the database.'
             };
+          }
+
+          if (!error && dbReserved === true) {
+            reservedInDb.push(pId);
           }
         }
       } catch {
@@ -182,11 +195,12 @@ export async function reserveInventoryForOrder(
 
 /**
  * Confirms payment and permanently transitions products to 'out_of_stock'.
- * Rejects late confirmations if the piece was already confirmed for a different order.
+ * Rejects late confirmations if the piece was already confirmed for a different order,
+ * if the reservation has expired, or if the product is no longer available.
  */
 export async function confirmInventoryForOrder(
   orderId: string,
-  items: Array<{ product_id?: string; id?: string }>
+  items: Array<{ product_id?: string; id?: string; [key: string]: any }>
 ): Promise<{ success: boolean; error?: string }> {
   const productIds = items
     .map((item) => item.product_id || item.id)
@@ -199,14 +213,106 @@ export async function confirmInventoryForOrder(
   try {
     const now = Date.now();
 
-    // Verify none of the items were already confirmed to another order
+    // 1. Verify availability and active reservation for every product
     for (const pId of productIds) {
+      // A. Check in-memory catalog stock status
+      const memList = (globalThis as any).__ambika_memory_products;
+      if (Array.isArray(memList)) {
+        const p = memList.find((x: any) => x.id === pId || x.slug === pId);
+        if (p && p.stock_status === 'out_of_stock') {
+          const lock = activeReservations.get(pId);
+          // If not confirmed by this exact order, reject
+          if (!lock || lock.orderId !== orderId || lock.status !== 'confirmed') {
+            return {
+              success: false,
+              error: `Double-sell prevention: Product "${p.name || pId}" is out of stock in showroom catalog.`
+            };
+          }
+        }
+      }
+
+      // B. Check in-memory active reservations
       const existing = activeReservations.get(pId);
-      if (existing && existing.status === 'confirmed' && existing.orderId !== orderId) {
-        return {
-          success: false,
-          error: `Double-sell prevention: Product ${pId} was already purchased by another customer (Order: ${existing.orderId}).`
-        };
+      if (existing) {
+        if (existing.status === 'confirmed' && existing.orderId !== orderId) {
+          return {
+            success: false,
+            error: `Double-sell prevention: Product ${pId} was already purchased by another customer (Order: ${existing.orderId}).`
+          };
+        }
+        if (existing.status === 'reserved') {
+          if (existing.orderId === orderId && now > existing.expiresAt) {
+            return {
+              success: false,
+              error: `Double-sell prevention: Reservation expired for product ${pId} (Order: ${orderId}).`
+            };
+          }
+        }
+        if (existing.status === 'released') {
+          return {
+            success: false,
+            error: `Double-sell prevention: Reservation was released for product ${pId} (Order: ${orderId}).`
+          };
+        }
+      }
+
+      // C. Check database state if Supabase is connected
+      if (isSupabaseAdminConfigured && supabaseAdmin) {
+        try {
+          // Check product stock_status
+          const { data: dbProduct } = await supabaseAdmin
+            .from('products')
+            .select('id, name, stock_status')
+            .eq('id', pId)
+            .maybeSingle();
+
+          if (dbProduct && dbProduct.stock_status === 'out_of_stock') {
+            const { data: dbRes } = await supabaseAdmin
+              .from('inventory_reservations')
+              .select('order_id, status')
+              .eq('product_id', pId)
+              .eq('status', 'confirmed')
+              .maybeSingle();
+
+            if (dbRes && dbRes.order_id !== orderId) {
+              return {
+                success: false,
+                error: `Double-sell prevention: Product ${dbProduct.name || pId} was already purchased by another customer (Order: ${dbRes.order_id}).`
+              };
+            }
+          }
+
+          // Check if another customer holds confirmed or active reservation
+          const { data: dbReservations } = await supabaseAdmin
+            .from('inventory_reservations')
+            .select('order_id, status, expires_at')
+            .eq('product_id', pId);
+
+          if (Array.isArray(dbReservations)) {
+            for (const r of dbReservations) {
+              if (r.status === 'confirmed' && r.order_id !== orderId) {
+                return {
+                  success: false,
+                  error: `Double-sell prevention: Product ${pId} was already confirmed for Order: ${r.order_id}.`
+                };
+              }
+              if (r.status === 'reserved' && r.order_id !== orderId && new Date(r.expires_at).getTime() > now) {
+                return {
+                  success: false,
+                  error: `Double-sell prevention: Product ${pId} is actively reserved by another customer (Order: ${r.order_id}).`
+                };
+              }
+              if (r.status === 'reserved' && r.order_id === orderId && new Date(r.expires_at).getTime() < now) {
+                return {
+                  success: false,
+                  error: `Double-sell prevention: Reservation expired in database for product ${pId}.`
+                };
+              }
+            }
+          }
+        } catch (dbCheckErr) {
+          console.warn('[INVENTORY CONFIRM DB CHECK WARN]', dbCheckErr);
+        }
       }
     }
 

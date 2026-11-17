@@ -108,8 +108,8 @@ ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Orders are manageable by service role only"
   ON orders FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- FAQ: readable by everyone, writable by admin
 ALTER TABLE faq_items ENABLE ROW LEVEL SECURITY;
@@ -189,10 +189,10 @@ CREATE POLICY "Daily rates are viewable by everyone"
   ON daily_rates FOR SELECT
   USING (true);
 
-CREATE POLICY "Daily rates are editable by authenticated users only"
+CREATE POLICY "Daily rates are editable by service role only"
   ON daily_rates FOR ALL
-  USING (auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ============================================
 -- CUSTOMER SAVINGS GOALS TABLE
@@ -213,10 +213,10 @@ CREATE TABLE IF NOT EXISTS customer_savings_goals (
 
 ALTER TABLE customer_savings_goals ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Savings goals accessible by service role and authenticated admin only"
+CREATE POLICY "Savings goals accessible by service role only"
   ON customer_savings_goals FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 CREATE TRIGGER customer_savings_goals_updated_at
   BEFORE UPDATE ON customer_savings_goals

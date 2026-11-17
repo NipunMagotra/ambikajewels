@@ -106,7 +106,7 @@ CREATE TABLE public.orders (
   discount INTEGER NOT NULL DEFAULT 0,
   total INTEGER NOT NULL,
   status TEXT NOT NULL DEFAULT 'pending_confirmation' CHECK (
-    status IN ('pending_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'paid', 'failed')
+    status IN ('pending_confirmation', 'confirmed', 'processing', 'shipped', 'delivered', 'cancelled', 'paid', 'failed', 'oversold_manual_review')
   ),
   notes TEXT DEFAULT '',
   pan_number TEXT,
@@ -128,6 +128,8 @@ CREATE TABLE public.orders (
   shiprocket_order_id TEXT,
   shiprocket_status TEXT DEFAULT 'pending',
   shiprocket_awb TEXT,
+  payment_verified_at TIMESTAMPTZ,
+  email_sent_at TIMESTAMPTZ,
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -150,10 +152,10 @@ CREATE TRIGGER orders_updated_at
 
 ALTER TABLE public.orders ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Orders are manageable by service role and authenticated only"
+CREATE POLICY "Orders are manageable by service role only"
   ON public.orders FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ==============================================================================
 -- 6. ORDER TIMELINE
@@ -171,10 +173,10 @@ CREATE INDEX idx_order_timeline_order_id ON public.order_timeline(order_id);
 
 ALTER TABLE public.order_timeline ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Timeline viewable by service role and authenticated only"
+CREATE POLICY "Timeline viewable by service role only"
   ON public.order_timeline FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ==============================================================================
 -- 7. DAILY RATES TABLE
@@ -207,10 +209,10 @@ CREATE POLICY "Daily rates are viewable by everyone"
   ON public.daily_rates FOR SELECT
   USING (true);
 
-CREATE POLICY "Daily rates are editable by service role and authenticated only"
+CREATE POLICY "Daily rates are editable by service role only"
   ON public.daily_rates FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 INSERT INTO public.daily_rates (id, gold_24k, gold_22k, gold_18k, gold_14k, silver_999, silver_925, silver_fine, updated_by)
 VALUES (1, 8950, 8250, 6750, 5250, 105, 98, 105, 'initial_setup');
@@ -239,10 +241,10 @@ CREATE TRIGGER customer_savings_goals_updated_at
 
 ALTER TABLE public.customer_savings_goals ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Savings goals accessible by service role and authenticated admin only"
+CREATE POLICY "Savings goals accessible by service role only"
   ON public.customer_savings_goals FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ==============================================================================
 -- 9. WEBHOOK EVENTS TABLE (Replay Protection)
@@ -318,19 +320,18 @@ CREATE TABLE public.store_settings (
 ALTER TABLE public.store_settings ENABLE ROW LEVEL SECURITY;
 
 -- DPDP / PII lockdown: Public can only view non-sensitive public store configuration (e.g. hero, announcement).
--- Customer profiles (customer_profile:*) are strictly restricted to service_role and authenticated staff.
+-- Customer profiles (customer_profile:*) are strictly restricted to service_role.
 CREATE POLICY "Public store settings readable by everyone"
   ON public.store_settings FOR SELECT
   USING (
     auth.role() = 'service_role' 
-    OR auth.role() = 'authenticated'
     OR (key NOT LIKE 'customer_profile:%' AND key NOT LIKE 'private:%')
   );
 
-CREATE POLICY "Store settings editable by service role and authenticated only"
+CREATE POLICY "Store settings editable by service role only"
   ON public.store_settings FOR ALL
-  USING (auth.role() = 'service_role' OR auth.role() = 'authenticated')
-  WITH CHECK (auth.role() = 'service_role' OR auth.role() = 'authenticated');
+  USING (auth.role() = 'service_role')
+  WITH CHECK (auth.role() = 'service_role');
 
 -- ==============================================================================
 -- 12. STAFF ACCOUNTS TABLE

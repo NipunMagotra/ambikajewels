@@ -66,7 +66,7 @@ export type Order = {
   tax: number;
   shipping: number;
   total: number;
-  status: 'pending_confirmation' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  status: 'pending_confirmation' | 'confirmed' | 'processing' | 'shipped' | 'delivered' | 'cancelled' | 'oversold_manual_review';
   payment_method: string;
   payment_id?: string;
   payment_status: 'unpaid' | 'paid' | 'refunded';
